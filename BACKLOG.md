@@ -12,6 +12,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
+- [next] **DEATH-ANIM — player and mob knockout sprites.** Append four artist-editable death
+  poses for each uniform and the mob; play short, recipient-safe animations with reduced-motion
+  support, bounded lifetime and no replay across admission or round resets.
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 1.1.1 — 2026-10-31
+
+- Add four-frame knockout animations for all four player uniforms and mobs, with short static
+  reduced-motion cues, recipient-safe positions and no replay across admission/reset boundaries.
+- Append twenty editable death poses to the shared sheet, preserving existing sprites and
+  material maps; validate their palettes, alpha, anchors and native playback/expiry.
+
 ## 1.1.0 — 2026-10-31
 
 - Replace production arena drawing with Three.js/React Three Fiber: textured, chamfered 3D

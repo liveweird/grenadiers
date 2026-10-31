@@ -1,62 +1,48 @@
-# Retro pixel-art courtyard
+# Modern retro pixel artwork
 
-Production presentation now uses the [3D miniature arena](arena-3d.md), with the same canonical
-billboard artwork and additional shared surface textures. The Pixi implementation remains an
-isolated reference for the art workflow.
+The [3D miniature arena](arena-3d.md) combines textured geometry with detailed pixel-art
+billboards. The canonical [artist sheet](../../assets/art/README.md) owns both sprite drawings
+and the named surface maps. Lighting and restrained colour grading/static dithering give the
+courtyard depth while keeping players, pickups and blast cells readable.
 
-[Actual application captures](../screenshots/pixel-art.md) illustrate the current presentation.
-Dated capture and release evidence is preserved in
-[game acceptance history](../history/game-acceptance.md#pixel-art-and-screenshot-provenance).
+## Source artwork and animation
 
-The PixiJS arena renders the canonical [artist sheet](../../assets/art/README.md). The current
-Napoleonic atlas uses weathered stone, mossy masonry, layered brickwork and brass highlights;
-bright flames and orange-and-white/blue uniforms keep hazards and competitors distinguishable.
+Four uniforms distinguish the seats: orange/white with a plumed shako, blue with a cockaded
+bicorne, forest green/cream with silver, and plum purple/cream with gold. Each player has four
+poses per cardinal direction, with the walking cycle `0 → 2 → 1 → 3`. All poses share a foot
+anchor. Timed bombs have three shell poses plus separate fuse-spark and pause drawings;
+remote bombs and landmines retain their untimed art.
 
-Terrain variation comes only from public cell coordinates, never private generation seeds.
-Players have front, back and side poses, two walking frames, and different helmet marks.
-Bombs have stepped shell highlights and fuse sparks; pickups use distinct beveled symbols.
-Connected flame cells retain continuous rays. Artwork can extend beyond a collider without
-changing the server's fixed footprint or damage rules.
+Nearest sampling and pixelated CSS preserve hard edges. Logical 48×48 artwork is mapped onto
+world tiles; the orthographic camera fits each supported board to the responsive viewport.
+The canvas uses device-pixel ratio capped at two. Reduced motion selects static decorative
+frames and immediate positions without changing authoritative hazards or effects.
 
-The logical surface stays 720×624 with the existing 15:13 aspect ratio. CSS pixelated scaling
-fits the available space; Pixi uses no antialiasing and caps resolution at device-pixel ratio
-two. Resizing no longer rebuilds scene geometry. Interpolation still stops at authoritative
-targets and never predicts movement or damage.
+Terrain variation uses public cell coordinates. Artwork may extend beyond a collider without
+changing the server's fixed footprint or damage rules. Snapshot interpolation stops at received
+targets and never predicts movement, fuse expiry or damage.
 
-Terrain is retained until its public layout changes. Each actor owns eight fixed pose drawings
-and one shadow; bombs own three drawings, flames two frames, and blocks/pickups one drawing
-each. Visibility toggles animate existing objects instead of allocating frames. Unchanged
-authoritative targets stop walking; terminal state and reduced motion stop decorative frames.
-Removed entities and round resets destroy owned child graphics contexts. The arena keeps one
-renderer during mounted room/reconnect transitions, suspending its ticker and clearing hidden
-artwork while waiting. A new baseline is painted before the canvas becomes visible again.
-Actual component unmount still releases the renderer and WebGL resources.
+## State cues and recipient visibility
 
-Actor pose visibility is assigned idempotently. Snapshot updates retain the current animation
-frame until rendering selects its final pose, avoiding intermediate visibility invalidations.
+Golden Flame has a flame pickup and crest, coexisting with Shield and Heart-grace indicators.
+Reverse Controls uses directional arrows; Diarrhea a bomb-drop symbol; Slow Foot a boot and
+stack markers. Permanent gear and stored weapons retain distinct pickup and attached cues.
+Remote Bomb has an antenna-topped shell and localized armed state; Landmine uses a pressure plate.
+These visuals do not replace blast, trigger, contact, capacity or consumption rules.
 
-Player one wears an orange-and-white uniform with a plumed shako; player two wears blue with a
-cockaded bicorne. The procedural sources in `web/src/game/arena/terrainArt.ts`, `actorArt.ts`,
-`entityArt.ts`, `palette.ts` and `pixel.ts` produce the template and parity reference, not a
-runtime fallback. All patterns were authored for this repository; no franchise sprites, external
-texture packs, downloaded fonts or new rendering dependency are included.
+Cloak removes a hidden opponent's complete actor root, shadow, motion history and attached cues.
+Reappearance paints the received position without a trail across concealed space. Invisible
+Bombs removes bomb drawings and their attached cues for the afflicted recipient.
 
-Geometry/resource-bound, retention, removal, interpolation, reduced-motion and StrictMode tests
-accompany the artwork.
+Stopwatch uses a clock-face pickup and holder marker. Frozen actors receive static corner
+brackets; paused Timed bombs replace the burning spark with a pause mark. Persistent cues stay
+visible under reduced motion. Suspension hides the canvas and clears presentation history;
+a new baseline is painted before revealing it. Final unmount releases owned WebGL resources.
 
-Golden Flame has a bright flame pickup and separate crest above the actor, coexisting with Shield
-and Heart-grace indicators. Reverse Controls has a directional pickup. Diarrhea has a bomb-drop
-pickup and actor cue. Slow Foot has a boot pickup and grouped-effect presentation. Reduced motion
-keeps their persistent cues static.
+## Artist and reference workflow
 
-Piercing Bomb and Power Bomb have distinct stored-weapon and armed-bomb cues. Remote Bomb uses an
-antenna-topped planted bomb plus a localized armed state. Landmine uses a visible pressure plate.
-These visuals do not replace authoritative blast, trigger, contact, capacity or consumption rules.
-
-Invisibility Cloak uses a hooded pickup glyph. Recipient projection removes the hidden opponent's
-complete actor root, including shadow, motion record and attached cues; expiry paints the actor at
-the current authoritative position without a stale interpolation trail.
-
-Stopwatch uses a clock-face pickup and holder marker. A frozen visible actor receives static corner
-brackets, while a paused Timed bomb replaces its burning spark with a pause mark. Reduced motion
-keeps those cues visible without pulsing; Remote and Contact bombs retain their untimed art.
+Use the [artist handoff](../../assets/art/README.md) for guides, palette/alpha/anchor rules and
+validated extraction. Procedural terrain, actor, entity and material factories produce the
+reference template; the isolated Pixi workbench checks art parity and does not provide a
+production fallback. [Earlier 2D captures](../screenshots/pixel-art.md) remain useful for artwork
+comparison; current 3D screenshots are attached to the [release](../releases.md).

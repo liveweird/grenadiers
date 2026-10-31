@@ -8,7 +8,7 @@ import { GameAudio } from './engine'
 import { loadAudioPreference, saveAudioPreference } from './preferences'
 
 export function SoundControl({ state, copy, presentationDeaths }: {
-  state: GameClientState; copy: GameCopy; presentationDeaths?: PresentationDeaths | undefined
+  state: GameClientState; copy: GameCopy; presentationDeaths?: PresentationDeaths
 }) {
   const [preference, setPreference] = useState(loadAudioPreference)
   const [engineRunning, setEngineRunning] = useState(false)

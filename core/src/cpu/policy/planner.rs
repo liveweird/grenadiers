@@ -31,7 +31,7 @@ pub fn plan(
     if observation.parts().rules.version >= 8 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, true, false)
+    plan_inner(observation, memory, rng, work, true, false, false)
 }
 
 pub(crate) fn plan_lairs(
@@ -43,7 +43,7 @@ pub(crate) fn plan_lairs(
     if observation.parts().rules.version != 8 || observation.lairs().is_none() {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, false)
+    plan_inner(observation, memory, rng, work, false, false, false)
 }
 
 pub(crate) fn plan_respawn(
@@ -55,7 +55,7 @@ pub(crate) fn plan_respawn(
     if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, false)
+    plan_inner(observation, memory, rng, work, false, false, false)
 }
 
 pub(crate) fn plan_respawn_v23(
@@ -67,7 +67,19 @@ pub(crate) fn plan_respawn_v23(
     if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, true)
+    plan_inner(observation, memory, rng, work, false, true, false)
+}
+
+pub(crate) fn plan_respawn_v24(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 9 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, false, true, true)
 }
 
 fn plan_inner(
@@ -77,6 +89,7 @@ fn plan_inner(
     work: &mut WorkBudget,
     follow_committed: bool,
     persistent_goals: bool,
+    strategic_goals: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let parts = observation.parts();
     let key = MemoryKey {
@@ -172,9 +185,11 @@ fn plan_inner(
         rng,
         work,
         persistent_goals,
+        strategic_goals,
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn navigate(
     observation: &Observation,
     actor: &crate::cpu::VisibleActor,
@@ -183,8 +198,42 @@ fn navigate(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
     persistent_goals: bool,
+    strategic_goals: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let key = memory.key();
+    if strategic_goals {
+        let Some(guidance) = super::goals::select_v24(observation, actor, current, memory, work)
+        else {
+            return Ok(ControlPlan::stop(*memory));
+        };
+        let next_memory = UtilityMemory::from_route(key, &[guidance.first_step], false)
+            .carry_progress(*memory)
+            .with_strategic_intent(guidance.intent)
+            .with_failed_target(guidance.failed_target);
+        if guidance.first_step == current || !immediately_safe(observation, guidance.first_step) {
+            return Ok(ControlPlan::stop(
+                if immediately_safe(observation, current) {
+                    next_memory
+                } else if guidance.intent.objective == super::StrategicObjectiveKind::Wait {
+                    next_memory.use_survival_fallback(observation.parts().tick)
+                } else {
+                    next_memory.mark_strategic_phase(
+                        super::StrategicPhase::Evade,
+                        super::StrategicSwitchReason::SafetyInterrupt,
+                        observation.parts().tick,
+                    )
+                },
+            ));
+        }
+        direction(current, guidance.first_step).ok_or(PolicyError::InvalidObservation)?;
+        return Ok(movement_plan(
+            actor,
+            current,
+            guidance.first_step,
+            next_memory,
+            observation.parts().rules.settings.turn_assist_units() as u32,
+        ));
+    }
     let guidance = if persistent_goals {
         select_v23(observation, actor, current, memory, work)
     } else {

@@ -15,74 +15,10 @@ pub struct LairSurvivalPlan {
     pub contact: Option<MobContactLease>,
 }
 
-/// Rules-v8 policy. It certifies navigation and stopped handoff before trying
-/// any optional tactic, so a failed tactic returns useful movement.
-pub fn plan_lairs(
-    observation: &Observation,
-    memory: &UtilityMemory,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    rng: &mut CpuRng,
-    work: &mut WorkBudget,
-) -> Result<LairSurvivalPlan, PolicyError> {
-    plan_lairs_with_origin(
-        observation,
-        memory,
-        history,
-        settled_stop_tick,
-        None,
-        rng,
-        work,
-    )
-}
-
-#[allow(clippy::too_many_arguments)]
-pub fn plan_lairs_with_origin(
-    observation: &Observation,
-    memory: &UtilityMemory,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    origin: Option<&PlantEscapeOrigin>,
-    rng: &mut CpuRng,
-    work: &mut WorkBudget,
-) -> Result<LairSurvivalPlan, PolicyError> {
-    plan_lairs_inner(
-        observation,
-        memory,
-        history,
-        settled_stop_tick,
-        origin,
-        rng,
-        work,
-        8,
-        false,
-        false,
-    )
-}
-
-#[allow(clippy::too_many_arguments)]
-pub(super) fn plan_lairs_v23(
-    observation: &Observation,
-    memory: &UtilityMemory,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    origin: Option<&PlantEscapeOrigin>,
-    rng: &mut CpuRng,
-    work: &mut WorkBudget,
-) -> Result<LairSurvivalPlan, PolicyError> {
-    plan_lairs_inner(
-        observation,
-        memory,
-        history,
-        settled_stop_tick,
-        origin,
-        rng,
-        work,
-        9,
-        true,
-        true,
-    )
-}
+#[path = "lair_entry.rs"]
+mod entry;
+pub use entry::{plan_lairs, plan_lairs_with_origin};
+pub(super) use entry::{plan_lairs_v23, plan_lairs_v24};
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn plan_lairs_inner(
@@ -96,6 +32,7 @@ pub(super) fn plan_lairs_inner(
     rules_version: u16,
     pickup_handoff: bool,
     opportunistic_planting: bool,
+    strategic_goals: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -113,7 +50,11 @@ pub(super) fn plan_lairs_inner(
     }
     let stop = || LairSurvivalPlan {
         survival: SurvivalPlan {
-            control: ControlPlan::stop(UtilityMemory::new(memory.key())),
+            control: ControlPlan::stop(if strategic_goals {
+                UtilityMemory::new(memory.key()).carry_progress(*memory)
+            } else {
+                UtilityMemory::new(memory.key())
+            }),
             lease: None,
             execution: None,
         },
@@ -129,7 +70,7 @@ pub(super) fn plan_lairs_inner(
         return Ok(stop());
     }
     if let Some(origin) = origin {
-        return Ok(super::origin_planner::plan_lairs(
+        let mut plan = super::origin_planner::plan_lairs(
             observation,
             history,
             settled_stop_tick,
@@ -137,10 +78,17 @@ pub(super) fn plan_lairs_inner(
             origin,
             work,
         )
-        .unwrap_or_else(stop));
+        .unwrap_or_else(stop);
+        if strategic_goals {
+            plan.survival.control.next_memory =
+                plan.survival.control.next_memory.carry_progress(*memory);
+        }
+        return Ok(plan);
     }
 
-    let ordinary = if opportunistic_planting {
+    let ordinary = if strategic_goals {
+        crate::cpu::policy::plan_respawn_v24(observation, memory, rng, work)?
+    } else if opportunistic_planting {
         crate::cpu::policy::plan_respawn_v23(observation, memory, rng, work)?
     } else if rules_version == 8 {
         crate::cpu::policy::plan_lairs(observation, memory, rng, work)?
@@ -181,6 +129,7 @@ pub(super) fn plan_lairs_inner(
             ordinary_clear,
             start_window,
             end,
+            strategic_goals,
             work,
         )
     {
@@ -364,6 +313,7 @@ pub(super) fn plan_lairs_inner(
             settled_stop_tick,
             memory,
             &ordinary,
+            strategic_goals,
             work,
         )
     } else {

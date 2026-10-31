@@ -6,6 +6,7 @@ use crate::game::blast_geometry::{BlastBomb, BlastField, BlastSource, BlastVisit
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{BlastKind, CellId, OilBarrelState, Position, Terrain};
 
+use crate::cpu::policy::StrategicTarget;
 use crate::cpu::routing::PlannedBomb;
 
 pub(super) fn could_be_useful(observation: &Observation, work: &mut WorkBudget) -> bool {
@@ -74,6 +75,87 @@ pub(super) fn useful_plant(
     } else {
         Some(useful)
     }
+}
+
+pub(super) fn useful_plant_for(
+    observation: &Observation,
+    bomb: &PlannedBomb,
+    target: StrategicTarget,
+    work: &mut WorkBudget,
+) -> Option<bool> {
+    if !matches!(
+        target,
+        StrategicTarget::Block { .. } | StrategicTarget::Opponent { .. }
+    ) {
+        return Some(false);
+    }
+    let field = ObservedBlastGeometry::new(observation, work)?;
+    if bomb.blast == BlastKind::Power {
+        work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
+            .ok()?;
+    }
+    let opponent_position = match target {
+        StrategicTarget::Opponent { seat } => {
+            observation
+                .parts()
+                .actors
+                .iter()
+                .find_map(|actor| match actor {
+                    ObservedActor::Visible(actor) if actor.seat == seat && actor.alive => {
+                        Some(actor.position)
+                    }
+                    _ => None,
+                })
+        }
+        _ => None,
+    };
+    let mut hit = false;
+    let result = visit_blast(
+        &field,
+        BlastSource {
+            cell: bomb.cell,
+            range: bomb.range,
+            kind: bomb.blast,
+        },
+        |visit| {
+            if work.try_take(1).is_err() {
+                return ControlFlow::Break(());
+            }
+            hit = match target {
+                StrategicTarget::Block { cell } => visit.cell == cell && visit.soft_block,
+                StrategicTarget::Opponent { .. } => opponent_position
+                    .is_some_and(|position| position_overlaps_cell(position, visit.cell)),
+                _ => false,
+            };
+            if hit {
+                ControlFlow::Break(())
+            } else {
+                ControlFlow::Continue(())
+            }
+        },
+    );
+    if result.is_break() && !hit {
+        None
+    } else {
+        Some(hit)
+    }
+}
+
+pub fn strategic_plant_still_targets(
+    observation: &Observation,
+    intent: crate::cpu::policy::StrategicIntent,
+    certificate: &crate::cpu::routing::PlantCertificate,
+    work: &mut WorkBudget,
+) -> bool {
+    let target_visible = match intent.target {
+        StrategicTarget::Block { cell } => observation.parts().arena.blocks.contains(&cell),
+        StrategicTarget::Opponent { seat } => observation.parts().actors.iter().any(|actor| {
+            matches!(actor, ObservedActor::Visible(actor) if actor.seat == seat && actor.alive)
+        }),
+        _ => false,
+    };
+    target_visible
+        && useful_plant_for(observation, certificate.placement(), intent.target, work) == Some(true)
 }
 
 pub(crate) struct ObservedBlastGeometry<'a> {
@@ -230,93 +312,5 @@ fn possible_origins(cell: CellId) -> [Option<CellId>; 5] {
 }
 
 #[cfg(test)]
-mod tests {
-    use crate::cpu::policy::tests::observation;
-    use crate::cpu::{Observation, ObservedActor, ObservedOil, WorkBudget};
-    use crate::game::{BlastKind, CellId, EntityId, OilBarrelState, Position, SeatId, Tick};
-
-    use super::{ARENA_CELL_COUNT, could_be_useful, useful_plant};
-    use crate::cpu::routing::PlannedBomb;
-
-    fn with_rival_and_oil(rival: CellId, oil: Option<CellId>) -> Observation {
-        let mut parts = observation(CellId::new(7, 7)).into_parts();
-        let ObservedActor::Visible(mut actor) = parts.actors[1].clone() else {
-            unreachable!()
-        };
-        actor.id = EntityId(1);
-        actor.seat = SeatId::One;
-        actor.position = Position::center(rival);
-        parts.actors[0] = ObservedActor::Visible(actor);
-        if let Some(cell) = oil {
-            parts.oil.push(ObservedOil {
-                cell,
-                state: OilBarrelState::Unlit,
-            });
-        }
-        Observation::new(parts).unwrap()
-    }
-
-    fn bomb(blast: BlastKind) -> PlannedBomb {
-        PlannedBomb {
-            placed_at: Tick(17),
-            owner: EntityId(2),
-            cell: CellId::new(7, 7),
-            range: 3,
-            blast,
-            detonates_at: Tick(197),
-        }
-    }
-
-    #[test]
-    fn shared_geometry_values_piercing_past_oil_and_power_diagonals() {
-        let piercing = with_rival_and_oil(CellId::new(9, 7), Some(CellId::new(8, 7)));
-        assert_eq!(
-            useful_plant(
-                &piercing,
-                &bomb(BlastKind::Standard),
-                &mut WorkBudget::new(1_000)
-            ),
-            Some(false)
-        );
-        assert_eq!(
-            useful_plant(
-                &piercing,
-                &bomb(BlastKind::Piercing),
-                &mut WorkBudget::new(1_000)
-            ),
-            Some(true)
-        );
-
-        let diagonal = with_rival_and_oil(CellId::new(8, 8), None);
-        assert!(could_be_useful(&diagonal, &mut WorkBudget::new(100)));
-        assert_eq!(
-            useful_plant(
-                &diagonal,
-                &bomb(BlastKind::Standard),
-                &mut WorkBudget::new(1_000)
-            ),
-            Some(false)
-        );
-        assert_eq!(
-            useful_plant(
-                &diagonal,
-                &bomb(BlastKind::Power),
-                &mut WorkBudget::new(1_000)
-            ),
-            Some(true)
-        );
-    }
-
-    #[test]
-    fn power_full_arena_scan_is_charged_before_value_can_succeed() {
-        let diagonal = with_rival_and_oil(CellId::new(8, 8), None);
-        assert_eq!(
-            useful_plant(
-                &diagonal,
-                &bomb(BlastKind::Power),
-                &mut WorkBudget::new(ARENA_CELL_COUNT as u32)
-            ),
-            None
-        );
-    }
-}
+#[path = "plant_value_tests.rs"]
+mod tests;

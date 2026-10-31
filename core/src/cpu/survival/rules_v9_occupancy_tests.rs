@@ -12,7 +12,7 @@ use crate::room::{BoardSize, RespawnLairConfig, RespawnLairSettings};
 
 use super::compatibility::{can_admit_ordinary, visible_rivals_allow_segment};
 
-fn observed(cpu: CellId, rival: Option<CellId>) -> Observation {
+pub(super) fn observed(cpu: CellId, rival: Option<CellId>) -> Observation {
     let mut parts = crate::cpu::policy::tests::observation(cpu).into_parts();
     parts.rules.version = 9;
     let mut timers = vec![None, Some(0)];

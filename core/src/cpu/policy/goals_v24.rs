@@ -1,0 +1,375 @@
+use std::collections::VecDeque;
+
+use crate::cpu::{Observation, ObservedActor, VisibleActor, WorkBudget};
+use crate::game::arena::ARENA_CELL_COUNT;
+use crate::game::{CellId, Position, Tick};
+
+use super::super::movement::{STEPS, offset};
+use super::super::{
+    FAILED_TARGET_DEFER_TICKS, STRATEGIC_COMMITMENT_TICKS, STRATEGIC_PROGRESS_TICKS,
+    StrategicIntent, StrategicObjectiveKind, StrategicPhase, StrategicSwitchReason,
+    StrategicTarget, UtilityMemory,
+};
+use super::{cell_index, pickup_value, search_map};
+
+#[path = "goals_v24_validation.rs"]
+mod validation;
+use validation::validate_previous;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::cpu::policy) struct GuidanceV24 {
+    pub first_step: CellId,
+    pub intent: StrategicIntent,
+    pub failed_target: Option<(StrategicTarget, Tick)>,
+}
+
+#[derive(Clone, Copy)]
+struct Candidate {
+    objective: StrategicObjectiveKind,
+    target: StrategicTarget,
+    approach: CellId,
+    score: u8,
+    distance: u16,
+    first_step: CellId,
+}
+
+type DistanceMap = [Option<u16>; ARENA_CELL_COUNT];
+type FirstStepMap = [Option<CellId>; ARENA_CELL_COUNT];
+
+pub(in crate::cpu::policy) fn select(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+) -> Option<GuidanceV24> {
+    let map = search_map(observation, actor, current, work)?;
+    let (distance, first_step) = reachable(observation, current, &map, work)?;
+    let mut candidates = Vec::new();
+    for pickup in &observation.parts().pickups {
+        let index = cell_index(observation, pickup.cell)?;
+        let Some(score) = pickup_value(observation, actor, pickup.kind) else {
+            continue;
+        };
+        if let Some(distance) = distance[index] {
+            candidates.push(Candidate {
+                objective: StrategicObjectiveKind::Collect,
+                target: StrategicTarget::Pickup {
+                    cell: pickup.cell,
+                    kind: pickup.kind,
+                },
+                approach: pickup.cell,
+                score,
+                distance,
+                first_step: first_step[index]?,
+            });
+        }
+    }
+    for &block in &observation.parts().arena.blocks {
+        add_firing_candidates(
+            observation,
+            block,
+            StrategicObjectiveKind::Farm,
+            StrategicTarget::Block { cell: block },
+            2,
+            &distance,
+            &first_step,
+            &mut candidates,
+        );
+    }
+    for observed in &observation.parts().actors {
+        if let ObservedActor::Visible(rival) = observed
+            && rival.seat != actor.seat
+            && rival.alive
+            && let Some(cell) = rival.position.cell()
+        {
+            add_firing_candidates(
+                observation,
+                cell,
+                StrategicObjectiveKind::Attack,
+                StrategicTarget::Opponent { seat: rival.seat },
+                1,
+                &distance,
+                &first_step,
+                &mut candidates,
+            );
+        }
+    }
+    candidates.sort_unstable_by_key(|candidate| {
+        (
+            std::cmp::Reverse(candidate.score),
+            candidate.distance,
+            candidate.approach.row,
+            candidate.approach.column,
+            target_order(candidate.target),
+        )
+    });
+    candidates.dedup_by_key(|candidate| candidate.target);
+    let retained_failure = memory
+        .failed_target()
+        .filter(|(_, until)| observation.parts().tick < *until);
+    if let Some((failed, _)) = retained_failure {
+        candidates.retain(|candidate| candidate.target != failed);
+    }
+
+    let previous = memory.strategic_intent();
+    let mut reason = StrategicSwitchReason::Initial;
+    let chosen = if let Some(previous) = previous {
+        let valid = validate_previous(observation, previous.target);
+        let retained = candidates
+            .iter()
+            .copied()
+            .find(|candidate| candidate.target == previous.target);
+        if let Some(retained) = retained.filter(|_| valid.is_ok()) {
+            let progressed = retained.distance < previous.last_distance
+                || previous.approach_cell.is_some_and(|approach| {
+                    actor.position != previous.last_cpu_position
+                        && position_distance(actor.position, Position::center(approach))
+                            < position_distance(
+                                previous.last_cpu_position,
+                                Position::center(approach),
+                            )
+                });
+            let suspended = matches!(
+                previous.phase,
+                StrategicPhase::Plant
+                    | StrategicPhase::Escape
+                    | StrategicPhase::Evade
+                    | StrategicPhase::Waiting
+            );
+            let stalled =
+                !suspended && observation.parts().tick >= previous.progress_deadline && !progressed;
+            let better = candidates.first().copied().filter(|candidate| {
+                candidate.target != previous.target
+                    && observation.parts().tick >= previous.committed_until
+                    && candidate.score >= previous.score.saturating_add(2)
+            });
+            if stalled {
+                reason = StrategicSwitchReason::Stalled;
+                candidates
+                    .iter()
+                    .copied()
+                    .find(|candidate| candidate.target != previous.target)
+                    .or(Some(retained))
+            } else if let Some(better) = better {
+                reason = StrategicSwitchReason::BetterOpportunity;
+                Some(better)
+            } else {
+                return Some(GuidanceV24 {
+                    first_step: if previous.phase == StrategicPhase::Waiting {
+                        current
+                    } else {
+                        retained.first_step
+                    },
+                    failed_target: retained_failure,
+                    intent: StrategicIntent {
+                        approach_cell: Some(retained.approach),
+                        observation_tick: observation.parts().tick,
+                        last_distance: retained.distance,
+                        last_cpu_position: actor.position,
+                        progress_deadline: if progressed {
+                            add_ticks(observation.parts().tick, STRATEGIC_PROGRESS_TICKS)
+                        } else {
+                            previous.progress_deadline
+                        },
+                        phase: match previous.phase {
+                            StrategicPhase::Reengage => StrategicPhase::Approach,
+                            StrategicPhase::Evade => StrategicPhase::Reengage,
+                            phase => phase,
+                        },
+                        last_switch_reason: if previous.phase == StrategicPhase::Evade {
+                            StrategicSwitchReason::Resumed
+                        } else {
+                            previous.last_switch_reason
+                        },
+                        ..previous
+                    },
+                });
+            }
+        } else {
+            reason = valid.err().unwrap_or(StrategicSwitchReason::TargetInvalid);
+            candidates.first().copied()
+        }
+    } else {
+        candidates.first().copied()
+    };
+
+    if let Some(chosen) = chosen {
+        let tick = observation.parts().tick;
+        return Some(GuidanceV24 {
+            first_step: chosen.first_step,
+            failed_target: if reason == StrategicSwitchReason::Stalled {
+                previous.map(|intent| (intent.target, add_ticks(tick, FAILED_TARGET_DEFER_TICKS)))
+            } else {
+                retained_failure
+            },
+            intent: StrategicIntent {
+                objective: chosen.objective,
+                target: chosen.target,
+                approach_cell: Some(chosen.approach),
+                phase: StrategicPhase::Approach,
+                last_switch_reason: reason,
+                observation_tick: tick,
+                score: chosen.score,
+                committed_until: add_ticks(tick, STRATEGIC_COMMITMENT_TICKS),
+                progress_deadline: add_ticks(tick, STRATEGIC_PROGRESS_TICKS),
+                last_distance: chosen.distance,
+                last_cpu_position: actor.position,
+                deferred_until: (reason == StrategicSwitchReason::Stalled)
+                    .then(|| add_ticks(tick, FAILED_TARGET_DEFER_TICKS)),
+            },
+        });
+    }
+
+    let tick = observation.parts().tick;
+    let fallback = fallback(current, observation, &map, work);
+    Some(GuidanceV24 {
+        first_step: fallback.unwrap_or(current),
+        failed_target: retained_failure,
+        intent: StrategicIntent {
+            objective: if fallback.is_some() {
+                StrategicObjectiveKind::Explore
+            } else {
+                StrategicObjectiveKind::Wait
+            },
+            target: fallback.map_or(StrategicTarget::None, |cell| StrategicTarget::Tile { cell }),
+            approach_cell: fallback,
+            phase: if fallback.is_some() {
+                StrategicPhase::Approach
+            } else {
+                StrategicPhase::Waiting
+            },
+            last_switch_reason: if reason == StrategicSwitchReason::Initial {
+                StrategicSwitchReason::NoTargets
+            } else {
+                reason
+            },
+            observation_tick: tick,
+            score: 0,
+            committed_until: add_ticks(tick, STRATEGIC_COMMITMENT_TICKS),
+            progress_deadline: add_ticks(tick, STRATEGIC_PROGRESS_TICKS),
+            last_distance: u16::from(fallback.is_some()),
+            last_cpu_position: actor.position,
+            deferred_until: None,
+        },
+    })
+}
+
+fn reachable(
+    observation: &Observation,
+    current: CellId,
+    map: &super::SearchMap,
+    work: &mut WorkBudget,
+) -> Option<(DistanceMap, FirstStepMap)> {
+    let mut distance: [Option<u16>; ARENA_CELL_COUNT] = [None; ARENA_CELL_COUNT];
+    let mut first_step = [None; ARENA_CELL_COUNT];
+    let start = cell_index(observation, current)?;
+    distance[start] = Some(0);
+    first_step[start] = Some(current);
+    let mut queue = VecDeque::from([current]);
+    while let Some(cell) = queue.pop_front() {
+        work.try_take(1).ok()?;
+        let index = cell_index(observation, cell)?;
+        let next_distance = distance[index]?.saturating_add(1);
+        for (_, dc, dr) in STEPS {
+            let Some(next) = offset(cell, dc, dr) else {
+                continue;
+            };
+            let Some(next_index) = cell_index(observation, next) else {
+                continue;
+            };
+            if distance[next_index].is_none() && map.transitable(observation, next) {
+                distance[next_index] = Some(next_distance);
+                first_step[next_index] = Some(if cell == current {
+                    next
+                } else {
+                    first_step[index]?
+                });
+                queue.push_back(next);
+            }
+        }
+    }
+    Some((distance, first_step))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn add_firing_candidates(
+    observation: &Observation,
+    target_cell: CellId,
+    objective: StrategicObjectiveKind,
+    target: StrategicTarget,
+    score: u8,
+    distance: &DistanceMap,
+    first_step: &FirstStepMap,
+    candidates: &mut Vec<Candidate>,
+) {
+    let mut best: Option<Candidate> = None;
+    for (_, dc, dr) in STEPS {
+        let Some(approach) = offset(target_cell, dc, dr) else {
+            continue;
+        };
+        let Some(index) = cell_index(observation, approach) else {
+            continue;
+        };
+        let (Some(distance), Some(first_step)) = (distance[index], first_step[index]) else {
+            continue;
+        };
+        let candidate = Candidate {
+            objective,
+            target,
+            approach,
+            score,
+            distance,
+            first_step,
+        };
+        if best.is_none_or(|old| {
+            (
+                candidate.distance,
+                candidate.approach.row,
+                candidate.approach.column,
+            ) < (old.distance, old.approach.row, old.approach.column)
+        }) {
+            best = Some(candidate);
+        }
+    }
+    candidates.extend(best);
+}
+
+fn fallback(
+    current: CellId,
+    observation: &Observation,
+    map: &super::SearchMap,
+    work: &mut WorkBudget,
+) -> Option<CellId> {
+    STEPS
+        .into_iter()
+        .filter_map(|(_, dc, dr)| {
+            work.try_take(1).ok()?;
+            offset(current, dc, dr).filter(|cell| map.transitable(observation, *cell))
+        })
+        .min_by_key(|cell| (cell.row, cell.column))
+}
+
+fn add_ticks(tick: Tick, amount: u64) -> Tick {
+    Tick(tick.0.saturating_add(amount))
+}
+
+fn position_distance(left: Position, right: Position) -> u32 {
+    left.x
+        .abs_diff(right.x)
+        .saturating_add(left.y.abs_diff(right.y))
+}
+
+fn target_order(target: StrategicTarget) -> (u8, u16, u16, u8) {
+    match target {
+        StrategicTarget::Pickup { cell, .. } => (0, cell.row, cell.column, 0),
+        StrategicTarget::Block { cell } => (1, cell.row, cell.column, 0),
+        StrategicTarget::Opponent { seat } => (2, 0, 0, seat as u8),
+        StrategicTarget::Tile { cell } => (3, cell.row, cell.column, 0),
+        StrategicTarget::None => (4, 0, 0, 0),
+    }
+}
+
+#[cfg(test)]
+#[path = "goals_v24_tests.rs"]
+mod tests;

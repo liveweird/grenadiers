@@ -17,6 +17,7 @@ pub(super) fn opening(
     ordinary_clear: bool,
     start_window: TickWindow,
     end: u64,
+    strategic: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     if ordinary.intent.manual.is_some() {
@@ -69,6 +70,7 @@ pub(super) fn opening(
         settled_stop_tick,
         memory,
         ordinary,
+        strategic,
         &mut tactic_work,
     );
     work.try_take(tactic_work.spent()).ok()?;

@@ -17,6 +17,7 @@ pub(super) fn validate_header(header: &ReplayHeader) -> Result<(), ()> {
             header.cpu_policy_version,
             ARCHIVED_CPU_POLICY_VERSION
                 | PICKUP_CPU_POLICY_VERSION
+                | INTENT_CPU_POLICY_VERSION
                 | STRATEGY_CPU_POLICY_VERSION
                 | CPU_POLICY_VERSION
         )

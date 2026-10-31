@@ -134,3 +134,6 @@ mod cpu_strategy_progress_tests;
 
 #[cfg(test)]
 mod cpu_intent_progress_tests;
+
+#[cfg(test)]
+mod cpu_farm_progress_tests;

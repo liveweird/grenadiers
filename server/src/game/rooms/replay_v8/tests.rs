@@ -192,17 +192,25 @@ fn replay8_keeps_supported_cpu_inputs_exact_without_mixed_provenance() {
     runtime.settle([None; 4]).unwrap();
     let (runtime, journal) = runtime.into_parts();
     let expected = runtime.replay_inspection();
-    assert_eq!(journal.header.cpu_policy_version, 24);
-    assert_eq!(journal.header.cpus[0].policy_version, 24);
+    assert_eq!(journal.header.cpu_policy_version, 25);
+    assert_eq!(journal.header.cpus[0].policy_version, 25);
     verify_exact(&journal, &expected).unwrap();
-    for version in [21, 22, 23] {
+    for version in [21, 22, 23, 24] {
         let mut archived = journal.clone();
         archived.header.cpu_policy_version = version;
         archived.header.cpus[0].policy_version = version;
         verify_exact(&archived, &expected).unwrap();
     }
-    for (header_version, provenance) in [(20, 20), (25, 25), (21, 22), (22, 23), (23, 24), (24, 21)]
-    {
+    for (header_version, provenance) in [
+        (20, 20),
+        (26, 26),
+        (21, 22),
+        (22, 23),
+        (23, 24),
+        (24, 21),
+        (25, 24),
+        (24, 25),
+    ] {
         let mut mixed = journal.clone();
         mixed.header.cpu_policy_version = header_version;
         mixed.header.cpus[0].policy_version = provenance;

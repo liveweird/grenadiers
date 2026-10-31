@@ -106,6 +106,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_EASY
                     | grenadiers_core::room::CpuProfile::RESPAWN_V22_STANDARD
                     | grenadiers_core::room::CpuProfile::RESPAWN_V22_EASY
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V24_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V24_EASY
                     | grenadiers_core::room::CpuProfile::RESPAWN_V23_STANDARD
                     | grenadiers_core::room::CpuProfile::RESPAWN_V23_EASY
                     | grenadiers_core::room::CpuProfile::RESPAWN_V21_STANDARD

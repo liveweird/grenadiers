@@ -35,6 +35,7 @@ impl CpuController {
                 | CpuProfile::ENVIRONMENT_EASY
                 | CpuProfile::LAIRS_EASY
                 | CpuProfile::RESPAWN_LAIRS_EASY
+                | CpuProfile::RESPAWN_V24_EASY
                 | CpuProfile::RESPAWN_V23_EASY
                 | CpuProfile::RESPAWN_V22_EASY
                 | CpuProfile::RESPAWN_V21_EASY
@@ -59,6 +60,7 @@ impl CpuController {
                 | CpuProfile::ENVIRONMENT_EASY
                 | CpuProfile::LAIRS_EASY
                 | CpuProfile::RESPAWN_LAIRS_EASY
+                | CpuProfile::RESPAWN_V24_EASY
                 | CpuProfile::RESPAWN_V23_EASY
                 | CpuProfile::RESPAWN_V22_EASY
                 | CpuProfile::RESPAWN_V21_EASY

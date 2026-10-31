@@ -60,3 +60,8 @@ does not replace that error with a ready message. The selected asset facts are r
 
 Load the committed source through the browser pipeline. Check all three 48px pit frames
 have opaque binary alpha, bounded palettes and distinct decoded pixel signatures.
+
+## Scenario: adopted flame poses join across both tile axes without edge seams
+
+Decode all six adopted flame poses. Opposing horizontal and vertical RGBA edge pixels must
+match, with a nonempty opaque connector, so animated adjacent tiles have no boundary gaps.

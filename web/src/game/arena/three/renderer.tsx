@@ -14,6 +14,8 @@ import { createArenaSceneStore } from './sceneStore'
 
 extend({ DirectionalLight, Group, HemisphereLight, InstancedMesh, Mesh, Object3D })
 
+const ARENA_CLEAR_COLOR = 0x172127
+
 function viewportSize(host: HTMLElement): { width: number; height: number } {
   const bounds = host.getBoundingClientRect()
   return {
@@ -37,6 +39,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
   let destroyed = false
   let wantedActive = false
   let contextLost = false
+  let restoreRendererState = false
   let frameRequest = 0
   let asyncFault: unknown = null
   let board = { width: 15, height: 13 }
@@ -52,7 +55,16 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
     frameRequest = 0
     if (destroyed || !wantedActive || contextLost || !rootStore) return
     try {
-      rootStore.getState().advance(timestamp / 1000, true)
+      const state = rootStore.getState()
+      if (restoreRendererState) {
+        // Our listener precedes Three's internal listener. Restore after its GL caches are rebuilt.
+        state.gl.resetState()
+        state.gl.setClearColor(ARENA_CLEAR_COLOR, 1)
+        state.gl.shadowMap.needsUpdate = true
+        atlas.texture.needsUpdate = true
+        restoreRendererState = false
+      }
+      state.advance(timestamp / 1000, true)
       canvas.style.visibility = 'visible'
       frameRequest = requestAnimationFrame(frame)
     } catch (error) {
@@ -81,6 +93,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
   const onContextRestored = (): void => {
     if (destroyed) return
     contextLost = false
+    restoreRendererState = true
     scheduleFrame()
   }
   const removeCanvas = (): void => {
@@ -106,7 +119,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
       },
       shadows: 'soft',
       size: { ...size, left: 0, top: 0 },
-      onCreated: ({ gl }) => gl.setClearColor(0x172127, 1),
+      onCreated: ({ gl }) => gl.setClearColor(ARENA_CLEAR_COLOR, 1),
     })
     let signalReady = (): void => undefined
     const committed = new Promise<void>((resolve) => { signalReady = resolve })

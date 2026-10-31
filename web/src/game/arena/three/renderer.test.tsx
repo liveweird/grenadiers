@@ -6,12 +6,15 @@ import { createThreeArenaRenderer } from './renderer'
 const hooks = vi.hoisted(() => ({
   configureError: null as Error | null,
   atlasError: null as Error | null,
-  atlas: { dispose: vi.fn() },
+  atlas: { dispose: vi.fn(), texture: { needsUpdate: false } },
   store: {
     read: vi.fn(), subscribe: vi.fn(), update: vi.fn(), clear: vi.fn(), setReducedMotion: vi.fn(),
   },
   advance: vi.fn(),
   setSize: vi.fn(),
+  resetGlState: vi.fn(),
+  setClearColor: vi.fn(),
+  shadowMap: { needsUpdate: false },
   configure: vi.fn(),
   render: vi.fn(),
   unmount: vi.fn(),
@@ -38,15 +41,26 @@ beforeEach(() => {
   hooks.configureError = null
   hooks.atlasError = null
   hooks.atlas.dispose.mockReset()
+  hooks.atlas.texture.needsUpdate = false
   for (const method of Object.values(hooks.store)) method.mockReset()
   hooks.advance.mockReset()
   hooks.setSize.mockReset()
+  hooks.resetGlState.mockReset()
+  hooks.setClearColor.mockReset()
+  hooks.shadowMap.needsUpdate = false
   hooks.configure.mockReset().mockImplementation(async () => {
     if (hooks.configureError) throw hooks.configureError
   })
   hooks.render.mockReset().mockImplementation((element: ReactElement<{ resolve: () => void }>) => {
     element.props.resolve()
-    return { getState: () => ({ advance: hooks.advance, setSize: hooks.setSize }) }
+    return { getState: () => ({
+      advance: hooks.advance, setSize: hooks.setSize,
+      gl: {
+        resetState: hooks.resetGlState,
+        setClearColor: hooks.setClearColor,
+        shadowMap: hooks.shadowMap,
+      },
+    }) }
   })
   hooks.unmount.mockReset().mockImplementation((_canvas: HTMLCanvasElement, done: () => void) => done())
   hooks.frames.clear()
@@ -99,6 +113,10 @@ describe('manual Three renderer lifetime', () => {
     canvas?.dispatchEvent(new Event('webglcontextrestored'))
     runFrame(234)
     expect(canvas?.style.visibility).toBe('visible')
+    expect(hooks.resetGlState).toHaveBeenCalledOnce()
+    expect(hooks.setClearColor).toHaveBeenCalledWith(0x172127, 1)
+    expect(hooks.shadowMap.needsUpdate).toBe(true)
+    expect(hooks.atlas.texture.needsUpdate).toBe(true)
 
     renderer.setReducedMotion(true)
     expect(hooks.store.setReducedMotion).toHaveBeenCalledWith(true)

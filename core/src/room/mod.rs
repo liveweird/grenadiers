@@ -30,6 +30,7 @@ pub mod respawn_lairs;
 pub mod roster;
 pub mod series;
 pub mod settings;
+pub mod spike_pit_settings;
 
 pub use configuration::{BoardSize, RoomConfiguration, RoomConfigurationError, SeatControl};
 pub use environment::EnvironmentRoomConfiguration;
@@ -42,6 +43,11 @@ pub use roster::{
     ROSTER_LIFECYCLE_PROFILE, RosterError, RosterMatchLifecycle, RosterParticipant, RosterUpdate,
 };
 pub use settings::{RoomSettings, SettingsError};
+pub use spike_pit_settings::{
+    DEFAULT_SPIKE_PIT_RAISED_TICKS, DEFAULT_SPIKE_PIT_WARNING_TICKS, MAX_SPIKE_PIT_RAISED_TICKS,
+    MAX_SPIKE_PIT_WARNING_TICKS, MIN_SPIKE_PIT_RAISED_TICKS, MIN_SPIKE_PIT_WARNING_TICKS,
+    SpikePitConfig, SpikePitSettings, SpikePitSettingsError,
+};
 
 use crate::game::{RoundResult, SeatId, Tick};
 

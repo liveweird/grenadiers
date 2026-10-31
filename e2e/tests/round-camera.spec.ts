@@ -8,6 +8,7 @@ declare global {
 }
 
 async function courtyardCenter(page: Page, info: TestInfo, name: string): Promise<Buffer> {
+  await page.locator('.game-arena canvas').scrollIntoViewIfNeeded()
   const bounds = await page.locator('.game-arena canvas').boundingBox()
   if (!bounds) throw new Error('Arena canvas unavailable')
   // Static center tiles exclude both unmoving players, which spawn in opposite corners.
@@ -19,7 +20,8 @@ async function courtyardCenter(page: Page, info: TestInfo, name: string): Promis
 
 test('real snapshot-free countdowns produce camera intros on the first and subsequent rounds', async ({ browser }, info) => {
   test.setTimeout(60_000)
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1050 } })
+  const contexts = await Promise.all([0, 1].map(() => browser.newContext({ viewport: { width: 1440, height: 1050 } })))
+  const context = contexts[0]
   try {
     const policy = await observeBrowserPolicy(context)
     const one = await context.newPage()
@@ -34,7 +36,7 @@ test('real snapshot-free countdowns produce camera intros on the first and subse
         advance: (ms) => { if (frozenAt !== null) frozenAt += ms },
       }
     })
-    const two = await context.newPage()
+    const two = await contexts[1].newPage()
     const game = observeGame(one)
     const peer = observeGame(two)
     const errors: string[] = []
@@ -50,30 +52,42 @@ test('real snapshot-free countdowns produce camera intros on the first and subse
     await one.getByRole('button', { name: 'Ready', exact: true }).click()
     await two.getByRole('button', { name: 'Ready', exact: true }).click()
 
-    let previousRound = 0
-    for (const index of [1, 2]) {
-      await expect.poll(() => {
-        const snapshot = latestSnapshot(game)
-        return snapshot?.room.phase.type === 'running' && snapshot.room.roundId > previousRound
-      }, { intervals: [20] }).toBe(true)
-      const currentRound = latestSnapshot(game)!.room.roundId
-      await expect(one.locator('.game-arena canvas')).toBeVisible()
-      const opening = await courtyardCenter(one, info, `live-round-${index}-opening`)
-      await one.evaluate(() => window.roundCameraTestClock.advance(1_000))
-      // Screenshot waits for successive native RAFs, allowing camera application before capture.
-      const neutral = await courtyardCenter(one, info, `live-round-${index}-neutral`)
-      expect(opening.equals(neutral), `round ${currentRound} must show a real opening camera move`).toBe(false)
-      if (index === 1) {
-        previousRound = currentRound
-        await one.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click()
-        await one.keyboard.press('Space')
-        await expect.poll(() => game.frames.some((frame) => frame.type === 'snapshot'
-          && frame.room.roundId === currentRound && frame.room.phase.type === 'result')).toBe(true)
+    try {
+      for (const index of [1, 2]) {
+        await expect.poll(() => {
+          const snapshot = latestSnapshot(game)
+          return snapshot ? `${snapshot.room.roundNumber}:${snapshot.room.phase.type}` : 'none'
+        }, { intervals: [20], timeout: 20_000 }).toBe(`${index}:running`)
+        const currentRound = latestSnapshot(game)!.room.roundId
+        await expect(one.locator('.game-arena canvas')).toBeVisible()
+        const opening = await courtyardCenter(one, info, `live-round-${index}-opening`)
+        await one.evaluate(() => window.roundCameraTestClock.advance(1_000))
+        await one.evaluate(() => new Promise<void>((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        }))
+        const neutral = await courtyardCenter(one, info, `live-round-${index}-neutral`)
+        expect(opening.equals(neutral), `round ${currentRound} must show a real opening camera move`).toBe(false)
+        if (index === 1) {
+          await one.getByRole('region', { name: 'Grenadiers courtyard', exact: true }).click()
+          await one.keyboard.press('Space')
+          await expect.poll(() => game.frames.some((frame) => frame.type === 'snapshot'
+            && frame.room.roundId === currentRound && frame.room.phase.type === 'result')).toBe(true)
+        }
       }
+    } catch (error) {
+      const lifecycle = [game, peer].map((observed) => observed.frames
+        .filter((frame) => 'room' in frame).slice(-30).map((frame) => {
+          if (!('room' in frame)) return null
+          return { type: frame.type, phase: frame.room.phase.type, roundId: frame.room.roundId,
+            roundNumber: frame.room.roundNumber, tick: frame.room.tick,
+            seats: frame.room.seats.map(({ seat, connection }) => ({ seat, connection })) }
+        }))
+      await info.attach('public-room-lifecycle', { body: JSON.stringify({ lifecycle, errors }), contentType: 'application/json' })
+      throw error
     }
     expect(errors).toEqual([])
     expect(policy.violations).toEqual([])
     await one.getByRole('button', { name: 'Leave room', exact: true }).click()
     await two.getByRole('button', { name: 'Leave room', exact: true }).click()
-  } finally { await context.close() }
+  } finally { await Promise.all(contexts.map((owned) => owned.close())) }
 })

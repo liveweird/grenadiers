@@ -266,13 +266,14 @@ jobs:
           exit 1
       - run: scripts/gates.sh browser
         if: matrix.shard == 'items'
-      - name: Verify artist export and Pixi atlas preview
+      - name: Verify artist export, reference atlas and Three arena
         if: matrix.shard == 'items'
         run: |
           npm --prefix web ci
           scripts/gates.sh art-atlas
           scripts/gates.sh atlas-gameplay
           npm --prefix e2e run test:terrain-pixels
+          npm --prefix e2e run test:three-arena
       - name: Verify deterministic pickups using the same built image
         if: matrix.shard == 'items'
         run: |
@@ -579,6 +580,7 @@ jobs:
             e2e/.playwright/art-atlas-test-results/
             e2e/.playwright/atlas-gameplay-test-results/
             e2e/.playwright/terrain-pixel-test-results/
+            e2e/.playwright/three-arena-test-results/
             e2e/playwright-lairs-report/
             e2e/lairs-test-results/
             e2e/playwright-pickup-report/

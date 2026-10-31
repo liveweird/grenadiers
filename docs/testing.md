@@ -126,14 +126,16 @@ EN/PL errors and desktop/320px reduced-motion layouts. Core unit tests cover fra
 metadata, every extrusion edge/corner, padding, gutters, transparency and texture disposal.
 Generated browser proofs live under ignored `e2e/.playwright/art-atlas-test-results/`. The
 [artist handoff](../assets/art/README.md) documents template/export commands. The dedicated
-`scripts/gates.sh atlas-gameplay` checks the gameplay atlas backend against procedural reference
+`scripts/gates.sh atlas-gameplay` checks the retained Pixi atlas reference against procedural
 pixels, by packing the procedural baseline sheet rather than the adopted artist source, and real
 WebGL lifecycle behavior with the bundled source. It uses the same fresh diagnostics build and
 stores proofs in `e2e/.playwright/atlas-gameplay-test-results/`. See the
 [rendering guide](game/art-atlas.md). Artist redraws therefore change no parity expectation.
 The same item-shard step runs the DPR 1/2 terrain-pixel suite and retains failures under
 `e2e/.playwright/terrain-pixel-test-results/`; the separate six-cell renderer lifecycle suite
-remains opt-in.
+remains opt-in. `npm --prefix e2e run test:three-arena` checks the production Three renderer in
+a separate credential-free diagnostic: final GPU colour, board fit, billboard visibility,
+reset/context recovery and teardown. The manual full CI runs it serially after the atlas checks.
 
 ## Rust
 
@@ -385,3 +387,4 @@ assertions and evidence for each suite.
 | `npm --prefix e2e run test:terrain-pixels` | [Terrain pixel scenario](../e2e/scenarios/terrain-pixels.md) | Exact cached/uncached Pixi terrain parity across DPRs, repaint/reset, and context restoration. |
 | `scripts/gates.sh art-atlas` / `npm --prefix e2e run test:art-atlas` | [Artist atlas](#artist-atlas) | Canonical import/export, decoded pixels, texture lifecycle/budgets, localization, and responsive reduced-motion layouts. |
 | `scripts/gates.sh atlas-gameplay` / `npm --prefix e2e run test:atlas-gameplay` | [Atlas gameplay scenario](../e2e/scenarios/atlas-gameplay.md) | Procedural-reference atlas parity and real bundled WebGL lifecycle behavior. |
+| `npm --prefix e2e run test:three-arena` | [Three arena scenario](../e2e/scenarios/three-arena.md) | Production GPU colour, three board sizes, billboards, privacy resets, reduced motion, context recovery and bounded teardown. |

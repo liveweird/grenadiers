@@ -13,6 +13,7 @@ const failureArtifactPaths = [
   "e2e/.playwright/art-atlas-test-results/",
   "e2e/.playwright/atlas-gameplay-test-results/",
   "e2e/.playwright/terrain-pixel-test-results/",
+  "e2e/.playwright/three-arena-test-results/",
   "e2e/playwright-lairs-report/",
   "e2e/lairs-test-results/",
   "e2e/playwright-pickup-report/",
@@ -103,8 +104,9 @@ export function validateFullWorkflow(workflow) {
 
   const atlas = workflow.indexOf("scripts/gates.sh atlas-gameplay");
   const terrain = workflow.indexOf("npm --prefix e2e run test:terrain-pixels");
+  const three = workflow.indexOf("npm --prefix e2e run test:three-arena");
   const nextItemScenario = workflow.indexOf("Verify deterministic pickups", terrain);
-  assert.ok(atlas < terrain && terrain < nextItemScenario);
+  assert.ok(atlas < terrain && terrain < three && three < nextItemScenario);
   const failureArtifact = workflow.slice(
     workflow.indexOf("name: playwright-report-${{ matrix.shard }}"),
     workflow.indexOf("\n\n  kubernetes:"),
@@ -204,6 +206,8 @@ test("contracts reject automatic full verification and weakened mask coverage", 
   assert.throws(() => validateFullWorkflow(full.replace("cache-bin: true", "cache-bin: false")));
   assert.throws(() => validateFullWorkflow(full.replace(
     "          npm --prefix e2e run test:terrain-pixels\n", "")));
+  assert.throws(() => validateFullWorkflow(full.replace(
+    "          npm --prefix e2e run test:three-arena\n", "")));
   assert.throws(() => validateFullWorkflow(full.replace("          include-hidden-files: true\n", "")));
   assert.throws(() => validateFullWorkflow(full.replace(
     "installed_version=\"$(cargo llvm-cov --version 2>/dev/null || true)\"",

@@ -2,6 +2,15 @@
 
 These Playwright tests treat the deployed app as a black box. They require a complete stack at `http://127.0.0.1:8085`, or at `E2E_BASE_URL`; the test command never starts or mocks a server.
 
+## Arena graphics acceptance
+
+`npm run test:three-arena` builds and serves the separate credential-free Three.js diagnostic.
+It checks actual WebGL colour output, all board sizes, billboard variants, visibility resets,
+context recovery and teardown at desktop and narrow reduced-motion sizes. The artist atlas
+and retained Pixi parity suites validate source artwork separately. Run software WebGL suites
+serially; macOS and CI use an explicit shared ANGLE backend and default to one worker.
+See the [scenario](scenarios/three-arena.md) and [testing policy](../docs/testing.md).
+
 ## Content security policy acceptance
 
 `npm run test:csp` checks real enforced headers, live HTTP/WS and HTTPS/WSS, and blocked

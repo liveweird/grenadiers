@@ -52,7 +52,8 @@ Bomb pulses use received fuse facts; the renderer does not decrement a fuse or e
 
 Each uniform and the mob have four separate knockout poses in the artist sheet. Normal
 playback lasts 600ms, at 150ms per pose; reduced motion shows only the collapsed pose for
-180ms. The detached sprite and shadow then disappear. These are cosmetic cues: elimination,
+180ms. The detached sprite and shadow then disappear. The body remains readable above blast
+and burning-Oil overlays, with the hazard visible around it. These are cosmetic cues: elimination,
 collision removal, scoring, bomb ownership and round transitions happen immediately on the server.
 
 Player cues require a fresh elimination event and that recipient's currently visible dead

@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 import {
-  assertCleanAudit, beginAudit, canvasScreenshot, expectDifferent, openFixture, show,
-  showDeath, settleDeathAge, type BoardName, type BrowserAudit, type DeathAppearance,
+  assertCleanAudit, beginAudit, canvasScreenshot, deathPixelRetention, expectDifferent,
+  openFixture, show, showDeath, showDeathOverlap, settleDeathAge,
+  type BoardName, type BrowserAudit, type DeathAppearance, type DeathOverlay,
 } from './three-arena-api'
 
 const deathAppearances: readonly DeathAppearance[] = ['one', 'two', 'three', 'four', 'mob']
@@ -117,6 +118,35 @@ test('reduced motion holds every death on frame three then expires from the same
     expectDifferent(staticStart, baseline, `${appearance} reduced death must show frame three`)
     expect(staticEnd.equals(staticStart), `${appearance} reduced death must remain static`).toBe(true)
     expect(expired.equals(baseline), `${appearance} reduced death must expire without residue`).toBe(true)
+  }
+})
+
+test('native death body remains readable over ordinary and burning-oil flames', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('reduced'), 'normal-motion overlap pixels')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'death-overlap-empty-baseline')
+
+  for (const [generation, overlay] of (['flame', 'burningOil'] satisfies DeathOverlay[]).entries()) {
+    const bornAt = await showDeathOverlap(page, 'none', true, generation, null)
+    await settleDeathAge(page, bornAt, 75)
+    const deathOnly = await canvasScreenshot(page, testInfo, `${overlay}-death-only`)
+    await showDeathOverlap(page, overlay, false, generation, bornAt)
+    const flameOnly = await canvasScreenshot(page, testInfo, `${overlay}-only`)
+    await showDeathOverlap(page, overlay, true, generation, bornAt)
+    await settleDeathAge(page, bornAt, 75)
+    const combined = await canvasScreenshot(page, testInfo, `${overlay}-death-combined`)
+    const retention = await deathPixelRetention(page, baseline, deathOnly, combined)
+    await testInfo.attach(`${overlay}-death-retention`, {
+      body: JSON.stringify(retention), contentType: 'application/json',
+    })
+
+    expectDifferent(deathOnly, baseline, 'death-only control must expose native body pixels')
+    expectDifferent(flameOnly, baseline, `${overlay} control must expose native flame pixels`)
+    expectDifferent(combined, flameOnly, `death body must remain visible over ${overlay}`)
+    expectDifferent(combined, deathOnly, `${overlay} must remain visible around the death body`)
+    expect(retention.deathPixels, 'death-only mask must contain meaningful pixels').toBeGreaterThan(100)
+    expect(retention.ratio, `${overlay} retained ${JSON.stringify(retention)}`).toBeGreaterThanOrEqual(0.75)
   }
 })
 

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.1.2 — 2026-10-31
+
+- Keep knockout sprites readable over ordinary blast flames and burning Oil while preserving
+  ground shadows and visible hazards around the body.
+
 ## 1.1.1 — 2026-10-31
 
 - Add four-frame knockout animations for all four player uniforms and mobs, with short static

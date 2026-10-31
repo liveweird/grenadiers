@@ -41,6 +41,15 @@ screenshot captured without another snapshot must equal the empty canvas with no
 The isolated fixture clock changes presentation time only; native animation frames still drive the
 production renderer.
 
+## Scenario: native death body remains readable over ordinary and burning-oil flames
+
+The desktop project freezes actor-one death frame zero in a floor cell and captures empty,
+death-only, flame-only, and combined native WebGL pixels for both an ordinary blast flame and a
+burning oil barrel. At least 75 percent of the death-only changed-pixel mask must remain identical
+in the combined image, while both controls independently differ from empty and the combined image
+still differs from death-only. This proves the body stays readable above either visible flame layer
+instead of accepting a merely nonempty combined canvas.
+
 ## Scenario: teleport, suspend, room replacement, context restoration, and destroy leave no ghosts
 
 A teleport changes the rendered position, suspension hides the canvas immediately, and a

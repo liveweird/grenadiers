@@ -4,7 +4,8 @@ import { createThreeArenaRenderer } from '../src/game/arena/three/renderer'
 import { createArenaCamera, fitArenaCamera } from '../src/game/arena/three/camera'
 import { cellToWorld } from '../src/game/arena/three/coordinates'
 import {
-  threeArenaDeathSnapshot, threeArenaSnapshot, type BoardName, type SceneName,
+  threeArenaDeathOverlapSnapshot, threeArenaDeathSnapshot, threeArenaSnapshot,
+  type BoardName, type DeathOverlay, type SceneName,
 } from './three-arena-snapshots'
 import type { DeathAppearance } from '../src/game/arena/types'
 import {
@@ -30,6 +31,12 @@ export type ThreeArenaDiagnosticApi = {
     bornAt: number
   }>
   settleDeathAge(bornAt: number, ageMs: number): Promise<number>
+  showDeathOverlap(
+    overlay: DeathOverlay,
+    includeDeath: boolean,
+    generation: number,
+    bornAt: number | null,
+  ): Promise<{ state: FixtureState; bornAt: number }>
   suspend(): Promise<FixtureState>
   destroy(): Promise<FixtureState>
   readState(): FixtureState
@@ -153,6 +160,22 @@ async function settleDeathAge(bornAt: number, ageMs: number): Promise<number> {
   return ageMs
 }
 
+async function showDeathOverlap(
+  overlay: DeathOverlay,
+  includeDeath: boolean,
+  generation: number,
+  requestedBornAt: number | null,
+): Promise<{ state: FixtureState; bornAt: number }> {
+  await initialize()
+  board = 'large'
+  scene = null
+  const bornAt = requestedBornAt ?? nativePerformanceNow()
+  fixtureNow = bornAt
+  renderer?.update(threeArenaDeathOverlapSnapshot(overlay, includeDeath, bornAt, generation))
+  await settle(2)
+  return { state: readState(), bornAt }
+}
+
 async function suspend(): Promise<FixtureState> {
   renderer?.suspend()
   scene = null
@@ -211,6 +234,6 @@ window.addEventListener('pagehide', () => {
   disposeCalibration?.()
 }, { once: true })
 window.grenadiersThreeArena = {
-  initialize, show, showDeath, settleDeathAge, suspend, destroy, readState, projectCell,
-  loseAndRestoreContext, calibrateColors,
+  initialize, show, showDeath, settleDeathAge, showDeathOverlap, suspend, destroy, readState,
+  projectCell, loseAndRestoreContext, calibrateColors,
 }

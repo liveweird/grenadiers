@@ -7,7 +7,7 @@ export type CpuDebugResponse = CpuDebugOperation['responses'][200]['content']['a
 export type CpuDebugRow = CpuDebugResponse['cpus'][number]
 export type AvailableCpuDebugRow = Extract<CpuDebugRow, { status: 'available' }>
 
-export interface CpuDebugBaseline {
+interface CpuDebugBaseline {
   roomId: string
   roundId: number
   tick: number

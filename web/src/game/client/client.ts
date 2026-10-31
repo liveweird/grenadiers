@@ -2,8 +2,7 @@ import { controllersAvailable } from './roomControllers'
 import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V14ErrorCode } from '../v18/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
-import { preservesTeleportHistory } from './teleportHistory'
-import { preservesSpikePitLayout } from './spikePitHistory'
+import { preservesSnapshotHistory } from './snapshotHistory'
 import { requestCpuDebug } from './cpuDebugRequest'
 import type { CpuDebugHttpResult } from './cpuDebugTypes'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
@@ -188,8 +187,7 @@ export class GameClient {
     const existing = this.capability
     if (existing && (message.room.roomId !== existing.roomId || message.youSeat !== existing.seat
       || message.resumeToken !== existing.token || !acceptableBaseline(message.room, this.state.room))) return
-    if (!preservesTeleportHistory(this.state.snapshot, message.room, message.state)
-      || !preservesSpikePitLayout(this.state.snapshot, message.room, message.state)) {
+    if (!preservesSnapshotHistory(this.state.snapshot, message.room, message.state)) {
       this.terminal('invalidServerMessage', true); return
     }
     this.capability = { roomId: message.room.roomId, seat: message.youSeat, token: message.resumeToken }
@@ -227,8 +225,7 @@ export class GameClient {
     const settlesSettings = current ? settlesPendingSettings(this.pendingSettings, message.room, current) : false
     if (!current || !this.capability || this.state.admissionPending
       || (!newerRoom(message.room, current) && !settlesSettings)) return
-    if (!settlesSettings && (!preservesTeleportHistory(this.state.snapshot, message.room, message.state)
-      || !preservesSpikePitLayout(this.state.snapshot, message.room, message.state))) {
+    if (!settlesSettings && (!preservesSnapshotHistory(this.state.snapshot, message.room, message.state))) {
       this.terminal('invalidServerMessage', true); return
     }
     if (message.room.roundId > current.roundId) this.nextAction = 1

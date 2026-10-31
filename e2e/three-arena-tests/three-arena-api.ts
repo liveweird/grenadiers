@@ -3,6 +3,7 @@ import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/su
 
 export type BoardName = 'small' | 'medium' | 'large'
 export type SceneName = 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
+export type DeathAppearance = 'one' | 'two' | 'three' | 'four' | 'mob'
 export type FixtureState = {
   board: BoardName
   scene: SceneName | null
@@ -23,6 +24,11 @@ type CalibrationSamples = {
 type FixtureApi = {
   initialize(): Promise<FixtureState>
   show(board: BoardName, scene: SceneName): Promise<FixtureState>
+  showDeath(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
+    state: FixtureState
+    bornAt: number
+  }>
+  settleDeathAge(bornAt: number, ageMs: number): Promise<number>
   suspend(): Promise<FixtureState>
   destroy(): Promise<FixtureState>
   readState(): FixtureState
@@ -76,13 +82,41 @@ export async function show(
   return state
 }
 
+export async function showDeath(
+  page: Page,
+  appearance: DeathAppearance,
+  index: number,
+): Promise<number> {
+  const result = await page.evaluate(
+    ({ deathAppearance, deathIndex }) => window.grenadiersThreeArena
+      .showDeath('large', deathAppearance, deathIndex),
+    { deathAppearance: appearance, deathIndex: index },
+  )
+  expect(result.state).toMatchObject({
+    board: 'large', scene: null, canvasCount: 1, canvasVisible: true, destroyed: false,
+  })
+  return result.bornAt
+}
+
+export async function settleDeathAge(page: Page, bornAt: number, ageMs: number): Promise<void> {
+  const age = await page.evaluate(
+    ({ cueBornAt, targetAge }) => window.grenadiersThreeArena
+      .settleDeathAge(cueBornAt, targetAge),
+    { cueBornAt: bornAt, targetAge: ageMs },
+  )
+  expect(age).toBeGreaterThanOrEqual(ageMs)
+}
+
 export async function canvasScreenshot(
   page: Page,
   testInfo: TestInfo,
   name: string,
 ): Promise<Buffer> {
-  const image = await page.locator('#arena canvas').screenshot({ animations: 'disabled' })
-  await testInfo.attach(name, { body: image, contentType: 'image/png' })
+  const screenshotPath = testInfo.outputPath(`${name}.png`)
+  const image = await page.locator('#arena canvas').screenshot({
+    animations: 'disabled', path: screenshotPath,
+  })
+  await testInfo.attach(name, { path: screenshotPath, contentType: 'image/png' })
   return image
 }
 

@@ -23,6 +23,24 @@ Known actor and bomb cells are projected with the production orthographic camera
 their public rows changes native canvas pixels; removing them must reproduce the whole empty canvas
 byte-for-byte, including shadows.
 
+## Scenario: native death artwork advances every appearance and expires without lingering pixels
+
+The normal-motion desktop project injects one public presentation death cue at a time for actor
+appearances one through four and a mob. Native WebGL screenshots at all four frames and after the
+600-millisecond lifetime must show changing artwork for every appearance.
+The terminal screenshot is captured without another snapshot and must equal the original empty
+canvas byte-for-byte, proving that neither the corpse nor its shadow lingers. An isolated fixture
+clock holds each age during capture so software-renderer screenshot latency cannot skip frames.
+
+## Scenario: reduced motion holds every death on frame three then expires from the same birth time
+
+The narrow reduced-motion project injects the same five public death appearances. Two native WebGL
+screenshots before expiry must be byte-identical and distinct from the empty canvas, proving the
+static frame-three treatment. After 180 milliseconds from the cue's unchanged birth time, a
+screenshot captured without another snapshot must equal the empty canvas with no corpse or shadow.
+The isolated fixture clock changes presentation time only; native animation frames still drive the
+production renderer.
+
 ## Scenario: teleport, suspend, room replacement, context restoration, and destroy leave no ghosts
 
 A teleport changes the rendered position, suspension hides the canvas immediately, and a

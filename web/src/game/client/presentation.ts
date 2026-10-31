@@ -14,6 +14,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
   const own = snapshot.state.actors.find((actor) => actor.seat === state.youSeat)
   const bombsHidden = own?.type === 'visible'
     && own.effects.some((effect) => effect.kind === 'invisibleBombs')
+  const visibleBombs = bombsHidden ? [] : snapshot.state.bombs
   const baseline = state.admissionBaseline
   return {
     room: {
@@ -34,7 +35,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
           id, seat, position, heading, alive, damageGraceRemainingTicks, voluntaryActionsFrozen,
           ...(seat === state.youSeat ? { stormSlowRemainingTicks } : {}),
           lastTeleportTick,
-          remoteArmed: snapshot.state.bombs.some((bomb) =>
+          remoteArmed: visibleBombs.some((bomb) =>
             bomb.owner === id && bomb.trigger.type === 'remote'),
           piercingArmed: inventory.weapon === 'piercingBomb',
           powerArmed: inventory.weapon === 'powerBomb',
@@ -64,7 +65,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
             effects.find((effect) => effect.kind === 'reverseControls')?.remainingTicks ?? 0,
           invisibleBombsRemainingTicks: effectTicks(effects, 'invisibleBombs'),
         })),
-      bombs: bombsHidden ? [] : snapshot.state.bombs,
+      bombs: visibleBombs,
       flames: snapshot.state.flames,
       oilBarrels: snapshot.state.oilBarrels,
       stormCloud: snapshot.state.stormCloud,

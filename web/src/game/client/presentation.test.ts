@@ -71,16 +71,20 @@ describe('v12 arena presentation', () => {
       },
       {
         id: 4, cell: { column: 2, row: 1 }, owner: 2, range: 2, placedAt: 1,
-        trigger: { type: 'contact' }, blast: 'piercing',
+        trigger: { type: 'remote' }, blast: 'piercing',
       },
     ]
     current.snapshot!.state.flames = [{ cell: { column: 3, row: 1 }, expiresAt: 30 }]
 
     const presented = presentSnapshot(current)!
     expect(presented.state.bombs).toEqual([])
+    expect(presented.state.actors.every((actor) => !actor.remoteArmed)).toBe(true)
     expect(presented.state.flames).toHaveLength(1)
     expect(presented.state.actors[0].invisibleBombsRemainingTicks).toBe(120)
     expect(own.liveBombCount).toBe(2)
+    own.effects = []
+    expect(presentSnapshot(current)!.state.actors.every((actor) => actor.remoteArmed)).toBe(true)
+    own.effects = [{ kind: 'invisibleBombs', remainingTicks: 120 }]
     current.snapshot!.state.pickups = [{ cell: { column: 4, row: 1 }, kind: 'invisibleBombs' }]
     expect(presentSnapshot(current)?.state.pickups).toEqual(current.snapshot!.state.pickups)
   })

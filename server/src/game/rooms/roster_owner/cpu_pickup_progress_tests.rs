@@ -264,7 +264,7 @@ fn cpu22_collects_golden_flame_and_continues_after_cpu21_stalls() {
     );
 
     for lairs in [true, false] {
-        let fixed = run(CpuProfile::RESPAWN_LAIRS_STANDARD, lairs);
+        let fixed = run(CpuProfile::RESPAWN_V22_STANDARD, lairs);
         assert_eq!(fixed.failed, 0, "lairs={lairs} {:#?}", fixed.snapshot());
         assert!(
             fixed.collected_at.iter().any(Option::is_some),

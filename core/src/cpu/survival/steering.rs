@@ -6,6 +6,20 @@ use crate::cpu::{BombKnowledge, Observation, WorkBudget};
 use crate::game::geometry::position_overlaps_cell;
 use crate::game::{CellId, Position, Terrain};
 
+pub(super) fn certified_pulse_progresses(
+    plan: &super::SurvivalPlan,
+    initial_position: Position,
+) -> bool {
+    let Some(lease) = &plan.lease else {
+        return false;
+    };
+    if lease.movement() == crate::cpu::MovementIntent::Stop {
+        return false;
+    }
+    let end = lease.pose_after(lease.hold_ticks());
+    end.min() != initial_position || end.max() != initial_position
+}
+
 /// Static guidance only. Every selected action still requires its own pulse
 /// certificate; this search grants no timed-route or escape guarantee.
 pub(super) fn target(

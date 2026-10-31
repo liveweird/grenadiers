@@ -305,13 +305,13 @@ focused commands supplement the unchanged full Rust/coverage release gates.
 
 ## Rules9 occupancy and respawn profile
 
-CPU22 receives checked v17 facts through `new_rules_v9`, with no lair overlay when disabled.
+CPU23 receives checked v17 facts through `new_rules_v9`, with no lair overlay when disabled.
 Visible living players are blockers through the same fixed-point cell/footprint geometry as
 physics. Fresh next-segment checks supplement pose/epoch/scene guards without requiring every
 unrelated rival to stand still. Hidden positions remain unknown. Corner alignment and forward
 motion are checked as separate axis segments; future unexpected blocking withdraws authority.
 
-`plan_respawn_v22_with_origin` keeps finite movement/contact and planting proofs, including with
+`plan_respawn_v23_with_origin` keeps finite movement/contact and planting proofs, including with
 lairs disabled. Occupied lairs contribute possible replacement envelopes after earliest death
 plus grace; empty lairs use independent due times. Combat goals seek reachable firing positions
 against all visible rivals with shared weapon/effect blast geometry. The real-State regression

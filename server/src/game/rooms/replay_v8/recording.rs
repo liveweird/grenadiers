@@ -12,7 +12,7 @@ use super::{
     record::{
         ActionSource, CpuProvenance, Journal, Operation, ReplayAction, ReplayHeader, ReplayStatus,
     },
-    runner::{domain_action, runtime_from_header},
+    runner::{domain_action, runtime_from_header, runtime_from_header_with_navigation},
 };
 
 pub(in crate::game::rooms) struct RecordingRosterRuntime {
@@ -21,6 +21,22 @@ pub(in crate::game::rooms) struct RecordingRosterRuntime {
 }
 
 impl RecordingRosterRuntime {
+    pub(in crate::game::rooms) fn new_with_mob_navigation(
+        configuration: LairRoomConfiguration,
+        settings: RoomSettings,
+        generation_seeds: RoundSeedSource,
+        cpus: Vec<CpuProvenance>,
+        navigation: grenadiers_core::game::MobNavigationPolicy,
+    ) -> Result<Self, ReplayError> {
+        let header = ReplayHeader::new(configuration, settings, [false; 4], cpus)
+            .map_err(|()| ReplayError::InvalidHeader)?;
+        let runtime = runtime_from_header_with_navigation(&header, generation_seeds, navigation)?;
+        Ok(Self {
+            runtime,
+            journal: Journal::new(header),
+        })
+    }
+
     pub(in crate::game::rooms) fn new(
         configuration: LairRoomConfiguration,
         settings: RoomSettings,

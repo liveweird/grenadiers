@@ -173,7 +173,7 @@ fn replay8_debug_redacts_private_cpu_seed() {
 }
 
 #[test]
-fn replay8_keeps_cpu21_and_cpu22_inputs_exact_without_mixed_provenance() {
+fn replay8_keeps_supported_cpu_inputs_exact_without_mixed_provenance() {
     let mut runtime = recorder();
     start(&mut runtime);
     runtime
@@ -192,14 +192,16 @@ fn replay8_keeps_cpu21_and_cpu22_inputs_exact_without_mixed_provenance() {
     runtime.settle([None; 4]).unwrap();
     let (runtime, journal) = runtime.into_parts();
     let expected = runtime.replay_inspection();
-    assert_eq!(journal.header.cpu_policy_version, 22);
-    assert_eq!(journal.header.cpus[0].policy_version, 22);
+    assert_eq!(journal.header.cpu_policy_version, 23);
+    assert_eq!(journal.header.cpus[0].policy_version, 23);
     verify_exact(&journal, &expected).unwrap();
-    let mut archived = journal.clone();
-    archived.header.cpu_policy_version = 21;
-    archived.header.cpus[0].policy_version = 21;
-    verify_exact(&archived, &expected).unwrap();
-    for (header_version, provenance) in [(20, 20), (23, 23), (21, 22), (22, 21)] {
+    for version in [21, 22] {
+        let mut archived = journal.clone();
+        archived.header.cpu_policy_version = version;
+        archived.header.cpus[0].policy_version = version;
+        verify_exact(&archived, &expected).unwrap();
+    }
+    for (header_version, provenance) in [(20, 20), (24, 24), (21, 22), (22, 23), (23, 21)] {
         let mut mixed = journal.clone();
         mixed.header.cpu_policy_version = header_version;
         mixed.header.cpus[0].policy_version = provenance;

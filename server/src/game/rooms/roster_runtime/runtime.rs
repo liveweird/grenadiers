@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use grenadiers_core::{
-    game::{GenerationRecord, SeatId, SimulationSeed, State, StepReport, StormCloudConfig, Tick},
+    game::{
+        GenerationRecord, MobNavigationPolicy, SeatId, SimulationSeed, State, StepReport,
+        StormCloudConfig, Tick,
+    },
     protocol::{v14, v15, v16, v17},
     room::{
         DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle,
@@ -38,6 +41,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) lair_cpu_publication: Option<Arc<v16::BoundPublication>>,
     pub(super) respawn_cpu_publication: Option<Arc<v17::BoundPublication>>,
     pub(super) environment_profile: Option<EnvironmentProfile>,
+    pub(super) mob_navigation: MobNavigationPolicy,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -94,6 +98,7 @@ impl RosterRuntime {
             lair_cpu_publication: None,
             respawn_cpu_publication: None,
             environment_profile: None,
+            mob_navigation: MobNavigationPolicy::LegacyV1,
         })
     }
 

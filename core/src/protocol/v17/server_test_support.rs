@@ -48,6 +48,29 @@ pub(super) fn world_case(
     effects: (bool, bool),
     seed: [u8; 32],
 ) -> WorldCase {
+    world_case_with_navigation(
+        board,
+        count,
+        cloud,
+        lairs,
+        advance_ticks,
+        effects,
+        seed,
+        crate::game::MobNavigationPolicy::LegacyV1,
+    )
+}
+
+#[allow(clippy::too_many_arguments)] // Add an explicit private AI identity to the existing test matrix.
+pub(super) fn world_case_with_navigation(
+    board: DomainBoard,
+    count: PlayerCount,
+    cloud: StormCloudConfig,
+    lairs: RespawnLairConfig,
+    advance_ticks: usize,
+    effects: (bool, bool),
+    seed: [u8; 32],
+    navigation: crate::game::MobNavigationPolicy,
+) -> WorldCase {
     let (cloak_center_actor, freeze_mobs) = effects;
     let enabled = if cloak_center_actor {
         EnabledItems::INVISIBILITY_CLOAK
@@ -70,10 +93,11 @@ pub(super) fn world_case(
             speed: SpeedLevel::Base,
         })
         .collect::<Vec<_>>();
-    let rules = RulesConfig::environment_v9(
+    let rules = RulesConfig::environment_v9_with_mob_navigation(
         crate::room::RoomSettings::DEFAULT.with_enabled_items(enabled),
         cloud,
         lairs,
+        navigation,
     );
     let mut lifecycle = super::server_conformance_lifecycle::lifecycle(count, board, enabled, true);
     let mut state = State::new_at_tick_with_assignment_and_seed(

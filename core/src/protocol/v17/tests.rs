@@ -111,3 +111,52 @@ fn parser_and_schema_agree_on_v17_client_corpus() {
         assert!(!validator.is_valid(value), "{}", case["caseId"]);
     }
 }
+
+#[test]
+fn both_private_mob_policies_keep_strict_publication_and_recipient_boundaries() {
+    for navigation in [
+        crate::game::MobNavigationPolicy::LegacyV1,
+        crate::game::MobNavigationPolicy::EscapeV2,
+    ] {
+        let case = super::server_test_support::world_case_with_navigation(
+            crate::room::BoardSize::FifteenByThirteen,
+            crate::game::PlayerCount::Two,
+            StormCloudConfig::Disabled,
+            RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()),
+            380,
+            (false, false),
+            [3; 32],
+            navigation,
+        );
+        assert_eq!(case.state.rules().mob_navigation_policy(), navigation);
+        let publication = bind_expanded(
+            &case.room,
+            case.room.round_id,
+            &case.capture,
+            case.generation,
+        )
+        .unwrap();
+        let observed = observe_cpu_recipient(
+            &publication,
+            Seat::One,
+            crate::cpu::WorldId {
+                room_instance: 4,
+                physical_round: u64::from(case.room.round_id.get()),
+            },
+        )
+        .unwrap();
+        assert_eq!(observed.parts().rules.version, 9);
+        let projected = project_recipient(&publication, Seat::One).unwrap();
+        let json = serde_json::to_string(&projected.state).unwrap();
+        assert!(!json.contains("mobNavigation"));
+        assert!(
+            bind_expanded(
+                &case.room,
+                crate::protocol::Counter::new(case.room.round_id.get() + 1).unwrap(),
+                &case.capture,
+                case.generation
+            )
+            .is_err()
+        );
+    }
+}

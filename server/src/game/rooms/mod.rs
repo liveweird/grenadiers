@@ -41,6 +41,9 @@ mod replay_v7;
 #[cfg(test)]
 #[allow(dead_code)]
 mod replay_v8;
+#[cfg(test)]
+#[allow(dead_code)]
+mod replay_v9;
 mod resume;
 mod roster_owner;
 mod roster_runtime;

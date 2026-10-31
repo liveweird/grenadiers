@@ -17,7 +17,6 @@ pub struct SurvivalPlan {
     pub execution: Option<ExecutionCertificate>,
 }
 
-/// Produces one action; pulse leases never authorize manual input.
 pub fn plan(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -63,6 +62,7 @@ pub fn plan_with_origin(
         work,
         false,
         false,
+        false,
     )
 }
 
@@ -77,6 +77,7 @@ pub(super) fn plan_inner(
     work: &mut WorkBudget,
     respawn: bool,
     pickup_handoff: bool,
+    opportunistic_planting: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -111,7 +112,9 @@ pub(super) fn plan_inner(
         )
         .unwrap_or_else(stop));
     }
-    let ordinary = if respawn {
+    let ordinary = if opportunistic_planting {
+        crate::cpu::policy::plan_respawn_v23(observation, memory, rng, work)?
+    } else if respawn {
         crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
     } else {
         crate::cpu::policy::plan(observation, memory, rng, work)?
@@ -128,13 +131,14 @@ pub(super) fn plan_inner(
     let bounded_plant_attempted =
         bounded_tactics && (ordinary.intent.manual.is_some() || clear_movement);
     if (ordinary.intent.manual.is_some() || clear_movement)
-        && let Some(plan) = super::plant_tactic::certified_plant(
+        && let Some(plan) = super::plant_tactic::certified_plant_for_policy(
             observation,
             history,
             settled_stop_tick,
             memory,
             &ordinary,
             bounded_tactics,
+            opportunistic_planting,
             work,
         )
     {
@@ -147,9 +151,7 @@ pub(super) fn plan_inner(
             execution: None,
         });
     }
-    // Preserve the existing clear-board goals and pickup collection. Hazard
-    // leases deliberately withhold item-changing paths until item tactics are
-    // modeled; they must not replace the already legal clear-board behavior.
+    // Keep legacy clear-board goals and pickup collection.
     if clear_movement && ordinary.intent.manual.is_none() && !respawn {
         return Ok(SurvivalPlan {
             control: ordinary,
@@ -252,10 +254,16 @@ pub(super) fn plan_inner(
                             manual: None,
                         },
                         hold_ticks,
-                        next_memory: if *movement == ordinary.intent.movement
+                        next_memory: if opportunistic_planting
+                            && ordinary.intent.movement == MovementIntent::Stop
+                        {
+                            ordinary.next_memory
+                        } else if *movement == ordinary.intent.movement
                             && ordinary.intent.manual.is_none()
                         {
                             ordinary.next_memory
+                        } else if opportunistic_planting {
+                            UtilityMemory::new(memory.key()).carry_progress(ordinary.next_memory)
                         } else {
                             UtilityMemory::new(memory.key())
                         },
@@ -316,7 +324,11 @@ pub(super) fn plan_inner(
                     manual: None,
                 },
                 hold_ticks,
-                next_memory: UtilityMemory::new(memory.key()),
+                next_memory: if opportunistic_planting {
+                    UtilityMemory::new(memory.key()).carry_progress(ordinary.next_memory)
+                } else {
+                    UtilityMemory::new(memory.key())
+                },
             },
             lease: None,
             execution: Some(ExecutionCertificate::Route(Box::new(route))),
@@ -324,13 +336,14 @@ pub(super) fn plan_inner(
         break;
     }
     if (!bounded_plant_attempted || !bounded_tactics)
-        && let Some(plan) = super::plant_tactic::certified_plant(
+        && let Some(plan) = super::plant_tactic::certified_plant_for_policy(
             observation,
             history,
             settled_stop_tick,
             memory,
             &ordinary,
             bounded_tactics,
+            opportunistic_planting,
             work,
         )
     {
@@ -339,7 +352,7 @@ pub(super) fn plan_inner(
     if (storm_enabled || respawn)
         && clear_movement
         && fallback.as_ref().is_some_and(|plan| {
-            certified_pulse_progresses(plan, actor.position)
+            super::steering::certified_pulse_progresses(plan, actor.position)
                 && route_fallback
                     .as_ref()
                     .is_some_and(|route| route.control.intent.movement == MovementIntent::Stop)
@@ -348,20 +361,6 @@ pub(super) fn plan_inner(
         return Ok(fallback.expect("progressing fallback was checked"));
     }
     Ok(route_fallback.or(fallback).unwrap_or_else(stop))
-}
-
-fn certified_pulse_progresses(
-    plan: &SurvivalPlan,
-    initial_position: crate::game::Position,
-) -> bool {
-    let Some(lease) = &plan.lease else {
-        return false;
-    };
-    if lease.movement() == MovementIntent::Stop {
-        return false;
-    }
-    let end = lease.pose_after(lease.hold_ticks());
-    end.min() != initial_position || end.max() != initial_position
 }
 
 fn certified_punch(

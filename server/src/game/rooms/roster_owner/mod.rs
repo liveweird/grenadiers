@@ -119,3 +119,6 @@ mod tests;
 
 #[cfg(test)]
 mod cpu_pickup_progress_tests;
+
+#[cfg(test)]
+mod cpu_strategy_progress_tests;

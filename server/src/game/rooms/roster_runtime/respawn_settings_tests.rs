@@ -127,3 +127,87 @@ fn respawn_admission_and_snapshots_are_recipient_checked_v17() {
     assert!(notice.frame(SeatId::One).is_some());
     assert!(notice.frame(SeatId::Two).is_some());
 }
+
+#[test]
+fn current_mob_policy_survives_settings_changes_failed_updates_and_round_start() {
+    use grenadiers_core::game::MobNavigationPolicy;
+    let mut runtime = RosterRuntime::new_respawn_with_navigation(
+        identity(configuration(2)),
+        RoomSettings::DEFAULT,
+        StormCloudConfig::Single,
+        tuning(true, 5),
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(51);
+            Ok(())
+        }),
+        Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
+        MobNavigationPolicy::EscapeV2,
+    )
+    .unwrap();
+    admit(&mut runtime);
+    runtime
+        .update_respawn_settings(
+            SeatId::One,
+            1,
+            1,
+            RoomSettings::DEFAULT,
+            StormCloudConfig::Disabled,
+            tuning(false, 10),
+        )
+        .unwrap();
+    let before = runtime.replay_inspection();
+    assert_eq!(before.mob_navigation, MobNavigationPolicy::EscapeV2);
+    assert!(
+        runtime
+            .update_respawn_settings(
+                SeatId::One,
+                1,
+                1,
+                RoomSettings::DEFAULT,
+                StormCloudConfig::Single,
+                tuning(true, 20)
+            )
+            .is_err()
+    );
+    assert_eq!(runtime.replay_inspection(), before);
+    for seat in SeatId::DUEL {
+        runtime
+            .action(
+                seat,
+                1,
+                RosterAction::Ready {
+                    ready: true,
+                    settings_revision: 2,
+                },
+            )
+            .unwrap();
+    }
+    for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
+        runtime.settle_boundary([None; 4]).unwrap();
+    }
+    let current = runtime.replay_inspection();
+    assert_eq!(current.mob_navigation, MobNavigationPolicy::EscapeV2);
+    assert_eq!(
+        current
+            .simulation
+            .unwrap()
+            .state
+            .rules()
+            .mob_navigation_policy(),
+        MobNavigationPolicy::EscapeV2
+    );
+    let before = runtime.replay_inspection();
+    assert!(
+        runtime
+            .update_respawn_settings(
+                SeatId::One,
+                1,
+                2,
+                RoomSettings::DEFAULT,
+                StormCloudConfig::Single,
+                tuning(true, 20)
+            )
+            .is_err()
+    );
+    assert_eq!(runtime.replay_inspection(), before);
+}

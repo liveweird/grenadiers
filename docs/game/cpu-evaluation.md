@@ -91,3 +91,16 @@ matrices under `target/cpu-easy-measurements/` and `target/cpu-easy-round-measur
 Standard retains `--cpu` and `--cpu-rounds`. Both use the same seeds, scripts, caps and replay
 checks. Compare cadence, pickup/progress, stationary time, planning cost and outcomes; slower
 decisions need not produce a monotonic survival or win-rate ordering.
+
+## Current arena strategy regression
+
+`cargo test -p grenadiers-server queued_cpu23 --lib` exercises the real queued four-seat
+controller with Golden Flame, a storm and current mob navigation. It records distinct physical
+bomb identities, crate count, collection and movement after collection, alive-player updates,
+settled cell transitions and bounded work. Worker proposals alone do not establish actual bomb
+use, and sub-tile motion does not establish navigation progress.
+
+The fixed generated scene supplements synthetic cases for unreachable pickups, changed goal
+values, attained goals, optional planting budgets and safe alternate first movements. Historical
+CPU21/22 fixtures retain explicit archived profiles. These tests establish concrete progress and
+safety regressions; they do not rank strength against human players.

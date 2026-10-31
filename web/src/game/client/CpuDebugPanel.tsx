@@ -49,7 +49,7 @@ export function CpuDebugPanel({ state, debug }: {
   const [open, setOpen] = useState(false)
   const rows = projectCpuDebug(debug.type === 'ready' ? debug.response : null, state)
   return <section className="cpu-debug-panel" aria-label={copy.cpuDebug.title}>
-    <button type="button" className="cpu-debug-toggle" aria-expanded={open}
+    <button type="button" className="cpu-debug-toggle" aria-label={copy.cpuDebug.title} aria-expanded={open}
       aria-controls="cpu-debug-content" onClick={() => setOpen((current) => !current)}>
       {copy.cpuDebug.title}
     </button>

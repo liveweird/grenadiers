@@ -13,8 +13,8 @@ export type FixtureState = {
   pendingAnimationFrames: number
   contextLossSupported: boolean
 }
-export type ColorSample = { red: number; green: number; blue: number; alpha: number }
-export type CalibrationSamples = {
+type ColorSample = { red: number; green: number; blue: number; alpha: number }
+type CalibrationSamples = {
   red: ColorSample
   green: ColorSample
   blue: ColorSample

@@ -8,7 +8,7 @@ import { FinishPass } from '../src/game/arena/three/finishPass'
 
 extend({ Mesh, MeshBasicMaterial, PlaneGeometry })
 
-export type ColorSample = { red: number; green: number; blue: number; alpha: number }
+type ColorSample = { red: number; green: number; blue: number; alpha: number }
 export type CalibrationSamples = {
   red: ColorSample
   green: ColorSample

@@ -1,6 +1,8 @@
 use super::RulesConfig;
 use crate::game::{EnabledItems, MobNavigationPolicy, SpeedLevel};
-use crate::room::{RespawnLairConfig, RespawnLairSettings, RoomSettings};
+use crate::room::{
+    RespawnLairConfig, RespawnLairSettings, RoomSettings, SpikePitConfig, SpikePitSettings,
+};
 
 #[test]
 fn classic_v1_exposes_the_fixed_geometry_and_tick_parameters() {
@@ -61,6 +63,29 @@ fn environment_v9_can_select_escape_navigation_explicitly() {
     assert_eq!(MobNavigationPolicy::LegacyV1.version(), 1);
     assert_eq!(MobNavigationPolicy::EscapeV2.version(), 2);
     assert_eq!(rules.mob_navigation_policy(), MobNavigationPolicy::EscapeV2);
+}
+
+#[test]
+fn environment_v10_is_the_only_profile_with_opt_in_spike_pits() {
+    let settings = RoomSettings::DEFAULT;
+    let lairs = RespawnLairConfig::Enabled(RespawnLairSettings::DEFAULT);
+    let ninth = RulesConfig::environment_v9(settings, super::StormCloudConfig::Disabled, lairs);
+    let tenth = RulesConfig::environment_v10_with_mob_navigation(
+        settings,
+        super::StormCloudConfig::Disabled,
+        lairs,
+        SpikePitConfig::Enabled(SpikePitSettings::DEFAULT),
+        MobNavigationPolicy::EscapeV2,
+    );
+
+    assert_eq!(ninth.spike_pit_config(), SpikePitConfig::Disabled);
+    assert_eq!(tenth.version(), 10);
+    assert_eq!(
+        tenth.spike_pit_config(),
+        SpikePitConfig::Enabled(SpikePitSettings::DEFAULT)
+    );
+    assert_eq!(tenth.mob_navigation_policy(), MobNavigationPolicy::EscapeV2);
+    assert_eq!(tenth.lair_config(), ninth.lair_config());
 }
 
 #[test]

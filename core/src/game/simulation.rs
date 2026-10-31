@@ -10,6 +10,7 @@ use super::storm_cloud::StormCloudState;
 use super::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 use super::world::World;
 use super::{lairs::LairState, movement, rules::RulesConfig};
+use simulation_spike_pits::SpikePitState;
 
 #[path = "simulation_contract.rs"]
 mod contract;
@@ -145,6 +146,7 @@ pub struct State {
     randomness: Option<Box<random::SimulationRandomness>>,
     storm_cloud: Option<Box<StormCloudState>>,
     lairs: Option<LairState>,
+    spike_pits: Option<SpikePitState>,
 }
 
 impl State {
@@ -223,6 +225,8 @@ mod random;
 mod shove;
 #[path = "shove_geometry.rs"]
 mod shove_geometry;
+#[path = "simulation_spike_pits.rs"]
+mod simulation_spike_pits;
 #[path = "simulation_storm.rs"]
 mod storm_step;
 

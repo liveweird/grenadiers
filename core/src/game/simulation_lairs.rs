@@ -70,22 +70,60 @@ impl State {
             .priority_order(self.player_count)
             .map(|seat| seat.index())
             .collect();
-        let lairs = self.lairs.as_mut().expect("checked above");
-        lairs
-            .kill_on_fire(&self.world, tick)
-            .map_err(|()| StepError::LairTimerOverflow)?;
-        let traces = lairs.advance(&self.world, &self.actors, &target_order, frozen, tick);
-        let mine_targets = lairs.mine_contacts(&self.world, &traces);
+        let track_spike_traces = self.spike_pits.is_some();
+        let (mob_ids, traces, mine_targets) = {
+            let lairs = self.lairs.as_mut().expect("checked above");
+            lairs
+                .kill_on_fire(&self.world, tick)
+                .map_err(|()| StepError::LairTimerOverflow)?;
+            let mob_ids = track_spike_traces
+                .then(|| lairs.mobs().iter().map(|mob| mob.id).collect::<Vec<_>>());
+            let traces = lairs.advance(&self.world, &self.actors, &target_order, frozen, tick);
+            let mine_targets = lairs.mine_contacts(&self.world, &traces);
+            (mob_ids, traces, mine_targets)
+        };
+        let mut surviving_spike_traces = mob_ids.map(|ids| {
+            ids.into_iter()
+                .zip(traces.iter().cloned())
+                .collect::<Vec<_>>()
+        });
+        if let Some(tagged_traces) = &mut surviving_spike_traces {
+            self.advance_spike_pits_for_mob_traces(tagged_traces, tick)?;
+            let surviving_ids = self
+                .lairs
+                .as_ref()
+                .expect("checked above")
+                .mobs()
+                .iter()
+                .map(|mob| mob.id)
+                .collect::<BTreeSet<_>>();
+            tagged_traces.retain(|(id, _)| surviving_ids.contains(id));
+        }
+        let lairs = self.lairs.as_ref().expect("checked above");
         let contacts: Vec<_> = (0..self.actors.len())
             .map(|index| {
+                let trace_contact = surviving_spike_traces.as_ref().map_or_else(
+                    || {
+                        crate::game::lairs::traces_contact_actor(
+                            &traces,
+                            self.actors[index].position,
+                        )
+                    },
+                    |tagged| {
+                        tagged.iter().any(|(_, trace)| {
+                            crate::game::lairs::traces_contact_actor(
+                                std::slice::from_ref(trace),
+                                self.actors[index].position,
+                            )
+                        })
+                    },
+                );
                 self.actors[index].alive
-                    && (crate::game::lairs::traces_contact_actor(
-                        &traces,
-                        self.actors[index].position,
-                    ) || crate::game::lairs::actor_position_contacts_mobs(
-                        self.actors[index].position,
-                        lairs.mobs(),
-                    ))
+                    && (trace_contact
+                        || crate::game::lairs::actor_position_contacts_mobs(
+                            self.actors[index].position,
+                            lairs.mobs(),
+                        ))
             })
             .collect();
         for (index, contact) in contacts.into_iter().enumerate() {
@@ -178,9 +216,16 @@ impl State {
         if self.result.is_some() {
             return Ok(0);
         }
+        let forbidden = self.non_idle_spike_pit_cells();
         if let Some(lairs) = &mut self.lairs {
             lairs
-                .spawn(&self.world, &self.actors, tick, &mut ids.iter().copied())
+                .spawn(
+                    &self.world,
+                    &self.actors,
+                    tick,
+                    &mut ids.iter().copied(),
+                    &forbidden,
+                )
                 .map_err(|()| StepError::EntityIdOverflow)
         } else {
             Ok(0)

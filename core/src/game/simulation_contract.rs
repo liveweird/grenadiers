@@ -1,7 +1,7 @@
 use crate::game::geometry::{MovementSegment, MovementTrace};
 use crate::game::input::Direction;
 use crate::game::types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
-use crate::game::{EffectKind, EnabledItems, PickupKind, StepEvent};
+use crate::game::{EffectKind, EnabledItems, PickupKind, SpikePitClockError, StepEvent};
 use crate::room::BoardSize;
 
 pub const MAX_INPUTS_PER_TICK: usize = 64;
@@ -78,6 +78,7 @@ pub enum StepError {
     BombPauseOverflow(EntityId),
     StormSlowExpiryOverflow,
     LairTimerOverflow,
+    SpikePitClock(SpikePitClockError),
     EntityIdOverflow,
 }
 

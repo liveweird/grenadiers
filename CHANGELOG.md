@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 1.1.4 — 2026-10-31
+
+- Keep characters visible beneath compact Remote Armed and Invisible Bombs badges instead
+  of covering their uniforms with full-size item sprites.
+- Restore recognizable 3D lairs with upright barred entrances and distinct stone bodies,
+  replacing overlapping ordinary pillar geometry at their cells.
+
 ## 1.1.3 — 2026-10-31
 
 - Adopt the owner-supplied polished arena sheet: refined 3D surface maps and death poses,

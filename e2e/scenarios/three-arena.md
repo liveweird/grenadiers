@@ -50,6 +50,21 @@ in the combined image, while both controls independently differ from empty and t
 still differs from death-only. This proves the body stays readable above either visible flame layer
 instead of accepting a merely nonempty combined canvas.
 
+## Scenario: narrow native remote badge preserves actor body pixels and adds a visible cue
+
+The narrow reduced-motion project captures empty, actor-only, and actor-with-remote-cue native
+WebGL canvases from public snapshots. At least 85 percent of the actor-only changed-pixel mask must
+remain identical when the cue is present, while the combined image must add visible pixels outside
+that mask. This rejects a full-scale centered bomb shell that replaces the uniform while proving
+the compact remote badge is actually drawn.
+
+## Scenario: native isolated lair entrance is visible for visual review
+
+The desktop project renders a single public lair replacing a hard-wall cell at the center of an
+otherwise empty arena and attaches both the empty baseline and lair canvas. The lair image must
+differ from empty, providing a focused visual-review artifact for the taller body and upright front
+entrance; production geometry unit tests retain the precise orientation assertions.
+
 ## Scenario: teleport, suspend, room replacement, context restoration, and destroy leave no ghosts
 
 A teleport changes the rendered position, suspension hides the canvas immediately, and a

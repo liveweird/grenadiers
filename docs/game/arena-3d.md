@@ -18,6 +18,10 @@ An engine-independent actor view contains public identity, heading, position and
 Future model-based characters can consume that same view. Models, rigs, animation clips and
 sprite-specific shadow/transparency changes would still be additional work.
 
+Remote-armed and Invisible Bombs indicators are compact badges beside the player's head;
+they never replace or cover the uniform. Full-frame equipment and protection cues retain
+their authored placement. Invisible Bombs still suppresses the remote-armed indicator.
+
 ## Shared material textures
 
 The same artist sheet includes ten 48×48 surface frames:
@@ -29,6 +33,10 @@ The same artist sheet includes ten 48×48 surface frames:
 | Destructible blocks | `material.block.top`, `material.block.side` |
 | Monster lairs | `material.lair.top`, `material.lair.side` |
 | Arena rim | `material.rim.top`, `material.rim.side` |
+
+Lairs use a taller stone body with the dedicated `terrain.lair` barred doorway upright on
+its camera-facing side. Their top and side maps remain separate editable material frames.
+The lair body replaces the ordinary pillar visual at that cell; collisions remain server-owned.
 
 Paint these named rectangles without changing frame IDs, locations, pivots or source dimensions.
 World materials use a white tint, so their base appearance comes from the sheet. Lighting and

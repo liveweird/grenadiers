@@ -5,7 +5,9 @@ import { RENDERABLE_PICKUP_KINDS } from '../src/game/arena/types'
 import { gameSnapshot } from '../src/test/game-snapshot'
 
 export type BoardName = 'small' | 'medium' | 'large'
-export type SceneName = 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
+export type SceneName =
+  | 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
+  | 'actorOnly' | 'remoteActor' | 'lairOnly'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
 
 const BOARDS = {
@@ -127,11 +129,25 @@ export function threeArenaSnapshot(board: BoardName, scene: SceneName): Snapshot
   const snapshot = base(board, scene === 'newRoom' ? 'three-arena-new-room' : undefined)
   if (scene === 'actorBomb') actorBombScene(snapshot)
   if (scene === 'showcase') showcase(snapshot)
+  if (scene === 'actorOnly' || scene === 'remoteActor') {
+    snapshot.state.actors = [{
+      ...actor(10, 'one', 7, 6),
+      ...(scene === 'remoteActor' ? { remoteArmed: true } : {}),
+    }]
+  }
+  if (scene === 'lairOnly') {
+    snapshot.state.lairs = [{
+      id: 90, cell: { column: 7, row: 6 }, spawnRemainingTicks: 30, livingMobs: 0,
+    }]
+  }
   if (scene === 'teleportA' || scene === 'teleportB') {
     snapshot.state.physicalTick = scene === 'teleportA' ? 10 : 11
     snapshot.state.actors = [actor(10, 'one', scene === 'teleportA' ? 1 : snapshot.state.arena.width - 2,
       scene === 'teleportA' ? 1 : snapshot.state.arena.height - 2)]
     snapshot.state.actors[0].lastTeleportTick = scene === 'teleportA' ? null : 11
+  }
+  for (const { cell } of snapshot.state.lairs) {
+    snapshot.state.arena.terrain[cell.row * snapshot.state.arena.width + cell.column] = 'wall'
   }
   return snapshot
 }

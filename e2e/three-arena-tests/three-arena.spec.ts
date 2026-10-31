@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import {
-  assertCleanAudit, beginAudit, canvasScreenshot, deathPixelRetention, expectDifferent,
-  openFixture, show, showDeath, showDeathOverlap, settleDeathAge,
+  assertCleanAudit, beginAudit, canvasScreenshot, expectDifferent, openFixture, pixelRetention,
+  show, showDeath, showDeathOverlap, settleDeathAge,
   type BoardName, type BrowserAudit, type DeathAppearance, type DeathOverlay,
 } from './three-arena-api'
 
@@ -136,7 +136,7 @@ test('native death body remains readable over ordinary and burning-oil flames', 
     await showDeathOverlap(page, overlay, true, generation, bornAt)
     await settleDeathAge(page, bornAt, 75)
     const combined = await canvasScreenshot(page, testInfo, `${overlay}-death-combined`)
-    const retention = await deathPixelRetention(page, baseline, deathOnly, combined)
+    const retention = await pixelRetention(page, baseline, deathOnly, combined)
     await testInfo.attach(`${overlay}-death-retention`, {
       body: JSON.stringify(retention), contentType: 'application/json',
     })
@@ -145,9 +145,36 @@ test('native death body remains readable over ordinary and burning-oil flames', 
     expectDifferent(flameOnly, baseline, `${overlay} control must expose native flame pixels`)
     expectDifferent(combined, flameOnly, `death body must remain visible over ${overlay}`)
     expectDifferent(combined, deathOnly, `${overlay} must remain visible around the death body`)
-    expect(retention.deathPixels, 'death-only mask must contain meaningful pixels').toBeGreaterThan(100)
+    expect(retention.subjectPixels, 'death-only mask must contain meaningful pixels').toBeGreaterThan(100)
     expect(retention.ratio, `${overlay} retained ${JSON.stringify(retention)}`).toBeGreaterThanOrEqual(0.75)
   }
+})
+
+test('narrow native remote badge preserves actor body pixels and adds a visible cue', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('reduced'), 'narrow compact-badge pixels')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'remote-badge-empty-baseline')
+  await show(page, 'large', 'actorOnly')
+  const actorOnly = await canvasScreenshot(page, testInfo, 'remote-badge-actor-only')
+  await show(page, 'large', 'remoteActor')
+  const remoteActor = await canvasScreenshot(page, testInfo, 'remote-badge-combined')
+  const retention = await pixelRetention(page, baseline, actorOnly, remoteActor)
+
+  expect(retention.subjectPixels, JSON.stringify(retention)).toBeGreaterThan(50)
+  expect(retention.ratio, JSON.stringify(retention)).toBeGreaterThanOrEqual(0.85)
+  expect(retention.addedPixels, JSON.stringify(retention)).toBeGreaterThan(5)
+  expectDifferent(remoteActor, actorOnly, 'remote badge must add native pixels outside the actor body')
+})
+
+test('native isolated lair entrance is visible for visual review', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('reduced'), 'desktop lair review artifact')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'lair-empty-baseline')
+  await show(page, 'large', 'lairOnly')
+  const lair = await canvasScreenshot(page, testInfo, 'lair-upright-entrance')
+  expect(lair.equals(baseline), 'isolated public lair must alter native world pixels').toBe(false)
 })
 
 test('teleport, suspend, room replacement, context restoration, and destroy leave no ghosts', async ({ page }, testInfo) => {

@@ -7,6 +7,12 @@ type ActorRow = SnapshotMessage['state']['actors'][number]
 export interface ActorCue {
   frameId: string
   pulse?: { floor: number; step: number; periodMs: number }
+  layout?: {
+    /** Offset from the actor's feet in normalized 48 px actor-card units. */
+    offset: readonly [x: number, y: number]
+    /** Scale relative to a full-size actor cue. */
+    scale: number
+  }
 }
 export interface ActorView {
   identity: string
@@ -25,10 +31,23 @@ const active = (remaining: number | undefined): boolean => (remaining ?? 0) > 0
 const cue = (
   frameId: string, enabled: boolean,
   pulse?: ActorCue['pulse'],
-): ActorCue | null => enabled ? { frameId, ...(pulse ? { pulse } : {}) } : null
+  layout?: ActorCue['layout'],
+): ActorCue | null => enabled
+  ? { frameId, ...(pulse ? { pulse } : {}), ...(layout ? { layout } : {}) }
+  : null
+
+const REMOTE_BADGE: NonNullable<ActorCue['layout']> = {
+  offset: [22 / 48, 51 / 48],
+  scale: 0.3,
+}
+const INVISIBLE_BADGE: NonNullable<ActorCue['layout']> = {
+  offset: [-22 / 48, 51 / 48],
+  scale: 0.3,
+}
 
 export function actorCues(actor: ActorRow): ActorCue[] {
   const slowStacks = actor.slowFootRemainingTicks?.length ?? 0
+  const bombsInvisible = active(actor.invisibleBombsRemainingTicks)
   return [
     cue('actor.cue.protection', active(actor.damageGraceRemainingTicks), { floor: 0.65, step: 0.35, periodMs: 120 }),
     cue('actor.cue.shield', active(actor.shieldRemainingTicks), { floor: 0.75, step: 0.25, periodMs: 160 }),
@@ -52,8 +71,8 @@ export function actorCues(actor: ActorRow): ActorCue[] {
     cue('actor.cue.bracelet', Boolean(actor.braceletEquipped)),
     cue('actor.cue.wallPass', Boolean(actor.wallPassEquipped)),
     cue('actor.cue.cloak', active(actor.invisibilityCloakRemainingTicks), { floor: 0.7, step: 0.3, periodMs: 140 }),
-    cue('pickup.invisibleBombs', active(actor.invisibleBombsRemainingTicks)),
-    cue('bomb.shell.remote.standard', Boolean(actor.remoteArmed)),
+    cue('pickup.invisibleBombs', bombsInvisible, undefined, INVISIBLE_BADGE),
+    cue('bomb.shell.remote.standard', Boolean(actor.remoteArmed), undefined, REMOTE_BADGE),
   ].filter((item): item is ActorCue => item !== null)
 }
 

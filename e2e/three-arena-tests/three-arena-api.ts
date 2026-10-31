@@ -2,7 +2,9 @@ import { expect, type BrowserContext, type Page, type TestInfo } from '@playwrig
 import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
 
 export type BoardName = 'small' | 'medium' | 'large'
-export type SceneName = 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
+export type SceneName =
+  | 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
+  | 'actorOnly' | 'remoteActor' | 'lairOnly'
 export type DeathAppearance = 'one' | 'two' | 'three' | 'four' | 'mob'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
 export type FixtureState = {
@@ -133,13 +135,13 @@ export async function showDeathOverlap(
   return result.bornAt
 }
 
-export async function deathPixelRetention(
+export async function pixelRetention(
   page: Page,
   baseline: Buffer,
-  deathOnly: Buffer,
+  subjectOnly: Buffer,
   combined: Buffer,
-): Promise<{ deathPixels: number; retainedPixels: number; ratio: number }> {
-  return page.evaluate(async ({ baselinePng, deathPng, combinedPng }) => {
+): Promise<{ subjectPixels: number; retainedPixels: number; addedPixels: number; ratio: number }> {
+  return page.evaluate(async ({ baselinePng, subjectPng, combinedPng }) => {
     const pixels = async (base64: string): Promise<Uint8ClampedArray> => {
       const image = new Image()
       image.src = `data:image/png;base64,${base64}`
@@ -152,26 +154,31 @@ export async function deathPixelRetention(
       context.drawImage(image, 0, 0)
       return context.getImageData(0, 0, canvas.width, canvas.height).data
     }
-    const [empty, death, overlap] = await Promise.all([
-      pixels(baselinePng), pixels(deathPng), pixels(combinedPng),
+    const [empty, subject, overlap] = await Promise.all([
+      pixels(baselinePng), pixels(subjectPng), pixels(combinedPng),
     ])
-    let deathPixels = 0
+    let subjectPixels = 0
     let retainedPixels = 0
+    let addedPixels = 0
     for (let offset = 0; offset < empty.length; offset += 4) {
-      const deathDelta = Math.abs(death[offset] - empty[offset])
-        + Math.abs(death[offset + 1] - empty[offset + 1])
-        + Math.abs(death[offset + 2] - empty[offset + 2])
-      if (deathDelta <= 12) continue
-      deathPixels += 1
-      const retainedDelta = Math.abs(death[offset] - overlap[offset])
-        + Math.abs(death[offset + 1] - overlap[offset + 1])
-        + Math.abs(death[offset + 2] - overlap[offset + 2])
-      if (retainedDelta <= 8) retainedPixels += 1
+      const subjectDelta = Math.abs(subject[offset] - empty[offset])
+        + Math.abs(subject[offset + 1] - empty[offset + 1])
+        + Math.abs(subject[offset + 2] - empty[offset + 2])
+      const overlapDelta = Math.abs(overlap[offset] - empty[offset])
+        + Math.abs(overlap[offset + 1] - empty[offset + 1])
+        + Math.abs(overlap[offset + 2] - empty[offset + 2])
+      if (subjectDelta > 12) {
+        subjectPixels += 1
+        const retainedDelta = Math.abs(subject[offset] - overlap[offset])
+          + Math.abs(subject[offset + 1] - overlap[offset + 1])
+          + Math.abs(subject[offset + 2] - overlap[offset + 2])
+        if (retainedDelta <= 8) retainedPixels += 1
+      } else if (overlapDelta > 12) addedPixels += 1
     }
-    return { deathPixels, retainedPixels, ratio: retainedPixels / deathPixels }
+    return { subjectPixels, retainedPixels, addedPixels, ratio: retainedPixels / subjectPixels }
   }, {
     baselinePng: baseline.toString('base64'),
-    deathPng: deathOnly.toString('base64'),
+    subjectPng: subjectOnly.toString('base64'),
     combinedPng: combined.toString('base64'),
   })
 }

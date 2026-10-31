@@ -21,6 +21,9 @@ and neither consume a Remote charge nor trigger an armed bomb.
 The HUD shows the stored weapon and armed Remote state independently. A placed Remote has an
 antenna and no burning-fuse spark; the bomb-key hint changes to the localized detonation action
 while the owner has an armed bomb.
+In the 3D arena, a small bomb badge beside the owner's head indicates the armed state while
+leaving the character's uniform visible. This badge is separate from the stored weapon icon
+and disappears when Invisible Bombs hides the owner's bomb visibility.
 
 <a id="native-acceptance"></a>
 

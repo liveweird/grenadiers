@@ -235,7 +235,11 @@
       "frameDurationMs": 80,
       "frameIds": [
         "effect.flame.0",
-        "effect.flame.1"
+        "effect.flame.2",
+        "effect.flame.1",
+        "effect.flame.3",
+        "effect.flame.4",
+        "effect.flame.5"
       ],
       "reducedMotionFrame": "effect.flame.0"
     },
@@ -4401,12 +4405,152 @@
         "y": 2016
       },
       "status": "baseline"
+    },
+    {
+      "id": "effect.flame.2",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 1008,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.flame.3",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 2128
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.flame.4",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 112,
+        "y": 2128
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.flame.5",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 224,
+        "y": 2128
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.ember",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 2128
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.smoke",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 2128
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "effect.ignition",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 560,
+        "y": 2128
+      },
+      "status": "baseline"
     }
   ],
   "schemaVersion": 1,
   "sheet": {
     "columns": 10,
-    "height": 2128,
+    "height": 2240,
     "slotSize": 112,
     "width": 1120
   },

@@ -3,6 +3,7 @@ import type { ArtManifest, RuntimeArtManifest } from '../artAtlas/types'
 import type { SnapshotMessage } from '../types'
 import type { PresentationDeathCue } from '../types'
 import type { BloodPool } from './bloodPoolState'
+import type { FirePresentation } from './firePresentation'
 
 export type FrameAnchor = 'pivot' | 'feet' | 'center' | 'paintedCenter'
 export type RuntimeFrame = RuntimeArtManifest['frames'][number]
@@ -21,6 +22,7 @@ export interface SceneRevision {
   snapshot: SnapshotMessage | null
   deaths: readonly PresentationDeathCue[]
   bloodPools?: readonly BloodPool[]
+  fire: FirePresentation | null
   reducedMotion: boolean
   receivedAt: number
   serial: number

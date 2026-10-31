@@ -32,9 +32,10 @@ function scene(
   snapshot: SnapshotMessage, store: ArenaSceneStore, atlas: ThreeAtlas,
 ) {
   const timing = readSceneTiming(store)
-  if (!timing) throw new Error('test scene has no timing')
+  const fire = store.read().fire
+  if (!timing || !fire) throw new Error('test scene has no timing/fire')
   return <Entities snapshot={snapshot} atlas={atlas} timing={timing}
-    reducedMotion={store.read().reducedMotion} />
+    reducedMotion={store.read().reducedMotion} fire={fire} />
 }
 
 function actorNode(renderer: Awaited<ReturnType<typeof ReactThreeTestRenderer.create>>, id: number) {
@@ -190,7 +191,7 @@ describe('mounted Three entity animation and variants', () => {
     await renderer.advanceFrames(1, 0.016)
     expect(meshNamed(renderer, 'billboard:actor.cue.protection').material.opacity).toBeCloseTo(1)
     for (const flame of nodesNamed(renderer, 'billboard:effect.flame.0')) {
-      expect((flame.instance as Mesh).geometry).toBe(atlas.geometry('effect.flame.1', 'center'))
+      expect((flame.instance as Mesh).geometry).toBe(atlas.geometry('effect.flame.2', 'center'))
     }
     store.setReducedMotion(true)
     delete snapshot.state.oilBarrels

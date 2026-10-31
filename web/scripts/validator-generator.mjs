@@ -7,6 +7,7 @@ import Ajv2020 from 'ajv/dist/2020.js'
 import standaloneCode from 'ajv/dist/standalone/index.js'
 import ts from 'typescript'
 import { build } from 'vite'
+import { validatorOptions } from '../src/validation/validatorOptions.ts'
 
 const validatorDefinitions = {
   'cpu-debug': {
@@ -322,9 +323,10 @@ export async function bundleStandaloneValidator(name, commonJs, webDirectory) {
 async function generateValidator(name, schema, webDirectory) {
   const definition = validatorDefinitions[name]
   if (!definition) throw new Error(`Unknown validator ${name}`)
+  const options = { ...validatorOptions(name), code: { source: true } }
   const ajv = definition.draft2020
-    ? new Ajv2020({ allErrors: true, code: { source: true } })
-    : new Ajv({ allErrors: true, code: { source: true } })
+    ? new Ajv2020(options)
+    : new Ajv(options)
   const commonJs = standaloneCode(ajv, definition.compile(ajv, schema))
   const bundled = await bundleStandaloneValidator(name, commonJs, webDirectory)
   return { ...bundled, declaration: definition.declaration }

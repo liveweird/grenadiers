@@ -9,10 +9,10 @@ import {
   threeArenaSnapshot, type BloodLayerMode, type BoardName, type DeathOverlay, type SceneName,
 } from './three-arena-snapshots'
 import type { DeathAppearance } from '../src/game/arena/types'
-import {
-  mountColorCalibration, type CalibrationSamples,
-} from './three-arena-calibration'
+import { mountColorCalibration, type CalibrationSamples } from './three-arena-calibration'
+import { fireSnapshot, resetFireSnapshot, type FireReset, type FireScene } from './three-arena-fire'
 
+type FrameCost = { samples: number; medianMs: number; p95Ms: number; maxMs: number }
 type FixtureState = {
   board: BoardName
   scene: SceneName | null
@@ -28,12 +28,10 @@ export type ThreeArenaDiagnosticApi = {
   initialize(): Promise<FixtureState>
   show(board: BoardName, scene: SceneName): Promise<FixtureState>
   showDeath(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
-    state: FixtureState
-    bornAt: number
+    state: FixtureState; bornAt: number
   }>
   showPoolOnly(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
-    state: FixtureState
-    bornAt: number
+    state: FixtureState; bornAt: number
   }>
   replayDeath(
     board: BoardName,
@@ -60,6 +58,12 @@ export type ThreeArenaDiagnosticApi = {
   projectCell(board: BoardName, column: number, row: number): { x: number; y: number }
   loseAndRestoreContext(): Promise<{ supported: boolean; lost: FixtureState; restored: FixtureState }>
   calibrateColors(): Promise<CalibrationSamples>
+  showFire(scene: FireScene): Promise<FixtureState>
+  beginFireTransition(): Promise<{ state: FixtureState; bornAt: number }>
+  settleFireAge(bornAt: number, ageMs: number): Promise<number>
+  resetFire(reason: FireReset | 'preferences'): Promise<FixtureState>
+  measureFireCost(scene: 'empty' | 'worstCase'): Promise<FrameCost>
+  projectPoint(board: BoardName, column: number, row: number, elevation: number): { x: number; y: number }
 }
 
 declare global {
@@ -75,11 +79,24 @@ Object.defineProperty(performance, 'now', {
   value: (): number => fixtureNow ?? nativePerformanceNow(),
 })
 const pendingFrames = new Set<number>()
+let measuredCallbackCosts: number[] | null = null
+let insideCallback = false
+let rescheduledInsideCallback = false
 window.requestAnimationFrame = (callback: FrameRequestCallback): number => {
+  if (insideCallback) rescheduledInsideCallback = true
   let handle = 0
   handle = nativeRequestAnimationFrame((timestamp) => {
     pendingFrames.delete(handle)
-    callback(timestamp)
+    insideCallback = true
+    rescheduledInsideCallback = false
+    const startedAt = nativePerformanceNow()
+    try {
+      callback(timestamp)
+    } finally {
+      const rendererLoop = rescheduledInsideCallback
+      insideCallback = false
+      if (rendererLoop) measuredCallbackCosts?.push(nativePerformanceNow() - startedAt)
+    }
   })
   pendingFrames.add(handle)
   return handle
@@ -269,13 +286,22 @@ function projectCell(
   column: number,
   row: number,
 ): { x: number; y: number } {
+  return projectPoint(targetBoard, column, row, 0.4)
+}
+
+function projectPoint(
+  targetBoard: BoardName,
+  column: number,
+  row: number,
+  elevation: number,
+): { x: number; y: number } {
   const dimensions = targetBoard === 'small' ? { width: 11, height: 9 }
     : targetBoard === 'medium' ? { width: 13, height: 11 } : { width: 15, height: 13 }
   const size = { width: host.clientWidth, height: host.clientHeight }
   const camera = createArenaCamera()
   fitArenaCamera(camera, dimensions, size)
   const [x, z] = cellToWorld(column, row)
-  const projected = new Vector3(x, 0.4, z).project(camera)
+  const projected = new Vector3(x, elevation, z).project(camera)
   return { x: (projected.x + 1) * size.width / 2, y: (1 - projected.y) * size.height / 2 }
 }
 
@@ -301,6 +327,65 @@ async function calibrateColors(): Promise<CalibrationSamples> {
   return calibration.samples
 }
 
+async function showFire(nextScene: FireScene): Promise<FixtureState> {
+  await initialize()
+  board = 'large'
+  scene = null
+  renderer?.update(fireSnapshot(nextScene))
+  await settle()
+  return readState()
+}
+
+async function beginFireTransition(): Promise<{ state: FixtureState; bornAt: number }> {
+  await initialize()
+  board = 'large'
+  scene = null
+  fixtureNow = Math.ceil(nativePerformanceNow() / 480) * 480
+  renderer?.update(fireSnapshot('transitionBase', 10))
+  await settle(1)
+  fixtureNow += 1
+  const bornAt = fixtureNow
+  renderer?.update(fireSnapshot('transitionAdded', 11))
+  await settle(2)
+  return { state: readState(), bornAt }
+}
+
+async function settleFireAge(bornAt: number, ageMs: number): Promise<number> {
+  return settleDeathAge(bornAt, ageMs)
+}
+
+async function resetFire(reason: FireReset | 'preferences'): Promise<FixtureState> {
+  if (reason === 'preferences') {
+    renderer?.setReducedMotion(!reducedMotion)
+    renderer?.setReducedMotion(reducedMotion)
+  }
+  renderer?.update(resetFireSnapshot(reason === 'preferences' ? 'clear' : reason))
+  await settle(2)
+  return readState()
+}
+
+function percentile(sorted: readonly number[], fraction: number): number {
+  return sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * fraction))] ?? 0
+}
+
+async function measureFireCost(nextScene: 'empty' | 'worstCase'): Promise<FrameCost> {
+  fixtureNow = null
+  await showFire(nextScene)
+  await settle(15)
+  measuredCallbackCosts = []
+  for (let attempts = 0; measuredCallbackCosts.length < 40 && attempts < 120; attempts += 1) {
+    await waitFrame()
+  }
+  const sorted = measuredCallbackCosts.slice().sort((left, right) => left - right)
+  measuredCallbackCosts = null
+  return {
+    samples: sorted.length,
+    medianMs: percentile(sorted, 0.5),
+    p95Ms: percentile(sorted, 0.95),
+    maxMs: sorted.at(-1) ?? 0,
+  }
+}
+
 window.addEventListener('pagehide', () => {
   renderer?.destroy()
   disposeCalibration?.()
@@ -308,5 +393,6 @@ window.addEventListener('pagehide', () => {
 window.grenadiersThreeArena = {
   initialize, show, showDeath, showPoolOnly, replayDeath, resetDeathPresentation,
   settleDeathAge, showDeathOverlap, showBloodLayers, suspend, destroy, readState, projectCell,
-  loseAndRestoreContext, calibrateColors,
+  loseAndRestoreContext, calibrateColors, showFire, beginFireTransition, settleFireAge,
+  resetFire, measureFireCost, projectPoint,
 }

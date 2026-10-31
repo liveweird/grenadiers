@@ -9,6 +9,11 @@ export type SceneName =
 export type DeathAppearance = 'one' | 'two' | 'three' | 'four' | 'mob'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
 export type BloodLayerMode = 'subjectOnly' | 'poolOnly' | 'combined'
+export type FireScene =
+  | 'empty' | 'single' | 'burningOil' | 'bombOnly' | 'concealed'
+  | 'actorOnly' | 'actorNear' | 'transitionBase' | 'transitionAdded' | 'worstCase'
+export type FireReset = 'clear' | 'round' | 'admission' | 'backward' | 'preferences'
+export type FrameCost = { samples: number; medianMs: number; p95Ms: number; maxMs: number }
 export type FixtureState = {
   board: BoardName
   scene: SceneName | null
@@ -62,6 +67,14 @@ type FixtureApi = {
   projectCell(board: BoardName, column: number, row: number): { x: number; y: number }
   loseAndRestoreContext(): Promise<{ supported: boolean; lost: FixtureState; restored: FixtureState }>
   calibrateColors(): Promise<CalibrationSamples>
+  showFire(scene: FireScene): Promise<FixtureState>
+  beginFireTransition(): Promise<{ state: FixtureState; bornAt: number }>
+  settleFireAge(bornAt: number, ageMs: number): Promise<number>
+  resetFire(reason: FireReset): Promise<FixtureState>
+  measureFireCost(scene: 'empty' | 'worstCase'): Promise<FrameCost>
+  projectPoint(
+    board: BoardName, column: number, row: number, elevation: number,
+  ): { x: number; y: number }
 }
 
 declare global {
@@ -202,6 +215,36 @@ export async function showDeathOverlap(
   return result.bornAt
 }
 
+export async function showFire(page: Page, scene: FireScene): Promise<FixtureState> {
+  const state = await page.evaluate((nextScene) => window.grenadiersThreeArena.showFire(nextScene), scene)
+  expect(state).toMatchObject({ board: 'large', canvasCount: 1, canvasVisible: true, destroyed: false })
+  return state
+}
+
+export async function beginFireTransition(page: Page): Promise<number> {
+  const result = await page.evaluate(() => window.grenadiersThreeArena.beginFireTransition())
+  expect(result.state).toMatchObject({ canvasCount: 1, canvasVisible: true, destroyed: false })
+  return result.bornAt
+}
+
+export async function settleFireAge(page: Page, bornAt: number, ageMs: number): Promise<void> {
+  const age = await page.evaluate(
+    (input) => window.grenadiersThreeArena.settleFireAge(input.bornAt, input.ageMs),
+    { bornAt, ageMs },
+  )
+  expect(age).toBe(ageMs)
+}
+
+export async function resetFire(page: Page, reason: FireReset): Promise<FixtureState> {
+  return page.evaluate((nextReason) => window.grenadiersThreeArena.resetFire(nextReason), reason)
+}
+
+export async function measureFireCost(
+  page: Page, scene: 'empty' | 'worstCase',
+): Promise<FrameCost> {
+  return page.evaluate((nextScene) => window.grenadiersThreeArena.measureFireCost(nextScene), scene)
+}
+
 export async function pixelRetention(
   page: Page,
   baseline: Buffer,
@@ -261,6 +304,58 @@ export async function canvasScreenshot(
   })
   await testInfo.attach(name, { path: screenshotPath, contentType: 'image/png' })
   return image
+}
+
+export async function canvasRegionScreenshot(
+  page: Page,
+  testInfo: TestInfo,
+  name: string,
+  point: { x: number; y: number },
+  radius: number,
+): Promise<Buffer> {
+  const bounds = await page.locator('#arena canvas').boundingBox()
+  if (!bounds) throw new Error('Three arena canvas bounds are unavailable')
+  const clip = {
+    x: Math.max(bounds.x, bounds.x + point.x - radius),
+    y: Math.max(bounds.y, bounds.y + point.y - radius),
+    width: Math.min(radius * 2, bounds.width),
+    height: Math.min(radius * 2, bounds.height),
+  }
+  const path = testInfo.outputPath(`${name}.png`)
+  const image = await page.screenshot({ animations: 'disabled', clip, path })
+  await testInfo.attach(name, { path, contentType: 'image/png' })
+  return image
+}
+
+export async function pixelDifference(
+  page: Page,
+  before: Buffer,
+  after: Buffer,
+): Promise<{ changed: number; red: number; green: number; blue: number }> {
+  return page.evaluate(async ({ beforePng, afterPng }) => {
+    const pixels = async (encoded: string): Promise<Uint8ClampedArray> => {
+      const image = new Image()
+      image.src = `data:image/png;base64,${encoded}`
+      await image.decode()
+      const canvas = document.createElement('canvas')
+      canvas.width = image.naturalWidth
+      canvas.height = image.naturalHeight
+      const context = canvas.getContext('2d')
+      if (!context) throw new Error('Fire pixel comparison context is unavailable')
+      context.drawImage(image, 0, 0)
+      return context.getImageData(0, 0, canvas.width, canvas.height).data
+    }
+    const [left, right] = await Promise.all([pixels(beforePng), pixels(afterPng)])
+    let changed = 0; let red = 0; let green = 0; let blue = 0
+    for (let offset = 0; offset < left.length; offset += 4) {
+      const dr = right[offset] - left[offset]
+      const dg = right[offset + 1] - left[offset + 1]
+      const db = right[offset + 2] - left[offset + 2]
+      if (Math.abs(dr) + Math.abs(dg) + Math.abs(db) > 9) changed += 1
+      red += dr; green += dg; blue += db
+    }
+    return { changed, red, green, blue }
+  }, { beforePng: before.toString('base64'), afterPng: after.toString('base64') })
 }
 
 export function expectDifferent(left: Buffer, right: Buffer, message: string): void {

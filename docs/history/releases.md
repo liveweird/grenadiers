@@ -4,6 +4,62 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.2.0 — 2026-10-31
+
+Add playable contact-triggered spike pits: warning, raised damage and automatic retraction.
+Pits start enabled with a 0.6s warning and 3s raised interval; creators can adjust both timings.
+Shield, Heart and normal grace retain their usual behavior. CPU26 and lair mobs account for
+pit contact and timing. The shared artist sheet includes three editable phase tiles.
+See [spike pits](../game/spike-pits.md) and [gameplay18](../game/protocol-v18.md).
+
+### Verification
+
+Accepted source: `0f81f2271caef45dd60249d2d759ccdb8406f9a4`,
+[PR #300](https://github.com/liveweird/grenadiers/pull/300).
+Independent reviews cover physics, CPU forecasting/execution, transport, replay, mob navigation,
+client validation and artwork. Resolved findings include mutable-layout reconstruction,
+protection-expiry forecasting, room-setting agreement and immutable round-cell history.
+
+The broader browser matrix exposed storm/pit terminal proofs exhausting CPU planting work.
+The rules10-only fix advances stationary hazards by events and checks the complete interval;
+per-tick execution guards, archived accounting and the 65,536 allowance remain unchanged.
+Exact queued seed-2 reproduction now moves and places bombs; oracle tests cover protection,
+future hazards, pickups and old-profile work parity.
+
+- Core debug/release pass 1,650 tests plus two doctests; server passes 598 tests in both
+  profiles. Fifteen existing server skips and the unchanged exhaustive item-mask acceptance
+  are retained. Formatting, strict Clippy and the 400-line gate pass.
+- Workspace line coverage is 90.43% against the unchanged 90% floor. Full web passes
+  7,334 tests in 160 files; coverage is 95.18% lines, 91.98% statements, 91.20% functions
+  and 88.48% branches. Contract/type/lint/Knip and 110 documented scenario checks pass.
+- Distinct Linux debug/release workspace checks pass for the accepted source in
+  [the platform run](https://github.com/liveweird/grenadiers/actions/runs/41231946287).
+- Native Three checks pass 17 cases with seven intentional skips; artist workbench passes
+  all 11 cases. The real seeded keyboard scenario covers activation, escape, retraction,
+  death, reconnect and rematch. Broader unaffected human/multiplayer cases are reused.
+- The exact image passes Compose duel/authentication, the full seeded spike cycle, all
+  board/controller/difficulty CPU progress cases, three-CPU first-bomb escape and the Easy
+  solo lifecycle. Kubernetes duel/authentication and restricted-runtime checks also pass;
+  owned acceptance stacks and namespace are removed.
+- The production bundle remains within the unchanged limits: JavaScript 397,583/400,000
+  gzip bytes and CSS 15,430/20,000. Every image web file equals the verified build.
+  Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings. Dependency inputs are
+  unchanged; prior dependency acceptance is reused.
+
+### Operation and artist handoff
+
+Exact accepted local image:
+`sha256:ffe445094e57c9241bcde91aa65c94b71eb3fcfb0d2512c99c65516c08901a75`,
+version 1.2.0/source 0f81f227, available as `grenadiers:spike-pits-v120`.
+This paired gameplay18/rules10/CPU26 upgrade ends in-memory matches; reload existing tabs.
+Historical contracts and private replay formats remain closed. Production replay export and
+hosted distribution remain outside this release.
+
+The [v1.2.0 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.2.0/grenadiers-artist-v1.2.0.zip)
+contains the canonical 1120×2128 PNG/JSON, separate guides, overview, 185 runtime slices and 3D
+phase previews: 199 files total. The source has 189 assigned entries, four blank reservations
+and one unassigned cell. New slots 186–188 preserve every previous sprite and mapping.
+
 ## v1.1.8 — 2026-10-31
 
 Add opt-in rules10 spike-pit simulation: contact arms a warning, raised spikes use normal

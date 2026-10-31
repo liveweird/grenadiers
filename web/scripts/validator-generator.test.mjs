@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url'
 import { afterEach, test } from 'vitest'
 import { assertNoExecutableCodeGeneration, bundleStandaloneValidator,
   generateValidators } from './validator-generator.mjs'
+import { validatorOptions } from '../src/validation/validatorOptions.ts'
 
 const temporaryDirectories = []
 afterEach(async () => {
@@ -32,6 +33,8 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v18.schema.json'), join(checkout, 'api', 'gameplay-v18.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
+    cp(join(import.meta.dirname, '..', 'src', 'validation', 'validatorOptions.ts'),
+      join(checkout, 'web', 'src', 'validation', 'validatorOptions.ts')),
   ])
   const sourceModules = join(import.meta.dirname, '..', 'node_modules')
   const targetModules = join(checkout, 'web', 'node_modules')
@@ -66,6 +69,15 @@ test('checked-in validators and declarations are reproducible and executable', a
     const module = await import(`data:text/javascript,${encodeURIComponent(artifacts.code)}`)
     assert.equal(typeof module.default, 'function')
   }
+})
+
+test('canonical options optimize only the current gameplay validator', () => {
+  assert.deepEqual(validatorOptions('gameplay-v17'), { allErrors: true })
+  assert.deepEqual(validatorOptions('realtime'), { allErrors: true })
+  assert.deepEqual(validatorOptions('gameplay-v18'), {
+    allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
+  })
+  assert.notEqual(validatorOptions('gameplay-v18'), validatorOptions('gameplay-v18'))
 })
 
 test('AST safety allows inert helper metadata and rejects executable code generation', () => {

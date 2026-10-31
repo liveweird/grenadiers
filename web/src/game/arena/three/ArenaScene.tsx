@@ -7,6 +7,7 @@ import { readSceneTiming } from './sceneStore'
 import { Deaths } from './Deaths'
 import { BloodPools } from './BloodPools'
 import { SpikePits } from './SpikePits'
+import { FireIllumination } from './FireIllumination'
 
 interface ArenaSceneProps {
   store: ArenaSceneStore
@@ -17,9 +18,10 @@ export function ArenaScene({ store, atlas }: ArenaSceneProps) {
   const revision = useSyncExternalStore(store.subscribe, store.read, store.read)
   const timing = readSceneTiming(store)
 
-  if (!revision.snapshot || !timing) return null
+  if (!revision.snapshot || !timing || !revision.fire) return null
   return <>
     <ArenaWorld snapshot={revision.snapshot} atlas={atlas}>
+      <FireIllumination model={revision.fire.lighting} animated={timing.running && !revision.reducedMotion}>
       <SpikePits pits={revision.snapshot.state.spikePits} atlas={atlas}
         reducedMotion={revision.reducedMotion} />
       <Entities
@@ -27,9 +29,11 @@ export function ArenaScene({ store, atlas }: ArenaSceneProps) {
         atlas={atlas}
         timing={timing}
         reducedMotion={revision.reducedMotion}
+        fire={revision.fire}
       />
       <BloodPools pools={revision.bloodPools ?? []} atlas={atlas} />
       <Deaths cues={revision.deaths} atlas={atlas} reducedMotion={revision.reducedMotion} />
+      </FireIllumination>
     </ArenaWorld>
     <FinishPass />
   </>

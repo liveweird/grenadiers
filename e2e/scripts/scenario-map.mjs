@@ -46,7 +46,10 @@ export const scenarioSpecMap = {
   'scenarios/storm-cloud.md': ['tests/storm-cloud.spec.ts'],
   'scenarios/teleporter.md': ['teleporter-tests/teleporter.spec.ts'],
   'scenarios/spike-pits.md': ['spike-pit-tests/spike-pits.spec.ts'],
-  'scenarios/three-arena.md': ['three-arena-tests/three-arena.spec.ts'],
+  'scenarios/three-arena.md': [
+    'three-arena-tests/fire.spec.ts',
+    'three-arena-tests/three-arena.spec.ts',
+  ],
   'scenarios/terrain-pixels.md': ['terrain-pixel-tests/terrain.spec.ts'],
   'scenarios/turning.md': ['tests/turning.spec.ts'],
   'scenarios/wall-pass.md': ['wall-pass-tests/wall-pass.spec.ts'],

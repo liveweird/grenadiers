@@ -1,10 +1,17 @@
-import Ajv from 'ajv'
+import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv'
 import { describe, expect, it } from 'vitest'
 import clientFixtures from '../../../../api/fixtures/gameplay-v18-client-conformance.json'
 import serverFixtures from '../../../../api/fixtures/gameplay-v18-server-conformance.json'
 import gameplayV18Schema from '../../../../api/gameplay-v18.schema.json'
 import validateServer from '../../validation/generated/gameplay-v18.mjs'
+import { validatorOptions } from '../../validation/validatorOptions'
 import type { Snapshot } from './schema'
+
+type Validator = ((value: unknown) => boolean) & { errors?: ErrorObject[] | null }
+
+function errors(validator: Validator): ErrorObject[] | null {
+  return structuredClone(validator.errors ?? null)
+}
 
 describe('gameplay v18 contract validation', () => {
   it('accepts only the bounded strict spike-pit client corpus', () => {
@@ -20,16 +27,39 @@ describe('gameplay v18 contract validation', () => {
   })
 
   it('accepts every Rust-generated recipient frame through the standalone validator', () => {
+    const original = new Ajv(validatorOptions('gameplay-v18')).addSchema(gameplayV18Schema)
+      .getSchema(`${gameplayV18Schema.$id}#/$defs/GameServerMessage`) as ValidateFunction
     expect(serverFixtures.cases.map(({ caseId }) => caseId)).toEqual([
       'lobby-room-state', 'waiting-admission', 'disabled', 'enabled-empty',
       'idle', 'warning', 'raised',
     ])
     for (const fixture of serverFixtures.cases) {
       const frame: unknown = JSON.parse(fixture.frame)
+      expect(original(frame), fixture.caseId).toBe(true)
       expect(validateServer(frame), fixture.caseId).toBe(true)
+      expect(errors(validateServer)).toEqual(errors(original))
     }
-    expect(validateServer({ type: 'authenticated', protocolVersion: 17 })).toBe(false)
+    for (const malformed of [
+      { type: 'authenticated' },
+      { type: 'authenticated', protocolVersion: 17 },
+      { type: 'authenticated', protocolVersion: 18, unexpected: true },
+      { type: 'nonsense' },
+    ]) {
+      expect(validateServer(malformed)).toBe(original(malformed))
+      expect(errors(validateServer)).toEqual(errors(original))
+    }
+    const invalid = { type: 'authenticated', protocolVersion: 17 }
+    expect(validateServer(invalid)).toBe(original(invalid))
+    const retainedGenerated = validateServer.errors
+    const retainedOriginal = original.errors
     expect(validateServer({ type: 'authenticated', protocolVersion: 18 })).toBe(true)
+    expect(original({ type: 'authenticated', protocolVersion: 18 })).toBe(true)
+    expect(validateServer.errors).toBeNull()
+    expect(original.errors).toBeNull()
+    expect(validateServer(invalid)).toBe(original(invalid))
+    expect(errors(validateServer)).toEqual(errors(original))
+    expect(validateServer.errors).not.toBe(retainedGenerated)
+    expect(original.errors).not.toBe(retainedOriginal)
   })
 
   it('projects only public symmetric pit facts with configuration-bound clocks', () => {

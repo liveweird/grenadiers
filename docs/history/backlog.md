@@ -7,6 +7,10 @@
 
 ## Completed 2026-10-31
 
+- **Fire presentation:** [v1.2.1](../releases.md#v121--2026-10-31) adds local fire illumination,
+  character warmth, six artist-editable flame poses, ignition, embers and smoke with static
+  reduced motion; context recovery retains the rendered appearance.
+
 - **Spike pits:** [v1.2.0](../releases.md#v120--2026-10-31) adds configurable contact warnings,
   raised damage/reset, shared-sheet phase art and guarded CPU/mob navigation. The live
   [feature guide](../game/spike-pits.md) owns behavior and the release owns acceptance.

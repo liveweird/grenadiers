@@ -12,11 +12,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
-- [next] **FIRE-VFX — local fire lighting and richer explosions.** Add bounded public-fire
-  illumination, gentle character tint, six-frame artist-editable flames, ignition, embers and
-  smoke. Preserve crisp pixel art, clear hazard boundaries, privacy, reduced motion and the
-  existing performance/size gates. Evaluate restrained glow after measuring the base effects.
-
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view

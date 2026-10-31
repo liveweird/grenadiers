@@ -7,7 +7,8 @@
 - Add contact-triggered spike pits with configurable warning and raised durations, normal
   Shield/Heart protection, 3D phase tiles and default-on shared lobby controls.
 - Teach CPU26 and lair mobs to respect pit timing and contact; retain bounded planning,
-  exact input replay and closed historical gameplay contracts.
+  exact input replay and closed historical gameplay contracts; prevent planting work
+  exhaustion when storms and pits are enabled together.
 - Activate paired gameplay18/rules10 clients and rooms, including checked reconnects,
   immutable round layouts and shared Rust/browser conformance.
 

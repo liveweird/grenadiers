@@ -2,7 +2,7 @@
 
 Gameplay18 is the live contract on `/api/v1/game/ws`. Its sources are
 [`api/gameplay-v18.schema.json`](../../api/gameplay-v18.schema.json), Rust `protocol::v18` and
-generated `web/src/game/v18/schema.ts`. Authentication accepts18; older gameplay clients receive
+generated `web/src/game/v18/schema.ts`. Authentication accepts protocol 18; older gameplay clients receive
 `incompatibleProtocol` and must refresh the paired web/server application. Session and realtime
 API versions are independent.
 
@@ -23,7 +23,7 @@ an empty array. Enabled rooms publish zero, two or four immutable, unique, row-m
 reflection set is symmetric across both axes. Each entry is closed:
 
 ```json
-{"cell":{"column":6,"row":4},"phase":"warning","remainingTicks":24}
+{"cell":{"column":5,"row":3},"phase":"warning","remainingTicks":24}
 ```
 
 `phase` is `idle`, `warning` or `raised`. Idle has zero remaining ticks; warning and raised carry

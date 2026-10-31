@@ -17,15 +17,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
   boundary while commissioning any required models, rigs and animation.
 
-## Arena hazards
-
-- [next] **SPIKE-PITS — contact-triggered spike tiles.** A player or mob touching a dormant
-  pit starts a brief visible warning. Spikes then rise, damage occupants and anyone entering
-  while raised, and retract after a few seconds to reset. Keep movement traversable and
-  activation server-owned; cover swept/forced movement, Teleporter destinations, exact timer
-  boundaries, CPU/mob hazard planning and shared-sheet animation. Timings and protection
-  interactions follow the [design](docs/game/spike-pits.md), with configurable lobby timings.
-
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

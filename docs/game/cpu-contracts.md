@@ -333,6 +333,6 @@ Forecasts use the same contact geometry and checked phase transitions as simulat
 
 Committed execution carries a guard for the observation tick, exact public pit configuration
 and every expected phase/countdown. A changed pit state withdraws authority and forces a fresh
-observation. Raised contact is rejected unless the recipient's ordinary published damage grace
+observation. Raised contact is rejected unless the recipient's published damage grace or active Shield
 still covers it. This does not introduce a separate immunity or expand the existing work,
 movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains archived unchanged.

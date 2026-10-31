@@ -14,7 +14,10 @@ function fakeContext(resumePromise?: Promise<void>) {
     disconnect: ReturnType<typeof vi.fn>
   }> = []
   const gains: Array<{ disconnect: ReturnType<typeof vi.fn> }> = []
-  const parameter = () => ({ setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() })
+  const parameter = () => ({
+    setValueAtTime: vi.fn(), cancelAndHoldAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(),
+    exponentialRampToValueAtTime: vi.fn(),
+  })
   const context = {
     state: 'suspended', currentTime: 1, destination: {},
     resume: vi.fn(async () => {
@@ -98,5 +101,34 @@ describe('procedural audio engine', () => {
     replacement.play(['placement'])
     expect(stale.oscillators).toHaveLength(0)
     expect(fresh.oscillators).toHaveLength(1)
+  })
+
+  it('bounds volume, rate-limits repeats, and lets critical cues displace footsteps', async () => {
+    const fake = fakeContext()
+    const audio = new GameAudio(() => fake.context)
+    audio.setVolume(35)
+    await audio.enableFromGesture()
+    const masterCall = fake.raw.createGain.mock.results[0]?.value.gain.setValueAtTime.mock.calls[0]
+    expect(masterCall?.[0]).toBeCloseTo(.028)
+    expect(masterCall?.[1]).toBe(1)
+    audio.setVolume(70)
+    const master = fake.raw.createGain.mock.results[0]?.value.gain
+    expect(master.cancelAndHoldAtTime).toHaveBeenCalledWith(1)
+    const rampCall = master.linearRampToValueAtTime.mock.calls[0]
+    expect(rampCall?.[0]).toBeCloseTo(.056)
+    expect(rampCall?.[1]).toBeCloseTo(1.03)
+    audio.setVolume(20)
+    expect(master.cancelAndHoldAtTime).toHaveBeenCalledTimes(2)
+    const latestRamp = master.linearRampToValueAtTime.mock.calls[1]
+    expect(latestRamp?.[0]).toBeCloseTo(.016)
+    expect(latestRamp?.[1]).toBeCloseTo(1.03)
+
+    audio.play(['step', 'step'])
+    expect(fake.oscillators).toHaveLength(1)
+    audio.play(['step'])
+    expect(fake.oscillators).toHaveLength(1)
+    audio.play(['detonation'])
+    expect(fake.oscillators).toHaveLength(2)
+    expect(fake.oscillators[0]?.disconnect).toHaveBeenCalledOnce()
   })
 })

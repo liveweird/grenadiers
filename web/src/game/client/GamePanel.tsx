@@ -362,7 +362,7 @@ export function GamePanelView({ state, actions, developerPanel, presentationDeat
         <div className="local-controls">
           <Button className="controls-button" variant="subtle" color="dark" size="compact-sm"
             onClick={() => setControlsOpen(true)}>{copy.controls.open}</Button>
-          <SoundControl state={state} copy={copy} />
+          <SoundControl state={state} copy={copy} presentationDeaths={presentationDeaths} />
         </div>
       </div>
       <aside className="control-column">

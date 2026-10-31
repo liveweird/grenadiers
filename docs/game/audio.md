@@ -1,24 +1,41 @@
 # Optional procedural sound
 
-The active browser can synthesize four short cues from accepted public events: bomb placement,
-detonation, pickup collection, and actor elimination. Sound is off by default. It has no music,
-countdown warning, spatial positioning, inferred destruction, victory cue, or attribution. All
-essential game state and warnings remain visual.
+The active browser synthesizes short retro cues for local walking, bomb placement, detonation,
+pickup collection, actor elimination, qualified public mob elimination presentations, and accepted
+public special-weapon activity. Special cues
+come only from weapon pickup events or bombs whose accepted event identifies a non-standard blast
+or trigger. The protocol has no weapon-use event, so the browser does not guess one from input or
+inventory changes. Sound is off by default. It has no music, countdown warning, spatial
+positioning, inferred terrain destruction, victory cue, or attribution. All essential game state and
+warnings remain visual.
 
 **Enable sound** is a native button outside the arena. Its explicit gesture creates or resumes
 one browser `AudioContext`; restoring `grenadiers.audio.v1` only shows **Sound paused** and never
 constructs a context automatically. Muting, hiding the document, reconnecting, leaving the room,
 or unmounting stops active voices. Hidden return requires **Resume sound**. The preference stores
-only exact `{ "version": 1, "enabled": boolean }` data, with a 64-character input bound.
+exact bounded v2 enabled and 0–100 volume data. Existing exact
+`{ "version": 1, "enabled": boolean }` data remains readable at the quiet 60% default. The
+localized native volume slider persists changes without creating an `AudioContext`.
 
-Audio follows validated live-contract state after the client accepts it. Event identity is room ID plus event
-tick and index. The cursor advances while muted, seeds silently on room, round, admission, enable,
-and visibility boundaries, rejects old revisions, and never queues history for replay. Each
-snapshot coalesces every cue kind once in elimination, detonation, pickup, placement priority.
+Audio follows validated live-contract state after the client accepts it. Event identity is room ID
+plus event tick and index. The cursor advances while muted, seeds silently on room, round,
+admission, enable, and visibility boundaries, rejects old revisions, and never queues history for
+replay. Mob elimination reuses the presentation tracker's guarded continuous-snapshot result; the
+audio cursor does not independently infer death from disappearance. Each snapshot coalesces every
+cue kind once in critical-first priority. Walking compares
+only the accepted visible local player's positions, requires plausible small movement accumulated
+over a six-tick cadence, and seeds silently on admission and teleport epochs. Gaps over six ticks
+and large displacements reset the travel accumulator instead of producing a catch-up step.
+It never observes an opponent's movement, including a cloaked one. Short contact displacements can contribute to this cosmetic local movement cue, because the
+public position has no forced-movement marker. There is no dedicated or attributed Bracelet shove cue.
 
-One low-gain master feeds at most four scheduled oscillator/gain voices. Every oscillator has a
-fixed stop time and disconnects when ended or silenced. There are no assets, downloads, timers,
-random buffers, server changes, or game-command inference.
+One volume-scaled low-gain master feeds at most four scheduled oscillator/gain voices. Live volume
+changes use a short gain ramp to avoid clicks. Cue kinds
+use distinct pitch, waveform, duration, and gain shapes with small deterministic pitch variation.
+Same-time repeats are coalesced and rate-limited; a footstep never starts alongside a critical
+voice and is displaced when a critical cue arrives. Every oscillator has a fixed stop time and
+disconnects when ended or silenced. There are no audio assets, downloads, timers, random buffers,
+server changes, or game-command inference.
 
 Run `scripts/gates.sh web` and `scripts/gates.sh e2e`. With this worktree's built frontend served
 by the native server, run:

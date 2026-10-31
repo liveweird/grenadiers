@@ -309,7 +309,8 @@
     "off": "Sound off",
     "on": "Sound on",
     "paused": "Sound paused",
-    "unavailable": "Sound unavailable"
+    "unavailable": "Sound unavailable",
+    "volume": "Sound volume"
   },
   "error": {
     "title": "Could not complete that action",

@@ -309,7 +309,8 @@
     "off": "Dźwięk wyłączony",
     "on": "Dźwięk włączony",
     "paused": "Dźwięk wstrzymany",
-    "unavailable": "Dźwięk niedostępny"
+    "unavailable": "Dźwięk niedostępny",
+    "volume": "Głośność dźwięku"
   },
   "error": {
     "title": "Nie udało się wykonać działania",

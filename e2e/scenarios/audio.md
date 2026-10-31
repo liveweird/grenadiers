@@ -13,3 +13,6 @@ Desktop English and 320-pixel Polish views retain screenshots and pass Axe. Trac
 CDP graph/state evidence proves browser audio processing, not hardware audibility or sound quality.
 The target closes before CDP can reliably expose final context destruction; disposal and
 `AudioContext.close()` are covered by unit tests rather than claimed as observed browser evidence.
+
+The same native scenario checks the EN/PL volume sliders, persistence without context creation,
+and oscillator activity after confirmed local walking before the bomb-placement check.

@@ -41,6 +41,8 @@ spec:
               value: grenadiers_server=info,tower_http=info
             - name: TRUSTED_PROXY_IPS
               value: ""
+            - name: CPU_DEBUG_ENABLED
+              value: "false"
           ports:
             - name: http
               containerPort: 8085

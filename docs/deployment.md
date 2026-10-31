@@ -245,6 +245,14 @@ reduced-motion captures, exact filenames, and capture timing.
 | Bracelet | [`e2e/compose/fixture.yaml`](../e2e/compose/fixture.yaml)<br>[`arena-v2-bracelet.seed`](../core/tests/fixtures/arena-v2-bracelet.seed) | `E2E_BRACELET_FIXTURE=arena-v3-bracelet npm --prefix e2e run test:bracelet` | [Bracelet scenario](../e2e/scenarios/bracelet.md): exact one-tile shove from physical blocking-face contact, with no victim command, Equipment action, event, or private marker; localized captures. |
 | <a id="reproduce-opt-in-oil-barrel-reveal-and-persistent-fire"></a>Oil Barrel | [`e2e/compose/fixture.yaml`](../e2e/compose/fixture.yaml)<br>[`arena-v2-oil-barrel.seed`](../core/tests/fixtures/arena-v2-oil-barrel.seed) | `E2E_OIL_BARREL_FIXTURE=arena-v3-oil-barrel npm --prefix e2e run test:oil-barrel` | [Oil Barrel scenario](../e2e/scenarios/oil-barrel.md): pending privacy, unlit collision pixels, ignition/escape, finite and persistent fire, reconnect, and localized rendering. |
 
+## Optional CPU intent inspection
+
+`CPU_DEBUG_ENABLED` is strictly `true` or `false`, defaulting to false in the executable,
+Compose and Kubernetes. Operators can explicitly enable it and open `/?cpuDebug=1` to inspect
+connected-participant CPU summaries. Use a deliberate Deployment environment override in Kubernetes;
+changing the setting restarts the process and ends in-memory matches. The [intent guide](game/cpu-intent.md)
+owns usage, redaction and authorization; the flag is not a developer account system.
+
 ## Graceful stop
 
 SIGTERM/Ctrl+C signal unfinished rooms with ServerStopped while preserving already-final match

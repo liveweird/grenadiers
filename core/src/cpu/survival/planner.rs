@@ -1,14 +1,18 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
-    PulseLease, PulseRequest, PunchRequest, RouteLimits, RouteMode, RouteRequest, RouteStep,
-    certify_pulse, certify_respawn_pulse, plan_punch, plan_respawn_route, plan_route,
+    PulseLease, PulseRequest, RouteLimits, RouteMode, RouteRequest, RouteStep, certify_pulse,
+    certify_respawn_pulse, plan_respawn_route, plan_route,
 };
-use crate::cpu::{CpuRng, Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
+use crate::cpu::{CpuRng, Intent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
 
 use super::compatibility::actor;
 use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
+
+#[path = "punch_tactic.rs"]
+mod punch_tactic;
+use punch_tactic::certified_punch;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SurvivalPlan {
@@ -63,6 +67,7 @@ pub fn plan_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 
@@ -78,6 +83,7 @@ pub(super) fn plan_inner(
     respawn: bool,
     pickup_handoff: bool,
     opportunistic_planting: bool,
+    strategic_goals: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -88,7 +94,11 @@ pub(super) fn plan_inner(
         return Err(PolicyError::IdentityMismatch);
     }
     let stop = || SurvivalPlan {
-        control: ControlPlan::stop(UtilityMemory::new(memory.key())),
+        control: ControlPlan::stop(if strategic_goals {
+            UtilityMemory::new(memory.key()).carry_progress(*memory)
+        } else {
+            UtilityMemory::new(memory.key())
+        }),
         lease: None,
         execution: None,
     };
@@ -102,7 +112,7 @@ pub(super) fn plan_inner(
         return Ok(stop());
     }
     if let Some(origin) = origin {
-        return Ok(super::origin_planner::plan(
+        let mut plan = super::origin_planner::plan(
             observation,
             history,
             settled_stop_tick,
@@ -110,9 +120,15 @@ pub(super) fn plan_inner(
             origin,
             work,
         )
-        .unwrap_or_else(stop));
+        .unwrap_or_else(stop);
+        if strategic_goals {
+            plan.control.next_memory = plan.control.next_memory.carry_progress(*memory);
+        }
+        return Ok(plan);
     }
-    let ordinary = if opportunistic_planting {
+    let ordinary = if strategic_goals {
+        crate::cpu::policy::plan_respawn_v24(observation, memory, rng, work)?
+    } else if opportunistic_planting {
         crate::cpu::policy::plan_respawn_v23(observation, memory, rng, work)?
     } else if respawn {
         crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
@@ -139,6 +155,7 @@ pub(super) fn plan_inner(
             &ordinary,
             bounded_tactics,
             opportunistic_planting,
+            strategic_goals,
             work,
         )
     {
@@ -342,6 +359,7 @@ pub(super) fn plan_inner(
             &ordinary,
             bounded_tactics,
             opportunistic_planting,
+            strategic_goals,
             work,
         )
     {
@@ -359,38 +377,4 @@ pub(super) fn plan_inner(
         return Ok(fallback.expect("progressing fallback was checked"));
     }
     Ok(route_fallback.or(fallback).unwrap_or_else(stop))
-}
-
-fn certified_punch(
-    observation: &Observation,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    memory: &UtilityMemory,
-    work: &mut WorkBudget,
-) -> Option<SurvivalPlan> {
-    let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
-    // Keep at least half the remaining allowance for ordinary survival if this
-    // optional tactic cannot prove a complete escape. All child work is charged.
-    let mut tactic_work = WorkBudget::new(work.remaining() / 2);
-    let certificate = plan_punch(
-        observation,
-        history,
-        PunchRequest {
-            execution_tick,
-            settled_stop_tick,
-            limits: RouteLimits::default(),
-        },
-        &mut tactic_work,
-    );
-    work.try_take(tactic_work.spent()).ok()?;
-    let certificate = certificate.ok()?;
-    Some(SurvivalPlan {
-        control: ControlPlan {
-            intent: Intent::STOP.with_manual(ManualIntent::Equipment),
-            hold_ticks: 1,
-            next_memory: UtilityMemory::new(memory.key()),
-        },
-        lease: None,
-        execution: Some(ExecutionCertificate::Punch(Box::new(certificate))),
-    })
 }

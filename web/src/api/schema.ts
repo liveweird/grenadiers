@@ -64,6 +64,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/game/cpu-debug": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Read a redacted CPU intent snapshot
+         * @description Operator-disabled by default with CPU_DEBUG_ENABLED=false. Requires an exact allowed browser Origin and the current human seat resume capability as a Bearer credential. The read-only query never resumes, replaces, or mutates a seat. CPU and target details are redacted against the authenticated recipient's current published world.
+         */
+        post: operations["getCpuIntentDiagnostics"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/game/ws": {
         parameters: {
             query?: never;
@@ -108,6 +128,55 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CpuDebugResponse: {
+            /** @enum {integer} */
+            protocolVersion: 1;
+            roomId: string;
+            roundId: number;
+            tick: number;
+            revision: number;
+            youSeat: components["schemas"]["CpuDebugSeat"];
+            cpus: components["schemas"]["CpuDebugRow"][];
+        };
+        /** @enum {string} */
+        CpuDebugSeat: "one" | "two" | "three" | "four";
+        CpuDebugCell: {
+            column: number;
+            row: number;
+        };
+        CpuDebugTarget: {
+            /** @enum {string} */
+            type: "pickup";
+            cell: components["schemas"]["CpuDebugCell"];
+            /** @enum {string} */
+            kind: "bombCapacity" | "blastRange" | "movementSpeed" | "kick" | "punch" | "bracelet" | "wallPass" | "heart" | "remoteBomb" | "piercingBomb" | "powerBomb" | "landmine" | "shield" | "stopwatch" | "invisibilityCloak" | "goldenFlame" | "shortFuse" | "diarrhea" | "slowFoot" | "shortFlame" | "longFuse" | "reverseControls" | "invisibleBombs" | "oilBarrel" | "teleporter";
+        } | {
+            /** @enum {string} */
+            type: "block" | "tile";
+            cell: components["schemas"]["CpuDebugCell"];
+        } | {
+            /** @enum {string} */
+            type: "opponent";
+            seat: components["schemas"]["CpuDebugSeat"];
+        };
+        CpuDebugRow: {
+            seat: components["schemas"]["CpuDebugSeat"];
+            /** @enum {string} */
+            status: "unavailable";
+        } | {
+            seat: components["schemas"]["CpuDebugSeat"];
+            /** @enum {string} */
+            status: "available";
+            observedTick: number;
+            /** @enum {string} */
+            objective: "collect" | "farm" | "attack" | "explore" | "survive" | "wait";
+            target: components["schemas"]["CpuDebugTarget"] | (never | null);
+            approach: components["schemas"]["CpuDebugCell"] | (never | null);
+            /** @enum {string} */
+            phase: "approach" | "plant" | "escape" | "reengage" | "evade" | "waiting";
+            /** @enum {string} */
+            switchReason: "initial" | "completed" | "targetInvalid" | "visibilityLost" | "betterOpportunity" | "stalled" | "noTargets" | "safetyInterrupt" | "resumed";
+        };
         GameSession: {
             token: string;
         };
@@ -304,6 +373,109 @@ export interface operations {
             503: {
                 headers: {
                     "Cache-Control": components["headers"]["NoStore"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    getCpuIntentDiagnostics: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Exact non-null browser origin from ALLOWED_ORIGINS. */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    roomId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Current recipient-redacted CPU intent snapshot. */
+            200: {
+                headers: {
+                    "Cache-Control": components["headers"]["NoStore"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CpuDebugResponse"];
+                };
+            };
+            /** @description Malformed JSON, unknown request fields, unsupported query parameters, or invalid trusted-proxy identity. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing, malformed, foreign, retired, or wrong-room seat resume capability. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing, duplicated, null, malformed, or disallowed Origin. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Feature disabled or room unavailable. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the fixed diagnostic limit. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Content-Type is not application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Dedicated CPU diagnostic peer rate or concurrency budget exceeded. */
+            429: {
+                headers: {
+                    "Retry-After": components["headers"]["RetryAfter"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Transport identity, diagnostic tracking, owner query, or timeout unavailable. */
+            503: {
+                headers: {
                     [name: string]: unknown;
                 };
                 content: {

@@ -26,7 +26,7 @@ pub(super) struct Driver {
     pub(super) runtime: RosterRuntime,
     pub(super) room_id: RoomId,
     pub(super) notices: watch::Sender<RosterOwnerNotice>,
-    last: RosterNotice,
+    pub(super) last: RosterNotice,
     pub(super) seats: [Option<SeatSlot>; 4],
     pub(super) retired_credentials: Vec<super::super::resume::ResumeCredential>,
     pub(super) terminal_at: Option<Instant>,

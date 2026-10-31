@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## 1.0.5 — 2026-10-31
+
+- Add CPU24 strategic objectives with exact subjects, explicit phases, stable commitment,
+  bounded progress deadlines and intent retained through safe route replanning.
+- Direct farming/combat bombs at the committed subject; collecting an upgrade no longer
+  permits unrelated opportunistic bombing to replace the objective.
+- Add operator-enabled, participant-authenticated CPU intent diagnostics and an opt-in EN/PL
+  developer overlay, with recipient privacy and no gameplay protocol change.
+
 ## 1.0.4 — 2026-10-31
 
 - Improve CPU goal persistence and cycle avoidance, seek productive crate-clearing positions,

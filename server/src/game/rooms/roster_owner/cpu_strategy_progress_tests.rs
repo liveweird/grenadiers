@@ -80,7 +80,7 @@ fn queued_cpu23_uses_bombs_collects_upgrades_and_avoids_three_ab_cycles() {
                 seat,
                 9_023,
                 [53_u8.wrapping_add(seat.index() as u8); 32],
-                CpuProfile::RESPAWN_LAIRS_STANDARD,
+                CpuProfile::RESPAWN_V23_STANDARD,
             )
         })
         .collect();

@@ -15,8 +15,16 @@ use super::movement::{STEPS, offset};
 mod v23;
 pub(in crate::cpu::policy) use v23::select as select_v23;
 
+#[path = "goals_v24.rs"]
+mod v24;
+pub(in crate::cpu::policy) use v24::select as select_v24;
+
 #[path = "goal_pressure.rs"]
 mod pressure;
+
+#[path = "goal_cells.rs"]
+mod cells;
+pub(super) use cells::{cell_index, legal_opening};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Guidance {
@@ -291,7 +299,11 @@ impl SearchMap {
     }
 }
 
-fn pickup_value(observation: &Observation, actor: &VisibleActor, kind: PickupKind) -> Option<u8> {
+pub(super) fn pickup_value(
+    observation: &Observation,
+    actor: &VisibleActor,
+    kind: PickupKind,
+) -> Option<u8> {
     let rules = crate::cpu::rules_config(observation)?;
     if let Some((value, _)) = supported_weapon(actor, kind) {
         return value;
@@ -372,25 +384,10 @@ fn pickup_transitable(actor: &VisibleActor, kind: PickupKind) -> bool {
     }
 }
 
-pub(super) fn legal_opening(observation: &Observation, cell: CellId) -> bool {
-    let Some(index) = cell_index(observation, cell) else {
-        return false;
-    };
-    observation.parts().arena.terrain.get(index) == Some(&Terrain::Floor)
-        && !observation.parts().arena.blocks.contains(&cell)
-        && !observation.parts().oil.iter().any(|oil| oil.cell == cell)
-}
-
 fn useful_effect(actor: &VisibleActor, kind: EffectKind) -> bool {
     actor
         .effects
         .iter()
         .find(|effect| effect.kind == kind)
         .is_none_or(|effect| u64::from(effect.remaining_ticks) <= kind.duration_ticks() / 2)
-}
-
-pub(super) fn cell_index(observation: &Observation, cell: CellId) -> Option<usize> {
-    let arena = &observation.parts().arena;
-    (cell.column < arena.width && cell.row < arena.height)
-        .then_some(usize::from(cell.row) * usize::from(arena.width) + usize::from(cell.column))
 }

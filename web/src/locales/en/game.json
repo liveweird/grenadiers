@@ -213,6 +213,58 @@
     "blindBombHint": "Bombs are hidden. Select the courtyard and press {{bomb}} to place a bomb or trigger your remote bomb.",
     "instructions": "Move with the arrow keys or W A S D. Place a bomb with Space. Controls work only during a live round."
   },
+  "cpuDebug": {
+    "title": "CPU intent diagnostics",
+    "developerOnly": "Developer view. Values are limited to the current player's visible game state.",
+    "waiting": "Waiting for CPU diagnostics…",
+    "disabled": "CPU diagnostics are disabled on this server.",
+    "error": "CPU diagnostics are temporarily unavailable.",
+    "unavailable": "Intent unavailable for the current view.",
+    "noCpus": "This match has no CPU players.",
+    "cpuLabel": "{{player}} CPU intent",
+    "objectiveLabel": "Objective",
+    "targetLabel": "Target",
+    "approachLabel": "Approach",
+    "phaseLabel": "Phase",
+    "switchReasonLabel": "Latest switch reason",
+    "observedTickLabel": "Observation tick",
+    "cell": "column {{column}}, row {{row}}",
+    "noTarget": "No target",
+    "noApproach": "No approach cell",
+    "objective": {
+      "collect": "Collect",
+      "farm": "Farm",
+      "attack": "Attack",
+      "explore": "Explore",
+      "survive": "Survive",
+      "wait": "Wait"
+    },
+    "phase": {
+      "approach": "Approach",
+      "plant": "Plant",
+      "escape": "Escape",
+      "reengage": "Re-engage",
+      "evade": "Evade",
+      "waiting": "Waiting"
+    },
+    "switchReason": {
+      "initial": "Initial intent",
+      "completed": "Completed",
+      "targetInvalid": "Target invalid",
+      "visibilityLost": "Visibility lost",
+      "betterOpportunity": "Better opportunity",
+      "stalled": "Stalled",
+      "noTargets": "No targets",
+      "safetyInterrupt": "Safety interrupt",
+      "resumed": "Resumed"
+    },
+    "target": {
+      "pickup": "{{item}} pickup at {{cell}}",
+      "block": "Block at {{cell}}",
+      "opponent": "{{player}}",
+      "tile": "Tile at {{cell}}"
+    }
+  },
   "controls": {
     "open": "Keyboard controls",
     "title": "Keyboard controls",

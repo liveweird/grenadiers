@@ -62,6 +62,7 @@ impl Config {
             environment.database_url,
             environment.round_seed_file.map(PathBuf::from),
             environment.trusted_proxy_ips,
+            parse_strict_boolean(environment.cpu_debug_enabled.as_deref())?,
         )?;
         let server_address = environment
             .server_address
@@ -94,6 +95,7 @@ pub(crate) struct Environment {
     pub(crate) database_url: Option<OsString>,
     pub(crate) round_seed_file: Option<OsString>,
     pub(crate) trusted_proxy_ips: Option<OsString>,
+    pub(crate) cpu_debug_enabled: Option<OsString>,
 }
 
 impl Environment {
@@ -106,6 +108,7 @@ impl Environment {
             database_url: std::env::var_os("DATABASE_URL"),
             round_seed_file: std::env::var_os("GAME_ROUND_SEED_FILE"),
             trusted_proxy_ips: std::env::var_os("TRUSTED_PROXY_IPS"),
+            cpu_debug_enabled: std::env::var_os("CPU_DEBUG_ENABLED"),
         }
     }
 }
@@ -118,19 +121,22 @@ impl AppState {
             None,
             None,
             TrustedProxyIps::default(),
+            false,
         )
         .expect("default state construction cannot fail")
     }
 
     pub fn from_environment() -> Result<Self, StartupError> {
-        Self::from_configuration(
-            std::env::var("ALLOWED_ORIGINS").ok(),
-            std::env::var("DATABASE_URL").ok(),
+        Self::from_os_configuration(
+            std::env::var_os("ALLOWED_ORIGINS"),
+            std::env::var_os("DATABASE_URL"),
             std::env::var_os("GAME_ROUND_SEED_FILE").map(PathBuf::from),
             std::env::var_os("TRUSTED_PROXY_IPS"),
+            parse_strict_boolean(std::env::var_os("CPU_DEBUG_ENABLED").as_deref())?,
         )
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) fn from_configuration(
         allowed_origins: Option<String>,
         database_url: Option<String>,
@@ -142,6 +148,7 @@ impl AppState {
             database_url.map(OsString::from),
             round_seed_file,
             trusted_proxy_ips,
+            false,
         )
     }
 
@@ -150,6 +157,7 @@ impl AppState {
         database_url: Option<OsString>,
         round_seed_file: Option<PathBuf>,
         trusted_proxy_ips: Option<OsString>,
+        cpu_debug_enabled: bool,
     ) -> Result<Self, StartupError> {
         let trusted_proxy_ips = match trusted_proxy_ips.as_deref() {
             Some(value) => Some(value.to_str().ok_or(StartupError::TrustedProxy)?),
@@ -174,6 +182,7 @@ impl AppState {
             database,
             round_seed_source,
             trusted_proxies,
+            cpu_debug_enabled,
             now,
         ))
     }
@@ -183,6 +192,7 @@ impl AppState {
         database_url: Option<String>,
         round_seed_file: Option<&Path>,
         trusted_proxies: TrustedProxyIps,
+        cpu_debug_enabled: bool,
     ) -> Result<Self, StartupError> {
         let now = Instant::now();
         let round_seed_source = RoundSeedSource::from_optional_path(round_seed_file)
@@ -193,6 +203,7 @@ impl AppState {
             database,
             round_seed_source,
             trusted_proxies,
+            cpu_debug_enabled,
             now,
         ))
     }
@@ -202,6 +213,7 @@ impl AppState {
         database: Option<sqlx::PgPool>,
         round_seed_source: RoundSeedSource,
         trusted_proxies: TrustedProxyIps,
+        cpu_debug_enabled: bool,
         now: Instant,
     ) -> Self {
         Self {
@@ -215,6 +227,8 @@ impl AppState {
             trusted_proxies: Arc::new(trusted_proxies),
             gameplay_admission: GameplayAdmission::new(now),
             diagnostic_admission: DiagnosticAdmission::new(now),
+            cpu_debug_enabled,
+            cpu_debug_gate: crate::cpu_debug::CpuDebugGate::new(now),
             denial_telemetry: Arc::new(DenialTelemetry::new(now)),
         }
     }
@@ -227,6 +241,15 @@ fn parse_origins(value: &str) -> HashSet<String> {
         .filter(|origin| !origin.is_empty())
         .map(ToString::to_string)
         .collect()
+}
+
+fn parse_strict_boolean(value: Option<&std::ffi::OsStr>) -> Result<bool, StartupError> {
+    match value {
+        None => Ok(false),
+        Some(value) if value == "true" => Ok(true),
+        Some(value) if value == "false" => Ok(false),
+        Some(_) => Err(StartupError::CpuDebugEnabled),
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -251,6 +274,7 @@ pub enum StartupError {
     Database,
     RoundSeed,
     TrustedProxy,
+    CpuDebugEnabled,
 }
 
 impl fmt::Debug for StartupError {
@@ -261,6 +285,7 @@ impl fmt::Debug for StartupError {
             Self::Database => "StartupError::Database",
             Self::RoundSeed => "StartupError::RoundSeed",
             Self::TrustedProxy => "StartupError::TrustedProxy",
+            Self::CpuDebugEnabled => "StartupError::CpuDebugEnabled",
         })
     }
 }
@@ -273,6 +298,7 @@ impl fmt::Display for StartupError {
             Self::Database => "database configuration failed",
             Self::RoundSeed => "round seed configuration failed",
             Self::TrustedProxy => "trusted proxy configuration failed",
+            Self::CpuDebugEnabled => "CPU debug configuration failed",
         })
     }
 }

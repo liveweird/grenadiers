@@ -66,6 +66,7 @@ pub(in crate::game::rooms) struct CpuController {
     escape_origin_epoch: Option<u64>,
     profile: CpuProfile,
     cadence: CadenceState,
+    strategic_blast: Option<intent::StrategicBlastContext>,
 }
 
 impl CpuController {
@@ -101,6 +102,7 @@ impl CpuController {
             escape_origin_epoch: None,
             profile,
             cadence: CadenceState::default(),
+            strategic_blast: None,
         }
     }
 
@@ -180,6 +182,20 @@ impl CpuController {
                 accepted.next_memory
             },
         );
+        if accepted.certified_manual == Some(grenadiers_core::cpu::ManualIntent::Bomb)
+            && !manual_admitted
+            && let Some(memory) = self.memory
+        {
+            let reason = memory.strategic_intent().map_or(
+                grenadiers_core::cpu::policy::StrategicSwitchReason::Initial,
+                |intent| intent.last_switch_reason,
+            );
+            self.memory = Some(memory.mark_strategic_phase(
+                grenadiers_core::cpu::policy::StrategicPhase::Approach,
+                reason,
+                accepted.decision.observation_tick,
+            ));
+        }
         self.rng = Some(accepted.next_rng);
         self.escaping = accepted.certified_manual.is_none()
             && accepted.intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb)
@@ -317,6 +333,9 @@ mod route;
 
 #[path = "controller_admission.rs"]
 mod admission;
+
+#[path = "controller_intent.rs"]
+mod intent;
 
 #[path = "controller_pulse.rs"]
 mod pulse;

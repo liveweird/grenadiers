@@ -1,5 +1,4 @@
 use grenadiers_core::cpu::Observation;
-use grenadiers_core::cpu::policy::UtilityMemory;
 use grenadiers_core::cpu::survival::PulseStatus;
 use grenadiers_core::game::Tick;
 
@@ -21,12 +20,11 @@ impl CpuController {
         }
         if status == PulseStatus::Invalidated {
             self.cancel();
-            self.memory = Some(UtilityMemory::new(
+            self.memory = Some(
                 self.memory
-                    .as_ref()
                     .expect("world memory initialized")
-                    .key(),
-            ));
+                    .without_execution_authority(),
+            );
         }
         Some(status)
     }

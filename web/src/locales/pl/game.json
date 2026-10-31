@@ -213,6 +213,58 @@
     "blindBombHint": "Bomby są ukryte. Wybierz dziedziniec i naciśnij {{bomb}}, aby podłożyć bombę albo odpalić swoją bombę zdalną.",
     "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
   },
+  "cpuDebug": {
+    "title": "Diagnostyka zamiarów komputera",
+    "developerOnly": "Widok deweloperski. Wartości są ograniczone do stanu gry widocznego dla bieżącego gracza.",
+    "waiting": "Oczekiwanie na diagnostykę komputera…",
+    "disabled": "Diagnostyka komputera jest wyłączona na tym serwerze.",
+    "error": "Diagnostyka komputera jest tymczasowo niedostępna.",
+    "unavailable": "Zamiar jest niedostępny w bieżącym widoku.",
+    "noCpus": "W tym meczu nie ma graczy komputerowych.",
+    "cpuLabel": "Zamiar komputera: {{player}}",
+    "objectiveLabel": "Cel",
+    "targetLabel": "Obiekt",
+    "approachLabel": "Pole podejścia",
+    "phaseLabel": "Faza",
+    "switchReasonLabel": "Ostatni powód zmiany",
+    "observedTickLabel": "Krok obserwacji",
+    "cell": "kolumna {{column}}, wiersz {{row}}",
+    "noTarget": "Brak obiektu",
+    "noApproach": "Brak pola podejścia",
+    "objective": {
+      "collect": "Zbieranie",
+      "farm": "Gromadzenie",
+      "attack": "Atak",
+      "explore": "Eksploracja",
+      "survive": "Przetrwanie",
+      "wait": "Oczekiwanie"
+    },
+    "phase": {
+      "approach": "Podejście",
+      "plant": "Podłożenie",
+      "escape": "Ucieczka",
+      "reengage": "Ponowne natarcie",
+      "evade": "Unik",
+      "waiting": "Oczekiwanie"
+    },
+    "switchReason": {
+      "initial": "Początkowy zamiar",
+      "completed": "Ukończenie",
+      "targetInvalid": "Nieprawidłowy obiekt",
+      "visibilityLost": "Utrata widoczności",
+      "betterOpportunity": "Lepsza okazja",
+      "stalled": "Brak postępu",
+      "noTargets": "Brak obiektów",
+      "safetyInterrupt": "Przerwanie dla bezpieczeństwa",
+      "resumed": "Wznowienie"
+    },
+    "target": {
+      "pickup": "{{item}} na polu {{cell}}",
+      "block": "Blok na polu {{cell}}",
+      "opponent": "{{player}}",
+      "tile": "Pole: {{cell}}"
+    }
+  },
   "controls": {
     "open": "Sterowanie klawiaturą",
     "title": "Sterowanie klawiaturą",

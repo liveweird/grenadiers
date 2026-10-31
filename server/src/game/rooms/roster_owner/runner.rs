@@ -5,7 +5,7 @@ use tokio::time::{Instant, sleep_until};
 
 use super::{
     driver::Driver,
-    types::{COMMAND_CAPACITY, OwnerCommand, PreparedRosterOwner},
+    types::{COMMAND_CAPACITY, CpuDebugCommand, OwnerCommand, PreparedRosterOwner},
 };
 use crate::game::rooms::{ClosingReason, types::RoomError};
 
@@ -27,7 +27,12 @@ pub(super) async fn run(mut owner: PreparedRosterOwner) {
     let mut catching_up = false;
     loop {
         if shutdown_requested(&mut owner.shutdown) {
-            stop_for_shutdown(&mut driver, &mut owner.receiver, &mut admissions);
+            stop_for_shutdown(
+                &mut driver,
+                &mut owner.receiver,
+                &mut owner.cpu_debug_receiver,
+                &mut admissions,
+            );
             return;
         }
         if close_at_boundaries(&mut driver) {
@@ -37,19 +42,26 @@ pub(super) async fn run(mut owner: PreparedRosterOwner) {
         let retirement = driver.terminal_at.map(|at| at + TERMINAL_LIFETIME);
         enum Wake {
             Command(Option<OwnerCommand>),
+            CpuDebug(Option<CpuDebugCommand>),
             Clock,
             Shutdown,
             Deadline,
         }
         let wake = tokio::select! {
             command = receive_commands(&mut owner.receiver, !catching_up) => Wake::Command(command),
+            command = receive_cpu_debug(&mut owner.cpu_debug_receiver, !catching_up) => Wake::CpuDebug(command),
             changed = owner.shutdown.changed() => { let _ = changed; Wake::Shutdown },
             () = sleep_optional(tick) => Wake::Clock,
             () = sleep_optional(driver.lobby_deadline) => Wake::Deadline,
             () = sleep_optional(retirement) => Wake::Deadline,
         };
         if matches!(wake, Wake::Shutdown) || shutdown_requested(&mut owner.shutdown) {
-            stop_for_shutdown(&mut driver, &mut owner.receiver, &mut admissions);
+            stop_for_shutdown(
+                &mut driver,
+                &mut owner.receiver,
+                &mut owner.cpu_debug_receiver,
+                &mut admissions,
+            );
             return;
         }
         if close_at_boundaries(&mut driver) {
@@ -69,6 +81,14 @@ pub(super) async fn run(mut owner: PreparedRosterOwner) {
                     driver.fail();
                     return;
                 }
+            }
+            Wake::CpuDebug(Some(command)) => {
+                let _ = command.reply.send(driver.cpu_debug(&command.token));
+            }
+            Wake::CpuDebug(None) => {
+                reject_admissions(&mut admissions);
+                driver.fail();
+                return;
             }
             Wake::Clock | Wake::Deadline | Wake::Shutdown => {}
         }
@@ -178,6 +198,17 @@ async fn receive_commands(
     }
 }
 
+async fn receive_cpu_debug(
+    receiver: &mut tokio::sync::mpsc::Receiver<CpuDebugCommand>,
+    enabled: bool,
+) -> Option<CpuDebugCommand> {
+    if enabled {
+        receiver.recv().await
+    } else {
+        pending().await
+    }
+}
+
 fn reject_admissions(admissions: &mut VecDeque<OwnerCommand>) {
     while let Some(command) = admissions.pop_front() {
         command.reject_unavailable();
@@ -206,6 +237,7 @@ fn close_at_boundaries(driver: &mut Driver) -> bool {
 fn stop_for_shutdown(
     driver: &mut Driver,
     receiver: &mut tokio::sync::mpsc::Receiver<OwnerCommand>,
+    cpu_debug_receiver: &mut tokio::sync::mpsc::Receiver<CpuDebugCommand>,
     admissions: &mut VecDeque<OwnerCommand>,
 ) {
     driver.settle_shutdown(Instant::now());
@@ -214,6 +246,9 @@ fn stop_for_shutdown(
     }
     while let Ok(command) = receiver.try_recv() {
         command.reject(RoomError::RoomNotFound);
+    }
+    while let Ok(command) = cpu_debug_receiver.try_recv() {
+        command.reject();
     }
 }
 

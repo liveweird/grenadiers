@@ -26,6 +26,7 @@ use tokio::{sync::Semaphore, time::timeout};
 pub(crate) mod admission;
 mod browser_response;
 mod configuration;
+mod cpu_debug;
 mod diagnostics;
 mod game;
 pub(crate) mod peer_identity;
@@ -66,6 +67,8 @@ pub struct AppState {
     trusted_proxies: Arc<peer_identity::TrustedProxyIps>,
     gameplay_admission: admission::GameplayAdmission,
     diagnostic_admission: admission::DiagnosticAdmission,
+    cpu_debug_enabled: bool,
+    cpu_debug_gate: cpu_debug::CpuDebugGate,
     denial_telemetry: Arc<admission::DenialTelemetry>,
 }
 
@@ -147,6 +150,7 @@ pub fn app(state: AppState, web_dist_dir: Option<PathBuf>) -> Router {
                 .layer(middleware::from_fn(no_store_middleware)),
         )
         .route("/api/v1/game/session", post(issue_session))
+        .route("/api/v1/game/cpu-debug", post(cpu_debug::query))
         .route(
             "/api/v1/game/ws",
             get(game_websocket)
@@ -297,6 +301,8 @@ async fn api_method_not_allowed(uri: Uri) -> Response {
 mod admission_telemetry_tests;
 #[cfg(test)]
 mod browser_response_tests;
+#[cfg(test)]
+mod cpu_debug_tests;
 #[cfg(test)]
 mod diagnostics_tests;
 #[cfg(test)]

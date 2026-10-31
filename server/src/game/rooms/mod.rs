@@ -9,6 +9,8 @@ use tokio::sync::{Notify, watch};
 
 mod closing;
 mod cpu;
+#[cfg(test)]
+mod cpu_debug_test_support;
 mod input;
 #[cfg(test)]
 mod legacy_registry;

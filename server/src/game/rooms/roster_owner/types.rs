@@ -19,6 +19,7 @@ use super::super::{
 };
 
 pub(super) const COMMAND_CAPACITY: usize = 32;
+pub(super) const CPU_DEBUG_COMMAND_CAPACITY: usize = 4;
 pub(super) type Reply<T> = oneshot::Receiver<Result<T, RoomError>>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -113,11 +114,28 @@ impl OwnerCommand {
 #[derive(Clone)]
 pub(in crate::game::rooms) struct RosterOwnerHandle {
     pub(super) commands: mpsc::Sender<OwnerCommand>,
+    pub(super) cpu_debug_commands: mpsc::Sender<CpuDebugCommand>,
+}
+
+pub(super) struct CpuDebugCommand {
+    pub(super) token: v14::ResumeToken,
+    pub(super) reply: oneshot::Sender<
+        Result<crate::cpu_debug::CpuDebugResponse, crate::cpu_debug::CpuDebugQueryError>,
+    >,
+}
+
+impl CpuDebugCommand {
+    pub(super) fn reject(self) {
+        let _ = self
+            .reply
+            .send(Err(crate::cpu_debug::CpuDebugQueryError::Unavailable));
+    }
 }
 
 pub(in crate::game::rooms) struct PreparedRosterOwner {
     pub(super) created_at: Instant,
     pub(super) receiver: mpsc::Receiver<OwnerCommand>,
+    pub(super) cpu_debug_receiver: mpsc::Receiver<CpuDebugCommand>,
     pub(super) notices: watch::Sender<RosterOwnerNotice>,
     pub(super) initial: RosterNotice,
     pub(super) runtime: RosterRuntime,

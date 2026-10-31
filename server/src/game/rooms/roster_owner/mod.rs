@@ -1,4 +1,7 @@
 mod admissions;
+mod cpu_debug;
+#[cfg(test)]
+mod cpu_debug_tests;
 mod driver;
 mod handle;
 mod runner;
@@ -26,11 +29,17 @@ impl PreparedRosterOwner {
         let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(initial.clone()));
         drop(receiver);
         let (commands, command_receiver) = tokio::sync::mpsc::channel(types::COMMAND_CAPACITY);
+        let (cpu_debug_commands, cpu_debug_receiver) =
+            tokio::sync::mpsc::channel(types::CPU_DEBUG_COMMAND_CAPACITY);
         Ok((
-            RosterOwnerHandle { commands },
+            RosterOwnerHandle {
+                commands,
+                cpu_debug_commands,
+            },
             Self {
                 created_at,
                 receiver: command_receiver,
+                cpu_debug_receiver,
                 notices,
                 initial,
                 runtime,
@@ -122,3 +131,6 @@ mod cpu_pickup_progress_tests;
 
 #[cfg(test)]
 mod cpu_strategy_progress_tests;
+
+#[cfg(test)]
+mod cpu_intent_progress_tests;

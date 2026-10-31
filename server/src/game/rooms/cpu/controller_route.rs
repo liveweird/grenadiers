@@ -1,5 +1,4 @@
 use grenadiers_core::cpu::Observation;
-use grenadiers_core::cpu::policy::UtilityMemory;
 #[cfg(test)]
 use grenadiers_core::cpu::routing::PlantPresence;
 #[cfg(test)]
@@ -89,12 +88,11 @@ impl CpuController {
         self.cancel();
         self.clear_escape_origin();
         if reset_memory {
-            self.memory = Some(UtilityMemory::new(
+            self.memory = Some(
                 self.memory
-                    .as_ref()
                     .expect("world memory initialized")
-                    .key(),
-            ));
+                    .without_execution_authority(),
+            );
         }
     }
 }

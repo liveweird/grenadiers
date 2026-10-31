@@ -5,6 +5,25 @@ use grenadiers_core::protocol::{RoomCode, RoomId};
 use super::{GameRooms, RoomError, RoomHandle};
 
 impl GameRooms {
+    pub(crate) async fn cpu_debug(
+        &self,
+        room_id: &RoomId,
+        token: grenadiers_core::protocol::v14::ResumeToken,
+    ) -> Result<crate::cpu_debug::CpuDebugResponse, crate::cpu_debug::CpuDebugQueryError> {
+        let owner = {
+            let registry = self.lock();
+            if self.is_stopping() {
+                return Err(crate::cpu_debug::CpuDebugQueryError::Unavailable);
+            }
+            registry
+                .rooms
+                .get(room_id)
+                .map(|handle| handle.owner.clone())
+        }
+        .ok_or(crate::cpu_debug::CpuDebugQueryError::Unavailable)?;
+        owner.cpu_debug(token).await
+    }
+
     pub(super) fn handle_for(&self, room_id: &RoomId) -> Result<RoomHandle, RoomError> {
         self.lock()
             .rooms

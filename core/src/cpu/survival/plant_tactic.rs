@@ -54,6 +54,7 @@ pub(super) fn certified_plant_for_policy(
     ordinary: &ControlPlan,
     bounded: bool,
     candidates: bool,
+    strategic: bool,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     if candidates {
@@ -64,6 +65,7 @@ pub(super) fn certified_plant_for_policy(
                 settled_stop_tick,
                 memory,
                 ordinary,
+                strategic,
                 work,
             );
         }
@@ -74,6 +76,7 @@ pub(super) fn certified_plant_for_policy(
             settled_stop_tick,
             memory,
             ordinary,
+            strategic,
             &mut tactic_work,
         );
         work.try_take(tactic_work.spent()).ok()?;
@@ -100,8 +103,33 @@ pub(super) fn certified_plant_candidates(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
+    strategic: bool,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
+    let selected = ordinary.next_memory.strategic_intent();
+    if strategic && selected.is_none() {
+        return None;
+    }
+    if strategic
+        && selected.is_some_and(|intent| {
+            !matches!(
+                intent.phase,
+                crate::cpu::policy::StrategicPhase::Approach
+                    | crate::cpu::policy::StrategicPhase::Reengage
+            )
+        })
+    {
+        return None;
+    }
+    if selected.is_some_and(|intent| {
+        !matches!(
+            intent.target,
+            crate::cpu::policy::StrategicTarget::Block { .. }
+                | crate::cpu::policy::StrategicTarget::Opponent { .. }
+        )
+    }) {
+        return None;
+    }
     let prefilter_allowance = work.remaining() / 8;
     let mut prefilter_work = WorkBudget::new(prefilter_allowance);
     let useful = super::plant_value::could_be_useful(observation, &mut prefilter_work);
@@ -227,19 +255,44 @@ fn certified_plant_inner_prefiltered(
         plan_ordinary_plant(observation, history, request, work)
     }
     .ok()?;
-    super::plant_value::useful_plant(observation, certificate.placement(), work)?.then(|| {
-        SurvivalPlan {
-            control: ControlPlan {
-                intent: Intent {
-                    movement: ordinary.intent.movement,
-                    manual: Some(ManualIntent::Bomb),
-                },
-                hold_ticks: 1,
-                next_memory: UtilityMemory::new(memory.key()),
+    let strategic_intent = ordinary
+        .next_memory
+        .strategic_intent()
+        .or(memory.strategic_intent());
+    let useful = if let Some(intent) = strategic_intent {
+        super::plant_value::useful_plant_for(
+            observation,
+            certificate.placement(),
+            intent.target,
+            work,
+        )?
+    } else {
+        super::plant_value::useful_plant(observation, certificate.placement(), work)?
+    };
+    useful.then(|| SurvivalPlan {
+        control: ControlPlan {
+            intent: Intent {
+                movement: ordinary.intent.movement,
+                manual: Some(ManualIntent::Bomb),
             },
-            lease: None,
-            execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
-        }
+            hold_ticks: 1,
+            next_memory: if strategic_intent.is_some() {
+                UtilityMemory::new(memory.key())
+                    .carry_progress(ordinary.next_memory)
+                    .mark_strategic_phase(
+                        crate::cpu::policy::StrategicPhase::Plant,
+                        strategic_intent.map_or(
+                            crate::cpu::policy::StrategicSwitchReason::Initial,
+                            |intent| intent.last_switch_reason,
+                        ),
+                        observation.parts().tick,
+                    )
+            } else {
+                UtilityMemory::new(memory.key())
+            },
+        },
+        lease: None,
+        execution: Some(ExecutionCertificate::Plant(Box::new(certificate))),
     })
 }
 

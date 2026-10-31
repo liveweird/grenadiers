@@ -2,7 +2,10 @@ use grenadiers_core::cpu::{
     BombKnowledge, MemoryKey, ObservedBomb, ObservedBombTrigger, ObservedFlame, UnknownBombFacts,
     WorkBudget,
     forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
-    policy::{ControlPlan, UtilityMemory},
+    policy::{
+        ControlPlan, StrategicIntent, StrategicObjectiveKind, StrategicPhase,
+        StrategicSwitchReason, StrategicTarget, UtilityMemory,
+    },
     routing::{RouteLimits, RouteMode, RouteRequest, plan_route},
     survival::{ExecutionCertificate, SurvivalPlan},
 };
@@ -94,6 +97,50 @@ fn clear_gap_requires_an_unencumbered_settled_stop() {
         Some(grenadiers_core::cpu::survival::RouteStatus::Completed)
     );
     assert!(legacy.has_committed_route());
+}
+
+#[test]
+fn cpu24_route_invalidation_revokes_authority_but_retains_exact_strategic_metadata() {
+    let (mut controller, _) = committed_wait_controller();
+    let key = controller.memory.unwrap().key();
+    let strategic = StrategicIntent {
+        objective: StrategicObjectiveKind::Farm,
+        target: StrategicTarget::Block {
+            cell: CellId::new(8, 7),
+        },
+        approach_cell: Some(CellId::new(7, 7)),
+        phase: StrategicPhase::Approach,
+        last_switch_reason: StrategicSwitchReason::Initial,
+        observation_tick: Tick(21),
+        score: 2,
+        committed_until: Tick(45),
+        progress_deadline: Tick(57),
+        last_distance: 0,
+        last_cpu_position: grenadiers_core::game::Position::center(CellId::new(7, 7)),
+        deferred_until: None,
+    };
+    controller.memory = Some(UtilityMemory::new(key).with_strategic_intent(strategic));
+
+    controller.invalidate_route();
+
+    assert!(!controller.has_committed_route());
+    assert!(controller.committed_contact.is_none());
+    assert!(controller.escape_origin.is_none());
+    assert_eq!(
+        controller.memory.unwrap().strategic_intent(),
+        Some(strategic)
+    );
+    assert!(
+        controller
+            .memory
+            .unwrap()
+            .route()
+            .iter()
+            .all(Option::is_none)
+    );
+
+    controller.reset_world(4);
+    assert_eq!(controller.memory.unwrap().strategic_intent(), None);
 }
 
 pub(super) fn committed_wait_controller() -> (CpuController, grenadiers_core::cpu::Observation) {

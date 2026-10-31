@@ -3,6 +3,8 @@ import type { Direction, GameClientMessage, GameServerMessage, GameSettings, Roo
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
 import { preservesTeleportHistory } from './teleportHistory'
+import { requestCpuDebug } from './cpuDebugRequest'
+import type { CpuDebugHttpResult } from './cpuDebugTypes'
 export { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { acceptableBaseline, canControl, controlIsObsolete, createConfiguration, dependenciesWithDefaults,
   gameplayUrl, isCurrentConnection, MAX_COUNTER, MAX_RECONNECT_ATTEMPTS, newerRoom, parseServerFrame,
@@ -12,23 +14,22 @@ export { gameplayUrl } from './clientProtocol'
 export class GameClient {
   private state = initialGameClientState()
   private generation = 0; private controller: AbortController | null = null
-  private socket: WebSocket | null = null
-  private nextSequence = 1; private nextAction = 1
+  private socket: WebSocket | null = null; private nextSequence = 1; private nextAction = 1
   private admission: AdmissionIntent | null = null; private capability: Capability | null = null
   private admissionSequence: number | null = null; private leaveSequence: number | null = null
-  private settingsSequence: number | null = null
-  private pendingSettings: PendingSettings | null = null
-  private sentControls: ControlCommand[] = []
-  private controlFailure: ControlFailure | null = null
-  private stopped = false
-  private readonly onChange: (state: GameClientState) => void
-  private readonly dependencies: Dependencies
-  private readonly recovery: ClientRecovery
+  private settingsSequence: number | null = null; private pendingSettings: PendingSettings | null = null
+  private sentControls: ControlCommand[] = []; private controlFailure: ControlFailure | null = null; private stopped = false
+  private readonly onChange: (state: GameClientState) => void; private readonly dependencies: Dependencies; private readonly recovery: ClientRecovery
   constructor(onChange: (state: GameClientState) => void, dependencies?: Partial<Dependencies>) {
     this.onChange = onChange; this.dependencies = dependenciesWithDefaults(dependencies)
     this.recovery = new ClientRecovery(this.dependencies, () => this.terminal('connectionFailed', true))
   }
   getState(): GameClientState { return this.state }
+  requestCpuDebug(signal: AbortSignal): Promise<CpuDebugHttpResult> {
+    const generation = this.generation; const capability = this.capability; return requestCpuDebug(
+      this.dependencies.fetch, this.state, capability,
+      () => generation === this.generation && capability === this.capability, signal)
+  }
   admit(intent: AdmissionIntent): boolean {
     if (this.state.room || this.admission || this.state.leavePending) return false
     this.stopped = false
@@ -103,8 +104,7 @@ export class GameClient {
     this.update({ leavePending: true, failure: null })
     return true
   }
-  disconnect(): void { this.reset(true) }
-  dispose(): void { this.reset(false) }
+  disconnect(): void { this.reset(true) } dispose(): void { this.reset(false) }
   private reset(notify: boolean): void {
     this.stopped = true
     this.generation += 1

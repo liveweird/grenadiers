@@ -18,3 +18,10 @@ npm --prefix web run gen:validators
 npm --prefix web run check:realtime
 npm --prefix web run check:validators
 ```
+
+## Authenticated CPU intent view
+
+The separate operator-enabled [CPU intent endpoint and overlay](game/cpu-intent.md) exposes
+recipient-filtered strategic summaries to connected human room participants. It uses its own
+versioned HTTP contract, budgets and owner queue; it does not extend this anonymous v2 socket.
+`CPU_DEBUG_ENABLED` defaults to false and the browser additionally requires `?cpuDebug=1`.

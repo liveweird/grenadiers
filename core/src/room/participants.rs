@@ -30,6 +30,7 @@ pub enum CpuPolicy {
     UtilityV21,
     UtilityV22,
     UtilityV23,
+    UtilityV24,
 }
 
 impl CpuPolicy {
@@ -59,6 +60,7 @@ impl CpuPolicy {
             Self::UtilityV21 => 21,
             Self::UtilityV22 => 22,
             Self::UtilityV23 => 23,
+            Self::UtilityV24 => 24,
         }
     }
 }
@@ -249,14 +251,25 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
-    /// Rules-v9 profile with persistent goals and opportunistic certified planting.
-    pub const RESPAWN_LAIRS_STANDARD: Self = Self {
+    /// Archived rules-v9 profile with goal-cell persistence and certified planting.
+    pub const RESPAWN_V23_STANDARD: Self = Self {
         policy: CpuPolicy::UtilityV23,
         difficulty: CpuDifficulty::Standard,
     };
 
-    pub const RESPAWN_LAIRS_EASY: Self = Self {
+    pub const RESPAWN_V23_EASY: Self = Self {
         policy: CpuPolicy::UtilityV23,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Rules-v9 profile with persistent subjects and phased strategic intent.
+    pub const RESPAWN_LAIRS_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV24,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const RESPAWN_LAIRS_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV24,
         difficulty: CpuDifficulty::Easy,
     };
 
@@ -349,10 +362,12 @@ mod tests {
         assert_eq!(CpuProfile::LAIRS_V19_EASY.policy.version(), 19);
         assert_eq!(CpuProfile::LAIRS_STANDARD.policy.version(), 20);
         assert_eq!(CpuProfile::LAIRS_EASY.policy.version(), 20);
-        assert_eq!(CpuProfile::RESPAWN_LAIRS_STANDARD.policy.version(), 23);
+        assert_eq!(CpuProfile::RESPAWN_LAIRS_STANDARD.policy.version(), 24);
+        assert_eq!(CpuProfile::RESPAWN_V23_STANDARD.policy.version(), 23);
         assert_eq!(CpuProfile::RESPAWN_V22_STANDARD.policy.version(), 22);
         assert_eq!(CpuProfile::RESPAWN_V21_STANDARD.policy.version(), 21);
-        assert_eq!(CpuProfile::RESPAWN_LAIRS_EASY.policy.version(), 23);
+        assert_eq!(CpuProfile::RESPAWN_LAIRS_EASY.policy.version(), 24);
+        assert_eq!(CpuProfile::RESPAWN_V23_EASY.policy.version(), 23);
         assert_eq!(CpuProfile::RESPAWN_V22_EASY.policy.version(), 22);
         assert_eq!(CpuProfile::RESPAWN_V21_EASY.policy.version(), 21);
         assert!(CpuProfile::CURRENT.is_current());

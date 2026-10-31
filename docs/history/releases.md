@@ -4,6 +4,61 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.0.4 — 2026-10-31
+
+Improve arena opponents through stronger decisions. CPU23 retains reachable objectives and
+bounded visit history, seeks productive crate-clearing positions, collects upgrades, and tries
+distinct certified bomb inputs before returning safe navigation. Unrelated pickups no longer
+suppress planting. Attained non-pickup objectives receive a visit-bounded retry cooldown;
+changed or higher-value goals are reconsidered. Easy retains its slower cadence.
+
+Mob navigation2 completes exits from dangerous origin tiles and re-centers interrupted retreats
+exactly before resuming pursuit. Safe centers are reachable from either side; genuinely trapped
+mobs wait for a safe route. Existing constructors and replay8 retain archived navigation1.
+Private replay9 explicitly binds navigation2/CPU23 and reuses checked accepted-input execution.
+Public gameplay17, rules9 geometry, generators, randomness and artwork remain unchanged.
+
+### Verification
+
+Accepted source: `b9cca82af5032de427649da0552a497db59249a4`,
+[PR #287](https://github.com/liveweird/grenadiers/pull/287). Independent CPU, mob and integration
+review is clear. Targeted debug/release regressions cover dangerous-origin oscillation, exact
+center arrival, blocked exits, reachable/changed/attained goals, cooldown expiry, pickup
+handoff, bounded optional tactics and archived/current replay identities.
+
+- Fresh debug/release suites pass: 1,567 core tests, 569 server tests and doctests. Formatting,
+  Clippy and build pass. Independent Rust coverage is 47,338/51,179 lines
+  (92.49%), above the unchanged 90% floor. The full local gate finishes in
+  330.377 seconds.
+- The real queued generated scene tracks physical bomb IDs, crate loss, collection plus later
+  movement, alive-player updates and settled-cell transitions. The matched 1,200-update sample
+  produces 13 physical bombs, 12 destroyed blocks, a collected Golden Flame and 3,600 alive-CPU
+  updates without a three-cycle A/B pattern. This is fixed-workload evidence, not a human rating.
+- Native Docker pickup/progress acceptance passes in 14.9 seconds. Four Compose cases pass in
+  28.2 seconds and two Kubernetes cases in 5.5 seconds, including default CPU first-bomb escape,
+  all-features-disabled movement, rendered duel and authentication. An additional Easy Solo
+  scenario passes in 13.2 seconds with completion, rematch, reconnect and leaving. Exact image, restricted
+  runtime, resource limits, probes and zero restarts are checked; temporary resources are removed.
+- Gameplay contract drift and dependency policy/audits pass at the HIGH/CRITICAL threshold.
+  Unchanged upstream minimatch tooling advisories report 20 moderate web and 12 moderate E2E
+  entries. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL image vulnerabilities.
+- Identical web/API/art inputs reuse v1.0.3's E2E-static and v1.0.2's 7,174-test frontend/atlas
+  acceptance. The rebuilt image retains the same web asset bytes. Only the independently
+  reviewed historical ExpandedV5 mask executions are reused: all 4,194,304 masks per
+  debug/release/coverage profile from source 336503ed. Fresh Rust coverage merges no old counters.
+- [Unique Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41155836024)
+  pass for the accepted source. Subsequent release documentation preserves all Rust/build inputs.
+
+### Operation
+
+Localhost:8085 runs accepted image
+`sha256:95b6e06b64a8c8923a54a9b821dac9cf33dcb2505b33c775d391e452eb640776`, labelled 1.0.4/source b9cca82a.
+Promotion checks exact image, health/readiness, runtime limits, CSP/cache policy and served
+HTML/JS/CSS/PNG equality. Immutable v1.0.3 remains available for rollback. Restart ends
+process-local matches; refresh and create a new match to try Standard against three CPUs.
+The unchanged [v1.0.2 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.0.2/grenadiers-art-v1.0.2.zip)
+remains current. Further human tuning lives in [BACKLOG.md](../../BACKLOG.md).
+
 ## v1.0.3 — 2026-10-31
 
 Fix CPUs stopping beside exposed pickups. The old planner discarded the movement lease from

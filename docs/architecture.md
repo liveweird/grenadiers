@@ -31,7 +31,7 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. All live two-to-four-seat matches use CPU policy23, rules9 physics and mob navigation2;
+ceiling, not a connection limit. All live two-to-four-seat matches use CPU policy24, rules9 physics and mob navigation2;
 cloud and lair settings may be enabled or disabled per room.
 Archived profiles retain their historical policies and rules. The board
 choice is immutable, defaults to 15×13 and is documented in [board geometry](game/board-sizes.md).

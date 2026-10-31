@@ -108,6 +108,45 @@ pub fn plan_respawn_v23_with_origin(
 }
 
 #[allow(clippy::too_many_arguments)]
+pub fn plan_respawn_v24_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    if observation.parts().rules.version != 9 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    if observation.respawn_lairs().is_none() {
+        return super::respawn_disabled::plan_v24(
+            observation,
+            memory,
+            history,
+            settled_stop_tick,
+            origin,
+            rng,
+            work,
+        )
+        .map(|survival| LairSurvivalPlan {
+            survival,
+            contact: None,
+        });
+    }
+    super::lair_planner::plan_lairs_v24(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn plan_respawn_policy(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -147,6 +186,7 @@ fn plan_respawn_policy(
         work,
         9,
         pickup_handoff,
+        false,
         false,
     )
 }

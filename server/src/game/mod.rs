@@ -12,7 +12,9 @@ pub(crate) use http::{issue_session, origin_allowed};
 pub(crate) use limits::InboundLimit;
 pub(crate) use rooms::GameRooms;
 #[cfg(test)]
-pub(crate) use rooms::{Admission, BindingKey, ClosingReason, RoomAction, RoomNotice};
+pub(crate) use rooms::{
+    Admission, BindingKey, ClosingReason, RoomAction, RoomNotice, RosterAction,
+};
 #[cfg(test)]
 pub(crate) use sessions::ConnectionId;
 pub(crate) use sessions::{GameSessions, UpgradeLimit};

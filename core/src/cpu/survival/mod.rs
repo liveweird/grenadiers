@@ -29,9 +29,10 @@ pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use planner::{SurvivalPlan, plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
+pub use plant_value::strategic_plant_still_targets;
 pub use respawn_v22::{
     plan_respawn, plan_respawn_v22_with_origin, plan_respawn_v23_with_origin,
-    plan_respawn_with_origin,
+    plan_respawn_v24_with_origin, plan_respawn_with_origin,
 };
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
@@ -76,3 +77,6 @@ mod lair_pickup_execution_tests;
 
 #[cfg(test)]
 mod rules_v9_occupancy_tests;
+
+#[cfg(test)]
+mod rules_v9_strategy_tests;

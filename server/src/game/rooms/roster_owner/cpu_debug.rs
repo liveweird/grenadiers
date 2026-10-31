@@ -7,7 +7,7 @@ use grenadiers_core::{
         },
     },
     game::SeatId,
-    protocol::{Cell, v14::ResumeToken, v17},
+    protocol::{Cell, v14::ResumeToken, v18},
     room::RosterParticipant,
 };
 
@@ -42,7 +42,7 @@ impl Driver {
 
         let room = self
             .last
-            .respawn_room()
+            .spike_room()
             .ok_or(CpuDebugQueryError::Unavailable)?;
         let unavailable_response = || CpuDebugResponse {
             protocol_version: 1,
@@ -60,11 +60,11 @@ impl Driver {
                 })
                 .collect(),
         };
-        let Some(publication) = self.last.respawn_cpu_publication() else {
+        let Some(publication) = self.last.spike_cpu_publication() else {
             return Ok(unavailable_response());
         };
         let recipient = wire_seat(seat);
-        let projected = v17::project_recipient(publication, recipient)
+        let projected = v18::project_recipient(publication, recipient)
             .map_err(|_| CpuDebugQueryError::Unavailable)?;
         let bomb_blind = projected
             .state
@@ -106,7 +106,7 @@ impl Driver {
 
 pub(super) fn available_row(
     summary: IntentDebugSummary,
-    state: &v17::GameState,
+    state: &v18::GameState,
 ) -> Option<CpuDebugRow> {
     let target = match summary.target {
         StrategicTarget::Pickup { cell, kind } => {
@@ -190,36 +190,36 @@ pub(super) fn available_row(
     })
 }
 
-fn actor_visible(state: &v17::GameState, seat: SeatId) -> bool {
+fn actor_visible(state: &v18::GameState, seat: SeatId) -> bool {
     state
         .actors
         .get(seat.index())
-        .is_some_and(|actor| matches!(actor, v17::ActorView::Visible { .. }))
+        .is_some_and(|actor| matches!(actor, v18::ActorView::Visible { .. }))
 }
-pub(super) fn recipient_bomb_blind(actor: &v17::ActorView) -> bool {
+pub(super) fn recipient_bomb_blind(actor: &v18::ActorView) -> bool {
     match actor {
-        v17::ActorView::Visible { effects, .. } => effects
+        v18::ActorView::Visible { effects, .. } => effects
             .as_slice()
             .iter()
-            .any(|effect| effect.kind() == v17::EffectKind::InvisibleBombs),
-        v17::ActorView::Hidden { .. } => true,
+            .any(|effect| effect.kind() == v18::EffectKind::InvisibleBombs),
+        v18::ActorView::Hidden { .. } => true,
     }
 }
-fn cell_visible(state: &v17::GameState, cell: Cell) -> bool {
+fn cell_visible(state: &v18::GameState, cell: Cell) -> bool {
     cell.column() < state.arena.width && cell.row() < state.arena.height
 }
-fn wire_seat(seat: SeatId) -> v17::Seat {
+fn wire_seat(seat: SeatId) -> v18::Seat {
     match seat {
-        SeatId::One => v17::Seat::One,
-        SeatId::Two => v17::Seat::Two,
-        SeatId::Three => v17::Seat::Three,
-        SeatId::Four => v17::Seat::Four,
+        SeatId::One => v18::Seat::One,
+        SeatId::Two => v18::Seat::Two,
+        SeatId::Three => v18::Seat::Three,
+        SeatId::Four => v18::Seat::Four,
     }
 }
 
-fn wire_pickup(value: v17::PickupKind) -> crate::cpu_debug::DebugPickupKind {
+fn wire_pickup(value: v18::PickupKind) -> crate::cpu_debug::DebugPickupKind {
     use crate::cpu_debug::DebugPickupKind as D;
-    use v17::PickupKind as W;
+    use v18::PickupKind as W;
     match value {
         W::BombCapacity => D::BombCapacity,
         W::BlastRange => D::BlastRange,

@@ -54,6 +54,7 @@ impl Driver {
                 .or_else(|| initial.environment_room().map(|room| &room.room_id))
                 .or_else(|| initial.lair_room().map(|room| &room.room_id))
                 .or_else(|| initial.respawn_room().map(|room| &room.room_id))
+                .or_else(|| initial.spike_room().map(|room| &room.room_id))
                 .expect("owner requires a checked room publication")
                 .clone(),
             runtime,
@@ -166,13 +167,14 @@ impl Driver {
         let seat = self
             .validate(binding, room_id, round_id)
             .map_err(|_| RosterRuntimeError::StaleEpoch)?;
-        if let Some(notice) = self.runtime.update_respawn_settings(
+        if let Some(notice) = self.runtime.update_spike_settings(
             seat,
             round_id,
             action.settings_revision,
             action.settings,
             action.cloud,
             action.tuning,
+            action.spike_pits,
         )? {
             self.publish(notice);
         }

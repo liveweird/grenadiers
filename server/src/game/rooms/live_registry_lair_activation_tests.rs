@@ -21,7 +21,7 @@ async fn advance_ticks(count: usize) {
 }
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn live_lair_cpu_progresses_through_checked_v17_snapshots() {
+async fn live_lair_cpu_progresses_through_checked_v18_snapshots() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let mut admission = rooms
@@ -49,7 +49,7 @@ async fn live_lair_cpu_progresses_through_checked_v17_snapshots() {
     };
     let first: serde_json::Value = serde_json::from_str(&first).unwrap();
     assert_eq!(first["type"], "snapshot");
-    assert_eq!(first["room"]["rulesVersion"], 9);
+    assert_eq!(first["room"]["rulesVersion"], 10);
     assert_eq!(first["room"]["phase"]["type"], "running");
     let initial_tick = first["state"]["physicalTick"].as_u64().unwrap();
 

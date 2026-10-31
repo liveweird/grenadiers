@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v17::{ErrorCode, GameServerMessage, ManualActionKind};
-use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
+use grenadiers_core::protocol::v18::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::{Counter, RoomId};
 use tokio::time::Instant;
 
 use super::{
@@ -198,7 +198,15 @@ pub(super) async fn dispatch(
                         grenadiers_core::room::RespawnLairSettings::new(
                             settings.environment.lairs.spawn_seconds,
                         )
-                        .expect("v17 parser validates lair settings"),
+                        .expect("v18 parser validates lair settings"),
+                    ),
+                    spike_pits: grenadiers_core::room::SpikePitTuning::new(
+                        settings.environment.spike_pits.enabled,
+                        grenadiers_core::room::SpikePitSettings::new(
+                            settings.environment.spike_pits.warning_ticks.into(),
+                            settings.environment.spike_pits.raised_ticks.into(),
+                        )
+                        .expect("v18 parser validates spike-pit settings"),
                     ),
                 },
                 state,
@@ -216,7 +224,7 @@ pub(super) async fn dispatch(
                 rooms,
                 room_id,
                 u64::from(round_id.get()),
-                RoomAction::Movement(direction.map(domain_direction)),
+                RoomAction::Movement(direction.map(environment_settings::domain_direction)),
                 state,
                 sequence,
             )
@@ -374,15 +382,6 @@ pub(super) async fn room_error(
         RoomError::UnsupportedConfiguration => ErrorCode::UnsupportedConfiguration,
     };
     reply_error(socket, code, sequence).await
-}
-
-const fn domain_direction(direction: WireDirection) -> grenadiers_core::game::Direction {
-    match direction {
-        WireDirection::North => grenadiers_core::game::Direction::North,
-        WireDirection::East => grenadiers_core::game::Direction::East,
-        WireDirection::South => grenadiers_core::game::Direction::South,
-        WireDirection::West => grenadiers_core::game::Direction::West,
-    }
 }
 
 pub(super) async fn reply_error(

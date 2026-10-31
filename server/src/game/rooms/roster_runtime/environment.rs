@@ -12,7 +12,7 @@ use crate::round_seed::RoundSeedSource;
 
 use super::{
     error::{RosterRuntimeError, lifecycle},
-    publication_v15, publication_v16, publication_v17,
+    publication_v15, publication_v16, publication_v17, publication_v18,
     runtime::{EnvironmentProfile, RosterRuntime, SimulationSeedDerivation},
     types::{RosterIdentity, RosterNotice},
 };
@@ -103,6 +103,7 @@ impl RosterRuntime {
         Ok(runtime)
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(in crate::game::rooms) fn new_respawn(
         identity: RosterIdentity,
         settings: RoomSettings,
@@ -116,6 +117,7 @@ impl RosterRuntime {
         Ok(runtime)
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     #[allow(clippy::too_many_arguments)]
     pub(in crate::game::rooms) fn new_respawn_with_navigation(
         identity: RosterIdentity,
@@ -142,9 +144,12 @@ impl RosterRuntime {
     pub(in crate::game::rooms) const fn lair_tuning(&self) -> Option<LairTuning> {
         match self.environment_profile {
             Some(EnvironmentProfile::LairsV8 { tuning, .. }) => Some(tuning),
-            Some(EnvironmentProfile::StormV7(_) | EnvironmentProfile::RespawnV9 { .. }) | None => {
-                None
-            }
+            Some(
+                EnvironmentProfile::StormV7(_)
+                | EnvironmentProfile::RespawnV9 { .. }
+                | EnvironmentProfile::SpikeV10 { .. },
+            )
+            | None => None,
         }
     }
 
@@ -152,12 +157,14 @@ impl RosterRuntime {
     pub(in crate::game::rooms) const fn respawn_tuning(&self) -> Option<RespawnLairTuning> {
         match self.environment_profile {
             Some(EnvironmentProfile::RespawnV9 { tuning, .. }) => Some(tuning),
+            Some(EnvironmentProfile::SpikeV10 { lairs, .. }) => Some(lairs),
             Some(EnvironmentProfile::StormV7(_) | EnvironmentProfile::LairsV8 { .. }) | None => {
                 None
             }
         }
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(in crate::game::rooms) fn update_respawn_settings(
         &mut self,
         seat: SeatId,
@@ -174,6 +181,7 @@ impl RosterRuntime {
         Ok(notice)
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn apply_respawn_settings(
         &mut self,
         seat: SeatId,
@@ -278,7 +286,7 @@ impl RosterRuntime {
         )
     }
 
-    fn apply_profile_settings(
+    pub(super) fn apply_profile_settings(
         &mut self,
         seat: SeatId,
         expected_epoch: u64,
@@ -354,6 +362,23 @@ impl RosterRuntime {
                 self.settings_authority_locked(),
             )
             .map(publication_v17::view_notice),
+            Some(EnvironmentProfile::SpikeV10 {
+                cloud,
+                lairs,
+                spike_pits,
+            }) => publication_v18::room_view(
+                &self.identity,
+                &self.lifecycle,
+                EnvironmentProfile::SpikeV10 {
+                    cloud,
+                    lairs,
+                    spike_pits,
+                },
+                self.revision,
+                self.settings_revision,
+                self.settings_authority_locked(),
+            )
+            .map(publication_v18::view_notice),
             None => Err(RosterRuntimeError::UnsupportedConfiguration),
         }
     }

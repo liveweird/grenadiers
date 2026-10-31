@@ -3,7 +3,10 @@ use std::{sync::Arc, time::Instant as StdInstant};
 use grenadiers_core::{
     game::{EnabledItems, SimulationSeed, StormCloudConfig},
     protocol::{Counter, RoomCode, RoomId, v14},
-    room::{CpuDifficulty, CpuProfile, LairRoomConfiguration, RespawnLairTuning, RoomSettings},
+    room::{
+        CpuDifficulty, CpuProfile, RespawnLairTuning, RoomSettings, SpikePitTuning,
+        SpikeRoomConfiguration,
+    },
 };
 use tokio::time::Instant;
 
@@ -27,6 +30,7 @@ pub(crate) struct LairSettingsAction {
     pub(crate) settings: RoomSettings,
     pub(crate) cloud: StormCloudConfig,
     pub(crate) tuning: RespawnLairTuning,
+    pub(crate) spike_pits: SpikePitTuning,
 }
 
 impl GameRooms {
@@ -35,8 +39,9 @@ impl GameRooms {
         binding: BindingKey,
         sequence: Counter,
         now: StdInstant,
-        configuration: LairRoomConfiguration,
+        configuration: impl Into<SpikeRoomConfiguration>,
     ) -> Result<LiveAdmission, RoomError> {
+        let configuration = configuration.into();
         validate_configuration(&configuration)?;
         let (handle, prepared, id, code) = {
             let mut registry = self.lock();
@@ -151,7 +156,7 @@ impl GameRooms {
 
     fn prepare_live_owner(
         &self,
-        configuration: LairRoomConfiguration,
+        configuration: SpikeRoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
         self.prepare_roster_live_owner(configuration, parts)
@@ -159,13 +164,14 @@ impl GameRooms {
 
     fn prepare_roster_live_owner(
         &self,
-        configuration: LairRoomConfiguration,
+        configuration: SpikeRoomConfiguration,
         parts: &super::registry_identity::RegistryIdentityParts,
     ) -> Result<(LiveOwner, PreparedLiveOwner), RoomError> {
-        let base = *configuration.base();
-        let cloud = configuration.storm_cloud();
-        let tuning = RespawnLairTuning::try_from(configuration.lairs())
+        let base = *configuration.base().base();
+        let cloud = configuration.base().storm_cloud();
+        let tuning = RespawnLairTuning::try_from(configuration.base().lairs())
             .map_err(|_| RoomError::UnsupportedConfiguration)?;
+        let spike_pits = configuration.spike_pits();
         let root = SimulationRoot::generate().map_err(|_| RoomError::CapacityReached)?;
         let simulation_seed = Arc::new(move |epoch| root.for_round(epoch));
         let identity = RosterIdentity {
@@ -174,20 +180,21 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_respawn_with_navigation(
+        let runtime = RosterRuntime::new_spike_with_navigation(
             identity,
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             cloud,
             tuning,
+            spike_pits,
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,
             grenadiers_core::game::MobNavigationPolicy::EscapeV2,
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::RESPAWN_LAIRS_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::RESPAWN_LAIRS_STANDARD,
-            None => CpuProfile::RESPAWN_LAIRS_STANDARD,
+            Some(CpuDifficulty::Easy) => CpuProfile::SPIKE_PITS_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::SPIKE_PITS_STANDARD,
+            None => CpuProfile::SPIKE_PITS_STANDARD,
         };
         let mut cpus = Vec::new();
         for seat in base.cpu_seats() {
@@ -216,8 +223,8 @@ impl GameRooms {
     }
 }
 
-fn validate_configuration(configuration: &LairRoomConfiguration) -> Result<(), RoomError> {
-    if configuration.base().human_seats().next().is_none() {
+fn validate_configuration(configuration: &SpikeRoomConfiguration) -> Result<(), RoomError> {
+    if configuration.base().base().human_seats().next().is_none() {
         return Err(RoomError::UnsupportedConfiguration);
     }
     Ok(())

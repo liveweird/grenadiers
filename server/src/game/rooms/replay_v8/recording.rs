@@ -21,6 +21,9 @@ pub(in crate::game::rooms) struct RecordingRosterRuntime {
 }
 
 impl RecordingRosterRuntime {
+    pub(in crate::game::rooms) fn from_parts(runtime: RosterRuntime, journal: Journal) -> Self {
+        Self { runtime, journal }
+    }
     pub(in crate::game::rooms) fn new_with_mob_navigation(
         configuration: LairRoomConfiguration,
         settings: RoomSettings,
@@ -97,6 +100,21 @@ impl RecordingRosterRuntime {
                 settings,
                 cloud,
                 tuning,
+            ),
+            ReplayAction::UpdateSpikeSettings {
+                settings_revision,
+                settings,
+                cloud,
+                tuning,
+                spike_pits,
+            } => self.runtime.update_spike_settings(
+                seat,
+                epoch,
+                settings_revision,
+                settings,
+                cloud,
+                tuning,
+                spike_pits,
             ),
             action => self.runtime.action(seat, epoch, domain_action(action)?),
         }

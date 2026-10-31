@@ -4,7 +4,7 @@ use grenadiers_core::{
         StrategicTarget,
     },
     game::{CellId, PickupKind, SeatId, Tick},
-    protocol::{Counter, Direction, EntityId, Position, Tick as WireTick, v14::ResumeToken, v17},
+    protocol::{Counter, Direction, EntityId, Position, Tick as WireTick, v14::ResumeToken, v18},
     room::{CpuDifficulty, SeatControl},
 };
 
@@ -164,7 +164,7 @@ async fn saturated_diagnostic_queue_does_not_consume_gameplay_command_capacity()
 #[test]
 fn hidden_or_stale_targets_redact_the_entire_intent_row() {
     let mut state = empty_state();
-    state.actors = vec![hidden_actor(v17::Seat::One), hidden_actor(v17::Seat::Two)];
+    state.actors = vec![hidden_actor(v18::Seat::One), hidden_actor(v18::Seat::Two)];
     let mut summary = summary(StrategicTarget::Opponent { seat: SeatId::Two });
     assert!(available_row(summary, &state).is_none());
 
@@ -185,7 +185,7 @@ fn hidden_or_stale_targets_redact_the_entire_intent_row() {
 
 #[test]
 fn invisible_bomb_effect_conservatively_marks_recipient_bomb_blind() {
-    assert!(recipient_bomb_blind(&hidden_actor(v17::Seat::One)));
+    assert!(recipient_bomb_blind(&hidden_actor(v18::Seat::One)));
     assert!(recipient_bomb_blind(&visible_actor(true)));
     assert!(!recipient_bomb_blind(&visible_actor(false)));
 }
@@ -202,12 +202,12 @@ fn summary(target: StrategicTarget) -> IntentDebugSummary {
     }
 }
 
-fn empty_state() -> v17::GameState {
-    v17::GameState {
+fn empty_state() -> v18::GameState {
+    v18::GameState {
         running_updates: 0,
         remaining_ticks: 0,
         physical_tick: WireTick::new(1).unwrap(),
-        arena: v17::ArenaView {
+        arena: v18::ArenaView {
             width: 15,
             height: 13,
             terrain: Vec::new(),
@@ -221,31 +221,32 @@ fn empty_state() -> v17::GameState {
         storm_cloud: None,
         lairs: Vec::new(),
         mobs: Vec::new(),
+        spike_pits: Vec::new(),
     }
 }
 
-fn hidden_actor(seat: v17::Seat) -> v17::ActorView {
+fn hidden_actor(seat: v18::Seat) -> v18::ActorView {
     let id = match seat {
-        v17::Seat::One => 1,
-        v17::Seat::Two => 2,
-        v17::Seat::Three => 3,
-        v17::Seat::Four => 4,
+        v18::Seat::One => 1,
+        v18::Seat::Two => 2,
+        v18::Seat::Three => 3,
+        v18::Seat::Four => 4,
     };
-    v17::ActorView::Hidden {
+    v18::ActorView::Hidden {
         id: EntityId::new(id),
         seat,
         alive: true,
     }
 }
 
-fn visible_actor(bomb_blind: bool) -> v17::ActorView {
+fn visible_actor(bomb_blind: bool) -> v18::ActorView {
     let effects = bomb_blind
-        .then(|| v17::EffectView::new(v17::EffectKind::InvisibleBombs, 1).unwrap())
+        .then(|| v18::EffectView::new(v18::EffectKind::InvisibleBombs, 1).unwrap())
         .into_iter()
         .collect();
-    v17::ActorView::Visible {
+    v18::ActorView::Visible {
         id: EntityId::new(1),
-        seat: v17::Seat::One,
+        seat: v18::Seat::One,
         position: Position::new(0, 0).unwrap(),
         heading: Direction::North,
         speed_level: 0,
@@ -253,12 +254,12 @@ fn visible_actor(bomb_blind: bool) -> v17::ActorView {
         bomb_capacity: 1,
         bomb_range: 1,
         live_bomb_count: 0,
-        inventory: v17::InventoryView {
+        inventory: v18::InventoryView {
             equipment: None,
             weapon: None,
         },
-        effects: v17::EffectViews::new(effects).unwrap(),
-        damage_grace_remaining_ticks: v17::DamageGraceTicks::new(0).unwrap(),
+        effects: v18::EffectViews::new(effects).unwrap(),
+        damage_grace_remaining_ticks: v18::DamageGraceTicks::new(0).unwrap(),
         voluntary_actions_frozen: false,
         last_teleport_tick: None,
         storm_slow_remaining_ticks: 0,

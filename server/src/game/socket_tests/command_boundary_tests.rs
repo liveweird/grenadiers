@@ -10,11 +10,12 @@ fn sequenced_commands() -> [Value; 9] {
         "enabledItems": [],
         "environment": {
             "stormCloud": true,
-            "lairs": {"enabled": false, "spawnSeconds": 10, "maxLivingMobs": 1}
+            "lairs": {"enabled": false, "spawnSeconds": 10, "maxLivingMobs": 1},
+            "spikePits": {"enabled": true, "warningTicks": 36, "raisedTicks": 180}
         }
     });
     [
-        json!({"type":"createRoom", "sequence":11, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
+        json!({"type":"createRoom", "sequence":11, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1},"spikePits":{"enabled":true,"warningTicks":36,"raisedTicks":180}}}}),
         json!({"type":"joinRoom", "sequence":12, "roomCode":"ABCDEFGH"}),
         json!({
             "type":"resumeRoom", "sequence":13, "roomId":room_id,
@@ -72,8 +73,8 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     let (url, server) = start_server(state).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 17).await,
-        json!({"type":"authenticated", "protocolVersion":17})
+        authenticate(&mut socket, &token, 18).await,
+        json!({"type":"authenticated", "protocolVersion":18})
     );
 
     let room_id = "00000000000000000000000000000001";
@@ -86,7 +87,8 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
                 "bombFuseTicks":180, "enabledItems":[],
                 "environment":{
                     "stormCloud":true,
-                    "lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}
+                    "lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1},
+                    "spikePits":{"enabled":true,"warningTicks":36,"raisedTicks":180}
                 }
             }
         }),
@@ -100,7 +102,7 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     for sequence in [19, 18] {
         send_json(
             &mut socket,
-            json!({"type":"createRoom", "sequence":sequence, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
+            json!({"type":"createRoom", "sequence":sequence, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1},"spikePits":{"enabled":true,"warningTicks":36,"raisedTicks":180}}}}),
         )
         .await;
         assert_eq!(
@@ -111,7 +113,7 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
 
     send_json(
         &mut socket,
-        json!({"type":"createRoom", "sequence":20, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
+        json!({"type":"createRoom", "sequence":20, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1},"spikePits":{"enabled":true,"warningTicks":36,"raisedTicks":180}}}}),
     )
     .await;
     assert_eq!(next_json(&mut socket).await["type"], "admitted");

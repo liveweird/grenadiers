@@ -40,6 +40,7 @@ impl PreparedRosterAdmission {
             PreparedProjection::Environment { .. }
             | PreparedProjection::Lairs { .. }
             | PreparedProjection::Respawn { .. } => None,
+            PreparedProjection::Spike { .. } => None,
         }
     }
 
@@ -48,7 +49,9 @@ impl PreparedRosterAdmission {
         match &self.projection {
             PreparedProjection::Environment { room, .. } => Some(room),
             PreparedProjection::Legacy { .. } => None,
-            PreparedProjection::Lairs { .. } | PreparedProjection::Respawn { .. } => None,
+            PreparedProjection::Lairs { .. }
+            | PreparedProjection::Respawn { .. }
+            | PreparedProjection::Spike { .. } => None,
         }
     }
 
@@ -58,7 +61,8 @@ impl PreparedRosterAdmission {
             PreparedProjection::Lairs { room, .. } => Some(room),
             PreparedProjection::Legacy { .. }
             | PreparedProjection::Environment { .. }
-            | PreparedProjection::Respawn { .. } => None,
+            | PreparedProjection::Respawn { .. }
+            | PreparedProjection::Spike { .. } => None,
         }
     }
 
@@ -68,7 +72,18 @@ impl PreparedRosterAdmission {
             PreparedProjection::Respawn { room, .. } => Some(room),
             PreparedProjection::Legacy { .. }
             | PreparedProjection::Environment { .. }
-            | PreparedProjection::Lairs { .. } => None,
+            | PreparedProjection::Lairs { .. }
+            | PreparedProjection::Spike { .. } => None,
+        }
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn spike_room(
+        &self,
+    ) -> Option<&grenadiers_core::protocol::v18::RoomView> {
+        match &self.projection {
+            PreparedProjection::Spike { room, .. } => Some(room),
+            _ => None,
         }
     }
 
@@ -88,6 +103,9 @@ impl PreparedRosterAdmission {
             PreparedProjection::Respawn { room, .. } => {
                 (&room.room_id, u64::from(room.round_id.get()))
             }
+            PreparedProjection::Spike { room, .. } => {
+                (&room.room_id, u64::from(room.round_id.get()))
+            }
         }
     }
 
@@ -100,6 +118,7 @@ impl PreparedRosterAdmission {
             PreparedProjection::Environment { room, .. } => (&room.room_code, room.revision.get()),
             PreparedProjection::Lairs { room, .. } => (&room.room_code, room.revision.get()),
             PreparedProjection::Respawn { room, .. } => (&room.room_code, room.revision.get()),
+            PreparedProjection::Spike { room, .. } => (&room.room_code, room.revision.get()),
         }
     }
 
@@ -109,7 +128,8 @@ impl PreparedRosterAdmission {
             PreparedProjection::Legacy { room, .. } => Some(room),
             PreparedProjection::Environment { .. }
             | PreparedProjection::Lairs { .. }
-            | PreparedProjection::Respawn { .. } => None,
+            | PreparedProjection::Respawn { .. }
+            | PreparedProjection::Spike { .. } => None,
         }
     }
 }
@@ -277,6 +297,22 @@ impl RosterRuntime {
                     notice,
                 )
             }
+            Some(EnvironmentProfile::SpikeV10 {
+                cloud,
+                lairs,
+                spike_pits,
+            }) => self.prepare_spike_admission(
+                &lifecycle,
+                EnvironmentProfile::SpikeV10 {
+                    cloud,
+                    lairs,
+                    spike_pits,
+                },
+                revision,
+                body,
+                state_epoch,
+                generation,
+            )?,
             None => {
                 let room = publication::room_view(
                     &self.identity,
@@ -327,18 +363,25 @@ impl RosterRuntime {
             super::types::RosterPublication::Legacy(_, _)
             | super::types::RosterPublication::Lairs(_, _)
             | super::types::RosterPublication::Respawn(_, _) => None,
+            super::types::RosterPublication::Spike(_, _) => None,
         };
         self.lair_cpu_publication = match &prepared.notice.publication {
             super::types::RosterPublication::Lairs(_, publication) => publication.clone(),
             super::types::RosterPublication::Legacy(_, _)
             | super::types::RosterPublication::Environment(_, _)
             | super::types::RosterPublication::Respawn(_, _) => None,
+            super::types::RosterPublication::Spike(_, _) => None,
         };
         self.respawn_cpu_publication = match &prepared.notice.publication {
             super::types::RosterPublication::Respawn(_, publication) => publication.clone(),
             super::types::RosterPublication::Legacy(_, _)
             | super::types::RosterPublication::Environment(_, _)
             | super::types::RosterPublication::Lairs(_, _) => None,
+            super::types::RosterPublication::Spike(_, _) => None,
+        };
+        self.spike_cpu_publication = match &prepared.notice.publication {
+            super::types::RosterPublication::Spike(_, publication) => publication.clone(),
+            _ => None,
         };
         self.lifecycle = prepared.lifecycle;
         self.revision = prepared.revision;

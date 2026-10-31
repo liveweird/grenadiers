@@ -4,7 +4,7 @@ use std::sync::Arc;
 use grenadiers_core::room::RoomSettings;
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::{RoomCode, RoomId, v14, v15, v16, v17},
+    protocol::{RoomCode, RoomId, v14, v15, v16, v17, v18},
     room::RoomConfiguration,
 };
 
@@ -69,6 +69,14 @@ impl RosterSeatFrames {
             .map(Self)
     }
 
+    pub(super) fn new_v18(frames: Vec<(v18::Seat, String)>) -> Option<Self> {
+        frames
+            .into_iter()
+            .map(|(seat, frame)| Some((domain_seat_v18(seat)?, Arc::from(frame))))
+            .collect::<Option<Vec<_>>>()
+            .map(Self)
+    }
+
     pub(in crate::game::rooms) fn select(&self, seat: SeatId) -> Option<Arc<str>> {
         self.0
             .iter()
@@ -83,6 +91,7 @@ pub(crate) enum RosterPublication {
     Environment(v15::RoomView, Option<Arc<v15::BoundPublication>>),
     Lairs(v16::RoomView, Option<Arc<v16::BoundPublication>>),
     Respawn(v17::RoomView, Option<Arc<v17::BoundPublication>>),
+    Spike(v18::RoomView, Option<Arc<v18::BoundPublication>>),
 }
 
 #[derive(Clone)]
@@ -101,7 +110,8 @@ impl RosterNotice {
             RosterPublication::Legacy(room, _) => Some(room),
             RosterPublication::Environment(_, _)
             | RosterPublication::Lairs(_, _)
-            | RosterPublication::Respawn(_, _) => None,
+            | RosterPublication::Respawn(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 
@@ -110,7 +120,8 @@ impl RosterNotice {
             RosterPublication::Legacy(_, publication) => publication.as_deref(),
             RosterPublication::Environment(_, _)
             | RosterPublication::Lairs(_, _)
-            | RosterPublication::Respawn(_, _) => None,
+            | RosterPublication::Respawn(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 
@@ -118,7 +129,9 @@ impl RosterNotice {
         match &self.publication {
             RosterPublication::Environment(room, _) => Some(room),
             RosterPublication::Legacy(_, _) => None,
-            RosterPublication::Lairs(_, _) | RosterPublication::Respawn(_, _) => None,
+            RosterPublication::Lairs(_, _)
+            | RosterPublication::Respawn(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 
@@ -128,7 +141,8 @@ impl RosterNotice {
             RosterPublication::Lairs(room, _) => Some(room),
             RosterPublication::Legacy(_, _)
             | RosterPublication::Environment(_, _)
-            | RosterPublication::Respawn(_, _) => None,
+            | RosterPublication::Respawn(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 
@@ -138,7 +152,8 @@ impl RosterNotice {
             RosterPublication::Lairs(_, publication) => publication.as_deref(),
             RosterPublication::Legacy(_, _)
             | RosterPublication::Environment(_, _)
-            | RosterPublication::Respawn(_, _) => None,
+            | RosterPublication::Respawn(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 
@@ -148,7 +163,22 @@ impl RosterNotice {
             RosterPublication::Respawn(room, _) => Some(room),
             RosterPublication::Legacy(_, _)
             | RosterPublication::Environment(_, _)
-            | RosterPublication::Lairs(_, _) => None,
+            | RosterPublication::Lairs(_, _)
+            | RosterPublication::Spike(_, _) => None,
+        }
+    }
+
+    pub(in crate::game::rooms) const fn spike_room(&self) -> Option<&v18::RoomView> {
+        match &self.publication {
+            RosterPublication::Spike(room, _) => Some(room),
+            _ => None,
+        }
+    }
+
+    pub(in crate::game::rooms) fn spike_cpu_publication(&self) -> Option<&v18::BoundPublication> {
+        match &self.publication {
+            RosterPublication::Spike(_, publication) => publication.as_deref(),
+            _ => None,
         }
     }
 
@@ -158,7 +188,8 @@ impl RosterNotice {
             RosterPublication::Respawn(_, publication) => publication.as_deref(),
             RosterPublication::Legacy(_, _)
             | RosterPublication::Environment(_, _)
-            | RosterPublication::Lairs(_, _) => None,
+            | RosterPublication::Lairs(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 
@@ -170,7 +201,8 @@ impl RosterNotice {
             RosterPublication::Environment(_, publication) => publication.as_deref(),
             RosterPublication::Legacy(_, _)
             | RosterPublication::Lairs(_, _)
-            | RosterPublication::Respawn(_, _) => None,
+            | RosterPublication::Respawn(_, _)
+            | RosterPublication::Spike(_, _) => None,
         }
     }
 }
@@ -218,6 +250,17 @@ impl PartialEq for RosterNotice {
                 (
                     RosterPublication::Respawn(a_room, a_cpu),
                     RosterPublication::Respawn(b_room, b_cpu),
+                ) => {
+                    a_room == b_room
+                        && match (a_cpu, b_cpu) {
+                            (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+                            (None, None) => true,
+                            _ => false,
+                        }
+                }
+                (
+                    RosterPublication::Spike(a_room, a_cpu),
+                    RosterPublication::Spike(b_room, b_cpu),
                 ) => {
                     a_room == b_room
                         && match (a_cpu, b_cpu) {
@@ -278,6 +321,15 @@ const fn domain_seat_v17(seat: v17::Seat) -> Option<SeatId> {
     })
 }
 
+const fn domain_seat_v18(seat: v18::Seat) -> Option<SeatId> {
+    Some(match seat {
+        v18::Seat::One => SeatId::One,
+        v18::Seat::Two => SeatId::Two,
+        v18::Seat::Three => SeatId::Three,
+        v18::Seat::Four => SeatId::Four,
+    })
+}
+
 pub(super) const fn wire_seat_v16(seat: SeatId) -> v16::Seat {
     match seat {
         SeatId::One => v16::Seat::One,
@@ -293,5 +345,14 @@ pub(super) const fn wire_seat_v17(seat: SeatId) -> v17::Seat {
         SeatId::Two => v17::Seat::Two,
         SeatId::Three => v17::Seat::Three,
         SeatId::Four => v17::Seat::Four,
+    }
+}
+
+pub(super) const fn wire_seat_v18(seat: SeatId) -> v18::Seat {
+    match seat {
+        SeatId::One => v18::Seat::One,
+        SeatId::Two => v18::Seat::Two,
+        SeatId::Three => v18::Seat::Three,
+        SeatId::Four => v18::Seat::Four,
     }
 }

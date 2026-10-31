@@ -18,10 +18,10 @@ pub(super) const INTENT_CPU_POLICY_VERSION: u16 = 24;
 pub(super) const STRATEGY_CPU_POLICY_VERSION: u16 = 23;
 pub(super) const PICKUP_CPU_POLICY_VERSION: u16 = 22;
 pub(super) const ARCHIVED_CPU_POLICY_VERSION: u16 = 21;
-pub(super) const SIMULATION_RANDOMNESS_VERSION: u16 = 1;
-pub(super) const SIMULATION_SEED_DERIVATION_VERSION: u16 = 1;
-pub(super) const ENVIRONMENT_RANDOMNESS_VERSION: u16 = 1;
-pub(super) const LAIR_LAYOUT_VERSION: u16 = 1;
+pub(in crate::game::rooms) const SIMULATION_RANDOMNESS_VERSION: u16 = 1;
+pub(in crate::game::rooms) const SIMULATION_SEED_DERIVATION_VERSION: u16 = 1;
+pub(in crate::game::rooms) const ENVIRONMENT_RANDOMNESS_VERSION: u16 = 1;
+pub(in crate::game::rooms) const LAIR_LAYOUT_VERSION: u16 = 1;
 pub(super) const MAX_RECORDS: usize = 60_000;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -54,25 +54,39 @@ impl CpuProvenance {
             private_seed: PrivateCpuSeed(private_seed),
         }
     }
+
+    pub(in crate::game::rooms) const fn new_with_policy(
+        seat: SeatId,
+        difficulty: CpuDifficulty,
+        private_seed: [u8; 32],
+        policy_version: u16,
+    ) -> Self {
+        Self {
+            seat,
+            difficulty,
+            policy_version,
+            private_seed: PrivateCpuSeed(private_seed),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
 pub(in crate::game::rooms) struct ReplayHeader {
-    pub(super) format_version: u16,
-    pub(super) lifecycle_profile: u16,
-    pub(super) rules_version: u16,
-    pub(super) cpu_policy_version: u16,
-    pub(super) generator_version: u16,
-    pub(super) simulation_randomness_version: u16,
-    pub(super) simulation_seed_derivation_version: u16,
-    pub(super) environment_randomness_version: u16,
-    pub(super) lair_layout_version: u16,
-    pub(super) configuration: LairRoomConfiguration,
-    pub(super) initial_settings: RoomSettings,
-    pub(super) initial_settings_revision: u32,
-    pub(super) initially_occupied_humans: [bool; 4],
-    pub(super) simulation_root: SimulationRoot,
-    pub(super) cpus: Box<[CpuProvenance]>,
+    pub(in crate::game::rooms) format_version: u16,
+    pub(in crate::game::rooms) lifecycle_profile: u16,
+    pub(in crate::game::rooms) rules_version: u16,
+    pub(in crate::game::rooms) cpu_policy_version: u16,
+    pub(in crate::game::rooms) generator_version: u16,
+    pub(in crate::game::rooms) simulation_randomness_version: u16,
+    pub(in crate::game::rooms) simulation_seed_derivation_version: u16,
+    pub(in crate::game::rooms) environment_randomness_version: u16,
+    pub(in crate::game::rooms) lair_layout_version: u16,
+    pub(in crate::game::rooms) configuration: LairRoomConfiguration,
+    pub(in crate::game::rooms) initial_settings: RoomSettings,
+    pub(in crate::game::rooms) initial_settings_revision: u32,
+    pub(in crate::game::rooms) initially_occupied_humans: [bool; 4],
+    pub(in crate::game::rooms) simulation_root: SimulationRoot,
+    pub(in crate::game::rooms) cpus: Box<[CpuProvenance]>,
 }
 
 impl ReplayHeader {
@@ -123,6 +137,13 @@ pub(in crate::game::rooms) enum ReplayAction {
         cloud: StormCloudConfig,
         tuning: RespawnLairTuning,
     },
+    UpdateSpikeSettings {
+        settings_revision: u32,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        tuning: RespawnLairTuning,
+        spike_pits: grenadiers_core::room::SpikePitTuning,
+    },
     Movement(Option<Direction>),
     Bomb(u32),
     Equipment(u32),
@@ -130,13 +151,13 @@ pub(in crate::game::rooms) enum ReplayAction {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) enum ActionSource {
+pub(in crate::game::rooms) enum ActionSource {
     Human,
     Cpu,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) enum Operation {
+pub(in crate::game::rooms) enum Operation {
     Admit {
         seat: SeatId,
         resume: bool,
@@ -163,10 +184,10 @@ pub(super) enum Operation {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) struct Record {
-    pub(super) tick: Tick,
-    pub(super) order: u32,
-    pub(super) operation: Operation,
+pub(in crate::game::rooms) struct Record {
+    pub(in crate::game::rooms) tick: Tick,
+    pub(in crate::game::rooms) order: u32,
+    pub(in crate::game::rooms) operation: Operation,
 }
 
 const _: () = assert!(size_of::<Record>() <= 80);
@@ -181,9 +202,9 @@ pub(in crate::game::rooms) enum ReplayStatus {
 
 #[derive(Clone)]
 pub(in crate::game::rooms) struct Journal {
-    pub(super) header: ReplayHeader,
-    pub(super) records: Vec<Record>,
-    pub(super) status: ReplayStatus,
+    pub(in crate::game::rooms) header: ReplayHeader,
+    pub(in crate::game::rooms) records: Vec<Record>,
+    pub(in crate::game::rooms) status: ReplayStatus,
 }
 
 impl Journal {
@@ -205,6 +226,38 @@ impl Journal {
             records: Vec::with_capacity(MAX_RECORDS),
             status: ReplayStatus::Complete,
         }
+    }
+
+    pub(in crate::game::rooms) fn new_unvalidated(
+        configuration: LairRoomConfiguration,
+        settings: RoomSettings,
+        initially_occupied_humans: [bool; 4],
+        cpus: Vec<CpuProvenance>,
+    ) -> Result<Self, ()> {
+        let generator_version = if configuration.base().board()
+            == grenadiers_core::room::BoardSize::FifteenByThirteen
+        {
+            grenadiers_core::game::MULTIPLAYER_GENERATOR_VERSION
+        } else {
+            grenadiers_core::game::VARIABLE_GENERATOR_VERSION
+        };
+        Ok(Self::new(ReplayHeader {
+            format_version: FORMAT_VERSION,
+            lifecycle_profile: LIFECYCLE_PROFILE,
+            rules_version: RULES_VERSION,
+            cpu_policy_version: CPU_POLICY_VERSION,
+            generator_version,
+            simulation_randomness_version: SIMULATION_RANDOMNESS_VERSION,
+            simulation_seed_derivation_version: SIMULATION_SEED_DERIVATION_VERSION,
+            environment_randomness_version: ENVIRONMENT_RANDOMNESS_VERSION,
+            lair_layout_version: LAIR_LAYOUT_VERSION,
+            configuration,
+            initial_settings: settings,
+            initial_settings_revision: 1,
+            initially_occupied_humans,
+            simulation_root: SimulationRoot::generate()?,
+            cpus: cpus.into_boxed_slice(),
+        }))
     }
 
     pub(super) fn record(&mut self, tick: Tick, operation: Operation) {

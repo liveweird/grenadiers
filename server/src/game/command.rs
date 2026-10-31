@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::v17::{
+use grenadiers_core::protocol::v18::{
     GameClientMessage, ManualActionKind, ResumeToken, RoomSettings,
 };
 use grenadiers_core::protocol::{
@@ -30,7 +30,7 @@ impl SequencedCommand {
 
 pub(super) enum Command {
     CreateRoom {
-        configuration: grenadiers_core::room::LairRoomConfiguration,
+        configuration: grenadiers_core::room::SpikeRoomConfiguration,
     },
     JoinRoom {
         room_code: RoomCode,
@@ -192,7 +192,7 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v17::parse_client_message;
+    use grenadiers_core::protocol::v18::parse_client_message;
 
     use super::{Command, InboundMessage};
 
@@ -203,7 +203,7 @@ mod tests {
             ("standard", grenadiers_core::room::CpuDifficulty::Standard),
         ] {
             let message = parse_client_message(&format!(
-                r#"{{"type":"createRoom","sequence":1,"configuration":{{"controllers":["human","cpu"],"cpuDifficulty":"{difficulty}","board":{{"width":15,"height":13}},"environment":{{"stormCloud":true,"lairs":{{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}}}}}"#
+                r#"{{"type":"createRoom","sequence":1,"configuration":{{"controllers":["human","cpu"],"cpuDifficulty":"{difficulty}","board":{{"width":15,"height":13}},"environment":{{"stormCloud":true,"lairs":{{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}},"spikePits":{{"enabled":true,"warningTicks":36,"raisedTicks":180}}}}}}}}"#
             ))
             .unwrap();
             let InboundMessage::Command(command) = InboundMessage::from(message) else {
@@ -214,14 +214,17 @@ mod tests {
             };
             assert_eq!(
                 configuration,
-                grenadiers_core::room::LairRoomConfiguration::new(
-                    grenadiers_core::room::RoomConfiguration::solo(expected),
-                    grenadiers_core::game::StormCloudConfig::Single,
-                    grenadiers_core::room::RespawnLairTuning::new(
-                        false,
-                        grenadiers_core::room::RespawnLairSettings::DEFAULT,
-                    )
-                    .as_legacy(),
+                grenadiers_core::room::SpikeRoomConfiguration::new(
+                    grenadiers_core::room::LairRoomConfiguration::new(
+                        grenadiers_core::room::RoomConfiguration::solo(expected),
+                        grenadiers_core::game::StormCloudConfig::Single,
+                        grenadiers_core::room::RespawnLairTuning::new(
+                            false,
+                            grenadiers_core::room::RespawnLairSettings::DEFAULT,
+                        )
+                        .as_legacy(),
+                    ),
+                    grenadiers_core::room::SpikePitTuning::DEFAULT,
                 )
             );
         }

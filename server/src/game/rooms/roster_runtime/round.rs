@@ -90,6 +90,17 @@ impl RosterRuntime {
                         self.mob_navigation,
                     )
                 }
+                super::runtime::EnvironmentProfile::SpikeV10 {
+                    cloud,
+                    lairs,
+                    spike_pits,
+                } => grenadiers_core::game::RulesConfig::environment_v10_with_mob_navigation(
+                    self.lifecycle.settings(),
+                    cloud,
+                    lairs.config(),
+                    spike_pits.config(),
+                    self.mob_navigation,
+                ),
             },
         );
         let state = State::new_round(
@@ -107,6 +118,7 @@ impl RosterRuntime {
         self.environment_cpu_publication = None;
         self.lair_cpu_publication = None;
         self.respawn_cpu_publication = None;
+        self.spike_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

@@ -13,6 +13,7 @@ pub enum StormCloudConfig {
 pub enum MobNavigationPolicy {
     LegacyV1,
     EscapeV2,
+    TimedEscapeV3,
 }
 
 impl MobNavigationPolicy {
@@ -21,7 +22,12 @@ impl MobNavigationPolicy {
         match self {
             Self::LegacyV1 => 1,
             Self::EscapeV2 => 2,
+            Self::TimedEscapeV3 => 3,
         }
+    }
+
+    pub(crate) const fn has_escape_navigation(self) -> bool {
+        !matches!(self, Self::LegacyV1)
     }
 }
 

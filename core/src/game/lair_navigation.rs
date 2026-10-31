@@ -4,6 +4,7 @@ use super::Mob;
 use crate::game::MobNavigationPolicy;
 use crate::game::geometry::{MovementSegment, MovementTrace};
 use crate::game::input::Direction;
+use crate::game::mob_hazards::{TimedMobHazards, WorkBudget};
 use crate::game::movement_collision::{ObstacleAccess, allowed_distance};
 use crate::game::simulation::Actor;
 use crate::game::types::{CellId, Position, TICKS_PER_SECOND, Tick};
@@ -15,6 +16,7 @@ type Distances = Vec<Option<u16>>;
 pub(super) struct NavigationHazards<'a> {
     danger: &'a BTreeSet<CellId>,
     spike_pits: Option<&'a BTreeSet<CellId>>,
+    timed: Option<&'a TimedMobHazards>,
 }
 
 impl<'a> NavigationHazards<'a> {
@@ -22,8 +24,23 @@ impl<'a> NavigationHazards<'a> {
         danger: &'a BTreeSet<CellId>,
         spike_pits: Option<&'a BTreeSet<CellId>>,
     ) -> Self {
-        Self { danger, spike_pits }
+        Self {
+            danger,
+            spike_pits,
+            timed: None,
+        }
     }
+
+    pub(super) const fn with_timed(mut self, timed: Option<&'a TimedMobHazards>) -> Self {
+        self.timed = timed;
+        self
+    }
+}
+
+#[derive(Clone, Copy)]
+pub(super) struct NavigationParameters {
+    pub(super) tick: Tick,
+    pub(super) policy: MobNavigationPolicy,
 }
 
 pub(super) fn target_searches(
@@ -86,8 +103,8 @@ pub(super) fn advance_mob(
     hazards: NavigationHazards<'_>,
     searches: &[(usize, Distances)],
     frozen: bool,
-    tick: Tick,
-    policy: MobNavigationPolicy,
+    parameters: NavigationParameters,
+    budget: &mut WorkBudget,
 ) -> MovementTrace {
     let mut trace = MovementTrace::new(mob.position);
     if frozen {
@@ -104,7 +121,7 @@ pub(super) fn advance_mob(
     } else if mob.retreat_anchor.is_none() && mob.position == center {
         mob.leg_origin = center;
     }
-    let direction = choose_direction(mob, world, hazards, searches, tick, cell, policy);
+    let direction = choose_direction(mob, world, hazards, searches, cell, parameters, budget);
     let Some(direction) = direction else {
         mob.residual = 0;
         return trace;
@@ -153,19 +170,36 @@ fn choose_direction(
     world: &World,
     hazards: NavigationHazards<'_>,
     searches: &[(usize, Distances)],
-    tick: Tick,
     cell: CellId,
-    policy: MobNavigationPolicy,
+    parameters: NavigationParameters,
+    budget: &mut WorkBudget,
 ) -> Option<u8> {
-    if policy == MobNavigationPolicy::EscapeV2
+    let NavigationParameters { tick, policy } = parameters;
+    if policy.has_escape_navigation()
         && let Some(pits) = hazards.spike_pits
         && let Some(direction) =
             super::spike_navigation::escape_direction(mob, world, hazards.danger, pits, tick)
     {
         return direction;
     }
+    if policy == MobNavigationPolicy::TimedEscapeV3
+        && let Some(timed) = hazards.timed
+        && let Some(direction) = crate::game::mob_escape::escape_direction(
+            crate::game::mob_escape::EscapeEnvironment {
+                world,
+                spike_pits: hazards.spike_pits,
+                hazards: timed,
+                tick,
+            },
+            budget,
+            mob.position,
+            mob.residual,
+        )
+    {
+        return Some(direction);
+    }
     if let Some(anchor) = mob.retreat_anchor {
-        if policy == MobNavigationPolicy::LegacyV1
+        if !policy.has_escape_navigation()
             || anchor.cell().is_some_and(|cell| {
                 !hazards.danger.contains(&cell)
                     && !hazards

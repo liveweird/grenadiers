@@ -28,14 +28,18 @@ fn advance(
     tick: u64,
     policy: MobNavigationPolicy,
 ) {
+    let mut budget = crate::game::mob_hazards::WorkBudget::new();
     advance_mob(
         mob,
         world,
         NavigationHazards::new(danger, None),
         &[],
         false,
-        Tick(tick),
-        policy,
+        NavigationParameters {
+            tick: Tick(tick),
+            policy,
+        },
+        &mut budget,
     );
 }
 

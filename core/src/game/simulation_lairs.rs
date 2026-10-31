@@ -7,6 +7,19 @@ use crate::game::simulation::contract::ForcedMovement;
 use crate::game::types::{EntityId, Tick};
 
 impl State {
+    #[cfg(test)]
+    pub(crate) fn insert_test_mob(
+        &mut self,
+        id: EntityId,
+        position: crate::game::Position,
+        heading: crate::game::Direction,
+    ) {
+        self.lairs
+            .as_mut()
+            .expect("test rules enable lairs")
+            .insert_test_mob(id, 0, position, heading);
+    }
+
     pub(super) fn preflight_lair_attempt(&self, tick: Tick) -> Result<bool, StepError> {
         let due = self.lairs.as_ref().is_some_and(|lairs| lairs.due(tick));
         if !due {
@@ -72,14 +85,14 @@ impl State {
             .collect();
         let track_spike_traces = self.spike_pits.is_some();
         let spike_pit_navigation = (self.rules.version() >= 10
-            && self.rules.mob_navigation_policy() == crate::game::MobNavigationPolicy::EscapeV2)
-            .then(|| {
-                self.spike_pits
-                    .as_ref()
-                    .into_iter()
-                    .flat_map(|pits| pits.cells())
-                    .collect::<BTreeSet<_>>()
-            });
+            && self.rules.mob_navigation_policy().has_escape_navigation())
+        .then(|| {
+            self.spike_pits
+                .as_ref()
+                .into_iter()
+                .flat_map(|pits| pits.cells())
+                .collect::<BTreeSet<_>>()
+        });
         let (mob_ids, traces, mine_targets) = {
             let lairs = self.lairs.as_mut().expect("checked above");
             lairs

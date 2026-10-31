@@ -38,14 +38,18 @@ fn rejected_mid_leg_escape_remains_pending_across_updates() {
     let mut mob = retreating_mob(position, origin);
 
     for tick in 1..=20 {
+        let mut budget = crate::game::mob_hazards::WorkBudget::new();
         let trace = advance_mob(
             &mut mob,
             &world,
             NavigationHazards::new(&danger, None),
             &[],
             false,
-            Tick(tick),
-            MobNavigationPolicy::EscapeV2,
+            NavigationParameters {
+                tick: Tick(tick),
+                policy: MobNavigationPolicy::EscapeV2,
+            },
+            &mut budget,
         );
         assert!(trace.segments().next().is_none());
         assert_eq!(mob.position, position);
@@ -67,14 +71,18 @@ fn safe_current_center_on_either_side_clamps_then_resumes_perpendicularly() {
         };
         let mut mob = retreating_mob(position, origin);
         for tick in 1..=10 {
+            let mut budget = crate::game::mob_hazards::WorkBudget::new();
             advance_mob(
                 &mut mob,
                 &world,
                 NavigationHazards::new(&danger, None),
                 &[],
                 false,
-                Tick(tick),
-                MobNavigationPolicy::EscapeV2,
+                NavigationParameters {
+                    tick: Tick(tick),
+                    policy: MobNavigationPolicy::EscapeV2,
+                },
+                &mut budget,
             );
             if mob.position == safe_center {
                 break;
@@ -88,14 +96,18 @@ fn safe_current_center_on_either_side_clamps_then_resumes_perpendicularly() {
         let mut distances = vec![None; world.arena.cell_count()];
         distances[cell_index(&world, current)] = Some(1);
         distances[cell_index(&world, north)] = Some(0);
+        let mut budget = crate::game::mob_hazards::WorkBudget::new();
         advance_mob(
             &mut mob,
             &world,
             NavigationHazards::new(&danger, None),
             &[(0, distances)],
             false,
-            Tick(11),
-            MobNavigationPolicy::EscapeV2,
+            NavigationParameters {
+                tick: Tick(11),
+                policy: MobNavigationPolicy::EscapeV2,
+            },
+            &mut budget,
         );
 
         assert_eq!(mob.retreat_anchor, None);

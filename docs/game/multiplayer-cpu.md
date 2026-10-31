@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy 20 on rules 8 for every live two-to-four-seat
+The live environment CPU implementation uses policy 21 on rules 9 for every live two-to-four-seat
 room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -12,14 +12,15 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v16::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v17::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::LAIRS_STANDARD` and `LAIRS_EASY` select Utility20 for live rules8 rooms.
+`CpuProfile::RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` select Utility21 for live rules9 rooms.
+`LAIRS_STANDARD`/`LAIRS_EASY` retain Utility20 on historical rules8.
 `ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` retain Utility18 on rules7; multiplayer, current
 legacy and historical replay profiles keep their previous identities. Planning uses the shared
 utility and bounded forecasting machinery with explicit profile boundaries.
@@ -59,10 +60,10 @@ Live controller selection uses the lair profile below, including when both envir
 
 ## Lair profile boundaries
 
-`LAIRS_STANDARD` and `LAIRS_EASY` identify Utility20 on rules8. Its checked v16 observation
-adds public lair attempt timers and mob poses without targets, paths or hidden freeze deadlines.
-Use `survival::plan_lairs`; historical public policy, routing and survival entry points reject
-rules8 rather than returning movement without a mob-contact proof.
+`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify Utility21 on rules9. The checked
+v17 observation adds independent nullable lair deadlines and mob poses without targets, paths
+or hidden thaw deadlines. Use `survival::plan_respawn_with_origin`; historical entry points
+remain closed to rules9. Disabled lairs use the same solid-player profile.
 
 The planner returns a separate finite contact lease beside the existing bomb/escape proof.
 Navigation covers movement and a stopped handoff; an optional plant must also cover its complete
@@ -82,6 +83,24 @@ command epoch and stopped authority. Contact checks supplement those fences; the
 them or rebase a result to a newer observation. Hold deadlines remain unconditional even when
 workers or observations are late. See [CPU contracts](cpu-contracts.md).
 
+## Combat pressure and player blocking
+
+Every visible living rival is an enemy, whether human or CPU. CPU21 seeks reachable firing
+positions whose actual blast can threaten a rival instead of walking into its occupied cell.
+Useful pickups remain valuable; combat pressure outranks routine crate clearing. Planting still
+requires a complete escape certificate, so increased aggression does not authorize suicide.
+
+Routing uses the shared player cell/footprint clipper for visible living rivals. Admission and
+continued execution check the next authorized movement against fresh blockers; unrelated rival
+movement does not invalidate the whole scene. Alignment/forward corner ticks retain their two
+axis segments. Hidden positions stay private; unexpected physical blocking is detected through
+the CPU's own pose and invalidates movement before fresh Stop/recovery planning.
+
+An occupied lair still has a possible future birth: its mob can die on the next update and the
+replacement appears only after the full grace. Empty lairs use their independent published
+eligibility ticks. These finite envelopes supplement bomb/storm proofs even when spawning is
+currently suspended.
+
 ## Interrupted planting
 
 A rival bomb can invalidate a CPU's certified escape, including when several CPUs plant on
@@ -95,14 +114,14 @@ force waiting until the CPU's own fuse is almost spent.
 
 Scheduled stops between route legs retain their contact lease. Contact invalidation stops the
 route or pulse while preserving valid origin provenance for a fresh proof; completed commitments
-release their leases. New rules8 controllers use policy20; archived policy19 replay records
+release their leases. Historical rules8 controllers retain policy20; archived policy19 replay records
 remain readable without rerunning their planner.
 
 ## Focused checks
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
-The v16 adapter tests compare CPU facts with human recipient projections. Additional cases
+The v17 adapter tests compare CPU facts with human recipient projections. Additional cases
 cover forecast capacity, rival interference, both difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.

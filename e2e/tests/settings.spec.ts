@@ -20,40 +20,39 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await expect(one.getByRole('button', { name: 'All off', exact: true })).toBeVisible()
     const stormCloud = one.getByRole('checkbox', { name: 'Storm cloud', exact: true })
     const lairs = one.getByRole('checkbox', { name: 'Monster lairs', exact: true })
-    const spawnSeconds = one.getByRole('textbox', { name: 'Spawn interval (seconds)', exact: true })
+    const spawnSeconds = one.getByRole('textbox', { name: 'Respawn delay (seconds)', exact: true })
     const maxLivingMobs = one.getByRole('textbox', { name: 'Living monsters per lair', exact: true })
     await expect(stormCloud).toBeChecked()
     await expect(lairs).toBeChecked()
     await expect(spawnSeconds).toHaveValue('10')
-    await expect(maxLivingMobs).toHaveValue('3')
+    await expect(maxLivingMobs).toHaveCount(0)
     const defaultEnvironment = {
       stormCloud: true,
-      lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+      lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
     }
     expect(latestRoom(games[0])?.settings.environment).toEqual(defaultEnvironment)
     expect(latestRoom(games[0])?.configuration.environment).toEqual(defaultEnvironment)
     await spawnSeconds.fill('11')
-    await maxLivingMobs.fill('4')
     await one.getByRole('button', { name: 'All off', exact: true }).click()
     await expect(stormCloud).not.toBeChecked()
     await expect(lairs).not.toBeChecked()
     await expect(spawnSeconds).toHaveValue('11')
-    await expect(maxLivingMobs).toHaveValue('4')
+    await expect(maxLivingMobs).toHaveCount(0)
     await one.getByRole('button', { name: 'All on', exact: true }).click()
     await expect(stormCloud).toBeChecked()
     await expect(lairs).toBeChecked()
     await expect(spawnSeconds).toHaveValue('11')
-    await expect(maxLivingMobs).toHaveValue('4')
+    await expect(maxLivingMobs).toHaveCount(0)
     await one.getByRole('button', { name: 'Classic settings', exact: true }).click()
     await expect(stormCloud).not.toBeChecked()
     await expect(lairs).not.toBeChecked()
     await expect(spawnSeconds).toHaveValue('10')
-    await expect(maxLivingMobs).toHaveValue('3')
+    await expect(maxLivingMobs).toHaveCount(0)
     await one.getByRole('button', { name: 'Restore match defaults', exact: true }).click()
     await expect(stormCloud).toBeChecked()
     await expect(lairs).toBeChecked()
     await expect(spawnSeconds).toHaveValue('10')
-    await expect(maxLivingMobs).toHaveValue('3')
+    await expect(maxLivingMobs).toHaveCount(0)
     await one.getByText('Polski', { exact: true }).click()
     await expect(one.getByRole('button', { name: 'Włącz wszystkie', exact: true })).toBeVisible()
     await expect(one.getByRole('button', { name: 'Wyłącz wszystkie', exact: true })).toBeVisible()
@@ -78,14 +77,14 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
       environment: {
         stormCloud: false,
-        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     }
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.configuration.environment)
       .toEqual({
         stormCloud: false,
-        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+        lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
       })))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.seats[1]?.ready).toBe(false)))
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')
@@ -94,7 +93,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     for (const game of games) {
-      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 8, settings: expected })
+      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 9, settings: expected })
       expect(latestSnapshot(game)!.state.actors.map((actor) => actor.type === 'visible' ? actor.speedLevel : null))
         .toEqual([4, 4])
       expect(latestSnapshot(game)!.state.stormCloud).toBeNull()

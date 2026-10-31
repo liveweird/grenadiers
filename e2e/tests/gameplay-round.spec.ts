@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v16/schema'
+import type { GameServerMessage } from '../../web/src/game/v17/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 import { visibleActor } from './support/duel'
 
@@ -55,7 +55,7 @@ test('two native gameplay sockets finish one authoritative cloud-disabled genera
         enabledItems: [],
         environment: {
           stormCloud: false,
-          lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+          lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
         },
       },
     })
@@ -63,14 +63,14 @@ test('two native gameplay sockets finish one authoritative cloud-disabled genera
     expect(configured.room.settings.enabledItems).toEqual([])
     expect(configured.room.configuration.environment).toEqual({
       stormCloud: false,
-      lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+      lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
     })
     await sendGame(one, { type: 'ready', ...binding, ready: true, settingsRevision: configured.room.settingsRevision })
     await sendGame(two, { type: 'ready', ...binding, ready: true, settingsRevision: configured.room.settingsRevision })
     await expect.poll(async () => snapshot(await gameFrames(one))?.room.phase.type).toBe('running')
     await expect.poll(async () => snapshot(await gameFrames(two))?.room.phase.type).toBe('running')
     const firstRunning = snapshot(await gameFrames(one))!
-    expect(firstRunning.room).toMatchObject({ rulesVersion: 8, mapId: 'generated_v2' })
+    expect(firstRunning.room).toMatchObject({ rulesVersion: 9, mapId: 'generated_v2' })
     expect(firstRunning.room.availableItems).toEqual([
       'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse',
       'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter',
@@ -78,7 +78,7 @@ test('two native gameplay sockets finish one authoritative cloud-disabled genera
     expect(firstRunning.room.settings.enabledItems).toEqual([])
     expect(firstRunning.room.settings.environment).toEqual({
       stormCloud: false,
-      lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+      lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
     })
     expect(firstRunning.state.stormCloud).toBeNull()
     expect(firstRunning.state.lairs).toEqual([])

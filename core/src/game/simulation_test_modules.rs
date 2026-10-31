@@ -38,6 +38,8 @@ mod lair_review_tests;
 mod lair_respawn_tests;
 #[path = "simulation/landmine_acceptance_tests.rs"]
 mod landmine_acceptance_tests;
+#[path = "simulation/landmine_capacity_v9_tests.rs"]
+mod landmine_capacity_v9_tests;
 #[path = "simulation/landmine_route_tests.rs"]
 mod landmine_route_tests;
 #[path = "simulation/landmine_tests.rs"]

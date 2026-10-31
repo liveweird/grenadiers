@@ -4,7 +4,7 @@ import { arenaTilePixels } from '../tests/support/compositor'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveSeatTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v16/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v17/schema'
 
 test.beforeAll(() => expect(process.env.E2E_BRACELET_FIXTURE).toBe('arena-v3-bracelet'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
@@ -92,6 +92,20 @@ async function clearAndStageVictim(page: Page, game: ObservedGame): Promise<void
   await moveSeatTo(page, game, 'two', { column: 11, row: 1 })
 }
 
+function expectSolidPlayers(frame: Snapshot): void {
+  const players = frame.state.actors.filter((value) => value.type === 'visible' && value.alive)
+  for (const [index, left] of players.entries()) {
+    if (left.type !== 'visible') continue
+    for (const right of players.slice(index + 1)) {
+      if (right.type !== 'visible') continue
+      expect({ column: Math.floor(left.position.x / 1024), row: Math.floor(left.position.y / 1024) })
+        .not.toEqual({ column: Math.floor(right.position.x / 1024), row: Math.floor(right.position.y / 1024) })
+      expect(Math.abs(left.position.x - right.position.x) >= 640
+        || Math.abs(left.position.y - right.position.y) >= 640).toBe(true)
+    }
+  }
+}
+
 async function expectStationary(game: ObservedGame, seat: Seat, after: number): Promise<void> {
   await expect.poll(() => {
     const frames = snapshots(game).filter(({ room }) => room.revision > after).slice(-2)
@@ -147,6 +161,7 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
       expect(games.flatMap(({ commands }) => commands)
         .some((command) => command.type === 'manualAction' && command.action === 'equipment')).toBe(false)
 
+      games.forEach((game) => snapshots(game).forEach(expectSolidPlayers))
       const settleFloors = games.map((game) => latestSnapshot(game)!.room.revision)
       await Promise.all(games.flatMap((game, index) => [
         expectStationary(game, 'one', settleFloors[index]!),
@@ -191,6 +206,7 @@ test('Bracelet shoves a stationary rival one tile without an action or private c
         const raw = snapshots(game).filter(({ room }) =>
           room.revision > floors[index]! && room.revision <= moved.room.revision)
         expect(raw.length).toBeGreaterThan(0)
+        raw.forEach(expectSolidPlayers)
         expect(raw.flatMap(({ events }) => events)).toEqual([])
         expect(JSON.stringify(raw)).not.toMatch(privateShoveFacts)
         expect(game.commands.slice(commandFloors[index]!).some((command) =>

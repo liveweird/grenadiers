@@ -1,5 +1,7 @@
 # Gameplay v16 lair contract
 
+This is the retained historical rules8 contract. The active endpoint uses [gameplay17](protocol-v17.md).
+
 `api/gameplay-v16.schema.json`, `core::protocol::v16` and generated
 `web/src/game/v16/schema.ts` define the checked rules8 profile. The production WebSocket
 endpoint is `/api/v1/game/ws` and requires gameplay16; versions 1 through 15 are rejected before

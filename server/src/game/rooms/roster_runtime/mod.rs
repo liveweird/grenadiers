@@ -1,12 +1,14 @@
 //! Transport-independent runtime for configured two-to-four-seat rooms.
 
 mod admission;
+mod admission_projection;
 mod environment;
 mod error;
 mod owner_helpers;
 mod publication;
 mod publication_v15;
 mod publication_v16;
+mod publication_v17;
 mod round;
 mod runtime;
 mod runtime_publication;
@@ -33,6 +35,8 @@ mod environment_settings_tests;
 mod lair_settings_tests;
 #[cfg(test)]
 mod replacement_tests;
+#[cfg(test)]
+mod respawn_settings_tests;
 #[cfg(test)]
 mod terminal_transport_tests;
 #[cfg(test)]

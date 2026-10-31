@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v16::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::v17::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, Direction as WireDirection, RoomId};
 use tokio::time::Instant;
 
@@ -193,13 +193,12 @@ pub(super) async fn dispatch(
                     } else {
                         grenadiers_core::game::StormCloudConfig::Disabled
                     },
-                    tuning: grenadiers_core::room::LairTuning::new(
+                    tuning: grenadiers_core::room::RespawnLairTuning::new(
                         settings.environment.lairs.enabled,
-                        grenadiers_core::room::LairSettings::new(
+                        grenadiers_core::room::RespawnLairSettings::new(
                             settings.environment.lairs.spawn_seconds,
-                            settings.environment.lairs.max_living_mobs,
                         )
-                        .expect("v16 parser validates lair settings"),
+                        .expect("v17 parser validates lair settings"),
                     ),
                 },
                 state,

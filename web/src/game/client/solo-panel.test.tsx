@@ -22,7 +22,7 @@ function soloState(difficulty: 'easy' | 'standard' = 'standard'): GameClientStat
   })
   current.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: difficulty,
     board: { width: 15, height: 13 },
-    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } }
+    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
   current.scores[1]!.wins = 3
   current.settings.winsToFinish = 3
   current.roundNumber = 3

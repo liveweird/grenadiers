@@ -89,7 +89,7 @@ export interface SnapshotMessage {
     lairs: Array<{
       id: number
       cell: { column: number; row: number }
-      spawnRemainingTicks: number
+      spawnRemainingTicks: number | null
       livingMobs: number
     }>
     mobs: Array<{

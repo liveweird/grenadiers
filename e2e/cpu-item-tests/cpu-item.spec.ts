@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor } from '../tests/support/duel'
-import type { GameServerMessage } from '../../web/src/game/v16/schema'
+import type { GameServerMessage } from '../../web/src/game/v17/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_CPU_ITEM_FIXTURE).toBe('arena-v3-cpu-wall-pass')
@@ -21,7 +21,7 @@ test('native CPU collects Wall Pass with all items enabled and renders its publi
   expect(room.settings.enabledItems).toEqual(room.availableItems)
   expect(room.settings.environment).toEqual({
     stormCloud: true,
-    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
   })
 
   const revision = room.settingsRevision
@@ -38,7 +38,7 @@ test('native CPU collects Wall Pass with all items enabled and renders its publi
   await expect.poll(() => updatedRoom()?.settings.enabledItems).toEqual(room.availableItems)
   const environment = {
     stormCloud: false,
-    lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+    lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
   }
   await expect.poll(() => updatedRoom()?.settings.environment).toEqual(environment)
   expect(updatedRoom()?.configuration.environment).toEqual(environment)

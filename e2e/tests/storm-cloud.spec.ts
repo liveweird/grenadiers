@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
-import type { GameServerMessage, StormCloudView } from '../../web/src/game/v16/schema'
+import type { GameServerMessage, StormCloudView } from '../../web/src/game/v17/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
 
@@ -52,11 +52,11 @@ async function joinRoom(group: Group): Promise<void> {
   expect(created.settings.enabledItems).toEqual(created.availableItems)
   expect(created.settings.environment).toEqual({
     stormCloud: true,
-    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
   })
   expect(created.configuration.environment).toEqual({
     stormCloud: true,
-    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
   })
   await expect(one.getByRole('combobox', { name: 'Players', exact: true })).toHaveCount(0)
   await expect(one.getByRole('combobox', { name: 'Board size', exact: true })).toHaveCount(0)
@@ -101,12 +101,12 @@ test('enabled storm cloud moves in one shared rendered world and survives reconn
       for (const game of group.games) {
         const frame = latestSnapshot(game)!
         expect(frame.room).toMatchObject({
-          rulesVersion: 8, mapId: 'generated_v2',
+          rulesVersion: 9, mapId: 'generated_v2',
           configuration: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
           } },
           settings: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
           } },
         })
         expect(frame.state.actors).toHaveLength(2)
@@ -160,10 +160,10 @@ test('enabled storm cloud moves in one shared rendered world and survives reconn
         expect(latestRoom(game)).toMatchObject({
           roundId: completedRoundId + 1,
           configuration: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
           } },
           settings: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
           } },
         })
       }

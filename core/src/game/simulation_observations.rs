@@ -172,7 +172,11 @@ impl State {
         self.world
             .bombs
             .values()
-            .filter(|bomb| bomb.owner() == owner)
+            .filter(|bomb| {
+                bomb.owner() == owner
+                    && (self.rules.version() < 9
+                        || !matches!(bomb.trigger(), crate::game::BombTrigger::Contact))
+            })
             .count()
     }
 }

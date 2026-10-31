@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
-import type { GameServerMessage, MobView } from '../../web/src/game/v16/schema'
+import type { GameServerMessage, MobView } from '../../web/src/game/v17/schema'
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import {
@@ -130,7 +130,26 @@ function expectPrivateNavigation(mob: MobView): void {
   expect(mob).not.toHaveProperty('path')
 }
 
-test('enabled lairs spawn capped private moving mobs, render on both clients, reconnect and rematch',
+async function expectNoAdditionalBirths(
+  game: ObservedGame, spawned: Snapshot, spawnSeconds: number,
+): Promise<void> {
+  const firstSpawnTick = spawned.state.physicalTick
+  expect(spawned.state.lairs.every(({ livingMobs, spawnRemainingTicks }) =>
+    livingMobs === 1 && spawnRemainingTicks === null)).toBe(true)
+  const nextSpawnTick = firstSpawnTick + spawnSeconds * 60
+  await expect.poll(() => latestSnapshot(game)?.state.physicalTick ?? 0,
+    { timeout: 10_000 }).toBeGreaterThanOrEqual(nextSpawnTick + 10)
+  const capped = snapshots(game).filter((frame) =>
+    frame.state.physicalTick >= firstSpawnTick && frame.state.physicalTick <= nextSpawnTick + 10)
+  expect(capped.length).toBeGreaterThan(1)
+  const originalIds = spawned.state.mobs.map(({ id }) => id)
+  expect(capped.every((frame) => frame.state.mobs.map(({ id }) => id).join(',') === originalIds.join(',')
+    && frame.state.lairs.every(({ livingMobs, spawnRemainingTicks }) =>
+      livingMobs === 1 && spawnRemainingTicks === null))).toBe(true)
+
+}
+
+test('enabled lairs keep one mob each, render on both clients, reconnect and rematch',
   async ({ browser }, testInfo) => {
     test.setTimeout(90_000)
     const group = await createGroup(browser)
@@ -138,8 +157,8 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       await joinRoom(group, true)
       const [one, two] = group.pages
       await one.getByRole('checkbox', { name: 'Storm cloud', exact: true }).uncheck()
-      await one.getByRole('textbox', { name: 'Spawn interval (seconds)', exact: true }).fill('5')
-      await one.getByRole('textbox', { name: 'Living monsters per lair', exact: true }).fill('1')
+      await one.getByRole('textbox', { name: 'Respawn delay (seconds)', exact: true }).fill('5')
+      await expect(one.getByRole('textbox', { name: 'Living monsters per lair', exact: true })).toHaveCount(0)
       await one.getByLabel('Round wins needed').selectOption('1')
       await one.getByLabel('Bomb fuse').selectOption('60')
       await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
@@ -149,15 +168,15 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       await Promise.all(group.games.map((game) =>
         expect.poll(() => latestRoom(game)?.settings.environment).toEqual(environment)))
       await expect(two.getByRole('checkbox', { name: 'Legowiska potworów', exact: true })).toBeChecked()
-      await expect(two.getByRole('textbox', { name: 'Czas odrodzenia (sekundy)', exact: true }))
+      await expect(two.getByRole('textbox', { name: 'Opóźnienie odrodzenia (sekundy)', exact: true }))
         .toHaveValue('5')
       await expect(two.getByRole('textbox', { name: 'Żywe potwory na legowisko', exact: true }))
-        .toHaveValue('1')
+        .toHaveCount(0)
       await startRound(group, true)
 
       for (const game of group.games) {
         const running = latestSnapshot(game)!
-        expect(running.room).toMatchObject({ rulesVersion: 8, settings: { environment } })
+        expect(running.room).toMatchObject({ rulesVersion: 9, settings: { environment } })
         expect(running.state.stormCloud).toBeNull()
         expect(running.state.lairs.map(({ cell }) => cell)).toEqual([
           { column: 6, row: 6 }, { column: 8, row: 6 },
@@ -188,7 +207,7 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
           lairs: frame?.state.lairs, nearLairs, blocked,
         })}`, { cause: error })
       }
-      const spawned = latestSnapshot(group.games[0])!
+      const spawned = snapshots(group.games[0]).find((frame) => frame.state.mobs.length === 2)!
       const mob = spawned.state.mobs[0]!
       for (const game of group.games) latestSnapshot(game)!.state.mobs.forEach(expectPrivateNavigation)
       let peerAtSpawn: Snapshot | undefined
@@ -266,16 +285,7 @@ test('enabled lairs spawn capped private moving mobs, render on both clients, re
       expect(latestSnapshot(group.games[1])!.room.phase.type).toBe('running')
       expect(latestSnapshot(group.games[1])!.state.mobs.length).toBeGreaterThan(0)
 
-      const firstSpawnTick = spawned.state.physicalTick
-      const nextSpawnTick = firstSpawnTick
-        + Math.max(...spawned.state.lairs.map(({ spawnRemainingTicks }) => spawnRemainingTicks))
-      await expect.poll(() => latestSnapshot(group.games[0])?.state.physicalTick ?? 0,
-        { timeout: 10_000 }).toBeGreaterThanOrEqual(nextSpawnTick + 10)
-      const capped = snapshots(group.games[0]).filter((frame) =>
-        frame.state.physicalTick >= firstSpawnTick && frame.state.physicalTick <= nextSpawnTick + 10)
-      expect(capped.length).toBeGreaterThan(1)
-      expect(capped.every((frame) => frame.state.mobs.length <= 2
-        && frame.state.lairs.every(({ livingMobs }) => livingMobs <= 1))).toBe(true)
+      await expectNoAdditionalBirths(group.games[0], spawned, environment.lairs.spawnSeconds)
 
       await one.screenshot({ path: testInfo.outputPath('lairs-running-desktop-en.png'), fullPage: true })
       await two.screenshot({ path: testInfo.outputPath('lairs-running-polish-320-reduced.png'), fullPage: true })
@@ -305,7 +315,7 @@ test('disabled lairs publish empty lair and mob arrays', async ({ browser }) => 
     await group.pages[0].getByRole('button', { name: 'All off', exact: true }).click()
     await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()
     const environment = {
-      stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 },
+      stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
     }
     for (const game of group.games) {
       await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)

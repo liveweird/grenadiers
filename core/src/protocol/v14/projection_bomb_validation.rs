@@ -4,7 +4,7 @@ use super::projection_facts::WorldFacts;
 use super::{BombTrigger, ProjectionError, Terrain};
 
 pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
-    if world.bombs.len() > super::MAX_BOMBS
+    if world.bombs.len() > super::projection_limits::bombs(world)
         || !world
             .bombs
             .windows(2)
@@ -40,7 +40,9 @@ pub(crate) fn validate(world: &WorldFacts) -> Result<(), ProjectionError> {
         {
             return Err(ProjectionError::InvalidBombs);
         }
-        *counts.entry(bomb.owner).or_insert(0_u8) += 1;
+        if world.rules_version != 9 || bomb.trigger != BombTrigger::contact() {
+            *counts.entry(bomb.owner).or_insert(0_u8) += 1;
+        }
         if bomb.trigger == BombTrigger::remote() {
             *remote_counts.entry(bomb.owner).or_insert(0_u8) += 1;
         }

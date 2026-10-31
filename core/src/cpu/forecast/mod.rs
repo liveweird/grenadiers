@@ -141,7 +141,10 @@ impl HazardForecast {
     ) -> Result<Self, ForecastFailure> {
         if horizon_end.0 <= basis_tick.0
             || cells.len() != board.cell_count()
-            || stationary_assumptions.len() > crate::cpu::MAX_MULTIPLAYER_OBSERVED_BOMBS
+            || stationary_assumptions.len()
+                > evolution
+                    .bomb_limit()
+                    .max(crate::cpu::MAX_MULTIPLAYER_OBSERVED_BOMBS)
             || cells.iter().any(|cell| {
                 cell.lethal.len() > usize::from(limits.max_intervals_per_cell)
                     || cell.blocking.len() > usize::from(limits.max_intervals_per_cell)
@@ -230,3 +233,6 @@ mod multiplayer_capacity_tests;
 
 #[cfg(test)]
 mod dimension_tests;
+
+#[cfg(test)]
+mod rules9_mine_tests;

@@ -12,18 +12,19 @@ function panel(current: ReturnType<typeof room>, copy: typeof en) {
   </MantineProvider>
 }
 
-describe('v16 lair settings controls', () => {
-  it('exposes accessible Polish names for the toggle and both numeric controls', () => {
+describe('v17 lair settings controls', () => {
+  it('exposes the Polish toggle and respawn delay without a configurable cap', () => {
     render(panel(room(1), pl))
     expect(screen.getByRole('checkbox', { name: 'Legowiska potworów' })).toBeChecked()
-    expect(screen.getByRole('textbox', { name: 'Czas odrodzenia (sekundy)' })).toHaveValue('10')
-    expect(screen.getByRole('textbox', { name: 'Żywe potwory na legowisko' })).toHaveValue('3')
+    expect(screen.getByRole('textbox', { name: 'Opóźnienie odrodzenia (sekundy)' })).toHaveValue('10')
+    expect(screen.queryByRole('textbox', { name: 'Żywe potwory na legowisko' })).not.toBeInTheDocument()
+    expect(screen.getByText(/pierwszego potwora/)).toBeVisible()
   })
 
   it('remounts a stale draft from an accepted higher settings revision', () => {
     const current = room(1)
     const view = render(panel(current, en))
-    const spawn = screen.getByRole('textbox', { name: 'Spawn interval (seconds)' })
+    const spawn = screen.getByRole('textbox', { name: 'Respawn delay (seconds)' })
     fireEvent.change(spawn, { target: { value: '24' } })
     expect(spawn).toHaveValue('24')
 
@@ -32,6 +33,6 @@ describe('v16 lair settings controls', () => {
     accepted.settings.environment.lairs.spawnSeconds = 30
     accepted.configuration.environment.lairs.spawnSeconds = 30
     view.rerender(panel(accepted, en))
-    expect(screen.getByRole('textbox', { name: 'Spawn interval (seconds)' })).toHaveValue('30')
+    expect(screen.getByRole('textbox', { name: 'Respawn delay (seconds)' })).toHaveValue('30')
   })
 })

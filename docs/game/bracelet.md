@@ -1,5 +1,9 @@
 # Bracelet
 
+In live rules9, contact stops players before overlap. Walking into a rival's physical blocking
+face can shove even when the holder's accepted movement is zero. Tile reservations without
+physical contact do not trigger it; forced travel respects every player's starts and sweeps.
+
 ## Availability and rules
 
 Bracelet is configurable permanent equipment enabled in new Expanded-v5 rooms. It has no manual action. When its

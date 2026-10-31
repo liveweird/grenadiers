@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{SeatId, StormCloudConfig},
-    room::{LairTuning, RoomSettings},
+    room::{LairTuning, RespawnLairTuning, RoomSettings},
 };
 
 use crate::game::rooms::roster_runtime::RosterRuntime;
@@ -24,6 +24,14 @@ pub(in crate::game::rooms) enum NormalizedSettings {
         cloud: StormCloudConfig,
         tuning: LairTuning,
     },
+    RespawnV9 {
+        seat: SeatId,
+        epoch: u64,
+        revision: u32,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        tuning: RespawnLairTuning,
+    },
 }
 
 impl NormalizedSettings {
@@ -44,6 +52,14 @@ impl NormalizedSettings {
                 cloud,
                 tuning,
             } => runtime.update_lair_settings(seat, epoch, revision, settings, cloud, tuning),
+            Self::RespawnV9 {
+                seat,
+                epoch,
+                revision,
+                settings,
+                cloud,
+                tuning,
+            } => runtime.update_respawn_settings(seat, epoch, revision, settings, cloud, tuning),
         };
         result.map(|_| ()).map_err(|_| ReplayError::Runtime)
     }

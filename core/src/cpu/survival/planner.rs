@@ -122,8 +122,9 @@ pub(super) fn plan_inner(
         ordinary.intent.movement != MovementIntent::Stop,
         work,
     );
+    let bounded_tactics = storm_enabled || respawn;
     let bounded_plant_attempted =
-        storm_enabled && (ordinary.intent.manual.is_some() || clear_movement);
+        bounded_tactics && (ordinary.intent.manual.is_some() || clear_movement);
     if (ordinary.intent.manual.is_some() || clear_movement)
         && let Some(plan) = super::plant_tactic::certified_plant(
             observation,
@@ -131,7 +132,7 @@ pub(super) fn plan_inner(
             settled_stop_tick,
             memory,
             &ordinary,
-            storm_enabled,
+            bounded_tactics,
             work,
         )
     {
@@ -306,14 +307,14 @@ pub(super) fn plan_inner(
         });
         break;
     }
-    if (!bounded_plant_attempted || !storm_enabled)
+    if (!bounded_plant_attempted || !bounded_tactics)
         && let Some(plan) = super::plant_tactic::certified_plant(
             observation,
             history,
             settled_stop_tick,
             memory,
             &ordinary,
-            storm_enabled,
+            bounded_tactics,
             work,
         )
     {

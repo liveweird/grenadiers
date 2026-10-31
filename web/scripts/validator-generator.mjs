@@ -8,6 +8,26 @@ import ts from 'typescript'
 import { build } from 'vite'
 
 const validatorDefinitions = {
+  'gameplay-v17': {
+    schema: '../api/gameplay-v17.schema.json',
+    declaration: `import type { ErrorObject } from 'ajv'
+import type { GameServerMessage } from '../../game/v17/schema'
+
+declare const validate: {
+  (value: unknown): value is GameServerMessage
+  errors?: ErrorObject[] | null
+}
+
+export default validate
+`,
+    compile(ajv, schema) {
+      ajv.addSchema(schema)
+      const reference = `${schema.$id}#/$defs/GameServerMessage`
+      const validate = ajv.getSchema(reference)
+      if (!validate) throw new Error(`AJV did not resolve ${reference}`)
+      return validate
+    },
+  },
   'gameplay-v16': {
     schema: '../api/gameplay-v16.schema.json',
     declaration: `import type { ErrorObject } from 'ajv'

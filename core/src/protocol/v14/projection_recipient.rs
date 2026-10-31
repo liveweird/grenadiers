@@ -93,8 +93,9 @@ pub(crate) fn project_facts(
                 .map(|(index, event)| {
                     Ok(WireEvent {
                         tick: event.tick,
-                        index: EventIndex::new(
+                        index: EventIndex::new_for_rules(
                             u8::try_from(index).map_err(|_| ProjectionError::InvalidReports)?,
+                            world.rules_version,
                         )
                         .map_err(|_| ProjectionError::InvalidReports)?,
                         kind: event.kind.clone(),
@@ -104,7 +105,8 @@ pub(crate) fn project_facts(
         .collect::<Result<Vec<_>, ProjectionError>>()?;
     Ok(RecipientProjection {
         state,
-        events: SnapshotEvents::new(events).map_err(|_| ProjectionError::InvalidReports)?,
+        events: SnapshotEvents::new_for_rules(events, world.rules_version)
+            .map_err(|_| ProjectionError::InvalidReports)?,
     })
 }
 

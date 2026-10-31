@@ -5,6 +5,14 @@
 > current status. Use the [current backlog](../game/backlog.md), [releases](../releases.md), and
 > [verification](../verification.md) for current work.
 
+## Completed 2026-10-31
+
+- **Arena playability:** [v1.0.2](../releases.md#v102--2026-10-31) adds one living mob per
+  lair with death-plus-delay replacement, solid players, safe CPU combat pressure against other
+  CPUs, and extra single-use mines independent of ordinary bomb capacity.
+- **Artist revision:** the supplied stone-wall sheet is adopted in the existing layout with
+  validated player palettes, anchors, animation frames and renderer parity.
+
 ## Completed 2026-10-29
 
 - **LAIRS:** [v0.3.118](../releases.md#v03118--2026-10-29) activates configurable,

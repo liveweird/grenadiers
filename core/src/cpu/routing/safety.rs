@@ -62,7 +62,15 @@ pub(super) fn check_segments_with_grace(
                     if forecast.stationary_assumptions().contains(&id) =>
                 {
                     assumptions.insert(id);
-                    if assumptions.len() > crate::cpu::MAX_OBSERVED_BOMBS {
+                    if assumptions.len()
+                        > if forecast.evolution().bomb_limit()
+                            > crate::cpu::MAX_MULTIPLAYER_OBSERVED_BOMBS
+                        {
+                            forecast.evolution().bomb_limit()
+                        } else {
+                            crate::cpu::MAX_OBSERVED_BOMBS
+                        }
+                    {
                         return Err(RouteFailure::Capacity);
                     }
                 }

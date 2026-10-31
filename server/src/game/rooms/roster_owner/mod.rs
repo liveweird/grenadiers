@@ -63,17 +63,22 @@ fn validate_cpus(
         return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
     }
     let expected_profile = match (
+        runtime.respawn_tuning(),
         runtime.lair_tuning(),
         runtime.environment(),
         identity.configuration.cpu_difficulty(),
     ) {
-        (Some(_), _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::LAIRS_EASY),
-        (Some(_), _, Some(CpuDifficulty::Standard)) => Some(CpuProfile::LAIRS_STANDARD),
-        (None, Some(_), Some(CpuDifficulty::Easy)) => Some(CpuProfile::ENVIRONMENT_EASY),
-        (None, Some(_), Some(CpuDifficulty::Standard)) => Some(CpuProfile::ENVIRONMENT_STANDARD),
-        (None, None, Some(CpuDifficulty::Easy)) => Some(CpuProfile::MULTIPLAYER_EASY),
-        (None, None, Some(CpuDifficulty::Standard)) => Some(CpuProfile::MULTIPLAYER_STANDARD),
-        (_, _, None) => None,
+        (Some(_), _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RESPAWN_LAIRS_EASY),
+        (Some(_), _, _, Some(CpuDifficulty::Standard)) => Some(CpuProfile::RESPAWN_LAIRS_STANDARD),
+        (None, Some(_), _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::LAIRS_EASY),
+        (None, Some(_), _, Some(CpuDifficulty::Standard)) => Some(CpuProfile::LAIRS_STANDARD),
+        (None, None, Some(_), Some(CpuDifficulty::Easy)) => Some(CpuProfile::ENVIRONMENT_EASY),
+        (None, None, Some(_), Some(CpuDifficulty::Standard)) => {
+            Some(CpuProfile::ENVIRONMENT_STANDARD)
+        }
+        (None, None, None, Some(CpuDifficulty::Easy)) => Some(CpuProfile::MULTIPLAYER_EASY),
+        (None, None, None, Some(CpuDifficulty::Standard)) => Some(CpuProfile::MULTIPLAYER_STANDARD),
+        (_, _, _, None) => None,
     };
     for (index, cpu) in cpus.iter().enumerate() {
         if cpu.seat() != configured[index]

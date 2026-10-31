@@ -3,13 +3,13 @@
 A browser-based multiplayer game inspired by classic Bomberman/Dynablaster.
 Play two-to-four-seat human/CPU matches, a quick two-human duel, or a private solo match.
 
-**[v1.0.1 CPU escape recovery](https://github.com/liveweird/grenadiers/releases/tag/v1.0.1).**
-All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v101--2026-10-30)
+**[v1.0.2 Arena behavior and stone-wall art](https://github.com/liveweird/grenadiers/releases/tag/v1.0.2).**
+All 22 requested item types shipped in v0.3.47. See the [release record](docs/releases.md#v102--2026-10-31)
 for verification, the exact deployed image and rollback. Reload browser tabs after upgrading the paired server/web image.
 
 The [artist sprite-sheet handoff](assets/art/README.md) includes editable PNG/JSON, labelled
 guides, validated runtime export and a separate Pixi preview. Download the artist bundle from
-[v0.3.117 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v0.3.117/grenadiers-lairs-art-v0.3.117.zip).
+[v1.0.2 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.0.2/grenadiers-art-v1.0.2.zip).
 Gameplay now uses those canonical inputs; see the [renderer guide](docs/game/art-atlas.md).
 The current sheet is a Napoleonic redraw generated with ChatGPT; see its
 [provenance](assets/art/README.md#provenance).

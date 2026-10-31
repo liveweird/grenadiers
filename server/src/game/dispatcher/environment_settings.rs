@@ -1,5 +1,5 @@
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::{Counter, RoomId, v16::ErrorCode};
+use grenadiers_core::protocol::{Counter, RoomId, v17::ErrorCode};
 
 use super::{reply_error, room_error};
 use crate::game::{

@@ -155,3 +155,8 @@ The lair and mob extension occupies the next row: `terrain.lair` is a 48×48 til
 player uniforms. All preceding frame pixels, rectangles and reserved entries are preserved.
 These sprites were generated with OpenAI built-in imagegen and normalized with owner-approved
 Pillow processing; see the [lair/mob prompts and processing rules](lair-mob-prompts.md).
+
+The owner-supplied stone-wall revision replaces the two solid-wall frames with gray stone
+masonry. It also retouches appended walking and timed-bomb poses, the cloud, lair and mobs
+inside their existing rectangles. The PNG is adopted without resampling or repainting;
+frame IDs, dimensions, pivots, anchors and animation metadata remain unchanged.

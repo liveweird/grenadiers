@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v16/schema'
+import type { Direction, EquipmentId, GameServerMessage, Seat } from '../../../web/src/game/v17/schema'
 
 type Admission = Extract<GameServerMessage, { type: 'admitted' }>
 export type PublicAdmission = {
@@ -16,7 +16,7 @@ export type PublicAdmission = {
   bombIds: number[]
   oilBarrels: { column: number; row: number; state: 'unlit' | 'burning' }[]
   stormCloud: { position: { x: number; y: number }; direction: Direction; legRemainingTicks: number } | null
-  lairs: { id: number; cell: { column: number; row: number }; spawnRemainingTicks: number; livingMobs: number }[]
+  lairs: { id: number; cell: { column: number; row: number }; spawnRemainingTicks: number | null; livingMobs: number }[]
   mobs: { id: number; lairId: number; position: { x: number; y: number }; heading: Direction; frozen: boolean }[]
   stableCapability: boolean
 }
@@ -128,7 +128,7 @@ export async function installTransportProbe(page: Page): Promise<void> {
         socket.addEventListener('close', fail, { once: true })
         socket.addEventListener('open', () => {
           stage = 'open'
-          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 16, token: session.token }))
+          socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 17, token: session.token }))
         }, { once: true })
         const onMessage = (event: MessageEvent): void => {
           const message = JSON.parse(String(event.data)) as GameServerMessage

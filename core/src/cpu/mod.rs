@@ -51,7 +51,9 @@ pub(crate) fn rules_config(observation: &Observation) -> Option<crate::game::Rul
 }
 
 pub(crate) const fn observed_bomb_capacity(rules_version: u16) -> usize {
-    if rules_version >= 6 {
+    if rules_version == 9 {
+        crate::game::arena::ARENA_CELL_COUNT
+    } else if rules_version >= 6 {
         MAX_MULTIPLAYER_OBSERVED_BOMBS
     } else {
         MAX_OBSERVED_BOMBS
@@ -82,5 +84,8 @@ mod observation_multiplayer_tests;
 mod rules_v8_boundary_tests;
 #[cfg(test)]
 mod rules_v9_episode_tests;
+
+#[cfg(test)]
+mod rules_v9_generated_tests;
 #[cfg(test)]
 mod tests;

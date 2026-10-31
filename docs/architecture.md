@@ -31,7 +31,7 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. All live two-to-four-seat matches use CPU policy 20 and rules 8;
+ceiling, not a connection limit. All live two-to-four-seat matches use CPU policy 21 and rules 9;
 cloud and lair settings may be enabled or disabled per room.
 Archived profiles retain their historical policies and rules. The board
 choice is immutable, defaults to 15×13 and is documented in [board geometry](game/board-sizes.md).
@@ -104,15 +104,15 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `roster_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v16 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v17 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v16 client/panel shares the Pixi presentation boundary, validates v16 messages, keeps
+The active v17 client/panel shares the Pixi presentation boundary, validates v17 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v16 on `/api/v1/game/ws`; versions 1 through 15 are
+authoritative facts. Production routing uses v17 on `/api/v1/game/ws`; versions 1 through 16 are
 rejected before credential claim. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v16](game/protocol-v16.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v17](game/protocol-v17.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

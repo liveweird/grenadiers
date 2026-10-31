@@ -3,7 +3,7 @@ import type { ObservedGame } from './duel'
 
 type ItemSelection = { id: string; label: string }
 
-const DISABLED_LAIRS = { enabled: false, spawnSeconds: 10, maxLivingMobs: 3 } as const
+const DISABLED_LAIRS = { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 } as const
 
 const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
   frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
@@ -37,7 +37,7 @@ export async function selectClassicSettings(page: Page, game: ObservedGame): Pro
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)
   expect(latestRoom(game)?.settings.enabledItems).toEqual([])
   expect(latestRoom(game)).toMatchObject({
-    rulesVersion: 8, mapId: 'generated_v2',
+    rulesVersion: 9, mapId: 'generated_v2',
     settings: { environment: { stormCloud: false, lairs: DISABLED_LAIRS } },
   })
 }

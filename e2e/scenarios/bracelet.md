@@ -8,3 +8,7 @@
   `(12,1)` without a Player Two command, Equipment action, public event, or private history field.
 - Capture the stable English desktop and Polish 320-pixel reduced-motion views and verify the
   destination tile is visibly occupied without horizontal overflow.
+
+Both clients' recorded living-player positions remain in distinct center cells with no positive-area
+footprint overlap, including every snapshot of the exact one-tile shove. The victim may also have
+collected Bracelet while clearing its corridor; stationary equipment does not initiate a shove.

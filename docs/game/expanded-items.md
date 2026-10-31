@@ -53,7 +53,7 @@ per seat/tick. Punch uses the remappable Equipment action, whose default is **E*
 | Remote bomb | The next manual bomb action detonates the armed bomb instead of planting. Chains/fire still trigger it; death/disconnect adds no invented fuse. Another unused weapon may occupy the slot while it is armed. |
 | Piercing bomb | Rays spend range through soft blocks/barrels; hard walls stop them. Solid bombs chain and stop the ray. |
 | Power bomb | Affect eligible cells within Manhattan radius, ignoring line of sight. Hard walls remain intact without fire; blocks, barrels and bombs use the same immutable explosion plan. |
-| Landmine | Passable and capacity-counted. Initial overlapping actors have exit grace; later swept entry, including the owner, triggers it. Other blasts destroy it without detonation; an already accepted contact wins. Exclude mines from Kick/Punch. |
+| Landmine | Passable, single-use and additional to ordinary slots in rules9; triggering or destroying it creates no slot refund. Initial overlapping actors have exit grace; later swept entry, including the owner, triggers it. Other blasts destroy it without detonation; an already accepted contact wins. Exclude mines from Kick/Punch. |
 
 Reverse controls transforms held directions within the simulator while retaining raw input
 press/release identity; clear pending turn assistance when inversion changes. Diarrhea makes

@@ -26,7 +26,7 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
       controllers: ['human', 'cpu'], cpuDifficulty: 'easy', board: { width: 15, height: 13 },
       environment: {
         stormCloud: true,
-        lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+        lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
       },
     })
     expect(created.seats).toEqual([
@@ -41,7 +41,7 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
     expect(created.settings.enabledItems).toEqual(created.availableItems)
     expect(created.settings.environment).toEqual({
       stormCloud: true,
-      lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 },
+      lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
     })
     await expect(player.getByText('Private solo match · Easy CPU', { exact: true })).toBeVisible()
     await expect(player.getByRole('list', { name: 'Players' })).toContainText('CPU opponent')

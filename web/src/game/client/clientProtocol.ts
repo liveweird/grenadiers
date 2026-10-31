@@ -1,10 +1,18 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v16/schema'
-import { validateGameplayV16ServerMessage } from '../v16/validation'
+  RoomView, Seat, V14ErrorCode } from '../v17/schema'
+import { validateGameplayV17ServerMessage } from '../v17/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
 export const MAX_RECONNECT_ATTEMPTS = 3
+export const MAX_SERVER_FRAME_BYTES = 196_608
+
+export function parseServerFrame(raw: unknown): unknown {
+  if (typeof raw !== 'string' || new TextEncoder().encode(raw).byteLength > MAX_SERVER_FRAME_BYTES) {
+    throw new Error('invalid server frame')
+  }
+  return JSON.parse(raw) as unknown
+}
 
 export interface Dependencies {
   fetch: typeof fetch
@@ -40,9 +48,9 @@ export function createConfiguration(intent: ConfigurationIntent): RoomConfigurat
   const difficulty = intent.mode?.type === 'solo' ? intent.mode.difficulty : null
   return difficulty === null
     ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } }
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
     : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } }
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
 }
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length
@@ -75,7 +83,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV16ServerMessage(value)
+  const result = validateGameplayV17ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 
@@ -127,7 +135,7 @@ function validBaseSettings(settings: GameSettings): boolean {
 function validLairSettings(lairs: GameSettings['environment']['lairs']): boolean {
   return Object.keys(lairs ?? {}).length === 3 && typeof lairs?.enabled === 'boolean'
     && Number.isInteger(lairs.spawnSeconds) && lairs.spawnSeconds >= 5 && lairs.spawnSeconds <= 60
-    && Number.isInteger(lairs.maxLivingMobs) && lairs.maxLivingMobs >= 1 && lairs.maxLivingMobs <= 8
+    && lairs.maxLivingMobs === 1
 }
 
 export function validGameSettings(settings: GameSettings): boolean {

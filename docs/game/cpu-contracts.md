@@ -302,3 +302,24 @@ Run `cargo test -p grenadiers-core cpu:: --lib` for bounded contracts,
 `cargo test -p grenadiers-core cpu_observation --lib` for recipient privacy and public facts,
 and `cargo test -p grenadiers-server cpu_contract --lib` for accepted-input replay. These
 focused commands supplement the unchanged full Rust/coverage release gates.
+
+## Rules9 occupancy and respawn profile
+
+CPU21 receives checked v17 facts through `new_rules_v9`, with no lair overlay when disabled.
+Visible living players are blockers through the same fixed-point cell/footprint geometry as
+physics. Fresh next-segment checks supplement pose/epoch/scene guards without requiring every
+unrelated rival to stand still. Hidden positions remain unknown. Corner alignment and forward
+motion are checked as separate axis segments; future unexpected blocking withdraws authority.
+
+`plan_respawn_with_origin` keeps finite movement/contact and planting proofs, including with
+lairs disabled. Occupied lairs contribute possible replacement envelopes after earliest death
+plus grace; empty lairs use independent due times. Combat goals seek reachable firing positions
+against all visible rivals with shared weapon/effect blast geometry. The real-State regression
+includes a human elimination, CPU-versus-CPU lethal planting and the planter's escape.
+
+## Extra mine observations
+
+Rules9 ordinary-slot counts exclude Contact mines, while forecast ownership/removal history keeps
+all visible mines. Distinct bomb cells bound observations to the board (at most 195). Work budgets
+and per-cell interval limits are unchanged: an excessively uncertain scene fails closed rather
+than accepting an unproved route. Archived observations and slot accounting remain closed.

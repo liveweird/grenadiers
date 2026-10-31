@@ -145,19 +145,19 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     let (url, server) = start_server(state).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 16).await,
-        json!({"type":"authenticated", "protocolVersion":16})
+        authenticate(&mut socket, &token, 17).await,
+        json!({"type":"authenticated", "protocolVersion":17})
     );
 
     send_json(
         &mut socket,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
     )
     .await;
     assert_eq!(next_json(&mut socket).await["type"], "admitted");
     send_json(
         &mut socket,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
     )
     .await;
     assert_eq!(
@@ -166,7 +166,7 @@ async fn authenticates_and_consumes_fresh_sequences_before_semantics() {
     );
     send_json(
         &mut socket,
-        json!({"type":"authenticate", "protocolVersion":16, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":17, "token":token}),
     )
     .await;
     assert_eq!(
@@ -188,18 +188,18 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     );
     let (url, server) = start_server(state).await;
 
-    for version in 1..16 {
+    for version in 1..17 {
         let forwarded = format!("198.51.100.{version}");
         let mut wrong = connect_with_forwarded(&url, Some(&forwarded)).await;
         assert_eq!(
             authenticate(&mut wrong, &token, version).await,
-            json!({"type":"incompatibleProtocol", "supportedVersion":16})
+            json!({"type":"incompatibleProtocol", "supportedVersion":17})
         );
     }
 
     let mut owner = connect_with_forwarded(&url, Some("198.51.100.20")).await;
     assert_eq!(
-        authenticate(&mut owner, &token, 16).await["type"],
+        authenticate(&mut owner, &token, 17).await["type"],
         "authenticated"
     );
     let mut claimed_wrong_version = connect_with_forwarded(&url, Some("198.51.100.21")).await;
@@ -209,12 +209,12 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     );
     let mut duplicate = connect_with_forwarded(&url, Some("198.51.100.22")).await;
     assert_eq!(
-        authenticate(&mut duplicate, &token, 16).await["code"],
+        authenticate(&mut duplicate, &token, 17).await["code"],
         "connectionInUse"
     );
     send_json(
         &mut owner,
-        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":3}}}}),
+        json!({"type":"createRoom", "sequence":1, "configuration":{"controllers":["human","human"],"cpuDifficulty":null,"board":{"width":15,"height":13},"environment":{"stormCloud":true,"lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}}}}),
     )
     .await;
     assert_eq!(next_json(&mut owner).await["type"], "admitted");
@@ -223,7 +223,7 @@ async fn version_precedes_claim_and_duplicate_cannot_revoke_owner() {
     tokio::task::yield_now().await;
     let mut consumed = connect_with_forwarded(&url, Some("198.51.100.23")).await;
     assert_eq!(
-        authenticate(&mut consumed, &token, 16).await["code"],
+        authenticate(&mut consumed, &token, 17).await["code"],
         "authenticationFailed"
     );
     server.abort();
@@ -283,7 +283,7 @@ async fn control_frames_do_not_extend_authentication_deadline() {
 
     let mut fresh = connect(&url).await;
     assert_eq!(
-        authenticate(&mut fresh, &token, 16).await["type"],
+        authenticate(&mut fresh, &token, 17).await["type"],
         "authenticated"
     );
     server.abort();
@@ -334,7 +334,7 @@ async fn diagnostic_and_game_sockets_have_isolated_capacity_both_directions() {
 
     let mut game = connect(&game_url).await;
     assert_eq!(
-        authenticate(&mut game, &token, 16).await["type"],
+        authenticate(&mut game, &token, 17).await["type"],
         "authenticated"
     );
     game.close(None).await.unwrap();
@@ -365,7 +365,7 @@ async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() 
     let (url, server) = start_server(app_state.clone()).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 16).await["type"],
+        authenticate(&mut socket, &token, 17).await["type"],
         "authenticated"
     );
     assert_eq!(
@@ -382,7 +382,7 @@ async fn abrupt_authenticated_disconnect_releases_lease_and_connection_permit() 
     .await;
     let mut retry = connect(&url).await;
     assert_eq!(
-        authenticate(&mut retry, &token, 16).await["code"],
+        authenticate(&mut retry, &token, 17).await["code"],
         "authenticationFailed"
     );
     server.abort();

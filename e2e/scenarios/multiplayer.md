@@ -28,4 +28,10 @@ place each CPU's first bomb. Public placement/detonation events identify ownersh
 CPU must survive its first detonation and the following flame interval. The test uses ordinary
 room controls with no injected game state, fixed private AI seed or direct CPU input.
 
-These cases require the active gameplay v16 endpoint. They must not run against an archived deployment.
+## Scenario: three CPUs keep moving with all optional features disabled
+
+The creator chooses All off and applies the accepted settings revision before starting a
+Human/CPU/CPU/CPU room. All three real CPU workers must make physical progress while lairs,
+clouds and items remain disabled; the published lair and mob arrays stay empty.
+
+These cases require the active gameplay v17 endpoint. They must not run against an archived deployment.

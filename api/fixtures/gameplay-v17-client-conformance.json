@@ -1,0 +1,133 @@
+{
+  "validMessages": [
+    {
+      "caseId": "create-room-lairs-enabled",
+      "value": {
+        "type": "createRoom",
+        "sequence": 1,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": {
+            "stormCloud": true,
+            "lairs": { "enabled": true, "spawnSeconds": 5, "maxLivingMobs": 1 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "create-room-disabled-values-retained",
+      "value": {
+        "type": "createRoom",
+        "sequence": 2,
+        "configuration": {
+          "controllers": ["human", "cpu"],
+          "cpuDifficulty": "standard",
+          "board": { "width": 11, "height": 9 },
+          "environment": {
+            "stormCloud": false,
+            "lairs": { "enabled": false, "spawnSeconds": 60, "maxLivingMobs": 1 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "update-settings-disabled-values-retained",
+      "value": {
+        "type": "updateSettings",
+        "sequence": 6,
+        "roomId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "roundId": 1,
+        "settingsRevision": 1,
+        "settings": {
+          "startingSpeedLevel": 0,
+          "turnAssistUnits": 128,
+          "winsToFinish": 3,
+          "bombFuseTicks": 180,
+          "enabledItems": [],
+          "environment": {
+            "stormCloud": false,
+            "lairs": {
+              "enabled": false,
+              "spawnSeconds": 37,
+              "maxLivingMobs": 1
+            }
+          }
+        }
+      }
+    }
+  ],
+  "invalidMessages": [
+    {
+      "caseId": "missing-lairs",
+      "value": {
+        "type": "createRoom",
+        "sequence": 3,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": { "stormCloud": false }
+        }
+      }
+    },
+    {
+      "caseId": "spawn-seconds-underflow",
+      "value": {
+        "type": "createRoom",
+        "sequence": 4,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": {
+            "stormCloud": false,
+            "lairs": { "enabled": false, "spawnSeconds": 4, "maxLivingMobs": 1 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "mob-cap-overflow",
+      "value": {
+        "type": "createRoom",
+        "sequence": 5,
+        "configuration": {
+          "controllers": ["human", "human"],
+          "cpuDifficulty": null,
+          "board": { "width": 15, "height": 13 },
+          "environment": {
+            "stormCloud": false,
+            "lairs": { "enabled": true, "spawnSeconds": 10, "maxLivingMobs": 2 }
+          }
+        }
+      }
+    },
+    {
+      "caseId": "update-settings-invalid-lair-tuning",
+      "value": {
+        "type": "updateSettings",
+        "sequence": 7,
+        "roomId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "roundId": 1,
+        "settingsRevision": 1,
+        "settings": {
+          "startingSpeedLevel": 0,
+          "turnAssistUnits": 128,
+          "winsToFinish": 3,
+          "bombFuseTicks": 180,
+          "enabledItems": [],
+          "environment": {
+            "stormCloud": false,
+            "lairs": {
+              "enabled": true,
+              "spawnSeconds": 4,
+              "maxLivingMobs": 1
+            }
+          }
+        }
+      }
+    }
+  ]
+}

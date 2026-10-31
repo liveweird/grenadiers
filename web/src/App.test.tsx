@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v16/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v17/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -43,17 +43,24 @@ class AppSocketStub {
 
 const appSockets: AppSocketStub[] = []
 
+function regularBombs(count: number): GameState['bombs'] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: 10 + index, owner: 1, cell: { column: 1 + index, row: 1 }, range: 8, placedAt: 1,
+    trigger: { type: 'timed', remainingTicks: 180, paused: false }, blast: 'standard',
+  }))
+}
+
 function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomView {
   return {
     roomId,
     configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } },
     roomCode: 'ABCDEFGH',
     roundId: 1,
     revision,
     tick: revision,
-    rulesVersion: 8,
+    rulesVersion: 9,
     mapId: 'generated_v2',
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
     scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: phase.type === 'result' ? 1 : 0 }],
@@ -64,7 +71,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1,
@@ -139,8 +146,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 16, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 16 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 17, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 17 }))
   return socket
 }
 
@@ -165,7 +172,7 @@ describe('App game flow', () => {
       type: 'createRoom', sequence: 1,
       configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
         board: { width: 15, height: 13 },
-        environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 3 } } },
+        environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } },
     })
 
     act(() => admit(socket, room(1)))
@@ -217,6 +224,7 @@ describe('App game flow', () => {
     act(() => admit(socket, room(1)))
     const live = snapshot(2)
     Object.assign(live.state.actors[0], { bombCapacity: 8, bombRange: 8, liveBombCount: 3, speedLevel: 4 })
+    live.state.bombs = regularBombs(3)
     act(() => socket.message(live))
     expect(await screen.findByLabelText('Phase time remaining')).toHaveTextContent('3:00')
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')

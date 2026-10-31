@@ -8,7 +8,7 @@ Run the production image with the pinned bytes from the archive-named
 Heart, apply the rules, and wait for authoritative settings acceptance. No test-only world or
 inventory endpoint is used.
 
-Two real browser contexts start a rules8/generator3 room with lairs explicitly disabled. Player one destroys the
+Two real browser contexts start a rules9/generator3 room with lairs explicitly disabled. Player one destroys the
 nearby soft block, escapes the ordinary blast, waits for its fire to expire and collects the
 exposed Heart. Both browsers observe the equipped charge. The desktop exposed-pickup capture,
 the existing Polish 320-pixel rival capture, and `heart-collector-equipped-polish-320.png` cover

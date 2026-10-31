@@ -36,67 +36,6 @@ pub fn plan_lairs(
     )
 }
 
-/// Rules-v9 policy. Disabled lairs use the shared survival planner; enabled
-/// lairs add replacement-mob contact certification.
-pub fn plan_respawn(
-    observation: &Observation,
-    memory: &UtilityMemory,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    rng: &mut CpuRng,
-    work: &mut WorkBudget,
-) -> Result<LairSurvivalPlan, PolicyError> {
-    plan_respawn_with_origin(
-        observation,
-        memory,
-        history,
-        settled_stop_tick,
-        None,
-        rng,
-        work,
-    )
-}
-
-#[allow(clippy::too_many_arguments)]
-pub fn plan_respawn_with_origin(
-    observation: &Observation,
-    memory: &UtilityMemory,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    origin: Option<&PlantEscapeOrigin>,
-    rng: &mut CpuRng,
-    work: &mut WorkBudget,
-) -> Result<LairSurvivalPlan, PolicyError> {
-    if observation.parts().rules.version != 9 {
-        return Err(PolicyError::InvalidObservation);
-    }
-    if observation.respawn_lairs().is_none() {
-        return super::respawn_disabled::plan(
-            observation,
-            memory,
-            history,
-            settled_stop_tick,
-            origin,
-            rng,
-            work,
-        )
-        .map(|survival| LairSurvivalPlan {
-            survival,
-            contact: None,
-        });
-    }
-    plan_lairs_inner(
-        observation,
-        memory,
-        history,
-        settled_stop_tick,
-        origin,
-        rng,
-        work,
-        9,
-    )
-}
-
 #[allow(clippy::too_many_arguments)]
 pub fn plan_lairs_with_origin(
     observation: &Observation,
@@ -116,11 +55,12 @@ pub fn plan_lairs_with_origin(
         rng,
         work,
         8,
+        false,
     )
 }
 
 #[allow(clippy::too_many_arguments)]
-fn plan_lairs_inner(
+pub(super) fn plan_lairs_inner(
     observation: &Observation,
     memory: &UtilityMemory,
     history: &ObservedHazardMemory,
@@ -129,6 +69,7 @@ fn plan_lairs_inner(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
     rules_version: u16,
+    pickup_handoff: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -232,7 +173,22 @@ fn plan_lairs_inner(
             contact: Some(contact),
         });
     }
-    if ordinary.intent.manual.is_none()
+    if pickup_handoff
+        && let Some(plan) = super::pickup_handoff::lair(
+            observation,
+            &hazards,
+            ordinary,
+            ordinary_clear,
+            start_window,
+            end,
+            settled_stop_tick,
+            work,
+        )
+    {
+        return Ok(plan);
+    }
+    if !pickup_handoff
+        && ordinary.intent.manual.is_none()
         && ordinary_clear
         && !parts.pickups.is_empty()
         && let Some(stopped_safe_until) =

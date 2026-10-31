@@ -12,5 +12,13 @@ pub(crate) fn certify_respawn_pulse(
     if observation.parts().rules.version != 9 {
         return Err(RouteFailure::InvalidRequest);
     }
-    super::pulse::certify_pulse_inner(observation, forecast, request, None, false, None, work)
+    super::pulse::certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        None,
+        super::pickup_pulse::PickupSafety::Reject,
+        None,
+        work,
+    )
 }

@@ -109,6 +109,7 @@ fn job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
     hazard_memory.observe(&observation).unwrap();
     (
         PlanJob {
+            policy: grenadiers_core::room::CpuPolicy::UtilityV5,
             settled_stop_tick: observation.parts().tick,
             observation,
             memory: UtilityMemory::new(key()),
@@ -129,6 +130,7 @@ fn respawn_job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
     let (result, receiver) = sync_channel(1);
     (
         PlanJob {
+            policy: grenadiers_core::room::CpuPolicy::UtilityV22,
             settled_stop_tick: observation.parts().tick,
             observation,
             memory: UtilityMemory::new(key()),

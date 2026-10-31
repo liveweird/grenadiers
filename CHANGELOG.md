@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.0.3 — 2026-10-31
+
+- Fix CPUs stopping beside exposed pickups by retaining their checked one-update movement
+  lease, then stopping and replanning from the collected item state. Cover lairs enabled and
+  disabled; identify the corrected policy as CPU22 and retain CPU21 replay8 compatibility.
+
 ## 1.0.2 — 2026-10-31
 
 - Limit each lair to one living mob; start its replacement delay after that mob dies and

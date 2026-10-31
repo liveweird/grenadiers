@@ -132,6 +132,24 @@ pub(super) fn reject_teleporter_pickups(
     }
 }
 
+pub(super) fn reject_unmodeled_pickups(
+    observation: &Observation,
+    segments: &[MovementSegment],
+) -> Result<(), RouteFailure> {
+    if observation.parts().pickups.iter().any(|pickup| {
+        matches!(
+            pickup.kind,
+            crate::game::PickupKind::Teleporter | crate::game::PickupKind::Diarrhea
+        ) && segments
+            .iter()
+            .any(|segment| segment.overlaps_cell(pickup.cell))
+    }) {
+        Err(RouteFailure::Unsupported)
+    } else {
+        Ok(())
+    }
+}
+
 pub(super) fn aggregate_motion(
     values: &[(Tick, Motion, bool)],
 ) -> Result<PoseBounds, RouteFailure> {

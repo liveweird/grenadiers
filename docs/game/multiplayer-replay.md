@@ -45,9 +45,10 @@ together. Mob actions are not journal entries: deterministic simulation regenera
 pursuit, contacts and deaths from accepted player inputs. Exact state inspection includes mob
 positions, retreat anchors, lair deadlines, living counts and simulation randomness.
 
-Format8 binds rules9 and CPU21 with the same generator/layout/lifecycle/randomness identities.
+Format8 binds rules9 and CPU22 (or archived CPU21) with the same generator/layout/lifecycle/randomness identities.
 It reconstructs one-mob respawn timers, solid movement, Bracelet contacts and atomic Teleporter
 exchanges from accepted inputs. Format7 retains rules8 and its original overlap/periodic lairs.
+Every CPU entry must match its header policy; mixed or unknown policy versions are rejected.
 
 Formats6/7/8 normalize their closed operations into the shared executor rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;

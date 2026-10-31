@@ -12,22 +12,23 @@ mod lair_planner;
 mod manual_execution;
 mod origin;
 mod origin_planner;
+mod pickup_handoff;
 mod planner;
 mod plant_tactic;
 mod plant_value;
 mod respawn_disabled;
+mod respawn_v22;
 mod route_execution;
 mod steering;
 
 pub use compatibility::can_admit_ordinary;
 pub use execution::{CommittedPulse, PulseStatus};
-pub use lair_planner::{
-    LairSurvivalPlan, plan_lairs, plan_lairs_with_origin, plan_respawn, plan_respawn_with_origin,
-};
+pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use planner::{SurvivalPlan, plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
+pub use respawn_v22::{plan_respawn, plan_respawn_v22_with_origin, plan_respawn_with_origin};
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;

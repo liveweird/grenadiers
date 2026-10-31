@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.1.7 — 2026-10-31
+
+- Add dormant spike-pit timing, contact and symmetric placement primitives, with checked
+  deadlines, bounded configuration and no changes to existing game rules or generation.
+
 ## 1.1.6 — 2026-10-31
 
 - Leave small cosmetic blood pools at visible player and mob deaths after knockout sprites

@@ -97,54 +97,46 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.1.6 — 2026-10-31
+## v1.1.7 — 2026-10-31
 
-Leave small dark-red blood pools on the floor at recipient-visible player and mob deaths.
-Pools remain after the knockout body and shadow disappear, through the result screen until
-the next round. One pool per tile bounds repeated lair deaths. Stains have no simulation,
-collision, damage or AI effect and do not reconstruct hidden or baseline death positions.
-
-The shared sheet appends `effect.bloodPool` at slot 185 without changing its 1120×2128 canvas,
-the preceding 185 frame entries or any pixel outside the new rectangle. Four reserved and
-four unassigned cells remain transparent. The [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.6/grenadiers-artist-v1.1.6.zip)
-contains the source pair, new guides, slices, labelled overview and 3D preview.
+Add dormant spike-pit core primitives: checked warning/raised clocks, strict positive-area
+contact helpers and deterministic symmetric clear-floor placement. No live profile selects
+these APIs yet. Spike simulation, transport, AI and visuals remain separate integration work.
+The [core guide](game/spike-pit-core.md) defines the implemented library invariants.
 
 ### Verification
 
-Accepted production source: `6fc9d151276029abd1188c5e53cc70ee3cc9e2c4`. Independent review
-found and resolved a replacement-room clock rollback case that dropped a valid coalesced
-death. Strictly newer generations retain fresh cues; stale same-generation envelopes remain
-fenced. Seen-cue history is capped at 128, independently of the per-tile pool bound.
+Accepted source: `676f2a3e94bbd1cf3fd40113092ef8a3f8709c87`,
+[PR #298](https://github.com/liveweird/grenadiers/pull/298). Independent review found and
+resolved same-tick retraction rearming and undefined stale-tick behavior. Updates and forecasts
+now enforce a checked horizon; both deadline additions are atomic.
 
-- Full web gate passes: 7,303 tests in 152 files (263.34s); coverage 95.24% lines,
-  88.80% branches, 92.06% statements and 91.33% functions. Lint, Knip, contracts and production
-  build pass; JS is 395,197/400,000 gzip bytes, CSS 15,430/20,000.
-- E2E static/types/scenario checks pass (107 mappings). Native Three passes fifteen cases
-  with seven intentional project skips. All player appearances and mobs expire exactly to
-  independent pool-only references in full/reduced motion without another snapshot. Ground
-  placement, foreground readability, duplicate envelopes and lifecycle resets are covered.
-- Native artwork acceptance passes nine unchanged cases plus the focused inventory rerun.
-  The inventory assertion now explicitly separates twenty death frames from the appended
-  blood frame. Standard export passes: 182 runtime frames, 2040×704 / 5,744,640 RGBA bytes.
-  Direct pixel review confirms 438 opaque pixels, four dark-red colors, binary alpha and
-  zero changes to previous pixels. No existing floor, character or item art is repainted.
-- Exact-image Compose passes four duel/auth/CPU cases (36.2s), disabled diagnostics (11.0s)
-  and an all-on visual smoke with zero browser errors. Kubernetes duel/auth passes (23.2s),
-  with runtime restrictions/probes/resources and cleanup of owned test resources.
-- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings. Every image web file equals
-  the verified build. Backend implementation, dependencies and gameplay contracts are unchanged;
-  reuse their recorded acceptance. The image includes a fresh Linux release build.
+- Twelve focused regressions pass in debug/release. Full core passes 1,594 tests plus two
+  doctests in each profile. Formatting and strict all-target core Clippy pass.
+- Isolated core-only coverage passes the unchanged 90% floor at 92.87% lines. An initial
+  shared-target report mixed stale objects from other worktrees and unexecuted server objects;
+  the isolated report measures only the tested core. No repository exclusion or floor changes.
+- Distinct Linux debug/release core/server coverage passes in
+  [the platform run](https://github.com/liveweird/grenadiers/actions/runs/41224893047).
+- The built image passes Compose duel/auth/CPU, disabled diagnostics, all-on visual smoke
+  and Kubernetes duel/auth/runtime checks. Owned test stacks and namespace are removed.
+  Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL findings.
+- All image web files equal the v1.1.6 verified frontend. Reuse its full web/coverage,
+  native graphics, E2E-static, artwork and dependency acceptance: those inputs are unchanged.
+  No existing live rules, generation or protocol behavior changes.
 
 ### Operation
 
-Localhost:8085 runs exact accepted image
-`sha256:35a4c62d9bc7dccfa8aa768b703f5e0e47f4a22bf03e488da0f6ec4f80c75c33`,
-labelled 1.1.6/source 6fc9d151. Local CPU diagnostics remain enabled; deployment defaults remain
-disabled. Promotion checks identity, cgroups/security, probes, CSP/cache and served bytes.
-A fresh all-on match renders without browser errors; the test room is left explicitly.
-Immutable v1.1.5 remains available for rollback. Refresh old tabs after restart.
+Exact accepted image:
+`sha256:f0d8c16222afc059b902e0ac2a94227133858fea469b7ead32c66d76f7126e70`,
+labelled 1.1.7/source 676f2a3e. It is available locally as `grenadiers:spike-foundation-v117`.
+Localhost:8085 retains the accepted v1.1.6 blood-pool image while the remaining spike-pit pieces
+are integrated. The running game's behavior and artist sheet are unchanged by this foundation.
+The [v1.1.6 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.6/grenadiers-artist-v1.1.6.zip)
+remains current. This source release does not enable spike pits in playable matches.
 
-Spike-pit work remains a separate backlog item; this release adds no spike gameplay.
+<a id="v116--2026-10-31"></a>
+The [v1.1.6 record](history/releases.md#v116--2026-10-31) is preserved in release history.
 
 <a id="v115--2026-10-31"></a>
 The [v1.1.5 record](history/releases.md#v115--2026-10-31) is preserved in release history.

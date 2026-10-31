@@ -97,51 +97,63 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.0.3 — 2026-10-31
+## v1.0.4 — 2026-10-31
 
-Fix CPUs stopping beside exposed pickups. The old planner discarded the movement lease from
-its pickup approach, so the server correctly rejected it repeatedly. CPU22 retains a certified
-single-update move, stops, and replans using the actual inventory/effects after collection.
-The same handoff works with lairs disabled. Teleporter/Diarrhea collection and unsafe hazard
-scenes remain outside this handoff; strict admission and contact checks remain in force.
+Improve arena opponents through stronger decisions. CPU23 retains reachable objectives and
+bounded visit history, seeks productive crate-clearing positions, collects upgrades, and tries
+distinct certified bomb inputs before returning safe navigation. Unrelated pickups no longer
+suppress planting. Attained non-pickup objectives receive a visit-bounded retry cooldown;
+changed or higher-value goals are reconsidered. Easy retains its slower cadence.
 
-Gameplay17/rules9 and private replay8 remain unchanged. CPU21 planning is retained; replay8
-accepts matching CPU21 or CPU22 header/provenance and rejects mixed or unknown versions.
+Mob navigation2 completes exits from dangerous origin tiles and re-centers interrupted retreats
+exactly before resuming pursuit. Safe centers are reachable from either side; genuinely trapped
+mobs wait for a safe route. Existing constructors and replay8 retain archived navigation1.
+Private replay9 explicitly binds navigation2/CPU23 and reuses checked accepted-input execution.
+Public gameplay17, rules9 geometry, generators, randomness and artwork remain unchanged.
 
 ### Verification
 
-Accepted source: `6681c4d4ffda70e361953cf3bc0352ab1cf4c4fe`,
-[PR #286](https://github.com/liveweird/grenadiers/pull/286). Independent review is clear.
+Accepted source: `b9cca82af5032de427649da0552a497db59249a4`,
+[PR #287](https://github.com/liveweird/grenadiers/pull/287). Independent CPU, mob and integration
+review is clear. Targeted debug/release regressions cover dangerous-origin oscillation, exact
+center arrival, blocked exits, reachable/changed/attained goals, cooldown expiry, pickup
+handoff, bounded optional tactics and archived/current replay identities.
 
-- Fresh debug/release suites pass: 1,553 core tests, 566 server tests and doctests. Formatting,
-  Clippy and build pass. Independent Rust coverage is 46,393/50,229 lines (92.36%), retaining the
-  90% floor. All local Rust gates finish in 337.738 seconds. Only the unchanged historical
-  ExpandedV5 mask execution is reused after independent closure review: all 4,194,304 masks in
-  each debug/release/coverage profile from source336503ed; no prior counters are merged.
-- New real queued regression reproduces the CPU21 stall and proves CPU22 pickup collection and
-  continued progress for every surviving CPU, with storm/lairs enabled and disabled. Timing
-  tests cover delayed/stale admission, changed facts, Movement Speed, Slow Foot and Reverse
-  Controls collection followed by Stop; hazard and lease guards remain checked.
-- Native Docker browser regression fails on v1.0.2 and passes on this image in 15.6 seconds.
-  Four Compose gameplay cases and two Kubernetes smoke cases pass with exact image identity,
-  restricted runtime, resource limits, probes and zero restarts. Temporary stacks are removed.
-- Repository/tooling/E2E static/strict Kubernetes-schema checks pass. Unchanged frontend/API/art
-  inputs reuse v1.0.2's 7,174-test frontend acceptance and atlas checks; Docker reuses the exact
-  web build. No historical coverage counters are merged into the new Rust report.
-- Cargo dependency policy passes. npm audits pass the HIGH/CRITICAL threshold; upstream
-  minimatch tooling advisories currently report 20 moderate web and 12 moderate E2E entries.
-  Dependencies remain unchanged. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL image findings.
-- [Unique Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41151356039)
-  pass for the accepted source; subsequent documentation changes preserve all Rust/build inputs.
+- Fresh debug/release suites pass: 1,567 core tests, 569 server tests and doctests. Formatting,
+  Clippy and build pass. Independent Rust coverage is 47,338/51,179 lines
+  (92.49%), above the unchanged 90% floor. The full local gate finishes in
+  330.377 seconds.
+- The real queued generated scene tracks physical bomb IDs, crate loss, collection plus later
+  movement, alive-player updates and settled-cell transitions. The matched 1,200-update sample
+  produces 13 physical bombs, 12 destroyed blocks, a collected Golden Flame and 3,600 alive-CPU
+  updates without a three-cycle A/B pattern. This is fixed-workload evidence, not a human rating.
+- Native Docker pickup/progress acceptance passes in 14.9 seconds. Four Compose cases pass in
+  28.2 seconds and two Kubernetes cases in 5.5 seconds, including default CPU first-bomb escape,
+  all-features-disabled movement, rendered duel and authentication. An additional Easy Solo
+  scenario passes in 13.2 seconds with completion, rematch, reconnect and leaving. Exact image, restricted
+  runtime, resource limits, probes and zero restarts are checked; temporary resources are removed.
+- Gameplay contract drift and dependency policy/audits pass at the HIGH/CRITICAL threshold.
+  Unchanged upstream minimatch tooling advisories report 20 moderate web and 12 moderate E2E
+  entries. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL image vulnerabilities.
+- Identical web/API/art inputs reuse v1.0.3's E2E-static and v1.0.2's 7,174-test frontend/atlas
+  acceptance. The rebuilt image retains the same web asset bytes. Only the independently
+  reviewed historical ExpandedV5 mask executions are reused: all 4,194,304 masks per
+  debug/release/coverage profile from source 336503ed. Fresh Rust coverage merges no old counters.
+- [Unique Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41155836024)
+  pass for the accepted source. Subsequent release documentation preserves all Rust/build inputs.
 
 ### Operation
 
-Stable source release. Localhost:8085 uses accepted image
-`sha256:12e1fcd6f26f2cbe5e55700a68d8e66ffc940aa99912809f3eaf47046bbcbed9`, labelled 1.0.3 and
-source6681c4d4. Health/readiness, served-asset byte equality and runtime restrictions are verified
-on promotion. Retain immutable v1.0.2 for rollback. Refresh and start a new match; restart ends
-process-local matches. Artwork is unchanged; the [v1.0.2 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.0.2/grenadiers-art-v1.0.2.zip)
-remains current. Human playtesting and tuning live in [BACKLOG.md](../BACKLOG.md).
+Localhost:8085 runs accepted image
+`sha256:95b6e06b64a8c8923a54a9b821dac9cf33dcb2505b33c775d391e452eb640776`, labelled 1.0.4/source b9cca82a.
+Promotion checks exact image, health/readiness, runtime limits, CSP/cache policy and served
+HTML/JS/CSS/PNG equality. Immutable v1.0.3 remains available for rollback. Restart ends
+process-local matches; refresh and create a new match to try Standard against three CPUs.
+The unchanged [v1.0.2 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.0.2/grenadiers-art-v1.0.2.zip)
+remains current. Further human tuning lives in [BACKLOG.md](../BACKLOG.md).
+
+<a id="v103--2026-10-31"></a>
+The [v1.0.3 record](history/releases.md#v103--2026-10-31) is preserved in release history.
 
 <a id="v102--2026-10-31"></a>
 The [v1.0.2 record](history/releases.md#v102--2026-10-31) is preserved in release history.

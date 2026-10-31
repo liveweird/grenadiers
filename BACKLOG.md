@@ -10,15 +10,6 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## Arena intelligence
-
-- [next] **Smarter CPU opponents.** Fix unproductive movement reversals, keep useful goals,
-  seek destructible-wall openings for upgrades outside combat, and take more certified bomb
-  opportunities against rivals. Improve Standard planning while retaining Easy cadence,
-  recipient visibility, bounded work, safe escapes and historical replay behavior.
-- [todo] **Mob progress.** Reproduce oscillating pursuit/retreat and fix navigation without
-  changing archived deterministic movement. Test bomb avoidance and progress together.
-
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

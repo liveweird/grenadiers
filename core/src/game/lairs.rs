@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use crate::room::{BoardSize, LairConfig, LairSettings};
 
 use super::BombTrigger;
+use super::MobNavigationPolicy;
 use super::arena::Terrain;
 use super::geometry::MovementTrace;
 use super::input::Direction;
@@ -76,12 +77,14 @@ pub(crate) struct LairState {
     lifecycle: LairLifecycle,
     lairs: [Lair; MAX_LAIRS],
     mobs: Vec<Mob>,
+    navigation_policy: MobNavigationPolicy,
 }
 
 impl LairState {
     pub(crate) fn new(
         config: LairConfig,
         rules_version: u16,
+        navigation_policy: MobNavigationPolicy,
         board: BoardSize,
         arena: &super::Arena,
         at: Tick,
@@ -112,6 +115,7 @@ impl LairState {
                 priority: 0,
             }),
             mobs: Vec::new(),
+            navigation_policy,
         }))
     }
 
@@ -168,7 +172,17 @@ impl LairState {
         let searches = navigation::target_searches(world, actors, target_order, tick, &danger);
         self.mobs
             .iter_mut()
-            .map(|mob| navigation::advance_mob(mob, world, &danger, &searches, frozen, tick))
+            .map(|mob| {
+                navigation::advance_mob(
+                    mob,
+                    world,
+                    &danger,
+                    &searches,
+                    frozen,
+                    tick,
+                    self.navigation_policy,
+                )
+            })
             .collect()
     }
 
@@ -329,6 +343,18 @@ fn adjacent(cell: CellId, direction: u8) -> CellId {
         1 => CellId::new(cell.column + 1, cell.row),
         2 => CellId::new(cell.column, cell.row + 1),
         _ => CellId::new(cell.column - 1, cell.row),
+    }
+}
+
+fn direction_toward(position: Position, target: Position) -> Direction {
+    if position.x < target.x {
+        Direction::East
+    } else if position.x > target.x {
+        Direction::West
+    } else if position.y < target.y {
+        Direction::South
+    } else {
+        Direction::North
     }
 }
 

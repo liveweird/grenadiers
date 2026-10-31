@@ -132,7 +132,7 @@ pub fn bind_expanded(
         }
         _ => false,
     };
-    if facts.rules != expected_rules(room)?
+    if facts.rules != expected_rules(room, facts.rules.mob_navigation_policy())?
         || facts.world.rules_version != 9
         || facts.world.actors.len() != base.controllers().len()
         || u16::from(facts.world.arena.width) != width
@@ -260,7 +260,10 @@ pub fn prepare_snapshots(
         .collect()
 }
 
-fn expected_rules(room: &RoomView) -> Result<RulesConfig, ProjectionError> {
+fn expected_rules(
+    room: &RoomView,
+    navigation: crate::game::MobNavigationPolicy,
+) -> Result<RulesConfig, ProjectionError> {
     let settings = &room.settings.base;
     let speed = [
         crate::game::SpeedLevel::Base,
@@ -288,7 +291,14 @@ fn expected_rules(room: &RoomView) -> Result<RulesConfig, ProjectionError> {
         .environment
         .domain()
         .map_err(|_| ProjectionError::InvalidExpandedBinding)?;
-    Ok(RulesConfig::environment_v9(domain, cloud, lairs.config()))
+    // Navigation is a private, versioned AI identity. Both policies publish the
+    // same checked physics/settings facts; no target or path enters this view.
+    Ok(RulesConfig::environment_v9_with_mob_navigation(
+        domain,
+        cloud,
+        lairs.config(),
+        navigation,
+    ))
 }
 
 fn cell(value: crate::game::CellId) -> Result<Cell, ProjectionError> {

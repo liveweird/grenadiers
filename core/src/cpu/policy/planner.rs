@@ -7,7 +7,7 @@ use crate::game::CellId;
 use crate::game::types::UNITS_PER_CELL;
 
 use super::execution::follow_committed_escape;
-use super::goals::{select, transit_allowed};
+use super::goals::{select, select_v23, transit_allowed};
 use super::hazards::{immediately_safe, planting_supported, unsupported_control_effect};
 use super::movement::{
     STEPS, bounded_alignment_hold_ticks, direction, hold_ticks, input_direction, offset,
@@ -31,7 +31,7 @@ pub fn plan(
     if observation.parts().rules.version >= 8 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, true)
+    plan_inner(observation, memory, rng, work, true, false)
 }
 
 pub(crate) fn plan_lairs(
@@ -43,7 +43,7 @@ pub(crate) fn plan_lairs(
     if observation.parts().rules.version != 8 || observation.lairs().is_none() {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false)
+    plan_inner(observation, memory, rng, work, false, false)
 }
 
 pub(crate) fn plan_respawn(
@@ -55,7 +55,19 @@ pub(crate) fn plan_respawn(
     if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false)
+    plan_inner(observation, memory, rng, work, false, false)
+}
+
+pub(crate) fn plan_respawn_v23(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 9 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, false, true)
 }
 
 fn plan_inner(
@@ -64,6 +76,7 @@ fn plan_inner(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
     follow_committed: bool,
+    persistent_goals: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let parts = observation.parts();
     let key = MemoryKey {
@@ -113,7 +126,12 @@ fn plan_inner(
         ));
     }
 
-    let can_prepare_bomb = adjacent_block(observation, current) && planting_supported(observation);
+    // V23 planting is admitted only by the survival layer's full absent,
+    // present, route, and contact proofs. Its ordinary planner supplies the
+    // persistent firing objective but never emits an uncertified plant.
+    let can_prepare_bomb = !persistent_goals
+        && adjacent_block(observation, current)
+        && planting_supported(observation);
     let center_threshold = placement_center_threshold(observation);
     if can_prepare_bomb
         && !centered_for_placement(observation, actor, current)
@@ -146,34 +164,71 @@ fn plan_inner(
         });
     }
 
-    navigate(observation, actor, current, key, rng, work)
+    navigate(
+        observation,
+        actor,
+        current,
+        memory,
+        rng,
+        work,
+        persistent_goals,
+    )
 }
 
 fn navigate(
     observation: &Observation,
     actor: &crate::cpu::VisibleActor,
     current: CellId,
-    key: MemoryKey,
+    memory: &UtilityMemory,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
+    persistent_goals: bool,
 ) -> Result<ControlPlan, PolicyError> {
-    let Some(guidance) = select(observation, actor, current, rng, work) else {
-        return Ok(ControlPlan::stop(UtilityMemory::new(key)));
+    let key = memory.key();
+    let guidance = if persistent_goals {
+        select_v23(observation, actor, current, memory, work)
+    } else {
+        select(observation, actor, current, rng, work)
+    };
+    let Some(guidance) = guidance else {
+        return Ok(ControlPlan::stop(if persistent_goals {
+            *memory
+        } else {
+            UtilityMemory::new(key)
+        }));
     };
     let next = guidance.first_step;
     if !immediately_safe(observation, next) {
-        return Ok(ControlPlan::stop(UtilityMemory::from_route(
-            key,
-            &[next],
-            false,
-        )));
+        return Ok(ControlPlan::stop(if persistent_goals {
+            *memory
+        } else {
+            UtilityMemory::from_route(key, &[next], false)
+        }));
+    }
+    let next_memory = guidance.goal.map_or_else(
+        || {
+            let fresh = UtilityMemory::from_route(key, &[next], false);
+            if persistent_goals {
+                fresh.carry_progress(*memory).without_guidance(current)
+            } else {
+                fresh
+            }
+        },
+        |goal| {
+            UtilityMemory::from_route(key, &[next], false)
+                .carry_progress(*memory)
+                .with_progress(current, goal)
+        },
+    );
+    if next == current {
+        return Ok(ControlPlan::stop(next_memory));
     }
     direction(current, next).ok_or(PolicyError::InvalidObservation)?;
     Ok(movement_plan(
         actor,
         current,
         next,
-        UtilityMemory::from_route(key, &[next], false),
+        next_memory,
         observation.parts().rules.settings.turn_assist_units() as u32,
     ))
 }

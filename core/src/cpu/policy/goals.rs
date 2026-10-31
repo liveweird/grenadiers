@@ -4,10 +4,16 @@ use std::collections::VecDeque;
 use crate::cpu::{CpuRng, Observation, ObservedActor, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::effects::GOLDEN_FLAME_RANGE;
-use crate::game::{CellId, EffectKind, Equipment, PickupKind, SpecialWeapon, SpeedLevel, Terrain};
+use crate::game::{CellId, EffectKind, Equipment, PickupKind, SpeedLevel, Terrain};
 
+use super::GoalMemory;
 use super::equipment::classify as equipment_pickup;
+pub(super) use super::equipment::supported_weapon;
 use super::movement::{STEPS, offset};
+
+#[path = "goals_v23.rs"]
+mod v23;
+pub(in crate::cpu::policy) use v23::select as select_v23;
 
 #[path = "goal_pressure.rs"]
 mod pressure;
@@ -15,6 +21,7 @@ mod pressure;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Guidance {
     pub first_step: CellId,
+    pub goal: Option<GoalMemory>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -30,11 +37,11 @@ struct Reached {
     first_step: CellId,
 }
 
-struct SearchMap {
+pub(super) struct SearchMap {
     values: [u8; ARENA_CELL_COUNT],
     blocked: [bool; ARENA_CELL_COUNT],
     forbidden: [bool; ARENA_CELL_COUNT],
-    highest_value: u8,
+    pub(super) highest_value: u8,
 }
 
 /// Finds one reachable static goal and its first hop. This is guidance only:
@@ -122,7 +129,7 @@ pub(super) fn transit_allowed(
             .is_none_or(|pickup| pickup_transitable(actor, pickup.kind))
 }
 
-fn search_map(
+pub(super) fn search_map(
     observation: &Observation,
     actor: &VisibleActor,
     current: CellId,
@@ -220,6 +227,7 @@ fn choose_reached(mut reached: Vec<Reached>, rng: &mut CpuRng) -> Option<Guidanc
     };
     Some(Guidance {
         first_step: reached[chosen].first_step,
+        goal: None,
     })
 }
 
@@ -259,16 +267,20 @@ fn fallback_step(
     };
     Some(Guidance {
         first_step: *choices.get(chosen)?,
+        goal: None,
     })
 }
 
 impl SearchMap {
+    pub(super) fn value(&self, observation: &Observation, cell: CellId) -> u8 {
+        cell_index(observation, cell).map_or(0, |index| self.values[index])
+    }
     fn add_goal(&mut self, index: usize, value: u8) {
         self.values[index] = self.values[index].max(value);
         self.highest_value = self.highest_value.max(value);
     }
 
-    fn transitable(&self, observation: &Observation, cell: CellId) -> bool {
+    pub(super) fn transitable(&self, observation: &Observation, cell: CellId) -> bool {
         let Some(index) = cell_index(observation, cell) else {
             return false;
         };
@@ -369,22 +381,6 @@ pub(super) fn legal_opening(observation: &Observation, cell: CellId) -> bool {
         && !observation.parts().oil.iter().any(|oil| oil.cell == cell)
 }
 
-pub(super) fn supported_weapon(
-    actor: &VisibleActor,
-    kind: PickupKind,
-) -> Option<(Option<u8>, bool)> {
-    let incoming = match kind {
-        PickupKind::PiercingBomb => SpecialWeapon::Piercing,
-        PickupKind::PowerBomb => SpecialWeapon::Power,
-        _ => return None,
-    };
-    Some(match actor.weapon {
-        None | Some(SpecialWeapon::Remote | SpecialWeapon::Landmine) => (Some(7), true),
-        Some(current) if current == incoming => (None, true),
-        Some(SpecialWeapon::Piercing | SpecialWeapon::Power) => (None, true),
-    })
-}
-
 fn useful_effect(actor: &VisibleActor, kind: EffectKind) -> bool {
     actor
         .effects
@@ -393,7 +389,7 @@ fn useful_effect(actor: &VisibleActor, kind: EffectKind) -> bool {
         .is_none_or(|effect| u64::from(effect.remaining_ticks) <= kind.duration_ticks() / 2)
 }
 
-fn cell_index(observation: &Observation, cell: CellId) -> Option<usize> {
+pub(super) fn cell_index(observation: &Observation, cell: CellId) -> Option<usize> {
     let arena = &observation.parts().arena;
     (cell.column < arena.width && cell.row < arena.height)
         .then_some(usize::from(cell.row) * usize::from(arena.width) + usize::from(cell.column))

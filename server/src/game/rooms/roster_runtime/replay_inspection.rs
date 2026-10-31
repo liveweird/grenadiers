@@ -15,6 +15,7 @@ pub(in crate::game::rooms) struct RosterRuntimeInspection {
     pub(in crate::game::rooms) settings_revision: u32,
     pub(in crate::game::rooms) creator_settings_revoked: bool,
     pub(in crate::game::rooms) environment: Option<StormCloudConfig>,
+    pub(in crate::game::rooms) mob_navigation: grenadiers_core::game::MobNavigationPolicy,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -39,6 +40,7 @@ impl RosterRuntime {
             settings_revision: self.settings_revision,
             creator_settings_revoked: self.creator_settings_revoked,
             environment: self.environment(),
+            mob_navigation: self.mob_navigation,
         }
     }
 }

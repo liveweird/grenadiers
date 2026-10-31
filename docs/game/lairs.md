@@ -28,7 +28,10 @@ unchanged. Construction rejects a lair cell without a hard wall.
 
 Mobs move at 1.5 cells/second and chase the nearest reachable living, uncloaked player,
 using round priority for ties. Shared blast geometry guides bomb avoidance. Fixed-point
-collision and committed retreat anchors prevent wall crossing and direction oscillation.
+collision and committed retreat anchors prevent wall crossing. Current navigation2 completes an
+exit from a dangerous origin instead of reversing back into it on the next update. It retreats
+from newly threatened destinations toward a safe center; if that center becomes dangerous,
+it rechecks an alternative exit and preserves exact center alignment when changing direction.
 
 Mobs do not block players or blasts, plant bombs, collect items, use equipment, drop rewards or
 affect scores. Swept player/mob contact uses Shield, Heart/grace and elimination rules.
@@ -47,8 +50,11 @@ Checked timer/ID failures restore the complete tick, including simulation random
 obstructed. `State::mobs()` omits pursuit targets, paths and private thaw deadlines.
 
 Rules8 retains its periodic 1–8-mob lifecycle and finite `State::lairs()` view for historical
-contracts/replay7. Rules9 uses the separate view and test-only replay8; production replay
-recording remains disabled. The artist sheet and mob/lair sprites are unchanged.
+contracts/replay7. Rules9 uses the separate view. Mob AI has its own immutable identity: all existing rules
+constructors and replay8 retain navigation1; live construction explicitly selects navigation2,
+bound by private replay9. Settings changes, rounds and rematches preserve that selection.
+Both policies share the same speed, collision/contact and recipient facts; gameplay17 carries
+no hidden navigation data. Production replay recording remains disabled. The artist sheet and mob/lair sprites are unchanged.
 
 Run `cargo test -p grenadiers-core --locked lair --lib` and repeat with `--release` for focused
 lifecycle, movement, death, obstruction, allocation and rollback regressions.

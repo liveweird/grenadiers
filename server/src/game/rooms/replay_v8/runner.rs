@@ -32,6 +32,16 @@ pub(in crate::game::rooms) fn verify_exact(
 pub(in crate::game::rooms) fn replay(
     journal: &Journal,
 ) -> Result<RosterRuntimeInspection, ReplayError> {
+    replay_with_mob_navigation(
+        journal,
+        grenadiers_core::game::MobNavigationPolicy::LegacyV1,
+    )
+}
+
+pub(in crate::game::rooms) fn replay_with_mob_navigation(
+    journal: &Journal,
+    navigation: grenadiers_core::game::MobNavigationPolicy,
+) -> Result<RosterRuntimeInspection, ReplayError> {
     super::validation::validate_header(&journal.header).map_err(|()| ReplayError::InvalidHeader)?;
     match journal.status {
         ReplayStatus::Complete => {}
@@ -63,7 +73,7 @@ pub(in crate::game::rooms) fn replay(
         Ok(())
     });
     execute_normalized(
-        runtime_from_header(&journal.header, source)?,
+        runtime_from_header_with_navigation(&journal.header, source, navigation)?,
         &normalized,
         seeds,
     )
@@ -161,11 +171,23 @@ pub(super) fn runtime_from_header(
     header: &super::ReplayHeader,
     seeds: RoundSeedSource,
 ) -> Result<RosterRuntime, ReplayError> {
+    runtime_from_header_with_navigation(
+        header,
+        seeds,
+        grenadiers_core::game::MobNavigationPolicy::LegacyV1,
+    )
+}
+
+pub(super) fn runtime_from_header_with_navigation(
+    header: &super::ReplayHeader,
+    seeds: RoundSeedSource,
+    navigation: grenadiers_core::game::MobNavigationPolicy,
+) -> Result<RosterRuntime, ReplayError> {
     let root = header.simulation_root.clone();
     let base = *header.configuration.base();
     let tuning = grenadiers_core::room::RespawnLairTuning::try_from(header.configuration.lairs())
         .map_err(|_| ReplayError::InvalidHeader)?;
-    let mut runtime = RosterRuntime::new_respawn(
+    let mut runtime = RosterRuntime::new_respawn_with_navigation(
         RosterIdentity {
             id: RoomId::new("00000000000000000000000000000008").unwrap(),
             code: RoomCode::new("REPLAYV8").unwrap(),
@@ -177,6 +199,7 @@ pub(super) fn runtime_from_header(
         tuning,
         seeds,
         Arc::new(move |epoch| root.for_round(epoch)),
+        navigation,
     )
     .map_err(|_| ReplayError::Runtime)?;
     for seat in base.human_seats() {

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 1.0.4 — 2026-10-31
+
+- Improve CPU goal persistence and cycle avoidance, seek productive crate-clearing positions,
+  and consider more certified bomb opportunities before falling back to navigation.
+- Fix mobs repeatedly reversing back into a dangerous tile instead of completing their escape.
+  Preserve archived mob navigation and CPU policies with explicit AI identities and private
+  replay9; public gameplay17 and rules9 geometry remain unchanged.
+
 ## 1.0.3 — 2026-10-31
 
 - Fix CPUs stopping beside exposed pickups by retaining their checked one-update movement

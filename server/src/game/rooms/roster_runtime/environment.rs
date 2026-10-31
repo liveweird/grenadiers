@@ -116,6 +116,28 @@ impl RosterRuntime {
         Ok(runtime)
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub(in crate::game::rooms) fn new_respawn_with_navigation(
+        identity: RosterIdentity,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        tuning: RespawnLairTuning,
+        round_seed_source: RoundSeedSource,
+        simulation_seed: Arc<SimulationSeedDerivation>,
+        navigation: grenadiers_core::game::MobNavigationPolicy,
+    ) -> Result<Self, RosterRuntimeError> {
+        let mut runtime = Self::new_respawn(
+            identity,
+            settings,
+            cloud,
+            tuning,
+            round_seed_source,
+            simulation_seed,
+        )?;
+        runtime.mob_navigation = navigation;
+        Ok(runtime)
+    }
+
     #[cfg_attr(not(test), allow(dead_code))]
     pub(in crate::game::rooms) const fn lair_tuning(&self) -> Option<LairTuning> {
         match self.environment_profile {

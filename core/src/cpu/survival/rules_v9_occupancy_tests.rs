@@ -1,11 +1,12 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
-use crate::cpu::policy::{PolicyError, UtilityMemory};
+use crate::cpu::policy::{GoalKind, GoalMemory, PolicyError, UtilityMemory};
 use crate::cpu::{
-    CpuRng, MemoryKey, Observation, ObservedActor, ObservedEnvironment, ObservedRespawnLairs,
-    WorkBudget,
+    CpuRng, MemoryKey, MovementIntent, Observation, ObservedActor, ObservedEnvironment,
+    ObservedPickup, ObservedRespawnLairs, WorkBudget,
 };
 use crate::game::{
-    CellId, EntityId, LairStatusView, Position, SeatId, StormCloudConfig, Terrain, lair_layout_v1,
+    CellId, Direction, EntityId, LairStatusView, PickupKind, Position, SeatId, StormCloudConfig,
+    Terrain, Tick, lair_layout_v1,
 };
 use crate::room::{BoardSize, RespawnLairConfig, RespawnLairSettings};
 
@@ -35,6 +36,10 @@ fn observed(cpu: CellId, rival: Option<CellId>) -> Observation {
 }
 
 fn with_enabled_lairs(observation: Observation) -> Observation {
+    with_lairs(observation, true)
+}
+
+fn with_lairs(observation: Observation, spawning: bool) -> Observation {
     let environment = observation.environment().unwrap().clone();
     let mut parts = observation.into_parts();
     let cells = lair_layout_v1(BoardSize::FifteenByThirteen);
@@ -46,7 +51,11 @@ fn with_enabled_lairs(observation: Observation) -> Observation {
         .into_iter()
         .map(|cell| LairStatusView {
             cell,
-            next_spawn_at: Some(parts.tick),
+            next_spawn_at: Some(if spawning {
+                parts.tick
+            } else {
+                Tick(parts.tick.0 + 300)
+            }),
             living_mobs: 0,
         })
         .collect();
@@ -137,6 +146,185 @@ fn v9_firing_position_plants_only_with_a_complete_escape_certificate() {
         Some(crate::cpu::ManualIntent::Bomb)
     );
     assert!(planned.survival.execution.is_some());
+}
+
+#[test]
+fn v23_unrelated_capped_pickup_does_not_starve_a_safe_plant() {
+    for lairs in [false, true] {
+        let mut scene = observed(CellId::new(9, 7), Some(CellId::new(11, 7)))
+            .map_parts(|parts| {
+                let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
+                    unreachable!()
+                };
+                actor.bomb_capacity = 9;
+                parts.pickups.push(ObservedPickup {
+                    cell: CellId::new(1, 1),
+                    kind: PickupKind::BombCapacity,
+                });
+            })
+            .unwrap();
+        if lairs {
+            scene = with_lairs(scene, false);
+        }
+        let key = MemoryKey {
+            world: scene.parts().world,
+            cpu_seat: scene.parts().recipient,
+        };
+        let planned = super::plan_respawn_v23_with_origin(
+            &scene,
+            &UtilityMemory::new(key),
+            &ObservedHazardMemory::new(key),
+            scene.parts().tick,
+            None,
+            &mut CpuRng::from_seed(key, [74; 32]),
+            &mut WorkBudget::new(65_536),
+        )
+        .unwrap();
+        assert_eq!(
+            planned.survival.control.intent.manual,
+            Some(crate::cpu::ManualIntent::Bomb),
+            "lairs={lairs}"
+        );
+        assert!(planned.survival.execution.is_some(), "lairs={lairs}");
+    }
+}
+
+#[test]
+fn v23_commits_one_goal_and_makes_cell_level_progress_without_ab_cycles() {
+    let mut scene = observed(CellId::new(7, 7), None)
+        .map_parts(|parts| {
+            parts.pickups.push(ObservedPickup {
+                cell: CellId::new(11, 7),
+                kind: PickupKind::GoldenFlame,
+            });
+        })
+        .unwrap();
+    let key = MemoryKey {
+        world: scene.parts().world,
+        cpu_seat: scene.parts().recipient,
+    };
+    let mut memory = UtilityMemory::new(key);
+    let mut rng = CpuRng::from_seed(key, [75; 32]);
+    let mut settled = vec![CellId::new(7, 7)];
+    for _ in 0..6 {
+        let plan = crate::cpu::policy::plan_respawn_v23(
+            &scene,
+            &memory,
+            &mut rng,
+            &mut WorkBudget::new(65_536),
+        )
+        .unwrap();
+        memory = plan.next_memory;
+        let current = *settled.last().unwrap();
+        let next = match plan.intent.movement {
+            MovementIntent::Direction(Direction::North) => {
+                CellId::new(current.column, current.row - 1)
+            }
+            MovementIntent::Direction(Direction::East) => {
+                CellId::new(current.column + 1, current.row)
+            }
+            MovementIntent::Direction(Direction::South) => {
+                CellId::new(current.column, current.row + 1)
+            }
+            MovementIntent::Direction(Direction::West) => {
+                CellId::new(current.column - 1, current.row)
+            }
+            MovementIntent::Stop => break,
+        };
+        settled.push(next);
+        scene = scene
+            .map_parts(|parts| {
+                let ObservedActor::Visible(actor) = &mut parts.actors[1] else {
+                    unreachable!()
+                };
+                actor.position = Position::center(next);
+            })
+            .unwrap();
+    }
+    assert_eq!(
+        memory.goal().map(|goal| goal.cell),
+        Some(CellId::new(11, 7))
+    );
+    assert!(settled.last().unwrap().column > 7, "{settled:?}");
+    assert!(
+        settled.windows(6).all(|cells| !(cells[0] == cells[2]
+            && cells[2] == cells[4]
+            && cells[1] == cells[3]
+            && cells[3] == cells[5])),
+        "{settled:?}"
+    );
+}
+
+#[test]
+fn v23_ignores_an_unreachable_high_pickup_for_a_reachable_farming_goal() {
+    let scene = observed(CellId::new(7, 7), None)
+        .map_parts(|parts| {
+            parts.pickups.push(ObservedPickup {
+                cell: CellId::new(11, 7),
+                kind: PickupKind::Heart,
+            });
+            parts.arena.blocks.extend([
+                CellId::new(10, 7),
+                CellId::new(12, 7),
+                CellId::new(11, 6),
+                CellId::new(11, 8),
+            ]);
+        })
+        .unwrap();
+    let key = MemoryKey {
+        world: scene.parts().world,
+        cpu_seat: scene.parts().recipient,
+    };
+    let plan = crate::cpu::policy::plan_respawn_v23(
+        &scene,
+        &UtilityMemory::new(key),
+        &mut CpuRng::from_seed(key, [76; 32]),
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    assert_ne!(plan.intent.movement, MovementIntent::Stop);
+    assert_eq!(
+        plan.next_memory.goal().map(|goal| goal.kind),
+        Some(GoalKind::Farming)
+    );
+}
+
+#[test]
+fn v23_discards_stale_pickup_priority_when_the_cell_becomes_an_opening() {
+    let stale = CellId::new(8, 7);
+    let replacement = CellId::new(7, 9);
+    let scene = observed(CellId::new(7, 7), None)
+        .map_parts(|parts| {
+            parts.arena.blocks.push(CellId::new(9, 7));
+            parts.pickups.push(ObservedPickup {
+                cell: replacement,
+                kind: PickupKind::BombCapacity,
+            });
+        })
+        .unwrap();
+    let key = MemoryKey {
+        world: scene.parts().world,
+        cpu_seat: scene.parts().recipient,
+    };
+    let memory = UtilityMemory::new(key).with_progress(
+        CellId::new(7, 7),
+        GoalMemory {
+            kind: GoalKind::Pickup,
+            cell: stale,
+            priority: 9,
+        },
+    );
+    let plan = crate::cpu::policy::plan_respawn_v23(
+        &scene,
+        &memory,
+        &mut CpuRng::from_seed(key, [77; 32]),
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    assert_eq!(
+        plan.next_memory.goal().map(|goal| goal.cell),
+        Some(replacement)
+    );
 }
 
 #[test]

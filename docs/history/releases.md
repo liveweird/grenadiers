@@ -4,6 +4,52 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.0.3 — 2026-10-31
+
+Fix CPUs stopping beside exposed pickups. The old planner discarded the movement lease from
+its pickup approach, so the server correctly rejected it repeatedly. CPU22 retains a certified
+single-update move, stops, and replans using the actual inventory/effects after collection.
+The same handoff works with lairs disabled. Teleporter/Diarrhea collection and unsafe hazard
+scenes remain outside this handoff; strict admission and contact checks remain in force.
+
+Gameplay17/rules9 and private replay8 remain unchanged. CPU21 planning is retained; replay8
+accepts matching CPU21 or CPU22 header/provenance and rejects mixed or unknown versions.
+
+### Verification
+
+Accepted source: `6681c4d4ffda70e361953cf3bc0352ab1cf4c4fe`,
+[PR #286](https://github.com/liveweird/grenadiers/pull/286). Independent review is clear.
+
+- Fresh debug/release suites pass: 1,553 core tests, 566 server tests and doctests. Formatting,
+  Clippy and build pass. Independent Rust coverage is 46,393/50,229 lines (92.36%), retaining the
+  90% floor. All local Rust gates finish in 337.738 seconds. Only the unchanged historical
+  ExpandedV5 mask execution is reused after independent closure review: all 4,194,304 masks in
+  each debug/release/coverage profile from source336503ed; no prior counters are merged.
+- New real queued regression reproduces the CPU21 stall and proves CPU22 pickup collection and
+  continued progress for every surviving CPU, with storm/lairs enabled and disabled. Timing
+  tests cover delayed/stale admission, changed facts, Movement Speed, Slow Foot and Reverse
+  Controls collection followed by Stop; hazard and lease guards remain checked.
+- Native Docker browser regression fails on v1.0.2 and passes on this image in 15.6 seconds.
+  Four Compose gameplay cases and two Kubernetes smoke cases pass with exact image identity,
+  restricted runtime, resource limits, probes and zero restarts. Temporary stacks are removed.
+- Repository/tooling/E2E static/strict Kubernetes-schema checks pass. Unchanged frontend/API/art
+  inputs reuse v1.0.2's 7,174-test frontend acceptance and atlas checks; Docker reuses the exact
+  web build. No historical coverage counters are merged into the new Rust report.
+- Cargo dependency policy passes. npm audits pass the HIGH/CRITICAL threshold; upstream
+  minimatch tooling advisories currently report 20 moderate web and 12 moderate E2E entries.
+  Dependencies remain unchanged. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL image findings.
+- [Unique Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41151356039)
+  pass for the accepted source; subsequent documentation changes preserve all Rust/build inputs.
+
+### Operation
+
+Stable source release. Localhost:8085 uses accepted image
+`sha256:12e1fcd6f26f2cbe5e55700a68d8e66ffc940aa99912809f3eaf47046bbcbed9`, labelled 1.0.3 and
+source6681c4d4. Health/readiness, served-asset byte equality and runtime restrictions are verified
+on promotion. Retain immutable v1.0.2 for rollback. Refresh and start a new match; restart ends
+process-local matches. Artwork is unchanged; the [v1.0.2 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.0.2/grenadiers-art-v1.0.2.zip)
+remains current. Human playtesting and tuning live in [BACKLOG.md](../../BACKLOG.md).
+
 ## v1.0.2 — 2026-10-31
 
 Correct arena playability and adopt the owner-supplied stone-wall sprite sheet. Each lair keeps

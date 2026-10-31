@@ -83,10 +83,11 @@ impl RosterRuntime {
                     )
                 }
                 super::runtime::EnvironmentProfile::RespawnV9 { cloud, tuning } => {
-                    grenadiers_core::game::RulesConfig::environment_v9(
+                    grenadiers_core::game::RulesConfig::environment_v9_with_mob_navigation(
                         self.lifecycle.settings(),
                         cloud,
                         tuning.config(),
+                        self.mob_navigation,
                     )
                 }
             },

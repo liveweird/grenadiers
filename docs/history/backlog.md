@@ -7,6 +7,10 @@
 
 ## Completed 2026-10-31
 
+- **Arena intelligence:** [v1.0.4](../releases.md#v104--2026-10-31) adds persistent reachable
+  goals, bounded cycle avoidance and retry, crate farming and more certified CPU bomb choices;
+  mobs complete danger exits and re-center interrupted retreats before resuming pursuit.
+
 - **CPU pickup recovery:** [v1.0.3](../releases.md#v103--2026-10-31) retains checked
   pickup movement, then stops and replans from the collected item state. Queued and native
   browser regressions cover late-round progress, including with lairs disabled.

@@ -56,6 +56,31 @@ pub fn plan_lairs_with_origin(
         work,
         8,
         false,
+        false,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn plan_lairs_v23(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_lairs_inner(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        9,
+        true,
+        true,
     )
 }
 
@@ -70,6 +95,7 @@ pub(super) fn plan_lairs_inner(
     work: &mut WorkBudget,
     rules_version: u16,
     pickup_handoff: bool,
+    opportunistic_planting: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -114,7 +140,9 @@ pub(super) fn plan_lairs_inner(
         .unwrap_or_else(stop));
     }
 
-    let ordinary = if rules_version == 8 {
+    let ordinary = if opportunistic_planting {
+        crate::cpu::policy::plan_respawn_v23(observation, memory, rng, work)?
+    } else if rules_version == 8 {
         crate::cpu::policy::plan_lairs(observation, memory, rng, work)?
     } else {
         crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
@@ -142,7 +170,24 @@ pub(super) fn plan_lairs_inner(
         ordinary.intent.movement != MovementIntent::Stop,
         work,
     );
-    if ordinary.intent.manual.is_none()
+    if opportunistic_planting
+        && let Some(plan) = super::lair_v23::opening(
+            observation,
+            &hazards,
+            history,
+            settled_stop_tick,
+            memory,
+            &ordinary,
+            ordinary_clear,
+            start_window,
+            end,
+            work,
+        )
+    {
+        return Ok(plan);
+    }
+    if !opportunistic_planting
+        && ordinary.intent.manual.is_none()
         && ordinary_clear
         && !parts.pickups.is_empty()
         && let Some(stopped_safe_until) = end.checked_add(u64::from(ordinary_hold) + 9).map(Tick)
@@ -174,6 +219,7 @@ pub(super) fn plan_lairs_inner(
         });
     }
     if pickup_handoff
+        && !opportunistic_planting
         && let Some(plan) = super::pickup_handoff::lair(
             observation,
             &hazards,
@@ -279,10 +325,14 @@ pub(super) fn plan_lairs_inner(
                             manual: None,
                         },
                         hold_ticks,
-                        next_memory: if ordinary.intent.manual.is_none()
-                            && movement == ordinary.intent.movement
+                        next_memory: if (opportunistic_planting
+                            && ordinary.intent.movement == MovementIntent::Stop)
+                            || (ordinary.intent.manual.is_none()
+                                && movement == ordinary.intent.movement)
                         {
                             ordinary.next_memory
+                        } else if opportunistic_planting {
+                            UtilityMemory::new(memory.key()).carry_progress(ordinary.next_memory)
                         } else {
                             UtilityMemory::new(memory.key())
                         },
@@ -307,15 +357,28 @@ pub(super) fn plan_lairs_inner(
         return Ok(stop());
     };
 
-    if let Some(plant) = super::plant_tactic::certified_plant(
-        observation,
-        history,
-        settled_stop_tick,
-        memory,
-        &ordinary,
-        true,
-        work,
-    ) && let Some(ExecutionCertificate::Plant(certificate)) = &plant.execution
+    let plant = if opportunistic_planting {
+        super::plant_tactic::certified_plant_candidates(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            &ordinary,
+            work,
+        )
+    } else {
+        super::plant_tactic::certified_plant(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            &ordinary,
+            true,
+            work,
+        )
+    };
+    if let Some(plant) = plant
+        && let Some(ExecutionCertificate::Plant(certificate)) = &plant.execution
         && let Ok(contact) = MobContactLease::certify_route(observation, certificate.route(), work)
     {
         return Ok(LairSurvivalPlan {

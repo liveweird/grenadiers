@@ -9,6 +9,22 @@ pub enum StormCloudConfig {
     Single,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MobNavigationPolicy {
+    LegacyV1,
+    EscapeV2,
+}
+
+impl MobNavigationPolicy {
+    #[must_use]
+    pub const fn version(self) -> u16 {
+        match self {
+            Self::LegacyV1 => 1,
+            Self::EscapeV2 => 2,
+        }
+    }
+}
+
 /// Immutable parameters for the initial deterministic rules profile.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RulesConfig {
@@ -28,6 +44,7 @@ pub struct RulesConfig {
     round_ticks: u64,
     storm_cloud_config: StormCloudConfig,
     lair_config: LairConfig,
+    mob_navigation_policy: MobNavigationPolicy,
 }
 
 impl RulesConfig {
@@ -50,6 +67,7 @@ impl RulesConfig {
             round_ticks: 10_800,
             storm_cloud_config: StormCloudConfig::Disabled,
             lair_config: LairConfig::Disabled,
+            mob_navigation_policy: MobNavigationPolicy::LegacyV1,
         }
     }
 
@@ -135,11 +153,32 @@ impl RulesConfig {
         clouds: StormCloudConfig,
         lairs: RespawnLairConfig,
     ) -> Self {
+        Self::environment_v9_with_mob_navigation(
+            settings,
+            clouds,
+            lairs,
+            MobNavigationPolicy::LegacyV1,
+        )
+    }
+
+    #[must_use]
+    pub const fn environment_v9_with_mob_navigation(
+        settings: RoomSettings,
+        clouds: StormCloudConfig,
+        lairs: RespawnLairConfig,
+        mob_navigation_policy: MobNavigationPolicy,
+    ) -> Self {
         Self {
             version: 9,
             lair_config: lairs.as_legacy(),
+            mob_navigation_policy,
             ..Self::environment_v8(settings, clouds, LairConfig::Disabled)
         }
+    }
+
+    #[must_use]
+    pub const fn mob_navigation_policy(self) -> MobNavigationPolicy {
+        self.mob_navigation_policy
     }
 
     #[must_use]

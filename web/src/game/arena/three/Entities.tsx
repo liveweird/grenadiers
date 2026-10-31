@@ -9,12 +9,15 @@ import type { ThreeAtlas } from './contracts'
 import { bombView, cellCenter, cellKey, cloudPosition, mobPosition, pickupFrame } from './entityView'
 import type { GroundPosition, MotionSegment, MotionTiming } from './motion'
 import { nextMotion, sampleMotion } from './motion'
+import { FireEffects } from './FireEffects'
+import type { FirePresentation } from './firePresentation'
 
 interface EntitiesProps {
   snapshot: SnapshotMessage
   atlas: ThreeAtlas
   timing: MotionTiming
   reducedMotion: boolean
+  fire: FirePresentation
 }
 interface MovingSpriteProps {
   name: string
@@ -65,7 +68,7 @@ function MovingSprite({
     />}
     <group ref={visual} position={[0, elevation, 0]}>
       <Billboard atlas={atlas} frameId={frameId} anchor="feet" position={[0, 0, 0]}
-        scale={1.35 / 48} />
+        scale={1.35 / 48} fireTint />
     </group>
   </group>
 }
@@ -120,33 +123,19 @@ function Bombs({ snapshot, atlas, timing, reducedMotion }: EntitiesProps) {
   })
 }
 
-function GroundEntities({ snapshot, atlas, timing, reducedMotion }: EntitiesProps) {
-  const animated = timing.running && !reducedMotion
-  const burningOil = new Set(
-    (snapshot.state.oilBarrels ?? [])
-      .filter(({ state }) => state === 'burning')
-      .map(({ cell }) => cellKey(cell)),
-  )
+function GroundEntities({ snapshot, atlas, timing, reducedMotion, fire }: EntitiesProps) {
   return <>
     {snapshot.state.pickups.map((pickup) => {
       const point = cellCenter(pickup.cell)
       return <Billboard key={cellKey(pickup.cell)} atlas={atlas} frameId={pickupFrame(pickup.kind)}
         position={[point.x, 0.5, point.z]} />
     })}
-    {snapshot.state.flames.filter(({ cell }) => !burningOil.has(cellKey(cell))).map((flame) => {
-      const point = cellCenter(flame.cell)
-      return <Billboard key={cellKey(flame.cell)} atlas={atlas} frameId="effect.flame.0"
-        position={[point.x, 0.5, point.z]}
-        frameAt={(now) => `effect.flame.${animated ? Math.floor(now / 80) % 2 : 0}`} />
-    })}
+    <FireEffects fire={fire} atlas={atlas} running={timing.running} reducedMotion={reducedMotion} />
     {(snapshot.state.oilBarrels ?? []).map((barrel) => {
       const point = cellCenter(barrel.cell)
       const burning = barrel.state === 'burning'
       return <group key={cellKey(barrel.cell)} position={[point.x, 0, point.z]}>
         <Billboard atlas={atlas} frameId={burning ? 'oil.charred' : 'oil.unlit'} position={[0, 0.5, 0]} />
-        {burning && <Billboard atlas={atlas} frameId="effect.flame.0" position={[0, 0.5, 0]}
-          renderOrder={12}
-          frameAt={(now) => `effect.flame.${animated ? Math.floor(now / 80) % 2 : 0}`} />}
       </group>
     })}
   </>

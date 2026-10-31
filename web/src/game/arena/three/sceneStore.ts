@@ -5,6 +5,7 @@ import type { PresentationDeathCue, SnapshotMessage } from '../types'
 import {
   advanceBloodPools, clearBloodPools, initialBloodPoolState,
 } from './bloodPoolState'
+import { advanceFirePresentation } from './firePresentation'
 
 export const DEATH_FRAME_MS = 150
 export const DEATH_ANIMATION_MS = DEATH_FRAME_MS * 4
@@ -22,6 +23,7 @@ const initialRevision = (): SceneRevision => ({
   snapshot: null,
   deaths: [],
   bloodPools: [],
+  fire: null,
   reducedMotion: false,
   receivedAt: 0,
   serial: 0,
@@ -94,8 +96,9 @@ export function createArenaSceneStore(): ArenaSceneStore {
       resetEpochFloor = timing.current.resetEpoch
       const deaths = updateDeaths(snapshot, receivedAt)
       bloodPoolState = advanceBloodPools(bloodPoolState, snapshot)
+      const fire = advanceFirePresentation(revision.fire, snapshot, timing.current, receivedAt)
       publish({
-        ...revision, snapshot, deaths, bloodPools: bloodPoolState.pools,
+        ...revision, snapshot, deaths, bloodPools: bloodPoolState.pools, fire,
         receivedAt, serial: revision.serial + 1,
       })
     },
@@ -104,7 +107,7 @@ export function createArenaSceneStore(): ArenaSceneStore {
       timing.current = null
       bloodPoolState = clearBloodPools(bloodPoolState)
       publish({
-        ...revision, snapshot: null, deaths: [], bloodPools: [], receivedAt: 0,
+        ...revision, snapshot: null, deaths: [], bloodPools: [], fire: null, receivedAt: 0,
         serial: revision.serial + 1,
       })
     },
@@ -112,7 +115,10 @@ export function createArenaSceneStore(): ArenaSceneStore {
       if (revision.reducedMotion === reducedMotion) return
       if (timing.current) timing.current = advanceResetEpoch(timing.current)
       resetEpochFloor = timing.current?.resetEpoch ?? resetEpochFloor + 1
-      publish({ ...revision, deaths: [], reducedMotion, serial: revision.serial + 1 })
+      const fire = revision.fire ? {
+        ...revision.fire, cells: revision.fire.cells.map((cell) => ({ ...cell, bornAt: null })),
+      } : null
+      publish({ ...revision, deaths: [], fire, reducedMotion, serial: revision.serial + 1 })
     },
   }
   timings.set(store, timing)

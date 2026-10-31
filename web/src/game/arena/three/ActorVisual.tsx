@@ -79,6 +79,7 @@ export function ActorVisual({ atlas, view, timing, reducedMotion }: ActorVisualP
       position={[0, 0, 0]}
       scale={ACTOR_SCALE}
       frameAt={(now) => actorFrameId(view, now, animated && moving.current)}
+      fireTint
     />
     {view.cues.map((cueView, index) => {
       const layout = cueView.layout

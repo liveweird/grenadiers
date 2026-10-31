@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test, type Download, type Page } from '@playwright/test'
 import { observeBrowserPolicy, type BrowserPolicyObservation } from '../tests/support/browser-policy'
-import { inspectActorInventory } from './actor-animation-inventory'
+import { expectDeathAndPoolFrames, inspectActorInventory } from './actor-animation-inventory'
 
 let browserPolicy: BrowserPolicyObservation
 test.beforeEach(async ({ context }) => { browserPolicy = await observeBrowserPolicy(context) })
@@ -250,18 +250,7 @@ test('committed artist source validates and exports through the browser pipeline
     localBounds: { x: -40, y: -40, width: 80, height: 80 },
     pivot: { x: 40, y: 40 },
   })
-  const deathAnimations = ['actor.one.death', 'actor.two.death', 'actor.three.death', 'actor.four.death', 'mob.death']
-  expect(sourceManifest.frames.slice(165).map(({ id }) => id)).toEqual(
-    deathAnimations.flatMap((animation) =>
-      [0, 1, 2, 3].map((frame) => `${animation}.${frame}`)),
-  )
-  for (const animation of deathAnimations) {
-    expect(sourceManifest.animations[animation]).toEqual({
-      frameIds: [0, 1, 2, 3].map((frame) => `${animation}.${frame}`),
-      frameDurationMs: 150,
-      reducedMotionFrame: `${animation}.3`,
-    })
-  }
+  expectDeathAndPoolFrames(source.manifestJson)
   const actorFrames = sourceManifest.frames.filter(({ id }) => id.startsWith('actor.')
     && /^actor\.(one|two|three|four)\.(north|east|south|west)\.[0-3]$/.test(id))
   expect(actorFrames).toHaveLength(64)

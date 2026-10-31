@@ -4,6 +4,50 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.5 — 2026-10-31
+
+Adopt the owner-supplied retro-texture PNG directly. All ten 3D material maps now use bolder
+tan sandstone, gray masonry and red brick patterns, with distinct lair surfaces. The remaining
+171 baseline frames are decoded-RGBA identical, including every player/mob pose, death frame,
+weapon, pickup, cue and effect. The paired manifest remains unchanged.
+
+The [current artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.5/grenadiers-artist-v1.1.5.zip)
+contains the updated PNG, unchanged JSON/guides, labelled overview, slices, runtime preview and
+actual 3D capture. The canonical source remains [assets/art/arena-source.png](../../assets/art/arena-source.png).
+
+### Verification
+
+Accepted source: `134df03f783701bf82c06e0dcc18817f587842ea`. Independent decoded-pixel review
+finds no actionable defects: 1120×2128 RGBA8, binary alpha, clean gutters/reservations and no
+changes outside the ten 48×48 material rectangles. Every opposite texture edge matches, all
+top/side pairs remain distinct, and material palettes contain 10–28 colors. The supplied file
+is adopted byte-for-byte; the redundant root copy is removed after native validation and equality checks.
+
+- Raw native import/export passes without adaptation: 181 runtime frames, 2040×704 texture and
+  5,744,640 RGBA bytes. Focused atlas/Three/status tests pass: 105 tests in 25 files.
+- Artist workbench passes ten native cases (15.8s). Native Three passes thirteen cases (48.7s),
+  with five intentional project skips, including compact badges, upright lairs, death playback,
+  reduced motion, board sizes, colour calibration, removal and context recovery.
+- Production build passes at 394,496/400,000 gzip JS bytes and 15,430/20,000 CSS bytes. All
+  five container web files equal the verified build. Pinned Trivy 0.74 finds zero fixable
+  HIGH/CRITICAL vulnerabilities.
+- Exact-image Compose duel/auth/CPU and disabled diagnostics pass, alongside an all-on four-player
+  visual smoke with zero browser errors. Kubernetes duel/auth and runtime restrictions pass.
+  Owned test stacks and namespace are removed.
+- Application code, contracts, dependencies, manifest and deployment configuration are unchanged.
+  Reuse the recorded full 7,294-test web/coverage, E2E-static, dependency/security and Rust
+  acceptance under the local-first policy. Cargo product metadata advances to 1.1.5; the image
+  includes a fresh Linux release build. No coverage floors or assertions change.
+
+### Operation
+
+Localhost:8085 runs exact accepted image
+`sha256:2f950984af61fbe11fc22a6888cae37587a7731d4cae9199eca0bb49f0ebd15f`,
+labelled 1.1.5/source 134df03f. The operator's CPU diagnostics preference remains enabled;
+deployment defaults remain disabled. Promotion verifies image/runtime identity, probes,
+CSP/cache and served assets. Immutable v1.1.4 remains available for rollback. Refresh old tabs
+and start a new match after restart to see the retro surfaces.
+
 ## v1.1.4 — 2026-10-31
 
 Fix two 3D presentation defects without changing artwork or gameplay. Remote-armed and Invisible

@@ -23,7 +23,8 @@ connectivity validation ignores soft blocks, while spawn escape reservations are
 
 ## Simulation and generation
 
-Live arenas require rules9. Retained rules6/CPU17, rules7/CPU18 and rules8/CPU20 support the same presets
+Live arenas require rules10. Retained rules6/CPU17, rules7/CPU18, rules8/CPU20 and
+rules9/CPU21–25 support the same presets
 without being selected for current rooms.
 Movement footprints, public terrain, Power blast traversal and Punch landings use the arena's
 actual dimensions. Punch retains its three-cell wrapping stride: an interior axis of nine

@@ -113,6 +113,11 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::RESPAWN_V21_STANDARD
                     | grenadiers_core::room::CpuProfile::RESPAWN_V21_EASY
             ),
+            10 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD
+                    | grenadiers_core::room::CpuProfile::SPIKE_PITS_EASY
+            ),
             _ => false,
         }
     }
@@ -345,5 +350,43 @@ mod tests {
         assert!(respawn.accept_observation(&observed));
         let mut legacy = controller(grenadiers_core::room::CpuProfile::LAIRS_STANDARD);
         assert!(!legacy.accept_observation(&observed));
+    }
+
+    #[test]
+    fn only_dormant_cpu26_profiles_accept_rules10_observations() {
+        let mut parts = observation_for(SeatId::One).into_parts();
+        parts.rules.version = 10;
+        let timers = parts
+            .actors
+            .iter()
+            .map(|actor| match actor {
+                ObservedActor::Visible(_) => Some(0),
+                ObservedActor::Hidden { .. } => None,
+            })
+            .collect();
+        let observed = Observation::new_rules_v10(
+            parts,
+            grenadiers_core::cpu::ObservedEnvironment::new(
+                grenadiers_core::game::StormCloudConfig::Disabled,
+                None,
+                timers,
+            ),
+            None,
+            None,
+        )
+        .unwrap();
+        let controller = |profile| {
+            CpuController::new(
+                CpuPlanner::without_workers(),
+                SeatId::One,
+                7,
+                [5; 32],
+                profile,
+            )
+        };
+        let mut spike = controller(grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD);
+        assert!(spike.accept_observation(&observed));
+        let mut live = controller(grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_STANDARD);
+        assert!(!live.accept_observation(&observed));
     }
 }

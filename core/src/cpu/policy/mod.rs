@@ -13,6 +13,7 @@ pub use execution::{EscapeExecution, follow_checked_escape, follow_committed_esc
 pub use planner::plan;
 pub(crate) use planner::{
     plan_lairs, plan_respawn, plan_respawn_v23, plan_respawn_v24, plan_respawn_v25,
+    plan_spike_pits_v26,
 };
 pub use types::{
     ControlPlan, FAILED_TARGET_DEFER_TICKS, GoalKind, GoalMemory, IntentDebugSummary,

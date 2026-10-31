@@ -5,6 +5,7 @@ import { makeActor } from '../actorArt'
 import { makeFlame } from '../entityArt'
 import { RENDERABLE_PICKUP_KINDS } from '../types'
 import { createArtCatalog } from './catalog'
+import { TILE_BOUNDS } from './descriptor'
 import { createSourceManifest } from './manifest'
 
 describe('art atlas catalogue', () => {
@@ -34,8 +35,8 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(186)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(182)
+    expect(manifest.frames).toHaveLength(189)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(185)
     expect(manifest.sheet).toEqual({ width: 1120, height: 2128, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
@@ -208,5 +209,23 @@ describe('blood-pool art atlas extension', () => {
       localBounds: { x: 0, y: 0, width: 48, height: 48 },
       pivot: { x: 0, y: 0 },
     })
+  })
+})
+
+describe('spike-pit art atlas extension', () => {
+  it('appends three tile frames without moving any established artwork', () => {
+    const frames = createSourceManifest().frames
+    expect(frames.slice(0, 186)).toEqual(adoptedSource.frames.slice(0, 186))
+    expect(frames.slice(186).map(({ id }) => id)).toEqual([
+      'terrain.spikePit.idle', 'terrain.spikePit.warning', 'terrain.spikePit.raised',
+    ])
+    expect(frames.slice(186).map(({ sourceRect }) => sourceRect)).toEqual([
+      { x: 672, y: 2016, width: 48, height: 48 },
+      { x: 784, y: 2016, width: 48, height: 48 },
+      { x: 896, y: 2016, width: 48, height: 48 },
+    ])
+    expect(frames.slice(186).every(({ localBounds, pivot }) =>
+      JSON.stringify(localBounds) === JSON.stringify(TILE_BOUNDS)
+      && pivot.x === 0 && pivot.y === 0)).toBe(true)
   })
 })

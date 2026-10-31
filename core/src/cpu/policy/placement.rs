@@ -1,6 +1,8 @@
 use crate::cpu::{Observation, VisibleActor};
 use crate::game::{CellId, Direction, Position};
 
+use super::movement::{STEPS, offset};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum TurnAlignment {
     Ready,
@@ -114,4 +116,11 @@ pub(super) fn placement_center_threshold(observation: &Observation) -> u32 {
         .settings
         .turn_assist_units()
         .min(64) as u32
+}
+
+pub(super) fn adjacent_block(observation: &Observation, cell: CellId) -> bool {
+    STEPS
+        .iter()
+        .filter_map(|(_, dc, dr)| offset(cell, *dc, *dr))
+        .any(|next| observation.parts().arena.blocks.contains(&next))
 }

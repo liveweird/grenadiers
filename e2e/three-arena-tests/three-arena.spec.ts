@@ -184,6 +184,23 @@ test('native isolated lair entrance is visible for visual review', async ({ page
   expect(lair.equals(baseline), 'isolated public lair must alter native world pixels').toBe(false)
 })
 
+test('native spike-pit phases remain readable on every board and in reduced motion', async ({ page }, testInfo) => {
+  await openFixture(page)
+  for (const board of ['small', 'medium', 'large'] satisfies BoardName[]) {
+    await show(page, board, 'empty')
+    const baseline = await canvasScreenshot(page, testInfo, `${board}-spike-empty`)
+    const frames = []
+    for (const phase of ['Idle', 'Warning', 'Raised'] as const) {
+      await show(page, board, `spike${phase}`)
+      const frame = await canvasScreenshot(page, testInfo, `${board}-spike-${phase.toLowerCase()}`)
+      expectDifferent(frame, baseline, `${board} ${phase} pit must alter native ground pixels`)
+      frames.push(frame)
+    }
+    expect(frames[0]!.equals(frames[1]!), `${board} idle and warning art must differ`).toBe(false)
+    expect(frames[1]!.equals(frames[2]!), `${board} warning and raised art must differ`).toBe(false)
+  }
+})
+
 test('native blood pools remain beneath living actors and flames', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes('reduced'), 'desktop ground-layer pixels')
   await openFixture(page)

@@ -13,7 +13,7 @@ function archivedValue(value: unknown): V9Snapshot {
       settings: { environment?: unknown };
       seats: Array<{ controller?: unknown }> }
     state: { actors: Array<Record<string, unknown>>; oilBarrels?: unknown; stormCloud?: unknown;
-      lairs?: unknown; mobs?: unknown }
+      lairs?: unknown; mobs?: unknown; spikePits?: unknown }
   }
   delete archived.room.mode
   delete archived.room.configuration
@@ -37,6 +37,7 @@ function archivedValue(value: unknown): V9Snapshot {
   delete archived.state.stormCloud
   delete archived.state.lairs
   delete archived.state.mobs
+  delete archived.state.spikePits
   return archived as unknown as V9Snapshot
 }
 const archivedSnapshot = (revision: number): V9Snapshot => archivedValue(v11Snapshot(revision))

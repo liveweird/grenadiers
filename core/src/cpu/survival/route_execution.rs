@@ -1,6 +1,6 @@
 use crate::cpu::policy::PolicyError;
 use crate::cpu::routing::{PlantCertificate, PlantPresence, RouteCertificate, RouteStep};
-use crate::cpu::{MemoryKey, MovementIntent, Observation};
+use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
 
 use super::MAX_PLAN_AGE_TICKS;
@@ -125,12 +125,20 @@ impl CommittedRoute {
                     )
             },
         );
+        let spike_pits_match = current.parts().rules.version != 10
+            || lane
+                .spike_pits_match_at(
+                    current,
+                    &mut WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE),
+                )
+                .unwrap_or(false);
         if age > MAX_PLAN_AGE_TICKS
             || current.parts().tick > admission_tick
             || certificate.key() != key
             || certificate.basis_tick() != basis.parts().tick
             || !certificate.start_window().contains(first_update)
             || !scene_matches
+            || !spike_pits_match
             || !crate::cpu::routing::storm::observation_fits(
                 &basis,
                 current,
@@ -209,7 +217,21 @@ impl CommittedRoute {
             .certificate
             .lane(self.first_update)
             .and_then(|lane| lane.storm_deadlines_at(tick));
+        let spike_pits_match = current.parts().rules.version != 10
+            || self
+                .certificate
+                .lane(self.first_update)
+                .is_some_and(|lane| {
+                    lane.spike_pits_match_at(
+                        current,
+                        &mut WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE),
+                    )
+                    .unwrap_or(false)
+                });
         if !crate::cpu::routing::storm::observation_fits(&self.basis, current, deadlines) {
+            return RouteStatus::Invalidated;
+        }
+        if !spike_pits_match {
             return RouteStatus::Invalidated;
         }
         let Some(current_actor) = actor(current) else {

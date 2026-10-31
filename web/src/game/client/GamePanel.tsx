@@ -9,7 +9,7 @@ import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
   Seat, VisibleActorView,
-} from '../v17/schema'
+} from '../v18/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -169,7 +169,8 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
     const hasCpu = controllers.includes('cpu')
     return {
       controllers, cpuDifficulty: hasCpu ? difficulty : null, board,
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
     } as RoomConfiguration
   }
   return (

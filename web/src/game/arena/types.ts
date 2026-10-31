@@ -109,6 +109,11 @@ export interface SnapshotMessage {
       spawnRemainingTicks: number | null
       livingMobs: number
     }>
+    spikePits: Array<{
+      cell: { column: number; row: number }
+      phase: 'idle' | 'warning' | 'raised'
+      remainingTicks: number
+    }>
     mobs: Array<{
       id: number
       lairId: number

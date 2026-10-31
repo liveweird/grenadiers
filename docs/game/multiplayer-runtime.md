@@ -1,7 +1,7 @@
 # Roster runtime
 
 `server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by every
-live two-to-four-seat configuration and board. The [v17 contract](protocol-v17.md) owns wire shape
+live two-to-four-seat configuration and board. The [v18 contract](protocol-v18.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -57,15 +57,15 @@ export stay disabled.
 
 ## Explicit lair runtime
 
-`RosterRuntime::new_respawn` selects a separate rules9 environment profile, including when lairs
-or clouds are disabled. It publishes checked gameplay17 admissions and snapshots; the ordinary
-live registry uses rules9/gameplay17. Profile-specific settings entry points reject
+`RosterRuntime::new_spike` selects a separate rules10 environment profile, including when pits,
+lairs or clouds are disabled. It publishes checked gameplay18 admissions and snapshots; the ordinary
+live registry uses rules10/gameplay18. Profile-specific settings entry points reject
 cross-profile updates and share the same atomic authority, revision and readiness transaction.
 Disabled lairs retain their numeric settings. Creator revocation, forming-seat replacement and
 the first-start lock retain the lifecycle rules above.
 
 RespawnV9 controllers require `RESPAWN_LAIRS_STANDARD` or `RESPAWN_LAIRS_EASY`. The worker returns its finite
-mob-contact lease with the bomb/escape proof and original observationv17. Admission keeps world,
+mob-contact lease with the bomb/escape proof and original gameplay18 observation. Admission keeps world,
 seat, pose, effects, command epoch, age and confirmed-stop fences. Continuing movement checks
 both proofs; a changed Teleporter marker or failed contact check withdraws authority. A timed
 hold still ends when observations or worker results are missing. See

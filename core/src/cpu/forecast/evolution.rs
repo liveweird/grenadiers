@@ -12,6 +12,7 @@ use super::ForecastFailure;
 use super::intervals::take;
 
 const MAX_FLAME_CHANGES: usize = MAX_MULTIPLAYER_OBSERVED_BOMBS * ARENA_CELL_COUNT;
+const _: () = assert!(MAX_FLAME_CHANGES == 6_240);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct FlameChange {
@@ -68,11 +69,12 @@ impl ForecastEvolution {
             capacity_ids: bombs
                 .iter()
                 .filter(|bomb| {
-                    parts.rules.version != 9 || bomb.trigger != ObservedBombTrigger::Contact
+                    !matches!(parts.rules.version, 9 | 10)
+                        || bomb.trigger != ObservedBombTrigger::Contact
                 })
                 .map(|bomb| bomb.id)
                 .collect(),
-            max_flame_changes: if parts.rules.version == 9 {
+            max_flame_changes: if matches!(parts.rules.version, 9 | 10) {
                 ARENA_CELL_COUNT * ARENA_CELL_COUNT
             } else {
                 MAX_FLAME_CHANGES
@@ -396,5 +398,3 @@ fn trigger_matches(before: ObservedBombTrigger, after: ObservedBombTrigger, elap
         _ => false,
     }
 }
-
-const _: () = assert!(MAX_FLAME_CHANGES == 6_240);

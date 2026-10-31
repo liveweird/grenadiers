@@ -32,6 +32,7 @@ pub enum CpuPolicy {
     UtilityV23,
     UtilityV24,
     UtilityV25,
+    UtilityV26,
 }
 
 impl CpuPolicy {
@@ -63,6 +64,7 @@ impl CpuPolicy {
             Self::UtilityV23 => 23,
             Self::UtilityV24 => 24,
             Self::UtilityV25 => 25,
+            Self::UtilityV26 => 26,
         }
     }
 }
@@ -283,6 +285,18 @@ impl CpuProfile {
 
     pub const RESPAWN_LAIRS_EASY: Self = Self {
         policy: CpuPolicy::UtilityV25,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Dormant rules-v10 profile with spike-pit-aware certified execution.
+    pub const SPIKE_PITS_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV26,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Dormant Easy rules-v10 profile; live room selection remains on CPU25.
+    pub const SPIKE_PITS_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV26,
         difficulty: CpuDifficulty::Easy,
     };
 

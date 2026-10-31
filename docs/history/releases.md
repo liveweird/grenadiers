@@ -4,6 +4,39 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.8 — 2026-10-31
+
+Add opt-in rules10 spike-pit simulation: contact arms a warning, raised spikes use normal
+protection and damage, and retraction resets the trap. Movement traces, forced movement,
+Teleporter destinations, mob deaths/respawns and transactional failures are covered.
+The [core guide](../game/spike-pit-core.md) documents the library behavior.
+
+### Verification
+
+Accepted candidate: `5207a45cff9052a79c1004f81750900118a8aee6`,
+[PR #299](https://github.com/liveweird/grenadiers/pull/299).
+Independent review resolved dead-mob trace damage and unnecessary legacy trace cloning.
+
+- Full core debug and release pass: 1,613 tests plus two doctests each. Strict Clippy,
+  formatting and isolated core coverage pass; line coverage is 92.99% against the 90% floor.
+- Distinct [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41228101948)
+  pass for this candidate.
+- Exact-image Compose duel/authentication: 2/2 pass; Kubernetes duel/authentication: 2/2 pass.
+  Restricted runtime/security checks pass and owned test resources are removed.
+- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL vulnerabilities. All five served web
+  files equal the verified v1.1.6 frontend; its unchanged web, graphics and dependency
+  acceptance is reused.
+
+### Operation
+
+Accepted local image:
+`sha256:d5d70081f399697483e53a4a36be5a1183b63a78627c6813d15f9f7a46bf5e4e`,
+labelled 1.1.8/source 5207a45c, tagged `grenadiers:spike-physics-v118`.
+Live transport remains gameplay17/rules9/CPU25. Localhost:8085 stays on the accepted v1.1.6
+blood-pool image until the paired spike contract, AI and presentation are ready.
+The [v1.1.6 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.6/grenadiers-artist-v1.1.6.zip)
+remains current. This library increment does not enable playable spike pits.
+
 ## v1.1.7 — 2026-10-31
 
 Add dormant spike-pit core primitives: checked warning/raised clocks, strict positive-area

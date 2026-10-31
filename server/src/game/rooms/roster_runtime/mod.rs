@@ -2,13 +2,16 @@
 
 mod admission;
 mod admission_projection;
+mod admission_spike;
 mod environment;
+mod environment_spike;
 mod error;
 mod owner_helpers;
 mod publication;
 mod publication_v15;
 mod publication_v16;
 mod publication_v17;
+mod publication_v18;
 mod round;
 mod runtime;
 mod runtime_publication;
@@ -37,6 +40,8 @@ mod lair_settings_tests;
 mod replacement_tests;
 #[cfg(test)]
 mod respawn_settings_tests;
+#[cfg(test)]
+mod spike_settings_tests;
 #[cfg(test)]
 mod terminal_transport_tests;
 #[cfg(test)]

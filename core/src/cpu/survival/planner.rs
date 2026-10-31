@@ -377,7 +377,7 @@ pub(super) fn plan_inner(
         return Ok(plan);
     }
     if (storm_enabled || respawn)
-        && clear_movement
+        && (clear_movement || observation.parts().rules.version == 10)
         && fallback.as_ref().is_some_and(|plan| {
             super::steering::certified_pulse_progresses(plan, actor.position)
                 && route_fallback

@@ -1,5 +1,5 @@
 use axum::extract::ws::WebSocket;
-use grenadiers_core::protocol::{Counter, RoomId, v17::ErrorCode};
+use grenadiers_core::protocol::{Counter, RoomId, v18::ErrorCode};
 
 use super::{reply_error, room_error};
 use crate::game::{
@@ -25,5 +25,16 @@ pub(super) async fn dispatch(
     {
         Ok(()) => true,
         Err(error) => room_error(socket, error, sequence).await,
+    }
+}
+
+pub(super) const fn domain_direction(
+    direction: grenadiers_core::protocol::Direction,
+) -> grenadiers_core::game::Direction {
+    match direction {
+        grenadiers_core::protocol::Direction::North => grenadiers_core::game::Direction::North,
+        grenadiers_core::protocol::Direction::East => grenadiers_core::game::Direction::East,
+        grenadiers_core::protocol::Direction::South => grenadiers_core::game::Direction::South,
+        grenadiers_core::protocol::Direction::West => grenadiers_core::game::Direction::West,
     }
 }

@@ -24,6 +24,7 @@ pub(super) fn can_complete(input: Input<'_>) -> bool {
         return false;
     };
     input.nonplant
+        && input.current.spike_pits().is_none()
         && input
             .certificate
             .steps()

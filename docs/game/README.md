@@ -56,11 +56,12 @@ for current defaults and behavior, rather than treating design proposals as deli
 
 [Board geometry](board-sizes.md) defines checked presets, spawn reservations and versioned generation.
 
-[Weather](storm-cloud.md) and [headless lairs](lairs.md) describe environment physics and checked
+[Weather](storm-cloud.md), [headless lairs](lairs.md) and [spike pits](spike-pits.md) describe environment physics and checked
 simulation boundaries.
 
-[Gameplay v16](protocol-v16.md) defines the live two-to-four-seat wire contract. The retained
-[Gameplay v13 compatibility guide](protocol-v13.md) documents its closed two-seat contract,
+[Gameplay v18](protocol-v18.md) defines the live two-to-four-seat wire contract. The retained
+[Gameplay v17 respawn contract](protocol-v17.md) and
+[Gameplay v13 compatibility guide](protocol-v13.md) document their closed historical contracts,
 including the authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and
 [v9](../history/protocols/protocol-v9.md) are archived; the
 [protocol history index](../history/protocols/README.md) links every standalone historical guide.

@@ -1,6 +1,6 @@
 # Storm-cloud simulation
 
-Rules7 introduced seeded, nonblocking weather. Live rules9/gameplay17 includes the same cloud
+Rules7 introduced seeded, nonblocking weather. Live rules10/gameplay18 includes the same cloud
 alongside lairs. Older protocols remain
 archived and cannot publish it.
 

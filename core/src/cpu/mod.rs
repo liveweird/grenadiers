@@ -10,9 +10,11 @@ mod intent;
 mod lair_contact;
 mod memory;
 mod observation;
+mod observation_bombs;
 mod observation_environment;
 mod observation_lairs;
 mod observation_respawn_lairs;
+mod observation_spike_pits;
 mod observation_validation;
 pub mod policy;
 mod random;
@@ -46,12 +48,24 @@ pub(crate) fn rules_config(observation: &Observation) -> Option<crate::game::Rul
                     lairs.config()
                 }),
         )),
+        10 => Some(crate::game::RulesConfig::environment_v10(
+            observation.parts().rules.settings,
+            observation.environment()?.storm_cloud_config(),
+            observation
+                .respawn_lairs()
+                .map_or(crate::room::RespawnLairConfig::Disabled, |lairs| {
+                    lairs.config()
+                }),
+            observation
+                .spike_pits()
+                .map_or(crate::room::SpikePitConfig::Disabled, |pits| pits.config()),
+        )),
         _ => None,
     }
 }
 
 pub(crate) const fn observed_bomb_capacity(rules_version: u16) -> usize {
-    if rules_version == 9 {
+    if matches!(rules_version, 9 | 10) {
         crate::game::arena::ARENA_CELL_COUNT
     } else if rules_version >= 6 {
         MAX_MULTIPLAYER_OBSERVED_BOMBS
@@ -72,14 +86,16 @@ pub use observation::{
     BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MAX_OBSERVED_BOMBS, MAX_OBSERVED_EFFECTS,
     Observation, ObservationError, ObservationParts, ObservedActor, ObservedArena, ObservedBomb,
     ObservedBombTrigger, ObservedEffect, ObservedEnvironment, ObservedFlame, ObservedLairs,
-    ObservedOil, ObservedPickup, ObservedRespawnLairs, ObservedRules, Unknown, UnknownActorFacts,
-    UnknownBombFacts, VisibleActor,
+    ObservedOil, ObservedPickup, ObservedRespawnLairs, ObservedRules, ObservedSpikePits, Unknown,
+    UnknownActorFacts, UnknownBombFacts, VisibleActor,
 };
 pub use random::{CpuRng, RandomError};
 pub use work::{WorkBudget, WorkError};
 
 #[cfg(test)]
 mod observation_multiplayer_tests;
+#[cfg(test)]
+mod observation_spike_pits_tests;
 #[cfg(test)]
 mod rules_v8_boundary_tests;
 #[cfg(test)]

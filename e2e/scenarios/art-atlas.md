@@ -55,3 +55,8 @@ canvas and one owned Pixi texture set.
 
 After an invalid manifest reports its concrete stable-ID error, changing the workbench language
 does not replace that error with a ready message. The selected asset facts are rerendered in Polish.
+
+## Scenario: adopted spike-pit phases are distinct binary-alpha bounded-palette tiles
+
+Load the committed source through the browser pipeline. Check all three 48px pit frames
+have opaque binary alpha, bounded palettes and distinct decoded pixel signatures.

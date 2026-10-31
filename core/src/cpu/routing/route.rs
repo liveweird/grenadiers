@@ -27,6 +27,7 @@ pub(super) struct LaneState {
     pub(super) last_stop: Option<Tick>,
     pub(super) origin_grace: Option<crate::game::CellId>,
     pub(super) recipient_barrier: Option<RecipientBarrier>,
+    pub(super) pits: super::spike_pits::PitTrajectory,
 }
 
 #[derive(Clone)]
@@ -54,7 +55,7 @@ pub(crate) fn plan_respawn_route(
     request: RouteRequest,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
-    if observation.parts().rules.version != 9 {
+    if !matches!(observation.parts().rules.version, 9 | 10) {
         return Err(RouteFailure::InvalidRequest);
     }
     plan_route_seeded(observation, &[forecast], request, None, None, None, work)
@@ -192,7 +193,13 @@ pub(super) fn plan_route_seeded(
             }
         }
         let ready_ticks = node.lanes.iter().map(|lane| lane.ready).collect::<Vec<_>>();
-        for updates in wait_lengths(&boundaries, request, &ready_ticks)? {
+        let mut node_boundaries = boundaries.clone();
+        for lane in &node.lanes {
+            node_boundaries.extend(lane.pits.wait_boundaries(work)?);
+        }
+        node_boundaries.sort_unstable();
+        node_boundaries.dedup();
+        for updates in wait_lengths(&node_boundaries, request, &ready_ticks)? {
             let mut next = node.clone();
             match apply_wait(&context, forecasts, request.mode, updates, &mut next, work) {
                 Ok(()) => {}
@@ -243,7 +250,7 @@ fn validate_request(
     Ok(())
 }
 
-fn initial_lanes(
+pub(super) fn initial_lanes(
     context: &Context<'_>,
     forecasts: &[&HazardForecast],
     request: RouteRequest,
@@ -256,6 +263,8 @@ fn initial_lanes(
     for value in request.start_window.start.0..request.start_window.end.0 {
         let first = Tick(value);
         let mut motion = Motion::stopped(context, first);
+        let mut pits =
+            super::spike_pits::PitTrajectory::from_observation(context.observation, work)?;
         if context.storm.is_none() {
             let segment = stationary_segment(context.actor.position);
             assumptions.extend(check_transition_all(
@@ -273,12 +282,14 @@ fn initial_lanes(
                 },
                 work,
             )?);
+            pits.stationary_until(first, context.actor.position, work)?;
         }
         if context.storm.is_some() {
             for tick in add_tick(context.observation.parts().tick, 1)?.0..first.0 {
                 super::storm::charge_tick(context.storm, work)?;
                 let tick = Tick(tick);
                 let segment = advance(context, &mut motion, MovementIntent::Stop, tick)?;
+                pits.advance(tick, segment[0].start(), &segment, work)?;
                 assumptions.extend(check_transition_all(
                     context,
                     forecasts,
@@ -302,6 +313,7 @@ fn initial_lanes(
             last_stop: None,
             origin_grace,
             recipient_barrier,
+            pits,
         });
     }
     Ok((lanes, assumptions))

@@ -3,6 +3,8 @@ import type { ObservedGame } from './duel'
 
 type ItemSelection = { id: string; label: string }
 
+const DISABLED_SPIKES = { enabled: false, warningTicks: 36, raisedTicks: 180 } as const
+
 const DISABLED_LAIRS = { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 } as const
 
 const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
@@ -24,8 +26,8 @@ export async function applyItemSettings(
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)
   expect(latestRoom(game)?.settings.enabledItems).toEqual(items.map(({ id }) => id))
-  expect(latestRoom(game)?.settings.environment).toEqual({ stormCloud: false, lairs: DISABLED_LAIRS })
-  expect(latestRoom(game)?.configuration.environment).toEqual({ stormCloud: false, lairs: DISABLED_LAIRS })
+  expect(latestRoom(game)?.settings.environment).toEqual({ stormCloud: false, lairs: DISABLED_LAIRS, spikePits: DISABLED_SPIKES })
+  expect(latestRoom(game)?.configuration.environment).toEqual({ stormCloud: false, lairs: DISABLED_LAIRS, spikePits: DISABLED_SPIKES })
 }
 
 /** Preserve the original seeded scenarios while exercising the real settings UI. */
@@ -37,7 +39,7 @@ export async function selectClassicSettings(page: Page, game: ObservedGame): Pro
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)
   expect(latestRoom(game)?.settings.enabledItems).toEqual([])
   expect(latestRoom(game)).toMatchObject({
-    rulesVersion: 9, mapId: 'generated_v2',
-    settings: { environment: { stormCloud: false, lairs: DISABLED_LAIRS } },
+    rulesVersion: 10, mapId: 'generated_v2',
+    settings: { environment: { stormCloud: false, lairs: DISABLED_LAIRS, spikePits: DISABLED_SPIKES } },
   })
 }

@@ -24,6 +24,7 @@
     "wall-pass-tests/**/*.spec.ts",
     "art-atlas-tests/**/*.spec.ts",
     "atlas-gameplay-tests/**/*.spec.ts",
-    "three-arena-tests/**/*.spec.ts"
+    "three-arena-tests/**/*.spec.ts",
+    "spike-pit-tests/**/*.spec.ts"
   ]
 }

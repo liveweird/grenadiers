@@ -2,7 +2,7 @@ import Ajv from 'ajv'
 import { describe, expect, it } from 'vitest'
 import v16Schema from '../../../../api/gameplay-v16.schema.json'
 import v17Schema from '../../../../api/gameplay-v17.schema.json'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from './testSupport'
 import type { BombView, Snapshot, VisibleActorView } from './schema'
 import { validateGameplayV17ServerMessage } from './validation'
 

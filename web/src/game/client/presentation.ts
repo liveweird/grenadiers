@@ -73,6 +73,7 @@ export function presentSnapshot(
       oilBarrels: snapshot.state.oilBarrels,
       stormCloud: snapshot.state.stormCloud,
       lairs: snapshot.state.lairs,
+      spikePits: snapshot.state.spikePits,
       mobs: snapshot.state.mobs,
       pickups: snapshot.state.pickups.filter(
         (pickup): pickup is typeof pickup & {

@@ -1,9 +1,8 @@
 # Spike-pit core primitives
 
-The core library provides checked timing, contact, placement and opt-in rules10 simulation for
-the [spike-pit design](spike-pits.md). Existing profiles remain unchanged; the live game does
-not select rules10 until its paired contract, AI and presentation are activated.
-Work status remains in the [backlog](../../BACKLOG.md).
+The core library provides checked timing, contact and placement primitives for the live
+[spike-pit behavior](spike-pits.md). Rules10 selects these primitives explicitly; historical
+rules profiles remain unchanged. Work status remains in the [backlog](../../BACKLOG.md).
 
 ## Timing and settings
 

@@ -9,8 +9,7 @@ use crate::{
     game::rooms::{
         replay_v4::{
             Operation as LegacyOperation, ReplayAction as LegacyAction,
-            normalized_settings::NormalizedSettings,
-            runner::{NormalizedOperation, NormalizedRecord, ReplayError, execute_normalized},
+            runner::{ReplayError, apply as apply_legacy},
         },
         roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, RosterRuntimeInspection},
     },
@@ -52,11 +51,16 @@ pub(in crate::game::rooms) fn replay_with_mob_navigation(
         super::validation::validate_operation(&journal.header, record.operation)
             .map_err(|()| ReplayError::InvalidOperation)?;
     }
-    let normalized = journal
-        .records
-        .iter()
-        .map(normalize)
-        .collect::<Result<Vec<_>, _>>()?;
+    let (source, seeds) = generation_seed_context(journal);
+    let runtime = runtime_from_header_with_navigation(&journal.header, source, navigation)?;
+    execute_journal(runtime, journal, seeds)
+}
+
+pub(in crate::game::rooms) type SeedQueue = Arc<Mutex<VecDeque<[u8; 32]>>>;
+
+pub(in crate::game::rooms) fn generation_seed_context(
+    journal: &Journal,
+) -> (RoundSeedSource, SeedQueue) {
     let seeds = journal
         .records
         .iter()
@@ -72,15 +76,63 @@ pub(in crate::game::rooms) fn replay_with_mob_navigation(
         bytes.copy_from_slice(&seed);
         Ok(())
     });
-    execute_normalized(
-        runtime_from_header_with_navigation(&journal.header, source, navigation)?,
-        &normalized,
-        seeds,
-    )
+    (source, seeds)
 }
 
-fn normalize(record: &super::record::Record) -> Result<NormalizedRecord, ReplayError> {
-    let operation = match record.operation {
+pub(in crate::game::rooms) fn execute_journal(
+    mut runtime: RosterRuntime,
+    journal: &Journal,
+    seeds: SeedQueue,
+) -> Result<RosterRuntimeInspection, ReplayError> {
+    validate_order(&journal.records)?;
+    let mut marker_due = false;
+    for record in &journal.records {
+        if record.tick != runtime.replay_inspection().lifecycle.tick() {
+            return Err(ReplayError::WrongTick);
+        }
+        if let Operation::RoundStarted {
+            epoch,
+            assignment,
+            generation,
+        } = record.operation
+        {
+            if !marker_due {
+                return Err(ReplayError::ExtraRoundMarker);
+            }
+            let sim = runtime
+                .replay_inspection()
+                .simulation
+                .ok_or(ReplayError::RoundMarkerMismatch)?;
+            if sim.epoch != epoch
+                || sim.state.round_assignment() != assignment
+                || sim.generation != generation
+            {
+                return Err(ReplayError::RoundMarkerMismatch);
+            }
+            marker_due = false;
+            continue;
+        }
+        if marker_due {
+            return Err(ReplayError::MissingRoundMarker);
+        }
+        let before = runtime.replay_inspection().simulation.map(|sim| sim.epoch);
+        apply_operation(&mut runtime, record.operation)?;
+        marker_due = runtime
+            .replay_inspection()
+            .simulation
+            .is_some_and(|sim| Some(sim.epoch) != before);
+    }
+    if marker_due {
+        return Err(ReplayError::MissingRoundMarker);
+    }
+    if !seeds.lock().map_err(|_| ReplayError::Runtime)?.is_empty() {
+        return Err(ReplayError::ExtraRoundMarker);
+    }
+    Ok(runtime.replay_inspection())
+}
+
+fn apply_operation(runtime: &mut RosterRuntime, operation: Operation) -> Result<(), ReplayError> {
+    match operation {
         Operation::Action {
             seat,
             epoch,
@@ -92,26 +144,60 @@ fn normalize(record: &super::record::Record) -> Result<NormalizedRecord, ReplayE
                     cloud,
                     tuning,
                 },
-        } => NormalizedOperation::Settings(NormalizedSettings::RespawnV9 {
+        } => runtime
+            .update_respawn_settings(seat, epoch, settings_revision, settings, cloud, tuning)
+            .map(|_| ())
+            .map_err(|_| ReplayError::Runtime),
+        Operation::Action {
             seat,
             epoch,
-            revision: settings_revision,
-            settings,
-            cloud,
-            tuning,
-        }),
+            source: ActionSource::Human,
+            action:
+                ReplayAction::UpdateSpikeSettings {
+                    settings_revision,
+                    settings,
+                    cloud,
+                    tuning,
+                    spike_pits,
+                },
+        } => runtime
+            .update_spike_settings(
+                seat,
+                epoch,
+                settings_revision,
+                settings,
+                cloud,
+                tuning,
+                spike_pits,
+            )
+            .map(|_| ())
+            .map_err(|_| ReplayError::Runtime),
         Operation::Action {
             source: ActionSource::Cpu,
-            action: ReplayAction::UpdateSettings { .. },
+            action: ReplayAction::UpdateSettings { .. } | ReplayAction::UpdateSpikeSettings { .. },
             ..
-        } => return Err(ReplayError::InvalidOperation),
-        operation => NormalizedOperation::Legacy(legacy_operation(operation)?),
-    };
-    Ok(NormalizedRecord {
-        tick: record.tick,
-        order: record.order,
-        operation,
-    })
+        } => Err(ReplayError::InvalidOperation),
+        operation => apply_legacy(runtime, legacy_operation(operation)?),
+    }
+}
+
+fn validate_order(records: &[super::record::Record]) -> Result<(), ReplayError> {
+    for (index, record) in records.iter().enumerate() {
+        let expected = match records
+            .get(index.wrapping_sub(1))
+            .filter(|previous| previous.tick == record.tick)
+        {
+            Some(previous) => previous
+                .order
+                .checked_add(1)
+                .ok_or(ReplayError::InvalidOrder)?,
+            None => 0,
+        };
+        if record.order != expected || index > 0 && records[index - 1].tick.0 > record.tick.0 {
+            return Err(ReplayError::InvalidOrder);
+        }
+    }
+    Ok(())
 }
 
 fn legacy_operation(operation: Operation) -> Result<LegacyOperation, ReplayError> {
@@ -164,6 +250,7 @@ fn legacy_action(action: ReplayAction) -> Result<LegacyAction, ReplayError> {
         ReplayAction::Equipment(value) => LegacyAction::Equipment(value),
         ReplayAction::Rematch(value) => LegacyAction::Rematch(value),
         ReplayAction::UpdateSettings { .. } => return Err(ReplayError::InvalidOperation),
+        ReplayAction::UpdateSpikeSettings { .. } => return Err(ReplayError::InvalidOperation),
     })
 }
 

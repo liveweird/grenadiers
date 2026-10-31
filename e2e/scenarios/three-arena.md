@@ -74,6 +74,13 @@ empty, foreground-only, pools-only, and combined canvases must retain at least 8
 foreground mask while adding visible pool pixels. This supplies a visual ground-decal artifact and
 proves actors and hazards remain legible above the cosmetic stains.
 
+## Scenario: native spike-pit phases remain readable on every board and in reduced motion
+
+Desktop and narrow reduced-motion projects render authoritative idle, warning, and raised pit
+rows at the center of every supported board. Each phase must change native ground pixels from the
+empty baseline, and adjacent phases must remain visually distinct. Reduced motion receives the
+same static authoritative frames without a locally advanced fuse or damage state.
+
 ## Scenario: duplicate death cues do not darken blood pools and lifecycle resets leave no ghosts
 
 The desktop project creates a pool from a fresh public cue, replays the identical envelope, and

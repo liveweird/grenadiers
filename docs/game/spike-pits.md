@@ -1,77 +1,66 @@
-# Spike pit design
+# Spike pits
 
-This design defines a new environmental hazard. Delivery status and priority live only in
-the [backlog](../../BACKLOG.md); this document does not describe an available game feature.
+Spike pits are an authoritative rules10 environmental hazard in live gameplay18 rooms. Their
+availability, timing and current phase are shared room facts; open work and priority remain in
+the [backlog](../../BACKLOG.md).
 
-## Requested behavior
+## Phases and damage
 
-A pit is traversable floor with three states:
+Each pit is traversable floor with three phases:
 
-1. **Dormant:** retracted spikes; contact by a living player or mob activates the trap.
-2. **Warning:** a short, visible arming interval gives occupants time to escape.
-3. **Raised:** spikes damage anything standing on the tile or entering it. After a few
-   seconds, they retract and the trap returns to its dormant state.
+1. **Idle:** retracted spikes; positive-area contact by a living player or mob starts warning.
+2. **Warning:** occupants can leave before the authoritative deadline.
+3. **Raised:** contact damages players and kills mobs until the pit retracts.
 
-Leaving during the warning does not cancel activation. Further contacts do not postpone
-the rise or extend the raised interval. All occupants are checked; the triggering entity
-has no special immunity. Dead bodies and cosmetic blood pools cannot activate a pit.
+Leaving during warning does not cancel activation. Further contact cannot postpone a deadline or
+extend the raised interval. After retraction, contact on a later physical tick can start a new
+cycle; a pit never rises without first passing through warning. Dead bodies, bombs and cosmetic
+blood pools do not activate pits. Bombs do not destroy them or alter blast propagation, Stopwatch
+does not pause their clocks, and storm clouds can pass over them.
 
-## Proposed settings and interactions
+The default warning is 36 ticks (0.6 seconds) and the default raised interval is 180 ticks
+(3 seconds). The lobby accepts 6–120 warning ticks and 60–600 raised ticks. Shield prevents a
+hit; otherwise Heart absorbs one hit and grants the ordinary damage grace. Existing grace also
+protects normally. Protection does not disarm or reset the pit.
 
-Use configurable defaults of **0.6 seconds warning** and **3 seconds raised**, with existing
-damage precedence:
-Shield prevents a hit, otherwise Heart absorbs one hit and grants normal damage grace.
-Unprotected players and mobs die. Protection does not disarm or reset the trap.
+Deadlines are resolved before movement on the rise update. Contact uses strict positive-area
+footprint overlap across actual ordinary and forced movement segments; edge-only tangency is
+safe. Teleportation checks the destination without inventing a connecting path. Checked timing
+or later update failure rolls back the complete simulation tick.
 
-Treat pits as an indestructible hazard layer on floor, separate from walls and soft blocks.
-Bombs neither activate nor destroy them; blast propagation remains unchanged. Stopwatch does
-not pause trap timers, consistent with independent environmental weather. Clouds continue
-to pass over pits. Teleporter arrival activates or contacts only the destination tile.
+## Settings and layout
 
-After retraction, a surviving occupant may activate a fresh warning on the next update.
-Do not raise spikes again without a new warning. New-round construction resets every pit.
-Provide a lobby switch alongside the environmental features; All on/All off and Classic
-must handle it consistently. Placement must preserve spawn safety and fair routes.
-Prefer a small symmetric layout on already-clear floor, with no changes to existing block or
-item sampling. The initial count and layout remain tuning choices; do not add a density control
-without a concrete need. Disabling pits must preserve base generation and RNG progress.
+`environment.spikePits` contains `enabled`, `warningTicks` and `raisedTicks`. New rooms enable
+the default tuning. All on and Restore enable pits; All off and Classic disable them. Disabling
+retains the checked timing values for later re-enabling. Settings lock with the rest of the room
+configuration when the match begins.
 
-## Simulation and acceptance boundaries
+`spike_pit_layout_v1` selects zero, two or four immutable cells on already-clear floor. The
+result is symmetric across both arena axes, row-major, outside all corner-spawn escape
+reservations, lairs, Oil and other excluded overlays. Placement never carves terrain, consumes
+randomness or changes block/item sampling, so enabling or disabling pits does not alter the base
+generation path or RNG progress.
 
-Use authoritative integer simulation ticks and publish the current state and remaining
-warning/raised time. Resolve a warning deadline before movement on the rise update so a
-character still occupying the pit at that instant cannot escape retroactively.
+Every new round resets the selected pits to idle. The authoritative snapshot publishes their
+sorted `cell`, `phase` and `remainingTicks`; it never publishes an activator, seed, hidden
+position, target or route. See the [gameplay18 contract](protocol-v18.md).
 
-Use positive-area footprint overlap, including each actual ordinary or forced movement
-segment and a Teleporter destination. Merely touching an outer edge is safe. No connecting
-path is implied by teleportation. Timer overflow and later tick failures roll back atomically.
+## CPU, mobs and presentation
 
-CPU and mob planning must reason about warning deadlines, raised intervals and the warning
-their own passage would trigger. Preserve bounded planning work and exact replay identities;
-do not disguise spikes as bomb fire or change archived rules and replay behavior.
-Idle pits are path-dependent hazards: a planned route may trigger one and return after its
-spikes rise. Reuse the simulation's phase/contact helpers in candidate-route validation.
+CPU26 forecasts path-dependent warning and raised intervals, including warnings its own route
+would trigger. Route execution is guarded by the observed public pit state and retains the
+existing bounded work, normal protection, movement and planting safety budgets. The live
+profiles are explicitly `SPIKE_PITS_STANDARD` and `SPIKE_PITS_EASY`; archived CPU25 behavior
+and historical replay identities remain closed.
 
-Mob deaths must schedule exactly one lair respawn delay, just as fire deaths do. Define
-newborn contact explicitly and prevent spawning onto a warning or raised pit. Existing
-invisibility restrictions remain: publish pit phases without exposing an activator identity,
-private position, seed, target or route.
+Mobs do not deliberately enter pits from safe floor. A mob already overlapping a pit is allowed
+to move out, including a newborn exceptional pose; pit deaths schedule the same single lair
+respawn delay as other mob deaths. This escape behavior does not promise aggressive crossings.
 
-Cover rise/retraction boundaries, crossings within one update, simultaneous occupants,
-retriggering, protection, frozen occupants, forced movement, respawn, replay, disabled
-generation and recipient conformance. The 3D arena and shared sheet need readable dormant,
-warning and raised art with an immediate reduced-motion presentation.
+The Three.js arena renders `terrain.spikePit.idle`, `terrain.spikePit.warning` and
+`terrain.spikePit.raised` as floor-aligned billboards. Warning pulses only when reduced motion is
+off; reduced motion keeps the same immediately readable static phase artwork. Blood pools remain cosmetic and do not change trap timing or contact.
 
-## Integration boundaries
-
-Keep the cosmetic blood-pool change independent. For pits, establish the core timing/contact
-and layout model first; then add versioned settings, projection, replay and CPU support; finally
-pair the renderer/lobby with coordinated live activation. Dormant internal foundations must
-not silently change an existing live ruleset. Preserve closed historical contracts and identify
-the new physics explicitly before enabling it.
-
-The [core primitives](spike-pit-core.md) define checked clocks, contact geometry and placement;
-they do not activate traps in the live ruleset.
-
-Three pit frames and one blood-pool frame fit the five currently unassigned artist-sheet cells.
-Append their stable IDs without changing existing sprite pixels or filling reserved entries.
+The checked clock, geometry and placement APIs are documented in
+[spike-pit core primitives](spike-pit-core.md). CPU and renderer checks belong to the normal
+[testing workflow](../testing.md); dated acceptance evidence belongs in release/history records.

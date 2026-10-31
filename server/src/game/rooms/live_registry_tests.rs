@@ -91,7 +91,7 @@ fn token(admission: &LiveAdmission) -> v14::ResumeToken {
 }
 
 #[tokio::test]
-async fn two_player_live_rooms_use_v17_respawn_roster_for_duel_and_solo() {
+async fn two_player_live_rooms_use_v18_spike_roster_for_duel_and_solo() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let duel = rooms
@@ -106,7 +106,7 @@ async fn two_player_live_rooms_use_v17_respawn_roster_for_duel_and_solo() {
     assert_eq!(duel.seat(), SeatId::One);
     assert_eq!(duel.room_id().as_str(), "123456789abcdef00000000000000001");
     assert!(matches!(duel, LiveAdmission::Roster(_)));
-    assert_eq!(personal(&duel)["room"]["rulesVersion"], 9);
+    assert_eq!(personal(&duel)["room"]["rulesVersion"], 10);
     assert_eq!(
         personal(&duel)["room"]["settings"]["enabledItems"]
             .as_array()
@@ -124,6 +124,14 @@ async fn two_player_live_rooms_use_v17_respawn_roster_for_duel_and_solo() {
             "enabled": false,
             "spawnSeconds": 10,
             "maxLivingMobs": 1
+        })
+    );
+    assert_eq!(
+        personal(&duel)["room"]["settings"]["environment"]["spikePits"],
+        serde_json::json!({
+            "enabled": true,
+            "warningTicks": 36,
+            "raisedTicks": 180
         })
     );
     assert_eq!(
@@ -351,49 +359,10 @@ async fn bodyless_roster_notice_is_encoded_for_the_actual_recipient() {
     );
 }
 
-#[tokio::test]
-async fn environment_roster_owners_share_the_single_room_capacity() {
-    let now = std::time::Instant::now();
-    let rooms = rooms(now);
-    let mut admissions = Vec::new();
-    for index in 0..31_u64 {
-        admissions.push(
-            rooms
-                .create_live(
-                    binding(index + 1),
-                    sequence(1),
-                    now + std::time::Duration::from_millis(index * 125),
-                    configuration(&[SeatControl::Human; 2], None),
-                )
-                .await
-                .unwrap(),
-        );
-    }
-    admissions.push(
-        rooms
-            .create_live(
-                binding(32),
-                sequence(1),
-                now + std::time::Duration::from_millis(31 * 125),
-                configuration(&[SeatControl::Human; 4], None),
-            )
-            .await
-            .unwrap(),
-    );
-    assert!(matches!(
-        rooms
-            .create_live(
-                binding(33),
-                sequence(1),
-                now + std::time::Duration::from_millis(32 * 125),
-                configuration(&[SeatControl::Human; 3], None),
-            )
-            .await,
-        Err(RoomError::CapacityReached)
-    ));
-}
-
 #[path = "live_registry_lair_activation_tests.rs"]
 mod lair_activation_tests;
 #[path = "live_registry_variable_board_tests.rs"]
 mod variable_board_tests;
+
+#[path = "live_registry_capacity_tests.rs"]
+mod capacity_tests;

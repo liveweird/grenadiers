@@ -7,6 +7,10 @@
 
 ## Completed 2026-10-31
 
+- **Spike pits:** [v1.2.0](../releases.md#v120--2026-10-31) adds configurable contact warnings,
+  raised damage/reset, shared-sheet phase art and guarded CPU/mob navigation. The live
+  [feature guide](../game/spike-pits.md) owns behavior and the release owns acceptance.
+
 - **CPU farming recovery:** [v1.0.6](../releases.md#v106--2026-10-31) replaces repeated
   Stop at an unplantable approach with certified physical progress, bounded exact-target
   retry and stale-route removal; preserves archived CPU24 behavior and all planting safety.

@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::{GenerationRecord, SeatId},
-    protocol::{Counter, v14, v15, v16, v17},
+    protocol::{Counter, v14, v15, v16, v17, v18},
 };
 
 pub(super) enum PreparedProjection {
@@ -26,6 +26,12 @@ pub(super) enum PreparedProjection {
         room: v17::RoomView,
         state_epoch: Option<Counter>,
         capture: Option<v17::ExpandedCapture>,
+        generation: Option<GenerationRecord>,
+    },
+    Spike {
+        room: v18::RoomView,
+        state_epoch: Option<Counter>,
+        capture: Option<v18::ExpandedCapture>,
         generation: Option<GenerationRecord>,
     },
 }
@@ -110,6 +116,25 @@ impl PreparedProjection {
                 },
                 v17::PersonalAdmission {
                     recipient: super::types::wire_seat_v17(seat),
+                    last_action_id,
+                    sequence,
+                    resume_token,
+                },
+            ),
+            Self::Spike {
+                room,
+                state_epoch,
+                capture,
+                generation,
+            } => v18::prepare_admission(
+                v18::AdmissionProjection {
+                    room,
+                    state_epoch: *state_epoch,
+                    capture: capture.as_ref(),
+                    generation: *generation,
+                },
+                v18::PersonalAdmission {
+                    recipient: super::types::wire_seat_v18(seat),
                     last_action_id,
                     sequence,
                     resume_token,

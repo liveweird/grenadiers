@@ -30,7 +30,7 @@ fn environment_observation(config: StormCloudConfig) -> Observation {
     .unwrap()
 }
 
-pub(super) fn custom_environment_observation(
+pub(crate) fn custom_environment_observation(
     cloud: crate::game::StormCloudView,
     actor_position: Position,
     remaining: u16,

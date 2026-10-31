@@ -20,6 +20,7 @@ pub(super) type StateKey = (
         Option<(u64, u64)>,
     )>,
     Vec<u32>,
+    Vec<Vec<(CellId, u8, Option<u64>, u64)>>,
 );
 
 pub(super) fn risk(
@@ -86,7 +87,12 @@ pub(super) fn state_key(node: &SearchNode) -> StateKey {
         })
         .collect();
     let assumptions = node.assumptions.iter().map(|id| id.0).collect();
-    (lanes, assumptions)
+    let pits = node
+        .lanes
+        .iter()
+        .map(|lane| lane.pits.state_key())
+        .collect();
+    (lanes, assumptions, pits)
 }
 
 const fn direction_key(direction: Direction) -> u8 {
@@ -117,7 +123,11 @@ mod tests {
 
     #[test]
     fn shallower_converging_wait_state_is_not_suppressed() {
-        let key = (vec![(1, 2, 0, 10, None, None, None, None)], Vec::new());
+        let key = (
+            vec![(1, 2, 0, 10, None, None, None, None)],
+            Vec::new(),
+            Vec::new(),
+        );
         let mut visited = BTreeMap::new();
         assert!(!dominated(&mut visited, key.clone(), 2));
         assert!(!dominated(&mut visited, key.clone(), 1));
@@ -129,9 +139,11 @@ mod tests {
         let first = (
             vec![(1, 2, 0, 10, None, None, None, Some((20, 40)))],
             Vec::new(),
+            Vec::new(),
         );
         let second = (
             vec![(1, 2, 0, 10, None, None, None, Some((30, 50)))],
+            Vec::new(),
             Vec::new(),
         );
         let mut visited = BTreeMap::new();

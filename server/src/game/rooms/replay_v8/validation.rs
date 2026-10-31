@@ -110,8 +110,12 @@ pub(super) fn validate_operation(header: &ReplayHeader, operation: Operation) ->
             } | ReplayAction::UpdateSettings {
                 settings_revision: 0,
                 ..
+            } | ReplayAction::UpdateSpikeSettings {
+                settings_revision: 0,
+                ..
             }
         )
+        || matches!(action, ReplayAction::UpdateSpikeSettings { .. })
     {
         return Err(());
     }

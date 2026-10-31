@@ -5,6 +5,7 @@ export type BoardName = 'small' | 'medium' | 'large'
 export type SceneName =
   | 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
   | 'actorOnly' | 'remoteActor' | 'lairOnly'
+  | 'spikeIdle' | 'spikeWarning' | 'spikeRaised'
 export type DeathAppearance = 'one' | 'two' | 'three' | 'four' | 'mob'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
 export type BloodLayerMode = 'subjectOnly' | 'poolOnly' | 'combined'

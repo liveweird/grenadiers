@@ -59,7 +59,23 @@ versions, navigation identities or CPU combinations are rejected before executio
 inspection includes the navigation policy even before a round starts. Lobby changes, later rounds
 and rematches preserve it. Recording/export remains test-only.
 
-Formats6/7/8/9 normalize their closed operations into the shared executor rather than duplicating
+Format10 is the private server-side accepted-operation profile for rules10, CPU26, navigation2
+and immutable spike-pit placement1. Its checked header binds the complete spike room
+configuration, lifecycle3, board-dependent generator3/4, simulation and environment randomness1,
+lair layout1, spike-pit layout1 and the private simulation-root derivation. Atomic lobby records
+retain base settings, clouds, respawn-lair tuning and spike-pit tuning together, including numeric
+durations while pits are disabled. Round markers still bind the private generation seed,
+assignment and generation record. The shared executor reconstructs admissions, reconnects,
+accepted human and CPU inputs, fences, settled departures, publications, interruptions and later
+rounds without rerunning CPU policy.
+
+Format10 does not widen format8 or format9: their readers remain closed to rules9 and their
+documented CPU identities, while the format10 reader requires CPU26 and rejects mixed provenance.
+The recorder, reader and runtime inspection remain under `cfg(test)` and add no production
+recording or export path. Truncated, incomplete, malformed, misordered, marker-inconsistent and
+cross-profile journals are rejected before being treated as exact replays.
+
+Formats6/7/8/9/10 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

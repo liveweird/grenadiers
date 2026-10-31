@@ -19,6 +19,7 @@ mod route_replay;
 mod route_time;
 mod route_types;
 mod safety;
+mod spike_pits;
 pub(crate) mod storm;
 mod types;
 mod validation;
@@ -29,6 +30,7 @@ pub use route_types::{
     MAX_ROUTE_EXPANSIONS, MAX_ROUTE_STEPS, RouteCertificate, RouteLane, RouteLimits, RouteRequest,
     RouteStep,
 };
+pub use spike_pits::SpikePitGuard;
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
 
 pub(crate) use bracelet_guard::BraceletGuard;
@@ -59,6 +61,9 @@ mod boundary_tests;
 #[cfg(test)]
 #[path = "route_tests.rs"]
 mod route_tests;
+
+#[cfg(test)]
+mod route_terminal_tests;
 
 #[cfg(test)]
 #[path = "motion_regression_tests.rs"]

@@ -1,6 +1,6 @@
 import type { GameClientState } from './clientTypes'
 import type { CpuDebugResponse, CpuDebugRow } from './cpuDebugTypes'
-import type { Cell, Seat } from '../v17/schema'
+import type { Cell, Seat } from '../v18/schema'
 
 export interface ProjectedCpuDebugRow {
   seat: Seat

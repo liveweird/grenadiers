@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
-import type { GameServerMessage, MobView } from '../../web/src/game/v17/schema'
+import type { GameServerMessage, MobView } from '../../web/src/game/v18/schema'
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import {
@@ -176,7 +176,7 @@ test('enabled lairs keep one mob each, render on both clients, reconnect and rem
 
       for (const game of group.games) {
         const running = latestSnapshot(game)!
-        expect(running.room).toMatchObject({ rulesVersion: 9, settings: { environment } })
+        expect(running.room).toMatchObject({ rulesVersion: 10, settings: { environment } })
         expect(running.state.stormCloud).toBeNull()
         expect(running.state.lairs.map(({ cell }) => cell)).toEqual([
           { column: 6, row: 6 }, { column: 8, row: 6 },

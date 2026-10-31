@@ -43,7 +43,7 @@ pub(super) fn validate_actors(
     arena: &ObservedArena,
     actors: &[ObservedActor],
 ) -> Result<(), ObservationError> {
-    if !(1..=9).contains(&rules_version)
+    if !(1..=10).contains(&rules_version)
         || (rules_version < 6 && actors.len() != 2)
         || (rules_version >= 6 && !(2..=4).contains(&actors.len()))
         || actors
@@ -114,10 +114,12 @@ pub(super) fn validate_bombs(
         return Ok(());
     };
     let max_bombs = crate::cpu::observed_bomb_capacity(rules_version);
-    if bombs.len() > max_bombs || rules_version == 9 && bombs.len() > arena.terrain.len() {
+    if bombs.len() > max_bombs
+        || matches!(rules_version, 9 | 10) && bombs.len() > arena.terrain.len()
+    {
         return Err(ObservationError::InvalidBombs);
     }
-    if rules_version == 9 {
+    if matches!(rules_version, 9 | 10) {
         validate_cells(arena, bombs, |bomb| bomb.cell)
             .map_err(|()| ObservationError::InvalidBombs)?;
     }

@@ -21,6 +21,8 @@ pub const MOB_UNITS_PER_SECOND: u16 = 1_536;
 mod damage;
 #[path = "lair_navigation.rs"]
 mod navigation;
+#[path = "lair_spike_navigation.rs"]
+mod spike_navigation;
 pub(crate) use navigation::{
     actor_position_contacts_mobs, actor_segment_contacts_mobs, actor_trace_contacts_mobs,
     traces_contact_actor,
@@ -167,18 +169,20 @@ impl LairState {
         world: &World,
         actors: &[Actor],
         target_order: &[usize],
+        spike_pits: Option<&BTreeSet<CellId>>,
         frozen: bool,
         tick: Tick,
     ) -> Vec<MovementTrace> {
         let danger = super::explosions::bomb_danger_cells(world);
-        let searches = navigation::target_searches(world, actors, target_order, tick, &danger);
+        let searches =
+            navigation::target_searches(world, actors, target_order, tick, &danger, spike_pits);
         self.mobs
             .iter_mut()
             .map(|mob| {
                 navigation::advance_mob(
                     mob,
                     world,
-                    &danger,
+                    navigation::NavigationHazards::new(&danger, spike_pits),
                     &searches,
                     frozen,
                     tick,

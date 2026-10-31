@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test'
 import { performance } from 'node:perf_hooks'
 import type {
   ActorView, Direction, GameServerMessage, Seat, V14ErrorCode as ErrorCode,
-} from '../../../web/src/game/v17/schema'
+} from '../../../web/src/game/v18/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const CONTROL_LIMIT = 256

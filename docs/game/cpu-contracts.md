@@ -25,7 +25,7 @@ validation; tests exercise accepted actions through the existing runtime and rep
 
 ## Information boundary
 
-The current-protocol adapter converts the already filtered v11 recipient projection. It must
+The current-protocol adapter converts the already filtered v18 recipient projection. It must
 never feed the policy `State::public_view` or reconstruct an authoritative `State`. A cloaked
 rival exposes only identity, seat and alive status. Invisible Bombs makes all bomb knowledge
 unavailable, including the observer's bombs; unavailable differs from an empty visible list.
@@ -323,3 +323,16 @@ Rules9 ordinary-slot counts exclude Contact mines, while forecast ownership/remo
 all visible mines. Distinct bomb cells bound observations to the board (at most 195). Work budgets
 and per-cell interval limits are unchanged: an excessively uncertain scene fails closed rather
 than accepting an unproved route. Archived observations and slot accounting remain closed.
+
+## Rules10 spike-pit profile
+
+CPU26 receives checked gameplay18 facts through `new_rules_v10`. The live
+`SPIKE_PITS_STANDARD` and `SPIKE_PITS_EASY` profiles model every public pit as a path-dependent
+clock: a route can trigger an idle pit, leave it and encounter its later warning or raised phase.
+Forecasts use the same contact geometry and checked phase transitions as simulation.
+
+Committed execution carries a guard for the observation tick, exact public pit configuration
+and every expected phase/countdown. A changed pit state withdraws authority and forces a fresh
+observation. Raised contact is rejected unless the recipient's published damage grace or active Shield
+still covers it. This does not introduce a separate immunity or expand the existing work,
+movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains archived unchanged.

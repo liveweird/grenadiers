@@ -1,7 +1,7 @@
 # World and movement
 
 `grenadiers_core::game` is a deterministic Rust simulation independent of browsers, networking,
-storage and wall clocks. Live rules9 supports two to four players on the three
+storage and wall clocks. Live rules10 supports two to four players on the three
 [board presets](board-sizes.md). [ADR 0002](../decisions/0002-deterministic-movement.md)
 explains fixed-point coordinates and turning.
 
@@ -9,7 +9,7 @@ explains fixed-point coordinates and turning.
 
 `Arena` separates hard terrain, soft blocks and spawn metadata. `World` adds owned bombs,
 pickups, Oil and hazards; `State` adds actors and round/environment state. Construction
-canonicalizes actors by seat and validates unique IDs, legal footprints and rules9 player
+canonicalizes actors by seat and validates unique IDs, legal footprints and rules10 player
 occupancy. Read-only domain accessors are separate from recipient-filtered wire snapshots.
 
 Coordinates increase east and south. Each tile spans 1,024 units; an actor footprint is

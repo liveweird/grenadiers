@@ -18,7 +18,7 @@ impl EventIndex {
         value: u8,
         rules_version: u8,
     ) -> Result<Self, super::super::InvalidScalar> {
-        let maximum = if rules_version == 9 {
+        let maximum = if matches!(rules_version, 9 | 10) {
             215
         } else {
             MAX_EVENT_INDEX

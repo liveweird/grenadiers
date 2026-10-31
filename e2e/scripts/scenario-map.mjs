@@ -1,5 +1,5 @@
 export const scenarioSpecMap = {
-  'scenarios/art-atlas.md': ['art-atlas-tests/art-atlas.spec.ts'],
+  'scenarios/art-atlas.md': ['art-atlas-tests/art-atlas.spec.ts', 'art-atlas-tests/spike-pits.spec.ts'],
   'scenarios/atlas-gameplay.md': ['atlas-gameplay-tests/atlas-gameplay.spec.ts'],
   'scenarios/audio.md': ['audio-tests/audio.spec.ts'],
   'scenarios/board-sizes.md': ['tests/board-sizes.spec.ts'],
@@ -45,6 +45,7 @@ export const scenarioSpecMap = {
   'scenarios/stopwatch.md': ['stopwatch-tests/stopwatch.spec.ts'],
   'scenarios/storm-cloud.md': ['tests/storm-cloud.spec.ts'],
   'scenarios/teleporter.md': ['teleporter-tests/teleporter.spec.ts'],
+  'scenarios/spike-pits.md': ['spike-pit-tests/spike-pits.spec.ts'],
   'scenarios/three-arena.md': ['three-arena-tests/three-arena.spec.ts'],
   'scenarios/terrain-pixels.md': ['terrain-pixel-tests/terrain.spec.ts'],
   'scenarios/turning.md': ['tests/turning.spec.ts'],

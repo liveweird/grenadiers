@@ -1,6 +1,6 @@
 # Gameplay v16 lair contract
 
-This is the retained historical rules8 contract. The active endpoint uses [gameplay17](protocol-v17.md).
+This is the retained historical rules8 contract. The active endpoint uses [gameplay18](protocol-v18.md).
 
 `api/gameplay-v16.schema.json`, `core::protocol::v16` and generated
 `web/src/game/v16/schema.ts` define the checked rules8 profile. The production WebSocket

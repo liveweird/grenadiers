@@ -5,7 +5,7 @@ use grenadiers_core::{
         GenerationRecord, MobNavigationPolicy, SeatId, SimulationSeed, State, StepReport,
         StormCloudConfig, Tick,
     },
-    protocol::{v14, v15, v16, v17},
+    protocol::{v14, v15, v16, v17, v18},
     room::{
         DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle,
         RosterParticipant,
@@ -40,6 +40,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) environment_cpu_publication: Option<Arc<v15::BoundPublication>>,
     pub(super) lair_cpu_publication: Option<Arc<v16::BoundPublication>>,
     pub(super) respawn_cpu_publication: Option<Arc<v17::BoundPublication>>,
+    pub(super) spike_cpu_publication: Option<Arc<v18::BoundPublication>>,
     pub(super) environment_profile: Option<EnvironmentProfile>,
     pub(super) mob_navigation: MobNavigationPolicy,
 }
@@ -51,18 +52,25 @@ pub(super) enum EnvironmentProfile {
         cloud: StormCloudConfig,
         tuning: grenadiers_core::room::LairTuning,
     },
+    #[cfg_attr(not(test), allow(dead_code))]
     RespawnV9 {
         cloud: StormCloudConfig,
         tuning: grenadiers_core::room::RespawnLairTuning,
+    },
+    SpikeV10 {
+        cloud: StormCloudConfig,
+        lairs: grenadiers_core::room::RespawnLairTuning,
+        spike_pits: grenadiers_core::room::SpikePitTuning,
     },
 }
 
 impl EnvironmentProfile {
     pub(super) const fn cloud(self) -> StormCloudConfig {
         match self {
-            Self::StormV7(cloud) | Self::LairsV8 { cloud, .. } | Self::RespawnV9 { cloud, .. } => {
-                cloud
-            }
+            Self::StormV7(cloud)
+            | Self::LairsV8 { cloud, .. }
+            | Self::RespawnV9 { cloud, .. }
+            | Self::SpikeV10 { cloud, .. } => cloud,
         }
     }
 }
@@ -97,6 +105,7 @@ impl RosterRuntime {
             environment_cpu_publication: None,
             lair_cpu_publication: None,
             respawn_cpu_publication: None,
+            spike_cpu_publication: None,
             environment_profile: None,
             mob_navigation: MobNavigationPolicy::LegacyV1,
         })
@@ -385,6 +394,7 @@ impl RosterRuntime {
         self.environment_cpu_publication = None;
         self.lair_cpu_publication = None;
         self.respawn_cpu_publication = None;
+        self.spike_cpu_publication = None;
         self.inputs.reset_round();
     }
 }

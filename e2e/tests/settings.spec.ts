@@ -29,6 +29,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     const defaultEnvironment = {
       stormCloud: true,
       lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
     }
     expect(latestRoom(games[0])?.settings.environment).toEqual(defaultEnvironment)
     expect(latestRoom(games[0])?.configuration.environment).toEqual(defaultEnvironment)
@@ -78,6 +79,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       environment: {
         stormCloud: false,
         lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 },
       },
     }
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
@@ -85,6 +87,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       .toEqual({
         stormCloud: false,
         lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 },
       })))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.seats[1]?.ready).toBe(false)))
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')
@@ -93,7 +96,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
     for (const game of games) {
-      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 9, settings: expected })
+      expect(latestSnapshot(game)!.room).toMatchObject({ rulesVersion: 10, settings: expected })
       expect(latestSnapshot(game)!.state.actors.map((actor) => actor.type === 'visible' ? actor.speedLevel : null))
         .toEqual([4, 4])
       expect(latestSnapshot(game)!.state.stormCloud).toBeNull()

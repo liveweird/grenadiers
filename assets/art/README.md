@@ -30,8 +30,8 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×2128 authoring sheet has 190 physical cells: 186 assigned entries (182 baseline
-drawings and four blank reserved entries), plus four unassigned transparent cells. Cells are 112×112
+The 1120×2128 authoring sheet has 190 physical cells: 189 assigned entries (185 baseline
+drawings and four blank reserved entries), plus one unassigned transparent cell. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
 before a source revision can use them.
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-182 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+185 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -132,6 +132,13 @@ node e2e/scripts/art-atlas-blood-pool.mjs \
 ```
 
 Artists may repaint its 48×48 frame at slot 185, keeping the drawing centered and alpha binary.
+
+The paired spike-pit extension appends three 48×48 terrain frames at slots 186–188:
+`terrain.spikePit.idle`, `terrain.spikePit.warning` and `terrain.spikePit.raised`. Their stable
+IDs and rectangles correspond directly to the authoritative gameplay phases. All preceding
+assigned pixels, the four historical reserved entries and the final unassigned cell remain
+unchanged. The repository append helper is used by the atlas acceptance scripts; ongoing artist
+work continues through the normal template/export commands above.
 
 The owner-supplied retro-texture revision replaces all ten 3D material maps with tan sandstone,
 gray masonry and red brick patterns. All other sprites and the paired manifest remain unchanged.

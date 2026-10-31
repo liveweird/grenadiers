@@ -71,6 +71,15 @@ impl State {
             .map(|seat| seat.index())
             .collect();
         let track_spike_traces = self.spike_pits.is_some();
+        let spike_pit_navigation = (self.rules.version() >= 10
+            && self.rules.mob_navigation_policy() == crate::game::MobNavigationPolicy::EscapeV2)
+            .then(|| {
+                self.spike_pits
+                    .as_ref()
+                    .into_iter()
+                    .flat_map(|pits| pits.cells())
+                    .collect::<BTreeSet<_>>()
+            });
         let (mob_ids, traces, mine_targets) = {
             let lairs = self.lairs.as_mut().expect("checked above");
             lairs
@@ -78,7 +87,14 @@ impl State {
                 .map_err(|()| StepError::LairTimerOverflow)?;
             let mob_ids = track_spike_traces
                 .then(|| lairs.mobs().iter().map(|mob| mob.id).collect::<Vec<_>>());
-            let traces = lairs.advance(&self.world, &self.actors, &target_order, frozen, tick);
+            let traces = lairs.advance(
+                &self.world,
+                &self.actors,
+                &target_order,
+                spike_pit_navigation.as_ref(),
+                frozen,
+                tick,
+            );
             let mine_targets = lairs.mine_contacts(&self.world, &traces);
             (mob_ids, traces, mine_targets)
         };
@@ -232,3 +248,7 @@ impl State {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "lair_spike_navigation_tests.rs"]
+mod spike_navigation_tests;

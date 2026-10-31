@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v17/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v18/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -150,7 +150,7 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 17 })
+  socket.message({ type: 'authenticated', protocolVersion: 18 })
   return socket
 }
 
@@ -168,8 +168,9 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
   return {
     roomId, roomCode: 'ABCDEFGH', roundId, revision, tick: revision,
     configuration: { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } },
-    rulesVersion: 9, mapId: 'generated_v2', roundNumber,
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } },
+    rulesVersion: 10, mapId: 'generated_v2', roundNumber,
     scores: [{ seat: 'one', wins: terminalWinner === 'one' ? 1 : 0 },
       { seat: 'two', wins: terminalWinner === 'two' ? 1 : 0 }], lastRound: completed,
     settings: {
@@ -179,7 +180,8 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
         'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak',
         'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',
         'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1, settingsEditor: 'one',
@@ -219,7 +221,7 @@ function gameState(physicalTick: number, alive = true): GameState {
       { id: 0, cell: { column: 6, row: 6 }, spawnRemainingTicks: 600, livingMobs: 0 },
       { id: 1, cell: { column: 8, row: 6 }, spawnRemainingTicks: 600, livingMobs: 0 },
     ],
-    mobs: [],
+    spikePits: [], mobs: [],
   }
 }
 

@@ -1,14 +1,14 @@
-# Gameplay v17: respawn lairs and solid players
+# Gameplay v17 (historical): respawn lairs and solid players
 
-Gameplay17 is the live contract on `/api/v1/game/ws`. Its source is
+Gameplay17 is the retained historical respawn-lair contract. Its source is
 [`api/gameplay-v17.schema.json`](../../api/gameplay-v17.schema.json), Rust
-`protocol::v17` and generated `web/src/game/v17/schema.ts`. Authentication accepts17;
-older gameplay clients receive `incompatibleProtocol` and must refresh the paired web/server
-application. Realtime/session API versions are independent.
+`protocol::v17` and generated `web/src/game/v17/schema.ts`. The live server now accepts
+[gameplay18](protocol-v18.md); v17 is rejected before credential claim and remains available for
+compatibility tests and archived replay identities. Realtime/session API versions are independent.
 
 ## Profile and settings
 
-The current room binds rules9 physics, CPU25 and private mob navigation2, with roster lifecycle3, lair layout1 and unchanged simulation/environment
+The historical v17 room binds rules9 physics, CPU25 and private mob navigation2, with roster lifecycle3, lair layout1 and unchanged simulation/environment
 randomness versions. Generator3 covers 15×13; generator4 covers 13×11 and11×9.
 
 Environment settings retain `stormCloud` and `lairs { enabled, spawnSeconds, maxLivingMobs }`.

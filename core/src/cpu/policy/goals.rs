@@ -145,7 +145,11 @@ pub(super) fn search_map(
     work: &mut WorkBudget,
 ) -> Option<SearchMap> {
     let parts = observation.parts();
-    let actor_scans = if parts.rules.version == 9 { 2 } else { 1 };
+    let actor_scans = if matches!(parts.rules.version, 9 | 10) {
+        2
+    } else {
+        1
+    };
     let actor_scan = parts.actors.len().checked_mul(actor_scans)?;
     let scan_work = parts
         .pickups
@@ -192,14 +196,14 @@ pub(super) fn search_map(
             && let Some(cell) = rival.position.cell()
         {
             let index = cell_index(observation, cell)?;
-            if parts.rules.version == 9 {
+            if matches!(parts.rules.version, 9 | 10) {
                 map.forbidden[index] = true;
             } else {
                 map.add_goal(index, 1);
             }
         }
     }
-    if parts.rules.version == 9 {
+    if matches!(parts.rules.version, 9 | 10) {
         for observed in &parts.actors {
             if let ObservedActor::Visible(rival) = observed
                 && rival.seat != parts.recipient

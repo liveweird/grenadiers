@@ -1,12 +1,12 @@
 # Lair and mob simulation
 
-Live rules9/gameplay17 gives each lair exactly one living mob. A lair waits for its mob to die,
-then starts a fresh respawn delay. See [the wire contract](protocol-v17.md) and
+Live rules10/gameplay18 gives each lair exactly one living mob. A lair waits for its mob to die,
+then starts a fresh respawn delay. See [the wire contract](protocol-v18.md) and
 [CPU boundaries](multiplayer-cpu.md#lair-profile-boundaries).
 
 ## Configuration and lifecycle
 
-`RulesConfig::environment_v9(settings, clouds, RespawnLairConfig)` accepts validated
+`RulesConfig::environment_v10(settings, clouds, RespawnLairConfig, SpikePitConfig)` accepts validated
 `RespawnLairSettings::new(spawn_seconds)`: 5–60 seconds, default ten. Capacity is fixed at one;
 the lobby edits only **Respawn delay**. Disabled tuning retains its delay for re-enabling.
 
@@ -33,6 +33,10 @@ exit from a dangerous origin instead of reversing back into it on the next updat
 from newly threatened destinations toward a safe center; if that center becomes dangerous,
 it rechecks an alternative exit and preserves exact center alignment when changing direction.
 
+Under rules10, ordinary mob routing treats spike-pit cells as unavailable. A mob already
+overlapping a pit may move outward, but this escape exception does not authorize deliberate
+crossings. Raised-pit death schedules exactly one normal replacement delay.
+
 Mobs do not block players or blasts, plant bombs, collect items, use equipment, drop rewards or
 affect scores. Swept player/mob contact uses Shield, Heart/grace and elimination rules.
 Bracelet travel counts before actions and pickups; teleportation checks destinations without
@@ -44,16 +48,16 @@ Checked timer/ID failures restore the complete tick, including simulation random
 
 ## Observations and compatibility
 
-`State::lair_statuses()` exposes rules9 cells, living counts and optional absolute deadlines:
-`None` while occupied, `Some(deadline)` while waiting. Gameplay17 publishes the corresponding
+`State::lair_statuses()` exposes rules10 cells, living counts and optional absolute deadlines:
+`None` while occupied, `Some(deadline)` while waiting. Gameplay18 publishes the corresponding
 `spawnRemainingTicks`: null while occupied, otherwise 0–delay. Zero means eligible but possibly
 obstructed. `State::mobs()` omits pursuit targets, paths and private thaw deadlines.
 
 Rules8 retains its periodic 1–8-mob lifecycle and finite `State::lairs()` view for historical
-contracts/replay7. Rules9 uses the separate view. Mob AI has its own immutable identity: all existing rules
+contracts/replay7. Rules9 and rules10 use the separate view. Mob AI has its own immutable identity: all existing rules
 constructors and replay8 retain navigation1; live construction explicitly selects navigation2,
 bound by private replay9. Settings changes, rounds and rematches preserve that selection.
-Both policies share the same speed, collision/contact and recipient facts; gameplay17 carries
+Both policies share the same speed, collision/contact and recipient facts; gameplay18 carries
 no hidden navigation data. Production replay recording remains disabled. The artist sheet and mob/lair sprites are unchanged.
 
 The 3D arena retains the dedicated `terrain.lair` doorway sprite upright on the front of a

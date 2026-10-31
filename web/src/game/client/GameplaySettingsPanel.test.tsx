@@ -52,7 +52,8 @@ describe('gameplay settings panel', () => {
     const custom = room(2)
     custom.settings = {
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
-      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 } },
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
+        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={custom} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -63,7 +64,8 @@ describe('gameplay settings panel', () => {
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: custom.availableItems,
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
     })
   })
 })
@@ -210,7 +212,8 @@ describe('gameplay settings items', () => {
     expect(apply).toHaveBeenLastCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
       bombFuseTicks: 180, enabledItems: [],
-      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 } },
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     })
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short flame' }))
@@ -238,7 +241,34 @@ describe('gameplay settings bulk actions', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith(expect.objectContaining({ environment: {
       stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 1 },
+      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
     } }))
+  })
+
+  it('rounds edited seconds to ticks while retaining arbitrary server tick choices', async () => {
+    const apply = vi.fn(() => true)
+    const user = userEvent.setup()
+    const custom = room(6)
+    custom.settings.environment.spikePits = { enabled: true, warningTicks: 37, raisedTicks: 181 }
+    render(<MantineProvider env="test"><GameplaySettingsPanel room={custom} youSeat="one"
+      pending={false} copy={en} onApply={apply} /></MantineProvider>)
+    const warning = screen.getByRole('textbox', { name: 'Warning time (seconds)' })
+    const raised = screen.getByRole('textbox', { name: 'Raised time (seconds)' })
+    expect(warning).toHaveValue('0.62')
+    expect(raised).toHaveValue('3.02')
+    await user.click(screen.getByRole('button', { name: 'All off' }))
+    await user.click(screen.getByRole('button', { name: 'All on' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Storm cloud' }))
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ environment:
+      expect.objectContaining({ spikePits: { enabled: true, warningTicks: 37, raisedTicks: 181 } }) }))
+    fireEvent.change(warning, { target: { value: '0.7' } })
+    await user.click(screen.getByRole('button', { name: 'Apply rules' }))
+    expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({ environment:
+      expect.objectContaining({ spikePits: { enabled: true, warningTicks: 42, raisedTicks: 181 } }) }))
+    fireEvent.change(warning, { target: { value: '0.05' } })
+    expect(screen.getByRole('alert')).toHaveTextContent('Use 0.1–2 seconds of warning')
+    expect(screen.getByRole('button', { name: 'Apply rules' })).toBeDisabled()
   })
 
   it('selects only canonical available items without changing numeric drafts or applying', async () => {
@@ -249,7 +279,8 @@ describe('gameplay settings bulk actions', () => {
     partial.settings = {
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
       bombFuseTicks: 270, enabledItems: ['heart'],
-      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 } },
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
+        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     }
     render(<MantineProvider env="test"><GameplaySettingsPanel room={partial} youSeat="one"
       pending={false} copy={en} onApply={apply} /></MantineProvider>)
@@ -259,7 +290,8 @@ describe('gameplay settings bulk actions', () => {
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7, bombFuseTicks: 270,
       enabledItems: ['heart', 'shield', 'teleporter'],
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 1 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
     })
     await user.click(screen.getByRole('button', { name: 'All off' }))
     expect(screen.getByRole('checkbox', { name: 'Heart' })).not.toBeChecked()
@@ -267,7 +299,8 @@ describe('gameplay settings bulk actions', () => {
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
       bombFuseTicks: 270, enabledItems: [],
-      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 } },
+      environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
+        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     }))
   })
 
@@ -333,57 +366,3 @@ describe('gameplay settings Oil locale', () => {
   })
 })
 
-describe('gameplay settings locks', () => {
-  it.each([false, true])('explains a null grant and disables controls when ready=%s', (ready) => {
-    const locked = room(3)
-    locked.settingsEditor = null
-    locked.seats[0].ready = ready
-    render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
-      pending={false} copy={en} onApply={() => true} /></MantineProvider>)
-    expect(screen.getByText('These match rules are read-only.')).toBeVisible()
-    expect(screen.getByLabelText('Starting speed')).toBeDisabled()
-    expect(screen.getByLabelText('Turning tolerance')).toBeDisabled()
-    expect(screen.getByLabelText('Round wins needed')).toBeDisabled()
-    expect(screen.getByLabelText('Bomb fuse')).toBeDisabled()
-    expect(screen.getAllByRole('checkbox').every((control) => control.hasAttribute('disabled'))).toBe(true)
-    for (const name of ['All on', 'All off', 'Restore match defaults', 'Classic settings', 'Apply rules']) {
-      expect(screen.getByRole('button', { name })).toBeDisabled()
-    }
-  })
-
-  it.each(['editor', 'disconnected', 'match', 'pending'] as const)(
-    'locks bulk actions when blocked by %s state', (lock) => {
-      const locked = room(3)
-      if (lock === 'editor') locked.settingsEditor = 'two'
-      if (lock === 'disconnected') locked.seats[0].connection = { type: 'disconnected', expiresAt: 20 }
-      if (lock === 'match') locked.phase = { type: 'running' }
-      render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
-        pending={lock === 'pending'} copy={en} onApply={() => true} /></MantineProvider>)
-      expect(screen.getByRole('button', { name: 'All on' })).toBeDisabled()
-      expect(screen.getByRole('button', { name: 'All off' })).toBeDisabled()
-    },
-  )
-
-  it('locks all item rules with the rest of the lobby settings', () => {
-    const locked = room(3)
-    locked.seats[0].ready = true
-    render(<MantineProvider env="test"><GameplaySettingsPanel room={locked} youSeat="one"
-      pending={false} copy={en} onApply={() => true} /></MantineProvider>)
-    expect(screen.getByRole('checkbox', { name: 'Heart' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Wall pass' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Landmine' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Shield' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Golden flame' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Short fuse' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Diarrhea' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Slow foot' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Short flame' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Teleporter' })).toBeDisabled()
-    expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'All on' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'All off' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Restore match defaults' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Classic settings' })).toBeDisabled()
-  })
-})

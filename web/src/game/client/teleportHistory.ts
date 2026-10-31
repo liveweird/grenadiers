@@ -1,4 +1,4 @@
-import type { GameState, RoomView, Snapshot } from '../v17/schema'
+import type { GameState, RoomView, Snapshot } from '../v18/schema'
 
 type Visible = Extract<GameState['actors'][number], { type: 'visible' }>
 function changedMarker(prior: Visible, actor: Visible): number | null | false {

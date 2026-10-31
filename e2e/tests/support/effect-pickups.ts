@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { GameServerMessage } from '../../../web/src/game/v17/schema'
+import type { GameServerMessage } from '../../../web/src/game/v18/schema'
 import { latestSnapshot, visibleActor, type ObservedGame } from './duel'
 
 export type EffectPickupKind = 'goldenFlame' | 'shortFuse' | 'shortFlame'

@@ -6,6 +6,7 @@ import { FinishPass } from './finishPass'
 import { readSceneTiming } from './sceneStore'
 import { Deaths } from './Deaths'
 import { BloodPools } from './BloodPools'
+import { SpikePits } from './SpikePits'
 
 interface ArenaSceneProps {
   store: ArenaSceneStore
@@ -19,6 +20,8 @@ export function ArenaScene({ store, atlas }: ArenaSceneProps) {
   if (!revision.snapshot || !timing) return null
   return <>
     <ArenaWorld snapshot={revision.snapshot} atlas={atlas}>
+      <SpikePits pits={revision.snapshot.state.spikePits} atlas={atlas}
+        reducedMotion={revision.reducedMotion} />
       <Entities
         snapshot={revision.snapshot}
         atlas={atlas}

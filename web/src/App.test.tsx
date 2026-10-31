@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v17/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v18/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -55,12 +55,13 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     roomId,
     configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } },
     roomCode: 'ABCDEFGH',
     roundId: 1,
     revision,
     tick: revision,
-    rulesVersion: 9,
+    rulesVersion: 10,
     mapId: 'generated_v2',
     roundNumber: ['running', 'result', 'matchResult'].includes(phase.type) ? 1 : 0,
     scores: [{ seat: 'one', wins: 0 }, { seat: 'two', wins: phase.type === 'result' ? 1 : 0 }],
@@ -71,7 +72,8 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1,
@@ -120,6 +122,7 @@ function snapshot(revision: number, phase: RoomPhase = { type: 'running' }): Sna
         { id: 0, cell: { column: 6, row: 6 }, spawnRemainingTicks: 600, livingMobs: 0 },
         { id: 1, cell: { column: 8, row: 6 }, spawnRemainingTicks: 600, livingMobs: 0 },
       ],
+      spikePits: [],
       mobs: [],
     },
     events: [],
@@ -146,8 +149,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 17, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 17 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 18, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 18 }))
   return socket
 }
 
@@ -172,7 +175,8 @@ describe('App game flow', () => {
       type: 'createRoom', sequence: 1,
       configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
         board: { width: 15, height: 13 },
-        environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } },
+        environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+          spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } },
     })
 
     act(() => admit(socket, room(1)))

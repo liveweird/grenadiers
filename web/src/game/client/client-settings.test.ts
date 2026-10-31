@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { GameSettings } from '../v17/schema'
+import type { GameSettings } from '../v18/schema'
 import { admitted, authenticate, harness, messages, room, SocketStub } from './testSupport'
 
 const changed = {
@@ -8,7 +8,8 @@ const changed = {
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
   enabledItems: [],
-  environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 } },
+  environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
+    spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
 } satisfies GameSettings
 
 describe('v12 authoritative gameplay settings', () => {

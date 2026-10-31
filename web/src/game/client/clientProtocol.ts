@@ -1,6 +1,6 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v17/schema'
-import { validateGameplayV17ServerMessage } from '../v17/validation'
+  RoomView, Seat, V14ErrorCode } from '../v18/schema'
+import { validateGameplayV18ServerMessage } from '../v18/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -48,9 +48,11 @@ export function createConfiguration(intent: ConfigurationIntent): RoomConfigurat
   const difficulty = intent.mode?.type === 'solo' ? intent.mode.difficulty : null
   return difficulty === null
     ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } }
     : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } }
 }
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length
@@ -83,7 +85,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV17ServerMessage(value)
+  const result = validateGameplayV18ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 
@@ -121,6 +123,9 @@ export function sameGameSettings(left: GameSettings, right: GameSettings): boole
     && left.environment.lairs.enabled === right.environment.lairs.enabled
     && left.environment.lairs.spawnSeconds === right.environment.lairs.spawnSeconds
     && left.environment.lairs.maxLivingMobs === right.environment.lairs.maxLivingMobs
+    && left.environment.spikePits.enabled === right.environment.spikePits.enabled
+    && left.environment.spikePits.warningTicks === right.environment.spikePits.warningTicks
+    && left.environment.spikePits.raisedTicks === right.environment.spikePits.raisedTicks
 }
 
 function validBaseSettings(settings: GameSettings): boolean {
@@ -138,13 +143,21 @@ function validLairSettings(lairs: GameSettings['environment']['lairs']): boolean
     && lairs.maxLivingMobs === 1
 }
 
+function validSpikePitSettings(pits: GameSettings['environment']['spikePits']): boolean {
+  return Object.keys(pits ?? {}).length === 3 && typeof pits?.enabled === 'boolean'
+    && Number.isInteger(pits.warningTicks) && pits.warningTicks >= 6 && pits.warningTicks <= 120
+    && Number.isInteger(pits.raisedTicks) && pits.raisedTicks >= 60 && pits.raisedTicks <= 600
+}
+
 export function validGameSettings(settings: GameSettings): boolean {
   const environment = settings.environment
   const lairs = environment?.lairs
+  const spikePits = environment?.spikePits
   return Object.keys(settings).length === 6
-    && Object.keys(environment ?? {}).length === 2
+    && Object.keys(environment ?? {}).length === 3
     && typeof environment?.stormCloud === 'boolean'
-    && lairs !== undefined && validBaseSettings(settings) && validLairSettings(lairs)
+    && lairs !== undefined && spikePits !== undefined && validBaseSettings(settings)
+    && validLairSettings(lairs) && validSpikePitSettings(spikePits)
 }
 
 export function settlesPendingSettings(

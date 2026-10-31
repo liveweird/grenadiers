@@ -15,11 +15,11 @@ const UNITS_PER_CELL = 1024
 const HALF_FOOTPRINT = 320
 const cellKey = ({ column, row }: { column: number; row: number }): string => `${column},${row}`
 
-function supportedRoomProfile(room: RoomView): boolean {
+function supportedRoomProfile(room: RoomView, rulesVersion: number): boolean {
   const { width, height } = room.configuration.board
   return ((width === 11 && height === 9) || (width === 13 && height === 11)
       || (width === 15 && height === 13))
-    && room.rulesVersion === 9
+    && room.rulesVersion === rulesVersion
     && room.configuration.controllers.length >= 2 && room.configuration.controllers.length <= 4
     && room.configuration.environment.stormCloud === room.settings.environment.stormCloud
 }
@@ -264,13 +264,15 @@ function stateBindingError(message: Extract<GameServerMessage,
     ? null : 'invalidStateBinding'
 }
 
-export function baseSemanticError(message: GameServerMessage): BaseSemanticError | null {
+export function baseSemanticErrorForRules(
+  message: GameServerMessage, rulesVersion: number,
+): BaseSemanticError | null {
   if (message.type !== 'admitted' && message.type !== 'roomState' && message.type !== 'snapshot') return null
   const { room } = message
   const metadata = metadataError(room)
   if (metadata) return metadata
   if (lairEnvironmentMismatch(room)) return 'invalidLairEnvironment'
-  if (!supportedRoomProfile(room)) return 'unsupportedProfile'
+  if (!supportedRoomProfile(room, rulesVersion)) return 'unsupportedProfile'
   const lifecycle = roomLifecycleSemanticError(room)
   if (lifecycle) return lifecycle
   const binding = stateBindingError(message)
@@ -288,6 +290,10 @@ export function baseSemanticError(message: GameServerMessage): BaseSemanticError
   }
   return state && worldError(state, room, events)
     || expandedProfileSemanticErrorFor(room, state, events, ITEM_IDS, {
-      allowPausedTimed: true, rulesVersions: [9],
+      allowPausedTimed: true, rulesVersions: [rulesVersion],
     })
+}
+
+export function baseSemanticError(message: GameServerMessage): BaseSemanticError | null {
+  return baseSemanticErrorForRules(message, 9)
 }

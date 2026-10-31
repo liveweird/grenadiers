@@ -2,7 +2,7 @@ import { Button, Checkbox, Group, NativeSelect, NumberInput, SimpleGrid, Text, T
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v17/schema'
+import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v18/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
@@ -13,6 +13,7 @@ const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
 } satisfies Omit<GameSettings, 'enabledItems' | 'environment'>
 const DEFAULT_LAIRS = { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } as const
+const DEFAULT_SPIKE_PITS = { enabled: true, warningTicks: 36, raisedTicks: 180 } as const
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
 const turnText = (units: number): string => {
@@ -22,6 +23,12 @@ const validLairs = (lairs: GameSettings['environment']['lairs']): boolean => {
   return Number.isInteger(lairs.spawnSeconds) && lairs.spawnSeconds >= 5 && lairs.spawnSeconds <= 60
     && lairs.maxLivingMobs === 1
 }
+const validSpikePits = (pits: GameSettings['environment']['spikePits']): boolean => {
+  return Number.isInteger(pits.warningTicks) && pits.warningTicks >= 6 && pits.warningTicks <= 120
+    && Number.isInteger(pits.raisedTicks) && pits.raisedTicks >= 60 && pits.raisedTicks <= 600
+}
+const ticksToSeconds = (ticks: number): number => Number((ticks / 60).toFixed(2))
+const secondsToTicks = (seconds: string | number): number => Math.round(Number(seconds) * 60)
 
 interface Props {
   room: RoomView
@@ -71,6 +78,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
   const controlsDisabled = !editable || pending
   const dirty = useMemo(() => !sameGameSettings(draft, room.settings), [draft, room.settings])
   const lairsValid = validLairs(draft.environment.lairs)
+  const spikePitsValid = validSpikePits(draft.environment.spikePits)
   const update = <K extends keyof GameSettings>(field: K, value: GameSettings[K]): void => {
     setDraft((current) => ({ ...current, [field]: value }))
   }
@@ -147,27 +155,53 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
             })} />
         </SimpleGrid>
       </div>
+      <div className="item-setting">
+        <Checkbox label={copy.settings.spikePits} checked={draft.environment.spikePits.enabled}
+          disabled={controlsDisabled}
+          onChange={(event) => update('environment', { ...draft.environment,
+            spikePits: { ...draft.environment.spikePits, enabled: event.currentTarget.checked } })} />
+        <Text size="xs">{copy.settings.spikePitsDescription}</Text>
+        <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
+          <NumberInput label={copy.settings.spikePitWarningSeconds} min={0.1} max={2} step={0.1}
+            required decimalScale={2} clampBehavior="none" disabled={controlsDisabled}
+            value={ticksToSeconds(draft.environment.spikePits.warningTicks)}
+            onChange={(value) => update('environment', { ...draft.environment,
+              spikePits: { ...draft.environment.spikePits, warningTicks: secondsToTicks(value) },
+            })} />
+          <NumberInput label={copy.settings.spikePitRaisedSeconds} min={1} max={10} step={0.1}
+            required decimalScale={2} clampBehavior="none" disabled={controlsDisabled}
+            value={ticksToSeconds(draft.environment.spikePits.raisedTicks)}
+            onChange={(value) => update('environment', { ...draft.environment,
+              spikePits: { ...draft.environment.spikePits, raisedTicks: secondsToTicks(value) },
+            })} />
+        </SimpleGrid>
+        {!spikePitsValid && <Text role="alert" size="xs" c="red">{copy.settings.spikePitsInvalid}</Text>}
+      </div>
       {dirty && <Text className="settings-lock" size="sm">{copy.settings.unapplied}</Text>}
       {lockText && <Text className="settings-lock" size="sm">{lockText}</Text>}
       <Group gap="sm">
         <Button size="sm" variant="outline" disabled={controlsDisabled}
           onClick={() => setDraft((current) => ({ ...current, enabledItems: availableItems,
             environment: { ...current.environment, stormCloud: true,
-              lairs: { ...current.environment.lairs, enabled: true } } }))}>{copy.settings.allOn}</Button>
+              lairs: { ...current.environment.lairs, enabled: true },
+              spikePits: { ...current.environment.spikePits, enabled: true } } }))}>{copy.settings.allOn}</Button>
         <Button size="sm" variant="outline" disabled={controlsDisabled}
           onClick={() => setDraft((current) => ({ ...current, enabledItems: [],
             environment: { ...current.environment, stormCloud: false,
-              lairs: { ...current.environment.lairs, enabled: false } } }))}>{copy.settings.allOff}</Button>
+              lairs: { ...current.environment.lairs, enabled: false },
+              spikePits: { ...current.environment.spikePits, enabled: false } } }))}>{copy.settings.allOff}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={controlsDisabled}
           onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: availableItems,
-            environment: { stormCloud: true, lairs: { ...DEFAULT_LAIRS } } })}>
+            environment: { stormCloud: true, lairs: { ...DEFAULT_LAIRS },
+              spikePits: { ...DEFAULT_SPIKE_PITS } } })}>
           {copy.settings.restore}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={controlsDisabled}
           onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: [],
-            environment: { stormCloud: false, lairs: { ...DEFAULT_LAIRS, enabled: false } } })}>
+            environment: { stormCloud: false, lairs: { ...DEFAULT_LAIRS, enabled: false },
+              spikePits: { ...DEFAULT_SPIKE_PITS, enabled: false } } })}>
           {copy.settings.classic}</Button>
         <Button size="sm" variant="outline" loading={pending}
-          disabled={!editable || !dirty || !lairsValid || pending}
+          disabled={!editable || !dirty || !lairsValid || !spikePitsValid || pending}
           onClick={() => onApply(draft)}>{copy.settings.apply}</Button>
       </Group>
     </section>

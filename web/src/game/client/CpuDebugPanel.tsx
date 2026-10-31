@@ -3,7 +3,7 @@ import { format, useGameCopy, type GameCopy } from './locale'
 import { projectCpuDebug } from './cpuDebugProjection'
 import type { AvailableCpuDebugRow } from './cpuDebugTypes'
 import type { CpuDebugState } from './useCpuDebug'
-import type { PickupKind } from '../v17/schema'
+import type { PickupKind } from '../v18/schema'
 import { useState } from 'react'
 
 function cell(copy: GameCopy, value: { column: number; row: number }): string {

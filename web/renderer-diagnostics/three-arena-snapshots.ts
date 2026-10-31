@@ -8,8 +8,14 @@ export type BoardName = 'small' | 'medium' | 'large'
 export type SceneName =
   | 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
   | 'actorOnly' | 'remoteActor' | 'lairOnly'
+  | 'spikeIdle' | 'spikeWarning' | 'spikeRaised'
 export type DeathOverlay = 'none' | 'flame' | 'burningOil'
 export type BloodLayerMode = 'subjectOnly' | 'poolOnly' | 'combined'
+type SpikeScene = 'spikeIdle' | 'spikeWarning' | 'spikeRaised'
+
+const SPIKE_PHASES: Record<SpikeScene, 'idle' | 'warning' | 'raised'> = {
+  spikeIdle: 'idle', spikeWarning: 'warning', spikeRaised: 'raised',
+}
 
 const BOARDS = {
   small: { width: 11 as const, height: 9 as const },
@@ -49,6 +55,7 @@ function base(board: BoardName, roomId = 'three-arena-static-room'): SnapshotMes
   snapshot.state.oilBarrels = []
   snapshot.state.stormCloud = null
   snapshot.state.lairs = []
+  snapshot.state.spikePits = []
   snapshot.state.mobs = []
   return snapshot
 }
@@ -126,6 +133,18 @@ function showcase(snapshot: SnapshotMessage): void {
   ]
 }
 
+function applySpikePitScene(snapshot: SnapshotMessage, scene: SceneName): void {
+  if (!(scene in SPIKE_PHASES)) return
+  const phase = SPIKE_PHASES[scene as SpikeScene]
+  const centerColumn = Math.floor(snapshot.state.arena.width / 2)
+  const centerRow = Math.floor(snapshot.state.arena.height / 2)
+  const offset = centerColumn % 2 === 0 ? 1 : 2
+  snapshot.state.spikePits = [centerColumn - offset, centerColumn + offset].map((column) => ({
+    cell: { column, row: centerRow }, phase,
+    remainingTicks: phase === 'idle' ? 0 : phase === 'warning' ? 36 : 180,
+  }))
+}
+
 export function threeArenaSnapshot(board: BoardName, scene: SceneName): SnapshotMessage {
   const snapshot = base(board, scene === 'newRoom' ? 'three-arena-new-room' : undefined)
   if (scene === 'actorBomb') actorBombScene(snapshot)
@@ -141,6 +160,7 @@ export function threeArenaSnapshot(board: BoardName, scene: SceneName): Snapshot
       id: 90, cell: { column: 7, row: 6 }, spawnRemainingTicks: 30, livingMobs: 0,
     }]
   }
+  applySpikePitScene(snapshot, scene)
   if (scene === 'teleportA' || scene === 'teleportB') {
     snapshot.state.physicalTick = scene === 'teleportA' ? 10 : 11
     snapshot.state.actors = [actor(10, 'one', scene === 'teleportA' ? 1 : snapshot.state.arena.width - 2,

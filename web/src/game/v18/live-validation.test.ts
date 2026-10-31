@@ -50,4 +50,13 @@ describe('live gameplay v18 spike-pit semantics', () => {
     value.state.spikePits[0]!.activatorId = 1
     expect(validateGameplayV18ServerMessage(value)).toMatchObject({ valid: false, source: 'schema' })
   })
+
+  it('rejects room-only environment tuning disagreement', () => {
+    const value = frame()
+    const message = { type: 'roomState' as const, room: value.room }
+    message.room.settings.environment.spikePits.raisedTicks = 240
+    expect(validateGameplayV18ServerMessage(message)).toMatchObject({
+      valid: false, source: 'semantics', error: 'invalidSpikePitState',
+    })
+  })
 })

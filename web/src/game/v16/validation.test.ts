@@ -2,7 +2,7 @@ import Ajv from 'ajv'
 import { describe, expect, it } from 'vitest'
 import gameplayV16Schema from '../../../../api/gameplay-v16.schema.json'
 import clientFixtures from '../../../../api/fixtures/gameplay-v16-client-conformance.json'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from '../v17/testSupport'
 import type { GameServerMessage, Snapshot } from './schema'
 import { validateGameplayV16ServerMessage } from './validation'
 

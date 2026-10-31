@@ -10,13 +10,15 @@ it.each(['easy', 'standard'] as const)(
   expect(messages(socket).at(-1)).toEqual({
     type: 'createRoom', sequence: 1, configuration: {
       controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } },
+      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
     },
   })
   const current = room(2)
   current.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: difficulty,
     board: { width: 15, height: 13 },
-    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
+    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } }
   current.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty },
     occupied: true, ready: true, rematchReady: false, connection: { type: 'serverControlled' },
@@ -39,7 +41,8 @@ it('rejects personal admission to the CPU seat before exposing controls or retai
   const frame = admitted()
   frame.room.configuration = { controllers: ['human', 'cpu'], cpuDifficulty: 'standard',
     board: { width: 15, height: 13 },
-    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } } }
+    environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
+      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } }
   frame.room.seats[1] = {
     seat: 'two', controller: { type: 'cpu', difficulty: 'standard' },
     occupied: true, ready: false, rematchReady: false, connection: { type: 'serverControlled' },

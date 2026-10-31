@@ -70,6 +70,15 @@ function lairError(state: GameState, room: RoomView): SemanticError | null {
   return lairFactsInvalid(state, room) || frozenStateInvalid(state) ? 'invalidLairState' : null
 }
 
+function spikeEnvironmentError(room: RoomView): SemanticError | null {
+  const configured = room.configuration.environment.spikePits
+  const selected = room.settings.environment.spikePits
+  return configured.enabled === selected.enabled
+    && configured.warningTicks === selected.warningTicks
+    && configured.raisedTicks === selected.raisedTicks
+    ? null : 'invalidSpikePitState'
+}
+
 function cellKey(cell: Cell): string { return `${cell.column},${cell.row}` }
 
 function validPitCell(state: GameState, room: RoomView, cell: Cell): boolean {
@@ -87,9 +96,6 @@ function validPitCell(state: GameState, room: RoomView, cell: Cell): boolean {
 
 function pitError(state: GameState, room: RoomView): SemanticError | null {
   const configured = room.configuration.environment.spikePits
-  const selected = room.settings.environment.spikePits
-  if (configured.enabled !== selected.enabled || configured.warningTicks !== selected.warningTicks
-    || configured.raisedTicks !== selected.raisedTicks) return 'invalidSpikePitState'
   if (!configured.enabled) return state.spikePits.length === 0 ? null : 'invalidSpikePitState'
   if (![0, 2, 4].includes(state.spikePits.length)) return 'invalidSpikePitState'
   const keys = new Set(state.spikePits.map(({ cell }) => cellKey(cell)))
@@ -120,7 +126,12 @@ export function validateGameplayV18ServerMessage(value: unknown): GameplayV18Val
   }
   const baseError = baseSemanticErrorForRules(value as unknown as V17ServerMessage, 10)
   if (baseError) return { valid: false, source: 'semantics', error: baseError }
-  if (value.type !== 'admitted' && value.type !== 'snapshot') return { valid: true, value }
+  if (value.type !== 'admitted' && value.type !== 'snapshot' && value.type !== 'roomState') {
+    return { valid: true, value }
+  }
+  const environmentError = spikeEnvironmentError(value.room)
+  if (environmentError) return { valid: false, source: 'semantics', error: environmentError }
+  if (value.type === 'roomState') return { valid: true, value }
   if (!value.state) return { valid: true, value }
   const error = entityError(value.state) ?? lairError(value.state, value.room)
     ?? pitError(value.state, value.room)

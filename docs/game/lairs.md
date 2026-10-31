@@ -56,5 +56,9 @@ bound by private replay9. Settings changes, rounds and rematches preserve that s
 Both policies share the same speed, collision/contact and recipient facts; gameplay17 carries
 no hidden navigation data. Production replay recording remains disabled. The artist sheet and mob/lair sprites are unchanged.
 
+The 3D arena retains the dedicated `terrain.lair` doorway sprite upright on the front of a
+taller stone lair, with `material.lair.top` and `material.lair.side` supplying its surface maps.
+It replaces the ordinary pillar visual at that cell without changing the indestructible obstacle.
+
 Run `cargo test -p grenadiers-core --locked lair --lib` and repeat with `--release` for focused
 lifecycle, movement, death, obstruction, allocation and rollback regressions.

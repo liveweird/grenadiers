@@ -11,7 +11,7 @@ import { createWorldResources, replaceInstancedMesh } from './resources'
 const FLOOR_Y = 0
 const WALL_HEIGHT = 0.48
 const BLOCK_HEIGHT = 0.54
-const LAIR_HEIGHT = 0.28
+const LAIR_HEIGHT = 0.8
 const RIM_HEIGHT = 0.22
 const WALL_BEVEL = 0.055
 const BLOCK_BEVEL = 0.06
@@ -124,7 +124,11 @@ function createWorldModel(snapshot: SnapshotMessage): WorldModel {
   const { blocks } = arena
   const floors: [Instance[], Instance[]] = [[], []]
   const walls = { tops: [] as Instance[], sides: [] as Instance[] }
+  const lairCells = new Set(snapshot.state.lairs.map(
+    ({ cell }) => cell.column + cell.row * arena.width,
+  ))
   arena.terrain.forEach((tile, index) => {
+    if (lairCells.has(index)) return
     const column = index % arena.width
     const row = Math.floor(index / arena.width)
     const [x, z] = cellToWorld(column, row)
@@ -147,7 +151,12 @@ function createWorldModel(snapshot: SnapshotMessage): WorldModel {
     const width = WORLD_TILE * 0.82
     lairs.tops.push(topInstance(x, z, LAIR_HEIGHT, width - LAIR_BEVEL * 2))
     lairs.sides.push(...beveledSides(x, z, LAIR_HEIGHT, { width, bevel: LAIR_BEVEL }))
-    lairs.entrances.push(topInstance(x, z, LAIR_HEIGHT + 0.003, 0.7))
+    const entranceSize = WORLD_TILE * 0.7
+    lairs.entrances.push({
+      position: [x, (LAIR_HEIGHT - LAIR_BEVEL) / 2, z + width / 2 + 0.003],
+      rotation: [0, 0, 0],
+      scale: [entranceSize / ART_TILE, entranceSize / ART_TILE, 1],
+    })
   }
   const rim = { tops: [] as Instance[], sides: [] as Instance[] }
   for (let column = -1; column <= arena.width; column += 1) {

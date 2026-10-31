@@ -15,6 +15,9 @@ interface ActorVisualProps {
   reducedMotion: boolean
 }
 
+const ACTOR_SCALE = 1.35 / 48
+const DEFAULT_CUE_OFFSET = [0, 25 / 48] as const
+
 export function ActorVisual({ atlas, view, timing, reducedMotion }: ActorVisualProps) {
   const root = useRef<Group>(null)
   const [initialPosition] = useState(() => [
@@ -67,25 +70,29 @@ export function ActorVisual({ atlas, view, timing, reducedMotion }: ActorVisualP
       faceCamera={false}
       depthTest
       renderOrder={2}
-      scale={1.35 / 48}
+      scale={ACTOR_SCALE}
     />
     <Billboard
       atlas={atlas}
       frameId={actorFrameId(view, 0, false)}
       anchor="feet"
       position={[0, 0, 0]}
-      scale={1.35 / 48}
+      scale={ACTOR_SCALE}
       frameAt={(now) => actorFrameId(view, now, animated && moving.current)}
     />
-    {view.cues.map((cueView, index) => <Billboard
-      key={`${cueView.frameId}:${index}`}
-      atlas={atlas}
-      frameId={cueView.frameId}
-      anchor="center"
-      position={[0, 25 * 1.35 / 48, 0]}
-      scale={1.35 / 48}
-      opacityAt={(now) => cueOpacity(cueView, now, animated)}
-      renderOrder={11 + index}
-    />)}
+    {view.cues.map((cueView, index) => {
+      const layout = cueView.layout
+      const [offsetX, offsetY] = layout?.offset ?? DEFAULT_CUE_OFFSET
+      return <Billboard
+        key={`${cueView.frameId}:${index}`}
+        atlas={atlas}
+        frameId={cueView.frameId}
+        anchor="center"
+        position={[offsetX * 1.35, offsetY * 1.35, 0]}
+        scale={ACTOR_SCALE * (layout?.scale ?? 1)}
+        opacityAt={(now) => cueOpacity(cueView, now, animated)}
+        renderOrder={11 + index}
+      />
+    })}
   </group>
 }

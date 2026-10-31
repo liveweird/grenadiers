@@ -4,6 +4,52 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.3 — 2026-10-31
+
+Adopt the owner-supplied polished arena PNG directly, without resizing, recoloring or metadata
+changes. It refines all ten 3D material maps and lightly retouches twenty death poses. All
+64 directional player poses, four mob directions and other sprite drawings remain unchanged.
+The sheet retains 1120×2128 RGBA dimensions, 185 assigned slots, anchors and animation contracts.
+The redundant root `arena-napoleonic-3d-polished.png` is removed only after verifying its adopted
+copy is byte-identical.
+
+Use the [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.3/grenadiers-artist-v1.1.3.zip)
+for the current PNG/JSON, labelled guides, slices and actual 3D preview. The canonical source
+remains [assets/art/arena-source.png](../../assets/art/arena-source.png).
+
+### Verification
+
+Accepted source: `e005b4228ac0f6bf76ccb4a6af794efc9e57f5c8`,
+[PR #293](https://github.com/liveweird/grenadiers/pull/293). Independent decoded-pixel review
+finds no structural defects: binary alpha, clean gutters/reservations, compatible death
+palettes and ground alignment, four distinct poses per death family. Exactly 30 frames change;
+151 baseline frames and all pixels outside allowed rectangles remain unchanged.
+
+- Raw input exports through the native validator without adaptation. Focused atlas/Three/UI
+  tests pass: 101 tests in 24 files. Artist workbench passes ten cases. Native 3D passes eleven
+  cases, with three intentional project skips, including all death frames, reduced motion,
+  expiry, flame overlap, board sizes, context recovery and removal privacy.
+- Fresh production build passes at 394,351/400,000 gzip JS bytes and 15,430/20,000 CSS bytes.
+  Runtime pack remains 2040×704 / 181 frames / 5,744,640 RGBA bytes. All five container web
+  files equal the verified build. Exact canonical file bytes equal the supplied input.
+- Exact-image Compose passes four duel/auth/CPU cases (36.8s), disabled diagnostics (10.3s)
+  and a native four-player visual smoke with zero page errors. Kubernetes duel/auth passes
+  (23.6s), alongside runtime restrictions, configured probes/resources and zero restarts.
+  Owned stacks and namespace are removed. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL.
+- Application/rules/contracts/dependencies and Kubernetes configuration are unchanged. Reuse
+  the recorded full web/coverage/security/Rust and E2E-static acceptance; no floors or assertions
+  are weakened. Only duplicate unchanged Rust CI is cancelled. Cargo product versions change
+  to 1.1.3; the image supplies a fresh Linux release build and runtime acceptance.
+
+### Operation
+
+Localhost:8085 runs exact accepted image
+`sha256:0c553e5c95b1a558608e8b9fcab2cfe1cb1d8dda510dba6ce1f3a37e3f73cc95`,
+labelled 1.1.3/source e005b422. The operator keeps CPU diagnostics enabled; base deployments
+default to disabled. Promotion checks image/runtime identity, health/readiness, CSP/cache and
+served bytes. Immutable v1.1.2 remains available for rollback. Refresh old tabs and create a
+new match after restart to see the polished material maps.
+
 ## v1.1.2 — 2026-10-31
 
 Keep knockout sprites readable during ordinary explosions and persistent Oil fire. The death

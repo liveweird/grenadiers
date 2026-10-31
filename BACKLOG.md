@@ -10,12 +10,6 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## CPU pickup progress
-
-- [next] **Late-round pickup stall.** Fix living CPUs stopping beside exposed pickups after
-  their opening bombs. Reproduce the real queued planner/admission mismatch, preserve certified
-  hazards and archived policies, and test pickup collection plus continued later movement.
-
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

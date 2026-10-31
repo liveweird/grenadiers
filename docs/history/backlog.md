@@ -7,6 +7,10 @@
 
 ## Completed 2026-10-31
 
+- **CPU pickup recovery:** [v1.0.3](../releases.md#v103--2026-10-31) retains checked
+  pickup movement, then stops and replans from the collected item state. Queued and native
+  browser regressions cover late-round progress, including with lairs disabled.
+
 - **Arena playability:** [v1.0.2](../releases.md#v102--2026-10-31) adds one living mob per
   lair with death-plus-delay replacement, solid players, safe CPU combat pressure against other
   CPUs, and extra single-use mines independent of ordinary bomb capacity.

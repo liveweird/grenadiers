@@ -20,6 +20,14 @@ Generate standalone ESM for the two production validation routes. Preserve the e
 resolves `$id#/$defs/GameServerMessage`; realtime compiles its root schema directly. Schema
 constraints, wire types and subsequent semantic/recipient checks do not change.
 
+Keep canonical Ajv options in a shared validator-name lookup used by standalone generation and
+compiler-backed parity tests. Historical gameplay validators retain the original `allErrors`
+configuration byte-for-byte. The current gameplay-v18 validator also disables reference inlining
+and loops larger required/enum checks; these code-generation choices reduce the shipped artifact
+without changing schema acceptance. Complete ordered errors remain exact against that declared
+canonical compilation route; `schemaPath` is an internal diagnostic tied to those options and is
+not a browser UI, transport or logging contract.
+
 Use pinned Ajv's standalone CommonJS output, then bundle it in memory with the existing pinned
 Vite Node API. Direct Ajv ESM output still contains CommonJS helper calls for these schemas;
 handwritten rewriting would be fragile. Require one ESM chunk without external or dynamic

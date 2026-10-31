@@ -260,6 +260,10 @@ compiler/schema checks. Run
 `check:validators` regenerates in memory and checks both ESM and declarations before production
 builds. Parity tests compare complete ordered errors with the original compilation routes;
 generated output rejects executable imports/evaluation while allowing inert helper metadata.
+The current gameplay validator and its compiler-backed oracle obtain Ajv code-generation options
+from the same validator-name lookup. Historical validator names retain their original options and
+artifacts; changing a canonical option requires regeneration, complete ordered-error parity and a
+fresh compressed-bundle measurement.
 Generated MJS is excluded narrowly from handwritten lint rules; its adjacent declarations are
 checked by TypeScript/drift checks and ignored only by Knip's unused-file discovery. Handwritten
 tests and helpers remain in scope; see [ADR 0022](decisions/0022-standalone-browser-validation.md).

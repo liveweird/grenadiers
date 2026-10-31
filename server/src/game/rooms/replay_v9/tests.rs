@@ -97,6 +97,16 @@ fn replay9_reconstructs_current_navigation_and_cpu_inputs_without_rerunning_ai()
     );
     let (_, journal) = recorder.into_parts();
     verify_exact(&journal, &expected).unwrap();
+    for version in [23, 24] {
+        let mut archived = journal.clone();
+        archived.body = archived.body.with_cpu_policy_for_test(version);
+        verify_exact(&archived, &expected).unwrap();
+    }
+    for version in [22, 25] {
+        let mut invalid = journal.clone();
+        invalid.body = invalid.body.with_cpu_policy_for_test(version);
+        assert!(replay(&invalid).is_err());
+    }
     assert!(replay_v8::verify_exact(&journal.body, &expected).is_err());
     for (format, navigation) in [(8, 2), (10, 2), (9, 1), (9, 3)] {
         let mut invalid = journal.clone();

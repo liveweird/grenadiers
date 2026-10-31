@@ -9,6 +9,7 @@ services:
       WEB_DIST_DIR: '/app/web/dist'
       ALLOWED_ORIGINS: '${ALLOWED_ORIGINS:-http://localhost:8085,http://127.0.0.1:8085}'
       TRUSTED_PROXY_IPS: '${TRUSTED_PROXY_IPS:-}'
+      CPU_DEBUG_ENABLED: '${CPU_DEBUG_ENABLED:-false}'
       RUST_LOG: '${RUST_LOG:-grenadiers_server=info,tower_http=info}'
       # Set a Compose-network URL explicitly to opt into database readiness.
       DATABASE_URL: '${DATABASE_URL:-}'

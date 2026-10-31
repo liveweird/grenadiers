@@ -7,11 +7,14 @@ use std::sync::{
 use grenadiers_core::cpu::{
     CpuRng, Intent, ManualIntent, MemoryKey, WorkBudget,
     forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast},
-    policy::{ControlPlan, UtilityMemory, plan},
+    policy::{
+        ControlPlan, StrategicIntent, StrategicObjectiveKind, StrategicPhase,
+        StrategicSwitchReason, StrategicTarget, UtilityMemory, plan,
+    },
     routing::{PulseRequest, RouteMode, certify_pulse},
     survival::{PulseStatus, SurvivalPlan},
 };
-use grenadiers_core::game::{Direction, SeatId, Tick};
+use grenadiers_core::game::{CellId, Direction, Position, SeatId, Tick};
 
 use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
@@ -26,6 +29,26 @@ fn controller() -> CpuController {
     );
     controller.reset_world(3);
     controller
+}
+
+fn test_strategy() -> StrategicIntent {
+    StrategicIntent {
+        objective: StrategicObjectiveKind::Collect,
+        target: StrategicTarget::Pickup {
+            cell: CellId::new(5, 7),
+            kind: grenadiers_core::game::PickupKind::GoldenFlame,
+        },
+        approach_cell: Some(CellId::new(5, 7)),
+        phase: StrategicPhase::Approach,
+        last_switch_reason: StrategicSwitchReason::Initial,
+        observation_tick: Tick(20),
+        score: 6,
+        committed_until: Tick(44),
+        progress_deadline: Tick(56),
+        last_distance: 2,
+        last_cpu_position: grenadiers_core::game::Position::center(CellId::new(7, 7)),
+        deferred_until: None,
+    }
 }
 
 fn inject(controller: &mut CpuController, decision: grenadiers_core::cpu::DecisionId) {
@@ -90,10 +113,13 @@ fn decision(controller: &CpuController) -> grenadiers_core::cpu::DecisionId {
 #[test]
 fn stale_and_wrong_world_results_do_not_commit_prospective_rng() {
     let mut stale = controller();
+    let strategy = test_strategy();
+    stale.memory = Some(stale.memory.unwrap().with_strategic_intent(strategy));
     let stale_decision = decision(&stale);
     inject(&mut stale, stale_decision);
     assert!(stale.poll(Tick(27), 4).is_none());
     assert_eq!(stale.rng.as_ref().unwrap().draws(), 0);
+    assert_eq!(stale.memory.unwrap().strategic_intent(), Some(strategy));
 
     let mut wrong = controller();
     let mut wrong_decision = decision(&wrong);
@@ -320,6 +346,8 @@ fn admitted_long_pulse_waits_for_its_scheduled_stop_update() {
         Some(PulseStatus::Completed)
     );
 }
+#[path = "controller_pulse_intent_tests.rs"]
+mod pulse_intent_tests;
 
 fn observation_at(tick: Tick, x_offset: i32) -> grenadiers_core::cpu::Observation {
     let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();

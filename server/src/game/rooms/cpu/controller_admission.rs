@@ -128,6 +128,17 @@ impl CpuController {
         let invalid_manual = execution
             .as_ref()
             .is_some_and(|_| certified_manual != control.intent.manual);
+        if let (Some(intent), Some(plant)) = (
+            control.next_memory.strategic_intent(),
+            execution.as_ref().and_then(ExecutionCertificate::plant),
+        ) && !grenadiers_core::cpu::survival::strategic_plant_still_targets(
+            latest,
+            intent,
+            plant,
+            &mut WorkBudget::new(65_536),
+        ) {
+            return None;
+        }
         if (escape_origin
             && (control.intent.manual.is_some()
                 || execution.is_some()

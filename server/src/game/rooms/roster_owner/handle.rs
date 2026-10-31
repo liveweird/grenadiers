@@ -5,9 +5,27 @@ use super::super::{
     roster_runtime::RosterAction,
     types::{BindingKey, RoomError},
 };
-use super::types::{OwnerCommand, Reply, RosterAdmission, RosterOwnerHandle};
+use super::types::{CpuDebugCommand, OwnerCommand, Reply, RosterAdmission, RosterOwnerHandle};
 
 impl RosterOwnerHandle {
+    pub(in crate::game::rooms) fn cpu_debug(
+        &self,
+        token: ResumeToken,
+    ) -> oneshot::Receiver<
+        Result<crate::cpu_debug::CpuDebugResponse, crate::cpu_debug::CpuDebugQueryError>,
+    > {
+        let (reply, response) = oneshot::channel();
+        match self
+            .cpu_debug_commands
+            .try_send(CpuDebugCommand { token, reply })
+        {
+            Ok(()) => {}
+            Err(tokio::sync::mpsc::error::TrySendError::Full(command))
+            | Err(tokio::sync::mpsc::error::TrySendError::Closed(command)) => command.reject(),
+        }
+        response
+    }
+
     pub(in crate::game::rooms) fn join_sequenced(
         &self,
         binding: BindingKey,

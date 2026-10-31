@@ -143,10 +143,17 @@ fn openapi_declares_every_implemented_http_status() {
             "/api/v1/game/session",
             ["201", "400", "403", "429", "503"].as_slice(),
         ),
+        (
+            "/api/v1/game/cpu-debug",
+            [
+                "200", "400", "401", "403", "404", "413", "415", "429", "503",
+            ]
+            .as_slice(),
+        ),
     ];
     for (path, statuses) in cases {
         for status in statuses {
-            let method = if path == "/api/v1/game/session" {
+            let method = if matches!(path, "/api/v1/game/session" | "/api/v1/game/cpu-debug") {
                 "post"
             } else {
                 "get"

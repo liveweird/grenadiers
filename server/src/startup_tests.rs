@@ -17,6 +17,7 @@ fn environment() -> Environment {
         database_url: None,
         round_seed_file: None,
         trusted_proxy_ips: None,
+        cpu_debug_enabled: None,
     }
 }
 
@@ -63,6 +64,68 @@ fn invalid_log_filter_retains_info_fallback() {
     let configuration = Config::from_configuration(values).unwrap();
 
     assert_eq!(configuration.log_filter(), "info");
+}
+
+#[test]
+fn cpu_debug_operator_flag_is_strict_and_defaults_off() {
+    let defaults = Config::from_configuration(environment())
+        .unwrap()
+        .into_parts()
+        .0;
+    assert!(!defaults.cpu_debug_enabled);
+
+    let mut enabled = environment();
+    enabled.cpu_debug_enabled = Some("true".into());
+    assert!(
+        Config::from_configuration(enabled)
+            .unwrap()
+            .into_parts()
+            .0
+            .cpu_debug_enabled
+    );
+
+    for invalid in ["TRUE", "1", " true", ""] {
+        let mut values = environment();
+        values.cpu_debug_enabled = Some(invalid.into());
+        assert_eq!(
+            Config::from_configuration(values).err().unwrap(),
+            StartupError::CpuDebugEnabled
+        );
+    }
+}
+
+#[test]
+fn public_app_state_environment_constructor_honors_strict_cpu_debug_flag() {
+    const CHILD: &str = "GRENADIERS_CPU_DEBUG_ENV_TEST_CHILD";
+    match std::env::var(CHILD).as_deref() {
+        Ok("enabled") => {
+            assert!(AppState::from_environment().unwrap().cpu_debug_enabled);
+            return;
+        }
+        Ok("invalid") => {
+            assert!(matches!(
+                AppState::from_environment(),
+                Err(StartupError::CpuDebugEnabled)
+            ));
+            return;
+        }
+        _ => {}
+    }
+
+    let executable = std::env::current_exe().unwrap();
+    for (child, flag) in [("enabled", "true"), ("invalid", "TRUE")] {
+        let status = std::process::Command::new(&executable)
+            .arg("--exact")
+            .arg("startup_tests::public_app_state_environment_constructor_honors_strict_cpu_debug_flag")
+            .env(CHILD, child)
+            .env("CPU_DEBUG_ENABLED", flag)
+            .env_remove("DATABASE_URL")
+            .env_remove("GAME_ROUND_SEED_FILE")
+            .env_remove("TRUSTED_PROXY_IPS")
+            .status()
+            .unwrap();
+        assert!(status.success(), "environment child {child} failed");
+    }
 }
 
 #[test]

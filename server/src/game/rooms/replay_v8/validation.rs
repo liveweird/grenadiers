@@ -15,7 +15,10 @@ pub(super) fn validate_header(header: &ReplayHeader) -> Result<(), ()> {
         || header.rules_version != RULES_VERSION
         || !matches!(
             header.cpu_policy_version,
-            ARCHIVED_CPU_POLICY_VERSION | PICKUP_CPU_POLICY_VERSION | CPU_POLICY_VERSION
+            ARCHIVED_CPU_POLICY_VERSION
+                | PICKUP_CPU_POLICY_VERSION
+                | STRATEGY_CPU_POLICY_VERSION
+                | CPU_POLICY_VERSION
         )
         || header.generator_version != expected_generator
         || header.simulation_randomness_version != SIMULATION_RANDOMNESS_VERSION

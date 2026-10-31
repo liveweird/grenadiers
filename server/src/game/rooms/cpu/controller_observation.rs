@@ -49,6 +49,7 @@ impl CpuController {
         self.escape_origin = None;
         self.escape_origin_epoch = None;
         self.cadence = super::CadenceState::default();
+        self.strategic_blast = None;
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {
@@ -72,6 +73,7 @@ impl CpuController {
             .as_mut()
             .expect("world hazard memory initialized")
             .observe(observation);
+        self.observe_strategic_intent(observation);
         self.last_observation_tick = Some(observation.parts().tick);
         self.confirm_stop(observation);
         self.observe_cadence(observation);
@@ -104,6 +106,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_EASY
                     | grenadiers_core::room::CpuProfile::RESPAWN_V22_STANDARD
                     | grenadiers_core::room::CpuProfile::RESPAWN_V22_EASY
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V23_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V23_EASY
                     | grenadiers_core::room::CpuProfile::RESPAWN_V21_STANDARD
                     | grenadiers_core::room::CpuProfile::RESPAWN_V21_EASY
             ),

@@ -16,6 +16,20 @@ pub(in crate::game::rooms) enum LiveOwner {
 }
 
 impl LiveOwner {
+    pub(in crate::game::rooms) async fn cpu_debug(
+        &self,
+        token: ResumeToken,
+    ) -> Result<crate::cpu_debug::CpuDebugResponse, crate::cpu_debug::CpuDebugQueryError> {
+        match self {
+            #[cfg(test)]
+            Self::Legacy(_) => Err(crate::cpu_debug::CpuDebugQueryError::Unavailable),
+            Self::Roster(value) => value
+                .cpu_debug(token)
+                .await
+                .unwrap_or(Err(crate::cpu_debug::CpuDebugQueryError::Unavailable)),
+        }
+    }
+
     #[cfg(test)]
     pub(in crate::game::rooms) fn legacy(&self) -> Option<&MatchOwnerHandle> {
         match self {

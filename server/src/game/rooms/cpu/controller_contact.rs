@@ -76,9 +76,14 @@ mod tests {
     use grenadiers_core::{
         cpu::{
             CpuRng, MemoryKey, ObservedEnvironment, ObservedLairs, WorkBudget,
-            forecast::ObservedHazardMemory, policy::UtilityMemory, survival::plan_lairs,
+            forecast::ObservedHazardMemory,
+            policy::{
+                StrategicIntent, StrategicObjectiveKind, StrategicPhase, StrategicSwitchReason,
+                StrategicTarget, UtilityMemory,
+            },
+            survival::plan_lairs,
         },
-        game::{LairView, Tick, lair_layout_v1},
+        game::{CellId, LairView, Tick, lair_layout_v1},
         room::{BoardSize, LairConfig, LairSettings},
     };
 
@@ -102,6 +107,23 @@ mod tests {
         )
         .unwrap();
         controller.committed_contact = planned.contact;
+        let strategic = StrategicIntent {
+            objective: StrategicObjectiveKind::Explore,
+            target: StrategicTarget::Tile {
+                cell: CellId::new(9, 7),
+            },
+            approach_cell: Some(CellId::new(9, 7)),
+            phase: StrategicPhase::Approach,
+            last_switch_reason: StrategicSwitchReason::Initial,
+            observation_tick: Tick(20),
+            score: 0,
+            committed_until: Tick(44),
+            progress_deadline: Tick(56),
+            last_distance: 2,
+            last_cpu_position: grenadiers_core::game::Position::center(CellId::new(7, 7)),
+            deferred_until: None,
+        };
+        controller.memory = Some(UtilityMemory::new(key).with_strategic_intent(strategic));
         assert!(controller.has_committed_route());
         assert!(controller.settled_stop_tick.is_some());
 
@@ -110,6 +132,10 @@ mod tests {
             Some(ContactStatus::Invalidated)
         );
         assert!(!controller.has_committed_route());
+        assert_eq!(
+            controller.memory.unwrap().strategic_intent(),
+            Some(strategic)
+        );
         assert!(controller.settled_stop_tick.is_none());
         assert_eq!(controller.poll_route_command(Tick(53), 4), None);
     }

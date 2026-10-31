@@ -13,7 +13,8 @@ use crate::game::rooms::roster_seed::SimulationRoot;
 pub(super) const FORMAT_VERSION: u16 = 8;
 pub(super) const LIFECYCLE_PROFILE: u16 = 3;
 pub(super) const RULES_VERSION: u16 = 9;
-pub(super) const CPU_POLICY_VERSION: u16 = 23;
+pub(super) const CPU_POLICY_VERSION: u16 = 24;
+pub(super) const STRATEGY_CPU_POLICY_VERSION: u16 = 23;
 pub(super) const PICKUP_CPU_POLICY_VERSION: u16 = 22;
 pub(super) const ARCHIVED_CPU_POLICY_VERSION: u16 = 21;
 pub(super) const SIMULATION_RANDOMNESS_VERSION: u16 = 1;
@@ -187,6 +188,14 @@ pub(in crate::game::rooms) struct Journal {
 impl Journal {
     pub(in crate::game::rooms) const fn cpu_policy_version(&self) -> u16 {
         self.header.cpu_policy_version
+    }
+
+    pub(in crate::game::rooms) fn with_cpu_policy_for_test(mut self, version: u16) -> Self {
+        self.header.cpu_policy_version = version;
+        for cpu in &mut self.header.cpus {
+            cpu.policy_version = version;
+        }
+        self
     }
 
     pub(super) fn new(header: ReplayHeader) -> Self {

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
 
 const baseURL = process.env.RENDERER_DIAGNOSTICS_BASE_URL ?? 'http://127.0.0.1:5188'
-const linuxLaunchOptions = process.platform === 'linux' ? {
+const nativeLaunchOptions = process.platform === 'darwin' || process.platform === 'linux' ? {
   args: ['--enable-gpu', '--use-gl=angle', '--use-angle=swiftshader'],
 } : undefined
 
@@ -17,7 +17,7 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL,
-    launchOptions: linuxLaunchOptions,
+    launchOptions: nativeLaunchOptions,
     trace: 'off', screenshot: 'off', video: 'off',
   },
   webServer: process.env.RENDERER_DIAGNOSTICS_BASE_URL ? undefined : {

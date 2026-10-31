@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { gameSnapshot } from '../../../test/game-snapshot'
 import { createArenaSceneStore, readSceneTiming } from './sceneStore'
+import type { PresentationDeathCue } from '../types'
+
+const death = (key: string, bornAt: number): PresentationDeathCue => ({
+  key, appearance: 'one', entityId: 1, position: { x: 512, y: 512 }, heading: 'east',
+  tick: 2, index: 0, bornAt,
+})
 
 describe('arena scene store', () => {
   it('publishes immutable revisions and synchronously clears the presented snapshot', () => {
@@ -112,5 +118,45 @@ describe('arena scene store', () => {
     expect(revealed.actorEpochs.get(actorId)).toBe((first.actorEpochs.get(actorId) ?? 0) + 1)
     expect(revealed.mobEpochs.get(90)).toBe((first.mobEpochs.get(90) ?? 0) + 1)
     expect(revealed.cloudEpoch).toBe(first.cloudEpoch + 1)
+  })
+
+  it('deduplicates death envelopes, bounds lifetime, and purges on generation changes', () => {
+    const store = createArenaSceneStore()
+    const snapshot = gameSnapshot()
+    snapshot.presentationDeaths = { epoch: 1, sequence: 1, cues: [death('first', 0)] }
+    store.update(snapshot, 0)
+    expect(store.read().deaths.map(({ key }) => key)).toEqual(['first'])
+    snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 1
+    store.update(snapshot, 100)
+    expect(store.read().deaths).toHaveLength(1)
+    snapshot.presentationDeaths = { epoch: 1, sequence: 2, cues: [death('first', 0), death('second', 100)] }
+    store.update(snapshot, 599)
+    expect(store.read().deaths.map(({ key }) => key)).toEqual(['first', 'second'])
+    store.update(snapshot, 600)
+    expect(store.read().deaths.map(({ key }) => key)).toEqual(['second'])
+    store.clear()
+    store.update(snapshot, 610)
+    expect(store.read().deaths).toEqual([])
+    snapshot.presentationDeaths = { epoch: 2, sequence: 3, cues: [] }
+    store.update(snapshot, 610)
+    expect(store.read().deaths).toEqual([])
+  })
+
+  it.each([true, false])('purges and fences active deaths when reduced motion becomes %s', (reduced) => {
+    const store = createArenaSceneStore()
+    store.setReducedMotion(!reduced)
+    const snapshot = gameSnapshot()
+    snapshot.presentationDeaths = { epoch: 1, sequence: 1, cues: [death('reduced', 0)] }
+    store.update(snapshot, 0)
+    expect(store.read().deaths).toHaveLength(1)
+    store.setReducedMotion(reduced)
+    expect(store.read().deaths).toEqual([])
+    snapshot.presentationDeaths.sequence = 2
+    store.update(snapshot, 100)
+    expect(store.read().deaths).toEqual([])
+    store.setReducedMotion(!reduced)
+    store.update(snapshot, 101)
+    expect(store.read().deaths).toEqual([])
+    vi.restoreAllMocks()
   })
 })

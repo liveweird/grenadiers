@@ -97,64 +97,75 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.1.0 — 2026-10-31
+## v1.1.1 — 2026-10-31
 
-The arena now uses Three.js and React Three Fiber: a miniature textured courtyard with shallow
-chamfered walls, directional lighting, grounded shadows and a restrained warm colour/dither
-finish. Detailed billboard sprites retain all four uniforms and existing animation. The fixed
-orthographic camera preserves keyboard directions. Rust simulation, controls, contracts and
-recipient visibility rules are unchanged. Future character models remain a separate proposal.
+Add short, non-gory knockout animations for all four player uniforms and mobs. Each appearance
+has four artist-owned poses, played once over 600ms; reduced motion shows only the collapsed
+pose for 180ms. The detached sprite/shadow then disappear. Elimination, collisions, scoring and
+round timing remain immediate and authoritative.
 
-The artist sheet adds ten named 48×48 material maps and preserves every existing sprite pixel.
-Use the [artist workflow](../assets/art/README.md) and the downloadable
-[artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.0/grenadiers-artist-v1.1.0.zip),
-including canonical inputs, guides, labelled inventory, optional slices and a 3D preview.
+Player cues require a fresh event and the recipient's currently visible dead pose; hidden Cloak
+positions never appear. Client ingress latches events before React batching can drop them.
+Qualified mob removal uses its last public pose only across tightly continuous same-round/lair
+snapshots, with long gaps suppressed. Final round and match wins can animate both together.
+Admission/reconnect, suspension, timeline/round changes and preference changes purge cues;
+duplicate publications cannot replay them.
+
+The shared sheet appends twenty poses and preserves every previous sprite and material map.
+Download the [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.1/grenadiers-artist-v1.1.1.zip),
+including canonical PNG/JSON, guides, labelled inventory, slices, and a death-pose overview.
+See [presentation](game/arena-3d.md#death-animation) and [artist rules](../assets/art/README.md).
 
 ### Verification
 
-Accepted production source: `4a9259ec7057ff9ca8595f0fa8423f9e5a124634`,
-[PR #290](https://github.com/liveweird/grenadiers/pull/290). Independent renderer and presentation
-reviews are clear, including GPU normals/lighting, resource ownership, concealed-history resets,
-interpolation, painted shadow anchors and a grounded cloud shadow throughout bobbing.
+Accepted production source: `65bcea9656eb3a3fce530fa37aef14c4862a193a`,
+[PR #291](https://github.com/liveweird/grenadiers/pull/291). Independent review is clear after
+terminal-mob and preference-transition corrections. Tests cover callback coalescing,
+recipient privacy, same-tick departures, terminal wins, mob continuity, bounded state, reset
+fences and expiry without another snapshot.
 
-- Web coverage: 7,268 tests pass in 264.29 seconds; statements 91.70%, branches 88.49%, functions
-  91.16%, lines 94.83%. Existing floors remain unchanged. Production bundle is 392,505/400,000
-  gzip JS bytes and 15,430/20,000 CSS bytes. The actual emitted module graph excludes the Pixi
-  reference renderer and authoring factories.
-- Native graphics: eight Three cases, ten source-atlas cases and both DPR1/DPR2 reference
-  comparisons pass. Checks cover all three boards, four uniforms, item/entity variants,
-  narrow/reduced-motion views, final framebuffer colour calibration, removal/concealment resets,
-  suspend/resume, context recovery and teardown. No page, shader or CSP errors are observed.
-- Atlas extension: all 155 original assigned rectangles, 3,247,104 RGBA bytes, compare unchanged.
-  The source is 1120×1904 with 165 frames; the runtime pack is 2040×584 with 161 frames and
-  4,765,440 RGBA bytes, within unchanged texture limits. The artist export and guides validate.
-- E2E static checks pass, including 100 scenario mappings and camera-projection checks. Four
-  Compose duel/auth/CPU cases and disabled diagnostics pass. All 21 general Kubernetes cases
-  are accepted: 18 passed initially; the three affected geometry/cloud/turning cases pass after
-  correcting the flat-board assertion and the macOS graphics backend. Runtime probes,
-  restrictions and zero restarts are checked; owned namespaces are removed.
-- Five focused item/privacy suites pass with unchanged deadlines: Oil Barrel, Cloak, Kick,
-  Wall Pass and Bracelet. Projection-aware compositor sampling preserves concealment and
-  reconnect assertions; graded colour-family checks retain Oil state evidence. macOS and CI
-  explicitly align ANGLE WebGL/compositing and default to one shared-backend worker.
-- Fresh dependency policy/audits pass at the HIGH/CRITICAL threshold; existing upstream tooling
-  advisories remain 20 moderate web and 12 moderate E2E entries. Pinned Trivy 0.74 finds zero
-  fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
-- Rust implementation, contracts and deterministic fixtures are unchanged from v1.0.6; only local
-  package-version metadata changes. Reuse that release's full macOS debug/release/coverage
-  acceptance rather than repeat the simulation matrix. The image compiles the Linux release
-  target; [fresh Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41196323616)
-  pass for the new package versions. Final docs/tests preserve production inputs.
+- Full web gate: 7,290 tests in 149 files pass in 248.87 seconds. Coverage is 95.20% lines,
+  88.84% branches, 92.05% statements and 91.44% functions. Existing floors remain unchanged.
+  Verified build is 394,344/400,000 gzip JS bytes and 15,430/20,000 CSS bytes; all five container
+  web files equal the verified build. Repository, tooling, API/schema, lint and static E2E
+  checks pass, including 102 scenario mappings.
+- Native Three acceptance: ten cases pass. Full frame progression for all five appearances
+  and exact empty-pixel equality after expiry are checked without another snapshot; reduced
+  motion holds the final pose byte-identically. Two cross-project skips intentionally select
+  desktop full playback and narrow reduced playback. All eight existing graphics cases pass.
+- Ten artist-workbench cases and both DPR reference comparisons pass. All twenty death frames
+  are nonempty, binary-alpha, distinct within each family and subsets of their original palettes.
+  The 165 previous rectangles, 3,339,264 RGBA bytes, and their frame/animation/alias/composition
+  contracts compare unchanged. Source is 1120×2128 with 185 assigned frames; runtime is
+  2040×704 with 181 frames and 5,744,640 RGBA bytes. The source-only PNG extent cap is explicitly
+  2128; compressed/decoded 16MiB and runtime 2048px/16MiB limits remain intact.
+- The legacy DPR2 pulse reference changes one 19-pixel edge row (49 RGB bytes, zero alpha) when
+  texture height grows from 584 to 704, due to nearest-sampling UV rounding at 1.125 scale.
+  Recreating the old extent reproduces the old hashes exactly; only three current DPR2 hashes
+  are updated. Historical and DPR1 hashes, parity assertions and source artwork remain intact.
+- Exact-image runtime acceptance passes: four Compose duel/auth/CPU cases (37.1s), disabled
+  diagnostics (11.2s), and two Kubernetes duel/auth cases (23.0s). Health/readiness, restricted
+  runtime, configured probes/resources and zero restarts are verified; owned stacks/namespaces
+  are removed. Strict Kubernetes schemas also pass.
+- Fresh cargo-deny/npm audits pass at HIGH/CRITICAL thresholds; existing tooling advisories
+  remain 20 moderate web and 12 moderate E2E entries. Pinned Trivy 0.74 reports zero fixable
+  HIGH/CRITICAL vulnerabilities in the exact accepted image.
+- Rust implementation/contracts are unchanged from v1.1.0; only package versions change.
+  Reuse the recorded macOS simulation/coverage acceptance. Fresh
+  [Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41206812465)
+  pass for the new versions. Final reference/doc changes preserve production inputs.
 
 ### Operation
 
-Localhost:8085 runs the exact accepted image
-`sha256:832ab2e4c96db7f6498a5a49a72645d48b585c451edf1944245bdf6986133b43`,
-labelled 1.1.0/source 4a9259ec. The local operator keeps CPU diagnostics enabled at
-`http://localhost:8085/?cpuDebug=1`; base Compose and Kubernetes default to disabled. Promotion
-checks image identity, runtime restrictions, health/readiness, CSP/cache policy and served bytes.
-Immutable v1.0.6 remains available for rollback. Restart ends in-memory matches; refresh and
-create a new match. Human visual/difficulty feedback and proposals live in [BACKLOG.md](../BACKLOG.md).
+Localhost:8085 runs exact accepted image
+`sha256:ecef3dd99eae78e63b8e2b922fb52adb92ee49ad8c0553154e81f3c9b5209b10`,
+labelled 1.1.1/source 65bcea96. Local CPU diagnostics remain enabled; base Compose/Kubernetes
+still default to disabled. Promotion verifies identity, runtime restrictions, health/readiness,
+CSP/cache policy and served bytes. Immutable v1.1.0 is retained for rollback. Refresh old tabs
+and create a new match after restart. Human feedback remains in [BACKLOG.md](../BACKLOG.md).
+
+<a id="v110--2026-10-31"></a>
+The [v1.1.0 record](history/releases.md#v110--2026-10-31) is preserved in release history.
 
 <a id="v106--2026-10-31"></a>
 The [v1.0.6 record](history/releases.md#v106--2026-10-31) is preserved in release history.

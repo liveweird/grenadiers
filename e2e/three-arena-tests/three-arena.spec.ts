@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test'
 import {
   assertCleanAudit, beginAudit, canvasScreenshot, expectDifferent, openFixture, show,
-  type BoardName, type BrowserAudit,
+  showDeath, settleDeathAge, type BoardName, type BrowserAudit, type DeathAppearance,
 } from './three-arena-api'
+
+const deathAppearances: readonly DeathAppearance[] = ['one', 'two', 'three', 'four', 'mob']
 
 let audit: BrowserAudit | undefined
 test.beforeEach(async ({ context, page }) => {
@@ -68,6 +70,54 @@ test('projected actor and bomb pixels revert exactly when public rows are remove
   await show(page, 'large', 'empty')
   const removed = await canvasScreenshot(page, testInfo, 'entity-removal-restored')
   expect(removed.equals(baseline), 'removed entities must leave no pixels or shadows').toBe(true)
+})
+
+test('native death artwork advances every appearance and expires without lingering pixels', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('reduced'), 'normal-motion production timing')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'death-empty-baseline')
+
+  for (const [index, appearance] of deathAppearances.entries()) {
+    const bornAt = await showDeath(page, appearance, index)
+    await settleDeathAge(page, bornAt, 75)
+    const before = await canvasScreenshot(page, testInfo, `${appearance}-death-before-frame-0`)
+    await settleDeathAge(page, bornAt, 225)
+    const middleOne = await canvasScreenshot(page, testInfo, `${appearance}-death-middle-frame-1`)
+    await settleDeathAge(page, bornAt, 375)
+    const middleTwo = await canvasScreenshot(page, testInfo, `${appearance}-death-middle-frame-2`)
+    await settleDeathAge(page, bornAt, 525)
+    const final = await canvasScreenshot(page, testInfo, `${appearance}-death-final-frame-3`)
+    await settleDeathAge(page, bornAt, 650)
+    const expired = await canvasScreenshot(page, testInfo, `${appearance}-death-expired`)
+
+    expectDifferent(before, baseline, `${appearance} death frame zero must alter native pixels`)
+    expectDifferent(middleOne, before, `${appearance} death animation must advance to frame one`)
+    expectDifferent(middleTwo, middleOne, `${appearance} death animation must advance to frame two`)
+    expectDifferent(final, middleTwo, `${appearance} death animation must advance to frame three`)
+    expect(expired.equals(baseline), `${appearance} death must leave no corpse or shadow`).toBe(true)
+  }
+})
+
+test('reduced motion holds every death on frame three then expires from the same birth time', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('reduced'), 'reduced-motion production timing')
+  await openFixture(page)
+  await show(page, 'large', 'empty')
+  const baseline = await canvasScreenshot(page, testInfo, 'reduced-death-empty-baseline')
+
+  for (const [index, appearance] of deathAppearances.entries()) {
+    const bornAt = await showDeath(page, appearance, index)
+    await settleDeathAge(page, bornAt, 30)
+    const staticStart = await canvasScreenshot(page, testInfo, `${appearance}-reduced-frame-3-start`)
+    await settleDeathAge(page, bornAt, 90)
+    const staticEnd = await canvasScreenshot(page, testInfo, `${appearance}-reduced-frame-3-held`)
+    await settleDeathAge(page, bornAt, 225)
+    const expired = await canvasScreenshot(page, testInfo, `${appearance}-reduced-expired`)
+
+    expectDifferent(staticStart, baseline, `${appearance} reduced death must show frame three`)
+    expect(staticEnd.equals(staticStart), `${appearance} reduced death must remain static`).toBe(true)
+    expect(expired.equals(baseline), `${appearance} reduced death must expire without residue`).toBe(true)
+  }
 })
 
 test('teleport, suspend, room replacement, context restoration, and destroy leave no ghosts', async ({ page }, testInfo) => {

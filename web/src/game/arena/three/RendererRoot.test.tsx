@@ -7,7 +7,7 @@ import { RendererRoot } from './RendererRoot'
 describe('RendererRoot commit signal', () => {
   it('signals readiness after mounting the scene subscription', async () => {
     const resolve = vi.fn()
-    const revision = { snapshot: null, reducedMotion: false, receivedAt: 0, serial: 0 }
+    const revision = { snapshot: null, deaths: [], reducedMotion: false, receivedAt: 0, serial: 0 }
     const store: ArenaSceneStore = {
       read: () => revision,
       subscribe: () => () => undefined,

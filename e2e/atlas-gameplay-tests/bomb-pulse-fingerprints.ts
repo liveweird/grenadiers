@@ -21,17 +21,17 @@ export default {
   "2": [
     {
       "stage": "bomb-pulse-standard",
-      "atlas": "fb48beb8b6626ac7c1f33e5393e14b34a9ee8aaac826d07a7a2abc9146714332",
+      "atlas": "ab1be6ad3120d9bcc2c0e3945bcf5733c4344f276cb40830d7b440ec9bdb6004",
       "historical": "86f357b818a65b049b25daf10c63ad4503e624d7fb2fa0e6414ff0b387d94462"
     },
     {
       "stage": "bomb-pulse-piercing",
-      "atlas": "f713534ba499396cb779446d67a899e6233884542c5158d05498f4b70f4b369a",
+      "atlas": "2f2e5ec6b3073994acf77031b79a969c8f40b3a6c385b9c581a713af7c96d092",
       "historical": "40f162d7bdceb87d75a51bd60693dbf7dbb38a167482a31915fd60c418852bf4"
     },
     {
       "stage": "bomb-pulse-power",
-      "atlas": "e0965e2383f1ebd435f0ba4e7a92e9a96010d8907c08f6abcf6b91f0cc8172ba",
+      "atlas": "a3264ef7711eb88ab783ee408c812c422cb57aa913412ce583e4d9ff259d9503",
       "historical": "6e54bb77ece403d9d0c378f54123dd2f006073a7161140d1d7ca2357349c1e9a"
     }
   ]

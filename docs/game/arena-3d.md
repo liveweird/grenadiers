@@ -48,6 +48,28 @@ admission baselines, backwards ticks and concealment/reappearance reset presenta
 Persistent epochs preserve those resets even when React coalesces multiple updates.
 Bomb pulses use received fuse facts; the renderer does not decrement a fuse or effect timer.
 
+## Death animation
+
+Each uniform and the mob have four separate knockout poses in the artist sheet. Normal
+playback lasts 600ms, at 150ms per pose; reduced motion shows only the collapsed pose for
+180ms. The detached sprite and shadow then disappear. These are cosmetic cues: elimination,
+collision removal, scoring, bomb ownership and round transitions happen immediately on the server.
+
+Player cues require a fresh elimination event and that recipient's currently visible dead
+actor position. A cloaked opponent's hidden row cannot supply a death position, so no spatial
+cue is drawn for that recipient. Events are latched before React can coalesce client callbacks.
+Mob cues use the last public pose when a mob disappears from tightly continuous snapshots of
+the same round and lair; fire is the only in-round mob removal. A long publication gap suppresses
+this inferred pose instead of showing an old location. Round-ending and match-winning blasts
+can show player and mob cues together.
+
+Death playback expires using local presentation time even if no further snapshot arrives.
+Duplicate events cannot restart it. Admission/reconnect, room/round replacement, backwards
+timelines, suspension and reduced-motion preference changes purge existing cues. A final kill
+still animates when the authoritative phase changes directly to a round or match result.
+Use `actor.<seat>.death.0` through `.3` and `mob.death.0` through `.3` for artist revisions;
+keep their common `(40,65)` foot anchor and per-appearance palettes.
+
 ## Renderer and artist checks
 
 The production build verifies its emitted module graph excludes Pixi reference drawing code.

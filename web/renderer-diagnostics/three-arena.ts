@@ -4,8 +4,9 @@ import { createThreeArenaRenderer } from '../src/game/arena/three/renderer'
 import { createArenaCamera, fitArenaCamera } from '../src/game/arena/three/camera'
 import { cellToWorld } from '../src/game/arena/three/coordinates'
 import {
-  threeArenaSnapshot, type BoardName, type SceneName,
+  threeArenaDeathSnapshot, threeArenaSnapshot, type BoardName, type SceneName,
 } from './three-arena-snapshots'
+import type { DeathAppearance } from '../src/game/arena/types'
 import {
   mountColorCalibration, type CalibrationSamples,
 } from './three-arena-calibration'
@@ -24,6 +25,11 @@ type FixtureState = {
 export type ThreeArenaDiagnosticApi = {
   initialize(): Promise<FixtureState>
   show(board: BoardName, scene: SceneName): Promise<FixtureState>
+  showDeath(board: BoardName, appearance: DeathAppearance, index: number): Promise<{
+    state: FixtureState
+    bornAt: number
+  }>
+  settleDeathAge(bornAt: number, ageMs: number): Promise<number>
   suspend(): Promise<FixtureState>
   destroy(): Promise<FixtureState>
   readState(): FixtureState
@@ -38,6 +44,12 @@ declare global {
 
 const nativeRequestAnimationFrame = window.requestAnimationFrame.bind(window)
 const nativeCancelAnimationFrame = window.cancelAnimationFrame.bind(window)
+const nativePerformanceNow = performance.now.bind(performance)
+let fixtureNow: number | null = null
+Object.defineProperty(performance, 'now', {
+  configurable: true,
+  value: (): number => fixtureNow ?? nativePerformanceNow(),
+})
 const pendingFrames = new Set<number>()
 window.requestAnimationFrame = (callback: FrameRequestCallback): number => {
   let handle = 0
@@ -120,6 +132,27 @@ async function show(nextBoard: BoardName, nextScene: SceneName): Promise<Fixture
   return readState()
 }
 
+async function showDeath(
+  nextBoard: BoardName,
+  appearance: DeathAppearance,
+  index: number,
+): Promise<{ state: FixtureState; bornAt: number }> {
+  await initialize()
+  board = nextBoard
+  scene = null
+  fixtureNow = nativePerformanceNow()
+  const bornAt = fixtureNow
+  renderer?.update(threeArenaDeathSnapshot(nextBoard, appearance, bornAt, index))
+  await settle(1)
+  return { state: readState(), bornAt }
+}
+
+async function settleDeathAge(bornAt: number, ageMs: number): Promise<number> {
+  fixtureNow = bornAt + ageMs
+  await settle(2)
+  return ageMs
+}
+
 async function suspend(): Promise<FixtureState> {
   renderer?.suspend()
   scene = null
@@ -178,5 +211,6 @@ window.addEventListener('pagehide', () => {
   disposeCalibration?.()
 }, { once: true })
 window.grenadiersThreeArena = {
-  initialize, show, suspend, destroy, readState, projectCell, loseAndRestoreContext, calibrateColors,
+  initialize, show, showDeath, settleDeathAge, suspend, destroy, readState, projectCell,
+  loseAndRestoreContext, calibrateColors,
 }

@@ -1,4 +1,4 @@
-import type { SnapshotMessage } from '../arena/types'
+import type { PresentationDeaths, SnapshotMessage } from '../arena/types'
 import type { GameClientState } from './clientTypes'
 
 const renderedPickups = new Set([
@@ -8,7 +8,9 @@ const renderedPickups = new Set([
 const effectTicks = (effects: { kind: string; remainingTicks: number }[], kind: string): number =>
   effects.find((effect) => effect.kind === kind)?.remainingTicks ?? 0
 
-export function presentSnapshot(state: GameClientState): SnapshotMessage | null {
+export function presentSnapshot(
+  state: GameClientState, presentationDeaths?: PresentationDeaths,
+): SnapshotMessage | null {
   const snapshot = state.snapshot
   if (!snapshot) return null
   const own = snapshot.state.actors.find((actor) => actor.seat === state.youSeat)
@@ -17,6 +19,7 @@ export function presentSnapshot(state: GameClientState): SnapshotMessage | null 
   const visibleBombs = bombsHidden ? [] : snapshot.state.bombs
   const baseline = state.admissionBaseline
   return {
+    ...(presentationDeaths ? { presentationDeaths } : {}),
     room: {
       roomId: snapshot.room.roomId,
       roundId: snapshot.room.roundId,

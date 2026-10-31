@@ -1,4 +1,6 @@
-import type { RenderablePickupKind, SnapshotMessage } from '../src/game/arena/types'
+import type {
+  DeathAppearance, RenderablePickupKind, SnapshotMessage,
+} from '../src/game/arena/types'
 import { RENDERABLE_PICKUP_KINDS } from '../src/game/arena/types'
 import { gameSnapshot } from '../src/test/game-snapshot'
 
@@ -129,6 +131,38 @@ export function threeArenaSnapshot(board: BoardName, scene: SceneName): Snapshot
     snapshot.state.actors = [actor(10, 'one', scene === 'teleportA' ? 1 : snapshot.state.arena.width - 2,
       scene === 'teleportA' ? 1 : snapshot.state.arena.height - 2)]
     snapshot.state.actors[0].lastTeleportTick = scene === 'teleportA' ? null : 11
+  }
+  return snapshot
+}
+
+export function threeArenaDeathSnapshot(
+  board: BoardName,
+  appearance: DeathAppearance,
+  bornAt: number,
+  index: number,
+): SnapshotMessage {
+  const snapshot = base(board)
+  const cells = [
+    { column: 1, row: 2 },
+    { column: 3, row: 2 },
+    { column: 5, row: 2 },
+    { column: 7, row: 2 },
+    { column: 9, row: 2 },
+  ]
+  const cell = cells[index % cells.length]
+  snapshot.presentationDeaths = {
+    epoch: index + 1,
+    sequence: 1,
+    cues: [{
+      key: `diagnostic:${appearance}:${index}`,
+      appearance,
+      entityId: 100 + index,
+      position: { x: (cell.column + 0.5) * 1024, y: (cell.row + 0.5) * 1024 },
+      heading: 'south',
+      tick: 1,
+      index,
+      bornAt,
+    }],
   }
   return snapshot
 }

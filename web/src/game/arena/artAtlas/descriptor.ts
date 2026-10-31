@@ -122,6 +122,21 @@ function addExtensions(frames: ArtFrame[]): void {
   for (const id of MATERIAL_FRAME_IDS) addFrame(frames, id)
 }
 
+function addDeathFrames(frames: ArtFrame[]): void {
+  for (const appearance of APPEARANCES) {
+    for (const pose of [0, 1, 2, 3] as const) {
+      addFrame(frames, `actor.${appearance}.death.${pose}`, {
+        size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
+      })
+    }
+  }
+  for (const pose of [0, 1, 2, 3] as const) {
+    addFrame(frames, `mob.death.${pose}`, {
+      size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
+    })
+  }
+}
+
 function animations(): Readonly<Record<string, ArtAnimation>> {
   const result: Record<string, ArtAnimation> = {
     flame: { frameIds: ['effect.flame.0', 'effect.flame.1'], frameDurationMs: 80, reducedMotionFrame: 'effect.flame.0' },
@@ -135,10 +150,19 @@ function animations(): Readonly<Record<string, ArtAnimation>> {
         frameDurationMs: 110, reducedMotionFrame: `${prefix}.0`,
       }
     }
+    const prefix = `actor.${appearance}.death`
+    result[prefix] = {
+      frameIds: [0, 1, 2, 3].map((pose) => `${prefix}.${pose}`),
+      frameDurationMs: 150, reducedMotionFrame: `${prefix}.3`,
+    }
   }
   for (const blast of ['standard', 'piercing', 'power'] as const) result[`bomb.timed.${blast}.pulse`] = {
     frameIds: [`bomb.shell.timed.${blast}`, `bomb.shell.timed.${blast}.1`, `bomb.shell.timed.${blast}.2`],
     frameDurationMs: 110, reducedMotionFrame: `bomb.shell.timed.${blast}`,
+  }
+  result['mob.death'] = {
+    frameIds: [0, 1, 2, 3].map((pose) => `mob.death.${pose}`),
+    frameDurationMs: 150, reducedMotionFrame: 'mob.death.3',
   }
   return result
 }
@@ -149,6 +173,7 @@ export function createArtDescriptor(): ArtDescriptor {
   const frames: ArtFrame[] = []
   addOriginalFrames(frames)
   addExtensions(frames)
+  addDeathFrames(frames)
   return {
     frames,
     animations: animations(),

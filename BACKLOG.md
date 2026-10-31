@@ -51,7 +51,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   item frequency/pools/weights and configurable effect durations. Existing numeric controls,
   item switches and creator/readiness/rematch policies are already implemented; see
   [settings](docs/game/settings.md). New cross-field combinations need explicit validation.
-- [new] **Further art.** Beyond the confirmed walking and bomb frames, consider idle/death
+- [new] **Further art.** Beyond the walking, bomb and death frames, consider idle
   animation, environment detail, layered authoring sources, accessibility and measured effects
   budgets. Follow the [artist handoff](assets/art/README.md).
 - [new] **AUTO-PUNCH — consider automatic contact Punch.** The current idea is at most one

@@ -2,6 +2,7 @@ import type { ArtManifest, PixelBuffer, RuntimeArtManifest } from './types'
 
 const PNG_SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10] as const
 const MAX_RGBA_BYTES = 16 * 1024 * 1024
+const MAX_AUTHORING_DIMENSION = 2128
 
 function assertPngHeader(bytes: Uint8Array): { width: number; height: number } {
   if (bytes.length > MAX_RGBA_BYTES) {
@@ -16,9 +17,10 @@ function assertPngHeader(bytes: Uint8Array): { width: number; height: number } {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   const width = view.getUint32(16)
   const height = view.getUint32(20)
-  if (width === 0 || height === 0 || width > 2048 || height > 2048
+  if (width === 0 || height === 0
+    || width > MAX_AUTHORING_DIMENSION || height > MAX_AUTHORING_DIMENSION
     || width * height * 4 > MAX_RGBA_BYTES) {
-    throw new Error('PNG dimensions exceed the 2048px or 16MiB RGBA decode budget')
+    throw new Error('PNG dimensions exceed the 2128px authoring or 16MiB RGBA decode budget')
   }
   return { width, height }
 }

@@ -14,6 +14,22 @@ export const RENDERABLE_PICKUP_KINDS = pickupKinds([
   'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame',
   'longFuse', 'reverseControls', 'invisibleBombs', 'teleporter',
 ] as const)
+export type DeathAppearance = Seat | 'mob'
+export interface PresentationDeathCue {
+  key: string
+  appearance: DeathAppearance
+  entityId: number
+  position: { x: number; y: number }
+  heading: Direction
+  tick: number
+  index: number
+  bornAt: number
+}
+export interface PresentationDeaths {
+  epoch: number
+  sequence: number
+  cues: readonly PresentationDeathCue[]
+}
 interface PresentedActor {
   id: number
   seat: Seat
@@ -58,6 +74,7 @@ interface PresentedBomb {
 }
 
 export interface SnapshotMessage {
+  presentationDeaths?: PresentationDeaths
   room: {
     roomId: string
     roundId: number

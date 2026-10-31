@@ -7,6 +7,7 @@ import { makeLair, makeMob } from '../lairArt'
 import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
 import { createArtDescriptor, MATERIAL_FRAME_IDS } from './descriptor'
 import { makeMaterialFrame } from './materialArtwork'
+import { poseDeathArtwork } from './deathArtwork'
 import type { ArtCatalog, ArtCatalogEntry } from './types'
 
 type DrawingFactory = () => { drawing: Container; owner?: Container }
@@ -167,6 +168,25 @@ function addTimedBombPoses(entries: ArtCatalogEntry[]): void {
   }
 }
 
+function addDeathArtwork(entries: ArtCatalogEntry[]): void {
+  for (const appearance of ['one', 'two', 'three', 'four'] as const) {
+    for (const frame of [0, 1, 2, 3] as const) {
+      entries.push(entry(`actor.${appearance}.death.${frame}`, entries.length, () => {
+        const actor = makeActor(appearance)
+        return {
+          drawing: poseDeathArtwork(actor.poses.south[0], frame),
+          owner: actor.root,
+        }
+      }))
+    }
+  }
+  for (const frame of [0, 1, 2, 3] as const) {
+    entries.push(entry(`mob.death.${frame}`, entries.length, () => ({
+      drawing: poseDeathArtwork(makeMob('south'), frame),
+    })))
+  }
+}
+
 export function createArtCatalog(): ArtCatalog {
   const entries: ArtCatalogEntry[] = []
   addTerrain(entries)
@@ -186,6 +206,7 @@ export function createArtCatalog(): ArtCatalog {
   for (const id of MATERIAL_FRAME_IDS) {
     entries.push(entry(id, entries.length, () => ({ drawing: makeMaterialFrame(id) })))
   }
+  addDeathArtwork(entries)
   if (entries.length !== DESCRIPTOR.frames.length) {
     throw new Error(`Drawing catalogue supplies ${entries.length} of ${DESCRIPTOR.frames.length} canonical frames`)
   }

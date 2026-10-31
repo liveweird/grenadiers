@@ -30,7 +30,7 @@ files:
 - `arena-guides.png` — raster copy of the separate guide/label layer;
 - `arena-overview.png` — labelled visual inventory on a checkerboard background.
 
-The 1120×1904 authoring sheet has 170 physical cells: 165 assigned entries (161 baseline
+The 1120×2128 authoring sheet has 190 physical cells: 185 assigned entries (181 baseline
 drawings and four blank reserved entries), plus five unassigned transparent cells. Cells are 112×112
 pixels in ten columns. Logical arena tiles remain 48×48 pixels. Reserved and unassigned cells must
 stay transparent. Do not move or rename assigned entries; new catalogue IDs must be added in code
@@ -57,7 +57,7 @@ npm --prefix e2e run art:export -- \
 Add `--slices` to emit optional named files under `target/art-atlas/slices/`. Runtime output is
 generated and ignored rather than an artist source. Its main files are `arena-atlas.png`,
 `arena-atlas.json`, `arena-overview.png` and `arena-preview.png`. The runtime texture contains the
-161 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
+181 baseline frames, unrotated and untrimmed, with two-pixel extrusion and two-pixel transparent
 padding. Labels and guides never enter the runtime texture.
 
 Both commands refuse an existing output directory, so an artist source or earlier review cannot
@@ -75,7 +75,8 @@ target after review.
 - Paint only inside each baseline frame rectangle. Slot gutters and reserved frames must remain
   transparent.
 - A frame pivot preserves its drawing origin and must equal `(-localBounds.x,
-  -localBounds.y)`. All 64 directional actor poses retain the shared `(40, 65)` foot anchor.
+  -localBounds.y)`. All directional and death actor/mob frames retain the shared `(40, 65)` foot
+  anchor.
 - Keep IDs path-safe and stable. The exporter rejects missing, duplicate, unexpected or path-like
   IDs, changed required animations, invalid dimensions and texture-budget overflow.
 - Flame frames must reach all four edges so adjacent rays join. The procedural template's
@@ -99,10 +100,30 @@ poses. Keep their fuse attachment aligned with the separate spark. Gameplay sele
 poses from remaining fuse ticks; fixed manifest timing is an authoring preview. Remote bombs
 and landmines retain their original single drawing. Reduced motion uses original pose zero.
 
+### Death frame authoring
+
+The final twenty assigned slots contain `actor.<appearance>.death.0` through `.3` for all four
+appearances, followed by `mob.death.0` through `.3`. Every death drawing stays inside its 80×80
+frame with local bounds `(-40, -44, 80, 80)`, pivot `(40, 44)` and foot anchor `(40, 65)`.
+Preserve all earlier frame rectangles and the four historical blank reservations; the new death
+frames are appended baseline artwork and do not replace those reserved IDs.
+
+Author four distinct stages that read as one fall/defeat sequence at 150ms per frame. Keep the
+character identity, palette, hard pixel edges and ground contact coherent between stages. Frame
+`.3` is the reduced-motion still, so it must be a stable terminal pose rather than an intermediate
+blur or flash. The procedural template uses transformed existing actor and mob drawings only as
+meaningful placement references; adopted source artwork remains authoritative.
+
 Start an art revision from the canonical pair or the published artist bundle. `art:template`
 produces the procedural reference; it does not reproduce or overwrite the adopted redraw.
 
 ## Provenance
+
+The twenty death poses were generated with OpenAI's built-in `image_gen`, using the existing
+four uniforms and mob as identity references, then normalized with owner-authorized Canvas
+processing. They retain each appearance's palette and the shared ground anchor. Existing
+assigned artwork is unchanged. See the [death prompts and import rules](death-prompts.md);
+repository licensing applies.
 
 The adopted source is a Napoleonic redraw, AI-generated with ChatGPT (OpenAI) and supplied by
 the repository owner. Player one wears an orange-and-white uniform with a plumed shako, player
@@ -163,7 +184,7 @@ frame IDs, dimensions, pivots, anchors and animation metadata remain unchanged.
 
 ## 3D material maps
 
-The final ten assigned slots are shared, artist-editable 48×48 maps for the Three.js arena:
+The ten `material.*` slots are shared, artist-editable 48×48 maps for the Three.js arena:
 
 - `material.floor.top.0` and `material.floor.top.1`;
 - `material.wall.top` and `material.wall.side`;

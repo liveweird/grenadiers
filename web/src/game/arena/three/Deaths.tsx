@@ -37,9 +37,10 @@ function DeathCard({ cue, atlas, reducedMotion }: DeathCardProps) {
       position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]}
       faceCamera={false} depthTest renderOrder={2} scale={1.35 / 48}
     />
+    {/* Clear hazard overlays (up to order 13), while higher status cues remain visible. */}
     <Billboard
       atlas={atlas} frameId={frameAt(cue.bornAt)} anchor="feet"
-      position={[0, 0, 0]} scale={1.35 / 48} frameAt={frameAt}
+      position={[0, 0, 0]} scale={1.35 / 48} frameAt={frameAt} renderOrder={14}
     />
   </group>
 }

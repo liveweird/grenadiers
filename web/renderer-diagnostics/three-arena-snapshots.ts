@@ -6,6 +6,7 @@ import { gameSnapshot } from '../src/test/game-snapshot'
 
 export type BoardName = 'small' | 'medium' | 'large'
 export type SceneName = 'empty' | 'actorBomb' | 'showcase' | 'teleportA' | 'teleportB' | 'newRoom'
+export type DeathOverlay = 'none' | 'flame' | 'burningOil'
 
 const BOARDS = {
   small: { width: 11 as const, height: 9 as const },
@@ -163,6 +164,35 @@ export function threeArenaDeathSnapshot(
       index,
       bornAt,
     }],
+  }
+  return snapshot
+}
+
+export function threeArenaDeathOverlapSnapshot(
+  overlay: DeathOverlay,
+  includeDeath: boolean,
+  bornAt: number,
+  generation: number,
+): SnapshotMessage {
+  const snapshot = base('large')
+  const cell = { column: 1, row: 2 }
+  if (overlay === 'flame') snapshot.state.flames = [{ cell, expiresAt: 999 }]
+  if (overlay === 'burningOil') snapshot.state.oilBarrels = [{ cell, state: 'burning' }]
+  if (includeDeath) {
+    snapshot.presentationDeaths = {
+      epoch: 100 + generation,
+      sequence: 1,
+      cues: [{
+        key: `diagnostic:overlap:${generation}`,
+        appearance: 'one',
+        entityId: 200 + generation,
+        position: { x: 1.5 * 1024, y: 2.5 * 1024 },
+        heading: 'south',
+        tick: 1,
+        index: generation,
+        bornAt,
+      }],
+    }
   }
   return snapshot
 }

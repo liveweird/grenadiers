@@ -17,6 +17,8 @@ pub const MAX_LAIRS: usize = 2;
 pub const MAX_MOBS: usize = 16;
 pub const MOB_UNITS_PER_SECOND: u16 = 1_536;
 
+#[path = "lair_damage.rs"]
+mod damage;
 #[path = "lair_navigation.rs"]
 mod navigation;
 pub(crate) use navigation::{
@@ -186,39 +188,6 @@ impl LairState {
             .collect()
     }
 
-    pub(crate) fn kill_on_fire(&mut self, world: &World, tick: Tick) -> Result<(), ()> {
-        let mut killed_lairs = BTreeSet::new();
-        for mob in &self.mobs {
-            if world
-                .committed_fire_cells()
-                .any(|cell| movement::position_overlaps_cell(mob.position, cell))
-            {
-                killed_lairs.insert(usize::from(mob.lair));
-            }
-        }
-        let replacement =
-            if self.lifecycle == LairLifecycle::ReplaceOnDeath && !killed_lairs.is_empty() {
-                Some(Tick(
-                    tick.0.checked_add(self.settings.spawn_ticks()).ok_or(())?,
-                ))
-            } else {
-                None
-            };
-        self.mobs.retain(|mob| {
-            !world
-                .committed_fire_cells()
-                .any(|cell| movement::position_overlaps_cell(mob.position, cell))
-        });
-        if let Some(next_spawn_at) = replacement {
-            for index in killed_lairs {
-                if self.living_mobs(index) == 0 {
-                    self.lairs[index].next_spawn_at = Some(next_spawn_at);
-                }
-            }
-        }
-        Ok(())
-    }
-
     pub(crate) fn mine_contacts(
         &self,
         world: &World,
@@ -245,6 +214,7 @@ impl LairState {
         actors: &[Actor],
         tick: Tick,
         ids: &mut impl Iterator<Item = EntityId>,
+        forbidden: &BTreeSet<CellId>,
     ) -> Result<usize, ()> {
         let mut spawned = 0;
         for index in 0..MAX_LAIRS {
@@ -267,7 +237,7 @@ impl LairState {
             }
             let Some(cell) = (0..4)
                 .map(|offset| adjacent(self.lairs[index].cell, (start + offset) % 4))
-                .find(|&cell| spawn_is_clear(cell, world, actors, &self.mobs, tick))
+                .find(|&cell| spawn_is_clear(cell, world, actors, &self.mobs, tick, forbidden))
             else {
                 continue;
             };
@@ -358,8 +328,16 @@ fn direction_toward(position: Position, target: Position) -> Direction {
     }
 }
 
-fn spawn_is_clear(cell: CellId, world: &World, actors: &[Actor], mobs: &[Mob], tick: Tick) -> bool {
+fn spawn_is_clear(
+    cell: CellId,
+    world: &World,
+    actors: &[Actor],
+    mobs: &[Mob],
+    tick: Tick,
+    forbidden: &BTreeSet<CellId>,
+) -> bool {
     traversable(cell, world, &BTreeSet::new(), tick)
+        && !forbidden.contains(&cell)
         && world.oil.state(cell).is_none()
         && !actors
             .iter()

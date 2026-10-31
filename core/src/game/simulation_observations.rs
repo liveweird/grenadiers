@@ -85,6 +85,11 @@ impl State {
             .map_or_else(Vec::new, |lairs| lairs.mob_views(frozen))
     }
 
+    #[must_use]
+    pub fn spike_pits(&self) -> Option<Vec<crate::game::SpikePitView>> {
+        self.spike_pits.as_ref().map(|pits| pits.views())
+    }
+
     pub(super) fn bomb_event_audience_for(&self, id: EntityId, at: Tick) -> EventAudience {
         let mut audience = self
             .actors

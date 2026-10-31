@@ -97,43 +97,41 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.1.7 — 2026-10-31
+## v1.1.8 — 2026-10-31
 
-Add dormant spike-pit core primitives: checked warning/raised clocks, strict positive-area
-contact helpers and deterministic symmetric clear-floor placement. No live profile selects
-these APIs yet. Spike simulation, transport, AI and visuals remain separate integration work.
-The [core guide](game/spike-pit-core.md) defines the implemented library invariants.
+Add opt-in rules10 spike-pit simulation: contact arms a warning, raised spikes use normal
+protection and damage, and retraction resets the trap. Movement traces, forced movement,
+Teleporter destinations, mob deaths/respawns and transactional failures are covered.
+The [core guide](game/spike-pit-core.md) documents the library behavior.
 
 ### Verification
 
-Accepted source: `676f2a3e94bbd1cf3fd40113092ef8a3f8709c87`,
-[PR #298](https://github.com/liveweird/grenadiers/pull/298). Independent review found and
-resolved same-tick retraction rearming and undefined stale-tick behavior. Updates and forecasts
-now enforce a checked horizon; both deadline additions are atomic.
+Accepted candidate: `5207a45cff9052a79c1004f81750900118a8aee6`,
+[PR #299](https://github.com/liveweird/grenadiers/pull/299).
+Independent review resolved dead-mob trace damage and unnecessary legacy trace cloning.
 
-- Twelve focused regressions pass in debug/release. Full core passes 1,594 tests plus two
-  doctests in each profile. Formatting and strict all-target core Clippy pass.
-- Isolated core-only coverage passes the unchanged 90% floor at 92.87% lines. An initial
-  shared-target report mixed stale objects from other worktrees and unexecuted server objects;
-  the isolated report measures only the tested core. No repository exclusion or floor changes.
-- Distinct Linux debug/release core/server coverage passes in
-  [the platform run](https://github.com/liveweird/grenadiers/actions/runs/41224893047).
-- The built image passes Compose duel/auth/CPU, disabled diagnostics, all-on visual smoke
-  and Kubernetes duel/auth/runtime checks. Owned test stacks and namespace are removed.
-  Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL findings.
-- All image web files equal the v1.1.6 verified frontend. Reuse its full web/coverage,
-  native graphics, E2E-static, artwork and dependency acceptance: those inputs are unchanged.
-  No existing live rules, generation or protocol behavior changes.
+- Full core debug and release pass: 1,613 tests plus two doctests each. Strict Clippy,
+  formatting and isolated core coverage pass; line coverage is 92.99% against the 90% floor.
+- Distinct [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41228101948)
+  pass for this candidate.
+- Exact-image Compose duel/authentication: 2/2 pass; Kubernetes duel/authentication: 2/2 pass.
+  Restricted runtime/security checks pass and owned test resources are removed.
+- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL vulnerabilities. All five served web
+  files equal the verified v1.1.6 frontend; its unchanged web, graphics and dependency
+  acceptance is reused.
 
 ### Operation
 
-Exact accepted image:
-`sha256:f0d8c16222afc059b902e0ac2a94227133858fea469b7ead32c66d76f7126e70`,
-labelled 1.1.7/source 676f2a3e. It is available locally as `grenadiers:spike-foundation-v117`.
-Localhost:8085 retains the accepted v1.1.6 blood-pool image while the remaining spike-pit pieces
-are integrated. The running game's behavior and artist sheet are unchanged by this foundation.
+Accepted local image:
+`sha256:d5d70081f399697483e53a4a36be5a1183b63a78627c6813d15f9f7a46bf5e4e`,
+labelled 1.1.8/source 5207a45c, tagged `grenadiers:spike-physics-v118`.
+Live transport remains gameplay17/rules9/CPU25. Localhost:8085 stays on the accepted v1.1.6
+blood-pool image until the paired spike contract, AI and presentation are ready.
 The [v1.1.6 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.6/grenadiers-artist-v1.1.6.zip)
-remains current. This source release does not enable spike pits in playable matches.
+remains current. This library increment does not enable playable spike pits.
+
+<a id="v117--2026-10-31"></a>
+The [v1.1.7 record](history/releases.md#v117--2026-10-31) is preserved in release history.
 
 <a id="v116--2026-10-31"></a>
 The [v1.1.6 record](history/releases.md#v116--2026-10-31) is preserved in release history.

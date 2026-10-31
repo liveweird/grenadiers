@@ -2,6 +2,7 @@ use super::{
     Actor, ActorInit, LairState, PlayerCount, RoundAssignment, RulesConfig, State, StateError,
     StormCloudState, Tick, World, contacts, movement, random, validation,
 };
+use crate::room::SpikePitConfig;
 use std::collections::BTreeSet;
 
 impl State {
@@ -160,6 +161,19 @@ impl State {
             &world.arena,
             tick,
         )?;
+        let spike_pits = match rules.spike_pit_config() {
+            SpikePitConfig::Disabled => None,
+            enabled @ SpikePitConfig::Enabled(_) => {
+                let lair_cells = lairs
+                    .as_ref()
+                    .map(|_| crate::game::lair_layout_v1(world.arena.board()).to_vec())
+                    .unwrap_or_default();
+                let excluded = lair_cells
+                    .into_iter()
+                    .chain(world.oil_barrels().map(|(cell, _)| cell));
+                super::SpikePitState::new(enabled, &world.arena, excluded, tick)
+            }
+        };
         Ok(Self {
             rules,
             world,
@@ -175,6 +189,7 @@ impl State {
             randomness: (rules.version() >= 6).then_some(randomness).flatten(),
             storm_cloud,
             lairs,
+            spike_pits,
         })
     }
 }

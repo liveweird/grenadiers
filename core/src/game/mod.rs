@@ -97,7 +97,7 @@ pub use simulation::{
 pub(crate) use simulation::{stationary_contact_entry, stationary_sweep_contact};
 pub use spike_pits::{
     MAX_SPIKE_PITS, SPIKE_PIT_LAYOUT_VERSION, SpikePitClock, SpikePitClockError, SpikePitPhase,
-    SpikePitRaisedInterval, position_contacts_spike_pit, segment_contacts_spike_pit,
+    SpikePitRaisedInterval, SpikePitView, position_contacts_spike_pit, segment_contacts_spike_pit,
     spike_pit_layout_v1, trace_contacts_spike_pit, traces_contact_spike_pit,
 };
 pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};

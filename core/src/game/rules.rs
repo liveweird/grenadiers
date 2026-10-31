@@ -1,5 +1,5 @@
 use super::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL};
-use crate::room::{LairConfig, RespawnLairConfig, RoomSettings};
+use crate::room::{LairConfig, RespawnLairConfig, RoomSettings, SpikePitConfig};
 
 const FORGIVING_TURN_ASSIST: i32 = 256;
 
@@ -44,6 +44,7 @@ pub struct RulesConfig {
     round_ticks: u64,
     storm_cloud_config: StormCloudConfig,
     lair_config: LairConfig,
+    spike_pit_config: SpikePitConfig,
     mob_navigation_policy: MobNavigationPolicy,
 }
 
@@ -67,6 +68,7 @@ impl RulesConfig {
             round_ticks: 10_800,
             storm_cloud_config: StormCloudConfig::Disabled,
             lair_config: LairConfig::Disabled,
+            spike_pit_config: SpikePitConfig::Disabled,
             mob_navigation_policy: MobNavigationPolicy::LegacyV1,
         }
     }
@@ -176,6 +178,43 @@ impl RulesConfig {
         }
     }
 
+    /// Headless environment profile with opt-in spike pits.
+    #[must_use]
+    pub const fn environment_v10(
+        settings: RoomSettings,
+        clouds: StormCloudConfig,
+        lairs: RespawnLairConfig,
+        spike_pits: SpikePitConfig,
+    ) -> Self {
+        Self::environment_v10_with_mob_navigation(
+            settings,
+            clouds,
+            lairs,
+            spike_pits,
+            MobNavigationPolicy::LegacyV1,
+        )
+    }
+
+    #[must_use]
+    pub const fn environment_v10_with_mob_navigation(
+        settings: RoomSettings,
+        clouds: StormCloudConfig,
+        lairs: RespawnLairConfig,
+        spike_pits: SpikePitConfig,
+        mob_navigation_policy: MobNavigationPolicy,
+    ) -> Self {
+        Self {
+            version: 10,
+            spike_pit_config: spike_pits,
+            ..Self::environment_v9_with_mob_navigation(
+                settings,
+                clouds,
+                lairs,
+                mob_navigation_policy,
+            )
+        }
+    }
+
     #[must_use]
     pub const fn mob_navigation_policy(self) -> MobNavigationPolicy {
         self.mob_navigation_policy
@@ -184,6 +223,11 @@ impl RulesConfig {
     #[must_use]
     pub const fn lair_config(self) -> LairConfig {
         self.lair_config
+    }
+
+    #[must_use]
+    pub const fn spike_pit_config(self) -> SpikePitConfig {
+        self.spike_pit_config
     }
 
     #[must_use]

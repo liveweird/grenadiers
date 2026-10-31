@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.1.8 — 2026-10-31
+
+- Add explicit opt-in rules10 spike-pit simulation, preserving older profiles: phased contact
+  damage, protection, mob respawns, destination-only teleport contact and atomic tick rollback.
+
 ## 1.1.7 — 2026-10-31
 
 - Add dormant spike-pit timing, contact and symmetric placement primitives, with checked

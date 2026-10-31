@@ -16,11 +16,31 @@ pub enum SpikePitPhase {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SpikePitView {
+    pub cell: CellId,
+    pub phase: SpikePitPhase,
+    pub remaining_ticks: u64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SpikePitClockError {
     DeadlineOverflow,
-    NonMonotonicUpdate { at: Tick, last_updated_at: Tick },
-    PastTickQuery { at: Tick, last_updated_at: Tick },
+    InvalidRemainingTicks {
+        phase: SpikePitPhase,
+        remaining_ticks: u64,
+    },
+    NonMonotonicUpdate {
+        at: Tick,
+        last_updated_at: Tick,
+    },
+    PastTickQuery {
+        at: Tick,
+        last_updated_at: Tick,
+    },
 }
+
+#[path = "spike_pits/observation.rs"]
+mod observation;
 
 /// The half-open interval during which one armed pit is raised.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

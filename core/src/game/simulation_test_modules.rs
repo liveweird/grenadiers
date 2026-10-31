@@ -106,6 +106,12 @@ mod storm_contact_tests;
 mod storm_golden_tests;
 #[path = "storm_test_support.rs"]
 mod storm_test_support;
+#[path = "spike_pit_state_tests.rs"]
+mod spike_pit_state_tests;
+#[path = "spike_pit_contact_tests.rs"]
+mod spike_pit_contact_tests;
+#[path = "spike_pit_mob_tests.rs"]
+mod spike_pit_mob_tests;
 #[path = "simulation/teleporter_acceptance_tests.rs"]
 mod teleporter_acceptance_tests;
 #[path = "simulation/teleporter_route_tests.rs"]

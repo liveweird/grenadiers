@@ -12,6 +12,16 @@ use std::collections::BTreeSet;
 
 impl State {
     pub fn step(&mut self, inputs: &[SeatInput]) -> Result<StepReport, StepError> {
+        if self.rules.version() >= 10 {
+            let mut staged = self.clone();
+            let report = staged.step_tick(inputs)?;
+            *self = staged;
+            return Ok(report);
+        }
+        self.step_tick(inputs)
+    }
+
+    fn step_tick(&mut self, inputs: &[SeatInput]) -> Result<StepReport, StepError> {
         if inputs.len() > super::MAX_INPUTS_PER_TICK {
             return Err(StepError::TooManyInputs {
                 count: inputs.len(),
@@ -68,15 +78,17 @@ impl State {
 
         // Rules 8 adds a fallible post-settlement entity allocation, so it retains a transaction
         // snapshot. Closed profiles keep the narrower timed-pickup rollback condition.
-        let rollback = (self.rules.version() >= 8)
+        let rollback = (self.rules.version() >= 8 && self.rules.version() < 10)
             .then(|| self.clone())
             .or_else(|| {
-                self.world
-                    .pickups
-                    .iter()
-                    .filter_map(|(_, kind)| kind.timed_effect())
-                    .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none())
-                    .then(|| self.clone())
+                (self.rules.version() < 10
+                    && self
+                        .world
+                        .pickups
+                        .iter()
+                        .filter_map(|(_, kind)| kind.timed_effect())
+                        .any(|effect| next_tick.0.checked_add(effect.duration_ticks()).is_none()))
+                .then(|| self.clone())
             });
         let cloud_movement = self.advance_storm_cloud();
         let mut storm_contacts = self.storm_contacts_at_start(cloud_movement);
@@ -88,6 +100,7 @@ impl State {
         self.apply_timed_pause(&stopwatch);
         self.world.expose_flame_free_pickups(next_tick);
         self.reveal_safe_oil(next_tick);
+        self.advance_spike_pits_at_start(next_tick, &mut events, &mut shield_prevented)?;
         let motion = crate::game::bomb_motion::advance(&mut self.world, &self.actors, next_tick);
         for actor in &mut self.actors {
             actor.bomb_grace.retain(|id| !motion.moved.contains(id));
@@ -122,6 +135,13 @@ impl State {
             .collect();
         self.resolve_kick_requests(kick_requests);
         let forced_movements = self.resolve_shove(&outcomes, next_tick);
+        self.advance_spike_pits_for_player_traces(
+            &traces,
+            &forced_movements,
+            next_tick,
+            &mut events,
+            &mut shield_prevented,
+        )?;
         self.include_storm_movement_contacts(&mut storm_contacts, &traces, &forced_movements);
         let mut contact_targets = super::contacts::accepted_contact_ids(
             &self.world,
@@ -173,6 +193,19 @@ impl State {
             }
         };
         self.commit_teleport(teleport_requests, next_tick);
+        let teleported = self
+            .actors
+            .iter()
+            .enumerate()
+            .filter(|(_, actor)| actor.last_teleport_tick == Some(next_tick))
+            .map(|(index, actor)| (index, actor.position))
+            .collect::<Vec<_>>();
+        self.advance_spike_pits_for_positions(
+            &teleported,
+            next_tick,
+            &mut events,
+            &mut shield_prevented,
+        )?;
         self.apply_lair_endpoint_contacts(
             &mut contact_damaged,
             next_tick,
@@ -201,6 +234,7 @@ impl State {
                     return Err(error);
                 }
             };
+            self.advance_spike_pits_for_newborns(&ids[..spawned], next_tick)?;
             self.next_entity_id = if spawned == 0 {
                 allocator_before
             } else {

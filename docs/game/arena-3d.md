@@ -19,7 +19,8 @@ remain active throughout; server timing, gameplay state and player visibility do
 Reduced motion keeps a stationary camera. Admission into an ongoing round/result, reconnect,
 suspension, WebGL recovery and stale observations do not replay camera history. Resize retains
 the current sampled pose without accumulating rotations. The existing render loop owns the
-animation; it adds no timers, animation loops or GPU resources.
+animation; it adds no timers, animation loops or GPU resources. See the
+[native camera examples](../screenshots/round-camera.md).
 
 ## Characters and artwork
 

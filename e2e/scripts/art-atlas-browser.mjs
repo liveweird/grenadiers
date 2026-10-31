@@ -101,6 +101,83 @@ export async function createTemplateInBrowser(distDirectory) {
   }))
 }
 
+export async function extendMaterialsInBrowser(distDirectory, sourcePath, manifestPath) {
+  const [png, manifestJson] = await Promise.all([readFile(sourcePath), readFile(manifestPath, 'utf8')])
+  return withWorkbench(distDirectory, (page) => page.evaluate(async (request) => {
+    const api = globalThis.grenadiersArtAtlas
+    if (!api) throw new Error('Art atlas browser API is unavailable')
+    const originalManifest = JSON.parse(request.manifestJson)
+    const template = await api.createTemplate()
+    const templatePng = template.files.find(({ name }) => name === 'arena-source.png')
+    const templateJson = template.files.find(({ name }) => name === 'arena-source.json')
+    if (!templatePng?.base64 || !templateJson?.text) throw new Error('Template source files are unavailable')
+
+    const decode = async (base64) => {
+      const binary = atob(base64)
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0))
+      return globalThis.createImageBitmap(new Blob([bytes], { type: 'image/png' }))
+    }
+    const compareFrames = (before, after, width, frames) => {
+      let comparedBytes = 0
+      let differentBytes = 0
+      for (const frame of frames) {
+        const { x, y, width: frameWidth, height } = frame.sourceRect
+        for (let row = y; row < y + height; row += 1) {
+          const start = (row * width + x) * 4
+          const end = start + frameWidth * 4
+          for (let index = start; index < end; index += 1) {
+            comparedBytes += 1
+            if (before[index] !== after[index]) differentBytes += 1
+          }
+        }
+      }
+      return { comparedBytes, differentBytes }
+    }
+    const [original, generated] = await Promise.all([decode(request.pngBase64), decode(templatePng.base64)])
+    try {
+      if (original.width !== 1120 || original.height !== 1792) throw new Error('Original source must be 1120 × 1792')
+      if (generated.width !== 1120 || generated.height !== 1904) throw new Error('Extended template must be 1120 × 1904')
+      const canvas = globalThis.document.createElement('canvas')
+      canvas.width = generated.width
+      canvas.height = generated.height
+      const context = canvas.getContext('2d', { willReadFrequently: true })
+      if (!context) throw new Error('Canvas 2D is unavailable')
+      context.imageSmoothingEnabled = false
+      context.drawImage(original, 0, 0)
+      for (const frame of template.manifest.frames.filter(({ id }) => id.startsWith('material.'))) {
+        const { x, y, width, height } = frame.sourceRect
+        context.drawImage(generated, x, y, width, height, x, y, width, height)
+      }
+
+      const originalCanvas = globalThis.document.createElement('canvas')
+      originalCanvas.width = original.width
+      originalCanvas.height = original.height
+      const originalContext = originalCanvas.getContext('2d', { willReadFrequently: true })
+      if (!originalContext) throw new Error('Canvas 2D is unavailable')
+      originalContext.drawImage(original, 0, 0)
+      const before = originalContext.getImageData(0, 0, original.width, original.height).data
+      const after = context.getImageData(0, 0, canvas.width, canvas.height).data
+      const comparison = compareFrames(before, after, original.width, originalManifest.frames)
+      const blob = await new Promise((resolve, reject) => canvas.toBlob(
+        (value) => value ? resolve(value) : reject(new Error('Browser PNG encoding failed')),
+        'image/png',
+      ))
+      const output = new Uint8Array(await blob.arrayBuffer())
+      let binary = ''
+      for (let offset = 0; offset < output.length; offset += 0x8000) {
+        binary += String.fromCharCode(...output.subarray(offset, offset + 0x8000))
+      }
+      return {
+        pngBase64: btoa(binary), manifestJson: templateJson.text,
+        proof: { originalFrames: originalManifest.frames.length, ...comparison },
+      }
+    } finally {
+      original.close()
+      generated.close()
+    }
+  }, { pngBase64: png.toString('base64'), manifestJson }))
+}
+
 export async function exportInBrowser(distDirectory, sourcePath, manifestPath, slices) {
   const [png, manifestJson] = await Promise.all([readFile(sourcePath), readFile(manifestPath, 'utf8')])
   if (png.byteLength > 32 * 1024 * 1024) throw new Error('Compressed source PNG exceeds the 32MiB input limit')

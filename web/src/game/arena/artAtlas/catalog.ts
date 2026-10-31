@@ -1,36 +1,21 @@
 import { Graphics, type Container } from 'pixi.js'
 import { makeActor } from '../actorArt'
-import { WALK_CYCLE, WALK_FRAME_DURATION_MS } from '../actorAnimation'
 import { makeBomb, makeFlame, makeOilBarrel, makePickup } from '../entityArt'
 import { makeBlock, makeFloorVariant, makeWallVariant } from '../terrainArt'
 import { makeStormCloud } from '../weatherArt'
 import { makeLair, makeMob } from '../lairArt'
 import { RENDERABLE_PICKUP_KINDS, type Direction, type Seat } from '../types'
-import { sourceFrame } from './layout'
-import type { ArtAnimation, ArtCatalog, ArtCatalogEntry, ArtFrame, ArtRect } from './types'
+import { createArtDescriptor, MATERIAL_FRAME_IDS } from './descriptor'
+import { makeMaterialFrame } from './materialArtwork'
+import type { ArtCatalog, ArtCatalogEntry } from './types'
 
-type FrameOptions = {
-  size?: 48 | 80
-  bounds?: ArtRect
-  pivot?: { x: number; y: number }
-  footAnchor?: { x: number; y: number }
-  opacity?: number
-  status?: ArtFrame['status']
-}
 type DrawingFactory = () => { drawing: Container; owner?: Container }
 
-const TILE_BOUNDS = { x: 0, y: 0, width: 48, height: 48 }
-const ACTOR_BOUNDS = { x: -40, y: -44, width: 80, height: 80 }
-const ACTOR_PIVOT = { x: 40, y: 44 }
+const DESCRIPTOR = createArtDescriptor()
 
-function entry(id: string, slot: number, factory: DrawingFactory, options: FrameOptions = {}): ArtCatalogEntry {
-  const size = options.size ?? 48
-  const frame = sourceFrame(id, slot, { width: size, height: size }, options.bounds ?? TILE_BOUNDS, {
-    status: options.status ?? 'baseline',
-    pivot: options.pivot ?? { x: 0, y: 0 },
-    ...(options.footAnchor ? { footAnchor: options.footAnchor } : {}),
-    ...(options.opacity === undefined ? {} : { opacity: options.opacity }),
-  })
+function entry(id: string, slot: number, factory: DrawingFactory): ArtCatalogEntry {
+  const frame = DESCRIPTOR.frames[slot]
+  if (!frame || frame.id !== id) throw new Error(`Drawing catalogue slot ${slot} must provide ${frame?.id ?? 'no frame'}, got ${id}`)
   return {
     frame,
     createDrawing() {
@@ -85,15 +70,11 @@ function addActors(entries: ArtCatalogEntry[]): void {
     for (const direction of directions) {
       for (const frame of [0, 1] as const) {
         entries.push(entry(`actor.${seat}.${direction}.${frame}`, entries.length,
-          actorPart(seat, (actor) => actor.poses[direction][frame]), {
-            size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
-          }))
+          actorPart(seat, (actor) => actor.poses[direction][frame])))
       }
     }
   }
-  entries.push(entry('actor.shadow', entries.length, actorPart('one', (actor) => actor.shadow), {
-    size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, opacity: 0.3,
-  }))
+  entries.push(entry('actor.shadow', entries.length, actorPart('one', (actor) => actor.shadow)))
   const parts: ReadonlyArray<[string, (actor: ReturnType<typeof makeActor>) => Container]> = [
     ['protection', (actor) => actor.protection], ['shield', (actor) => actor.shield],
     ['stopwatch', (actor) => actor.stopwatch], ['frozen', (actor) => actor.frozen],
@@ -107,35 +88,29 @@ function addActors(entries: ArtCatalogEntry[]): void {
     ['cloak', (actor) => actor.cloak],
   ]
   for (const [id, select] of parts) {
-    entries.push(entry(`actor.cue.${id}`, entries.length, actorPart('one', select), {
-      size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT,
-    }))
+    entries.push(entry(`actor.cue.${id}`, entries.length, actorPart('one', select)))
   }
   for (let marker = 0; marker < 6; marker += 1) {
     entries.push(entry(`actor.cue.slowMarker.${marker + 1}`, entries.length,
-      actorPart('one', (actor) => actor.slowMarkers[marker]), {
-        size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT,
-      }))
+      actorPart('one', (actor) => actor.slowMarkers[marker])))
   }
 }
 
 function addBombsAndEffects(entries: ArtCatalogEntry[]): void {
-  const bombBounds = { x: -40, y: -40, width: 80, height: 80 }
-  const options = { size: 80 as const, bounds: bombBounds, pivot: { x: 40, y: 40 } }
   entries.push(entry('bomb.shadow', entries.length,
-    bombPart('standard', 'timed', (bomb) => bomb.shadow), { ...options, opacity: 0.28 }))
+    bombPart('standard', 'timed', (bomb) => bomb.shadow)))
   for (const trigger of ['timed', 'remote'] as const) {
     for (const blast of ['standard', 'piercing', 'power'] as const) {
       entries.push(entry(`bomb.shell.${trigger}.${blast}`, entries.length,
-        bombPart(blast, trigger, (bomb) => bomb.shell), options))
+        bombPart(blast, trigger, (bomb) => bomb.shell)))
     }
   }
   entries.push(entry('bomb.shell.contact.standard', entries.length,
-    bombPart('standard', 'contact', (bomb) => bomb.shell), options))
+    bombPart('standard', 'contact', (bomb) => bomb.shell)))
   entries.push(entry('bomb.spark', entries.length,
-    bombPart('standard', 'timed', (bomb) => bomb.spark), options))
+    bombPart('standard', 'timed', (bomb) => bomb.spark)))
   entries.push(entry('bomb.pause', entries.length,
-    bombPart('standard', 'timed', (bomb) => bomb.pause), options))
+    bombPart('standard', 'timed', (bomb) => bomb.pause)))
   for (const frame of [0, 1] as const) {
     entries.push(entry(`effect.flame.${frame}`, entries.length, () => {
       const flame = makeFlame()
@@ -155,9 +130,7 @@ function addPickupsAndReservations(entries: ArtCatalogEntry[]): void {
     entries.push(entry(`pickup.${kind}`, entries.length, () => ({ drawing: makePickup(kind) })))
   }
   for (const id of ['actor.one.death', 'actor.two.death', 'terrain.block.destruction', 'pickup.collection']) {
-    entries.push(entry(`reserved.${id}`, entries.length, () => ({ drawing: new Graphics() }), {
-      status: 'reserved',
-    }))
+    entries.push(entry(`reserved.${id}`, entries.length, () => ({ drawing: new Graphics() })))
   }
 }
 
@@ -167,9 +140,7 @@ function addAdditionalActorAppearances(entries: ArtCatalogEntry[]): void {
     for (const direction of directions) {
       for (const frame of [0, 1] as const) {
         entries.push(entry(`actor.${appearance}.${direction}.${frame}`, entries.length,
-          actorPart(appearance, (actor) => actor.poses[direction][frame]), {
-            size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
-          }))
+          actorPart(appearance, (actor) => actor.poses[direction][frame])))
       }
     }
   }
@@ -181,51 +152,19 @@ function addWalkingFrames(entries: ArtCatalogEntry[]): void {
     for (const direction of directions) {
       for (const frame of [2, 3] as const) {
         entries.push(entry(`actor.${appearance}.${direction}.${frame}`, entries.length,
-          actorPart(appearance, (actor) => actor.poses[direction][frame]), {
-            size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
-          }))
+          actorPart(appearance, (actor) => actor.poses[direction][frame])))
       }
     }
   }
 }
 
 function addTimedBombPoses(entries: ArtCatalogEntry[]): void {
-  const options = {
-    size: 80 as const, bounds: { x: -40, y: -40, width: 80, height: 80 },
-    pivot: { x: 40, y: 40 },
-  }
   for (const blast of ['standard', 'piercing', 'power'] as const) {
     for (const frame of [1, 2] as const) {
       entries.push(entry(`bomb.shell.timed.${blast}.${frame}`, entries.length,
-        bombPart(blast, 'timed', (bomb) => bomb.shellFrames![frame]), options))
+        bombPart(blast, 'timed', (bomb) => bomb.shellFrames![frame])))
     }
   }
-}
-
-function animations(): Readonly<Record<string, ArtAnimation>> {
-  const result: Record<string, ArtAnimation> = {
-    flame: { frameIds: ['effect.flame.0', 'effect.flame.1'], frameDurationMs: 80, reducedMotionFrame: 'effect.flame.0' },
-    spark: { frameIds: ['bomb.spark'], frameDurationMs: 90, reducedMotionFrame: 'bomb.spark' },
-  }
-  for (const seat of ['one', 'two', 'three', 'four'] as const) {
-    for (const direction of ['north', 'east', 'south', 'west'] as const) {
-      const prefix = `actor.${seat}.${direction}`
-      result[`${prefix}.walk`] = {
-        frameIds: WALK_CYCLE.map((frame) => `${prefix}.${frame}`),
-        frameDurationMs: WALK_FRAME_DURATION_MS, reducedMotionFrame: `${prefix}.0`,
-      }
-    }
-  }
-  for (const blast of ['standard', 'piercing', 'power'] as const) {
-    result[`bomb.timed.${blast}.pulse`] = {
-      frameIds: [
-        `bomb.shell.timed.${blast}`, `bomb.shell.timed.${blast}.1`, `bomb.shell.timed.${blast}.2`,
-      ],
-      frameDurationMs: 110,
-      reducedMotionFrame: `bomb.shell.timed.${blast}`,
-    }
-  }
-  return result
 }
 
 export function createArtCatalog(): ArtCatalog {
@@ -238,26 +177,22 @@ export function createArtCatalog(): ArtCatalog {
   addWalkingFrames(entries)
   addTimedBombPoses(entries)
   entries.push(entry('environment.stormCloud', entries.length,
-    () => ({ drawing: makeStormCloud() }), {
-      size: 80, bounds: { x: -40, y: -40, width: 80, height: 80 }, pivot: { x: 40, y: 40 },
-    }))
+    () => ({ drawing: makeStormCloud() })))
   entries.push(entry('terrain.lair', entries.length, () => ({ drawing: makeLair() })))
   for (const direction of ['north', 'east', 'south', 'west'] as const) {
     entries.push(entry(`mob.${direction}`, entries.length,
-      () => ({ drawing: makeMob(direction) }), {
-        size: 80, bounds: ACTOR_BOUNDS, pivot: ACTOR_PIVOT, footAnchor: { x: 40, y: 65 },
-      }))
+      () => ({ drawing: makeMob(direction) })))
+  }
+  for (const id of MATERIAL_FRAME_IDS) {
+    entries.push(entry(id, entries.length, () => ({ drawing: makeMaterialFrame(id) })))
+  }
+  if (entries.length !== DESCRIPTOR.frames.length) {
+    throw new Error(`Drawing catalogue supplies ${entries.length} of ${DESCRIPTOR.frames.length} canonical frames`)
   }
   return {
     entries,
-    animations: animations(),
-    aliases: {
-      'bomb.shell.contact.piercing': 'bomb.shell.contact.standard',
-      'bomb.shell.contact.power': 'bomb.shell.contact.standard',
-    },
-    compositions: {
-      'oil.burning.0': ['oil.charred', 'effect.flame.0'],
-      'oil.burning.1': ['oil.charred', 'effect.flame.1'],
-    },
+    animations: DESCRIPTOR.animations,
+    aliases: DESCRIPTOR.aliases,
+    compositions: DESCRIPTOR.compositions,
   }
 }

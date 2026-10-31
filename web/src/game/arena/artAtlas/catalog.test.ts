@@ -34,9 +34,9 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(155)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(151)
-    expect(manifest.sheet).toEqual({ width: 1120, height: 1792, slotSize: 112, columns: 10 })
+    expect(manifest.frames).toHaveLength(165)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(161)
+    expect(manifest.sheet).toEqual({ width: 1120, height: 1904, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
 
@@ -79,15 +79,34 @@ describe('art atlas catalogue', () => {
   it('appends lairs and four mob directions in a new row with shared foot anchors', () => {
     const frames = createSourceManifest().frames
     expect(frames.slice(0, 150)).toEqual(adoptedSource.frames.slice(0, 150))
-    expect(frames.slice(150).map(({ id }) => id)).toEqual([
+    expect(frames.slice(150, 155).map(({ id }) => id)).toEqual([
       'terrain.lair', 'mob.north', 'mob.east', 'mob.south', 'mob.west',
     ])
     expect(frames[150].sourceRect).toEqual({ x: 0, y: 1680, width: 48, height: 48 })
-    for (const [index, frame] of frames.slice(151).entries()) {
+    for (const [index, frame] of frames.slice(151, 155).entries()) {
       expect(frame.sourceRect).toEqual({ x: (index + 1) * 112, y: 1680, width: 80, height: 80 })
       expect(frame.pivot).toEqual({ x: 40, y: 44 })
       expect(frame.footAnchor).toEqual({ x: 40, y: 65 })
     }
+  })
+
+  it('appends the ten 48px material maps without moving prior artwork', () => {
+    const frames = createSourceManifest().frames
+    expect(frames.slice(0, 155)).toEqual(adoptedSource.frames.slice(0, 155))
+    expect(frames.slice(155).map(({ id }) => id)).toEqual([
+      'material.floor.top.0', 'material.floor.top.1',
+      'material.wall.top', 'material.wall.side',
+      'material.block.top', 'material.block.side',
+      'material.lair.top', 'material.lair.side',
+      'material.rim.top', 'material.rim.side',
+    ])
+    expect(frames.slice(155).every(({ sourceRect, localBounds, pivot }) =>
+      sourceRect.width === 48 && sourceRect.height === 48
+      && localBounds.x === 0 && localBounds.y === 0
+      && localBounds.width === 48 && localBounds.height === 48
+      && pivot.x === 0 && pivot.y === 0)).toBe(true)
+    expect(frames[155].sourceRect).toEqual({ x: 560, y: 1680, width: 48, height: 48 })
+    expect(frames[164].sourceRect).toEqual({ x: 448, y: 1792, width: 48, height: 48 })
   })
 
   it('appends appearances three and four without moving any legacy atlas slot', () => {

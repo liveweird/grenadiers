@@ -3497,6 +3497,10 @@
       "status": "baseline"
     },
     {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
       "id": "mob.north",
       "localBounds": {
         "height": 80,
@@ -3514,13 +3518,13 @@
         "x": 112,
         "y": 1680
       },
-      "status": "baseline",
+      "status": "baseline"
+    },
+    {
       "footAnchor": {
         "x": 40,
         "y": 65
-      }
-    },
-    {
+      },
       "id": "mob.east",
       "localBounds": {
         "height": 80,
@@ -3538,13 +3542,13 @@
         "x": 224,
         "y": 1680
       },
-      "status": "baseline",
+      "status": "baseline"
+    },
+    {
       "footAnchor": {
         "x": 40,
         "y": 65
-      }
-    },
-    {
+      },
       "id": "mob.south",
       "localBounds": {
         "height": 80,
@@ -3562,13 +3566,13 @@
         "x": 336,
         "y": 1680
       },
-      "status": "baseline",
+      "status": "baseline"
+    },
+    {
       "footAnchor": {
         "x": 40,
         "y": 65
-      }
-    },
-    {
+      },
       "id": "mob.west",
       "localBounds": {
         "height": 80,
@@ -3586,17 +3590,213 @@
         "x": 448,
         "y": 1680
       },
-      "status": "baseline",
-      "footAnchor": {
-        "x": 40,
-        "y": 65
-      }
+      "status": "baseline"
+    },
+    {
+      "id": "material.floor.top.0",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 560,
+        "y": 1680
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.floor.top.1",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 672,
+        "y": 1680
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.wall.top",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 784,
+        "y": 1680
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.wall.side",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 896,
+        "y": 1680
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.block.top",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 1008,
+        "y": 1680
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.block.side",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.lair.top",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 112,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.lair.side",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 224,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.rim.top",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 336,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "id": "material.rim.side",
+      "localBounds": {
+        "height": 48,
+        "width": 48,
+        "x": 0,
+        "y": 0
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "sourceRect": {
+        "height": 48,
+        "width": 48,
+        "x": 448,
+        "y": 1792
+      },
+      "status": "baseline"
     }
   ],
   "schemaVersion": 1,
   "sheet": {
     "columns": 10,
-    "height": 1792,
+    "height": 1904,
     "slotSize": 112,
     "width": 1120
   },

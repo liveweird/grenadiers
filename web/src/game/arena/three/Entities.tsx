@@ -34,7 +34,8 @@ function MovingSprite({
   floating = false, shadow = true,
 }: MovingSpriteProps) {
   const root = useRef<Group>(null)
-  const [initialPosition] = useState(() => [target.x, elevation, target.z] as const)
+  const visual = useRef<Group>(null)
+  const [initialPosition] = useState(() => [target.x, 0, target.z] as const)
   const motion = useRef<MotionSegment>({
     from: target, to: target, receivedAt: timing.receivedAt, duration: timing.duration, snap: true,
   })
@@ -44,24 +45,28 @@ function MovingSprite({
     motion.current = nextMotion(
       { x: node.position.x, z: node.position.z }, target, timing, reducedMotion || snap,
     )
-    if (motion.current.snap) node.position.set(target.x, elevation, target.z)
-  }, [elevation, reducedMotion, snap, target, timing])
+    if (motion.current.snap) node.position.set(target.x, 0, target.z)
+  }, [reducedMotion, snap, target, timing])
   useFrame(() => {
     const node = root.current
-    if (!node) return
+    const visualNode = visual.current
+    if (!node || !visualNode) return
     const now = performance.now()
     const point = sampleMotion(motion.current, now)
     const bob = floating && timing.running && !reducedMotion ? Math.sin(now / 260) * 0.08 : 0
-    node.position.set(point.x, elevation + bob, point.z)
+    node.position.set(point.x, 0, point.z)
+    visualNode.position.y = elevation + bob
   })
   return <group ref={root} name={name} position={initialPosition}>
     {shadow && <Billboard
-      atlas={atlas} frameId="actor.shadow" anchor="paintedCenter" position={[0, 0.003 - elevation, 0]}
+      atlas={atlas} frameId="actor.shadow" anchor="paintedCenter" position={[0, 0.003, 0]}
       rotation={[-Math.PI / 2, 0, 0]} faceCamera={false} depthTest renderOrder={2}
       scale={1.35 / 48}
     />}
-    <Billboard atlas={atlas} frameId={frameId} anchor="feet" position={[0, 0, 0]}
-      scale={1.35 / 48} />
+    <group ref={visual} position={[0, elevation, 0]}>
+      <Billboard atlas={atlas} frameId={frameId} anchor="feet" position={[0, 0, 0]}
+        scale={1.35 / 48} />
+    </group>
   </group>
 }
 

@@ -1,5 +1,5 @@
 import ReactThreeTestRenderer from '@react-three/test-renderer'
-import { BufferGeometry, Texture, type Mesh, type MeshBasicMaterial } from 'three'
+import { BufferGeometry, Texture, Vector3, type Mesh, type MeshBasicMaterial } from 'three'
 import { describe, expect, it, vi } from 'vitest'
 import { gameSnapshot } from '../../../test/game-snapshot'
 import { RENDERABLE_PICKUP_KINDS, type SnapshotMessage } from '../types'
@@ -46,6 +46,10 @@ const nodesNamed = (renderer: Renderer, name: string) =>
   renderer.scene.findAll(({ instance }) => instance.name === name)
 const meshNamed = (renderer: Renderer, name: string) =>
   renderer.scene.find(({ instance }) => instance.name === name).instance as Mesh<BufferGeometry, MeshBasicMaterial>
+const worldPosition = (instance: Renderer['scene']['instance']): Vector3 => {
+  instance.updateWorldMatrix(true, false)
+  return instance.getWorldPosition(new Vector3())
+}
 
 describe('mounted Three entities', () => {
   it('remounts after coalesced hidden and scene-reset revisions instead of crossing concealed space', async () => {
@@ -219,6 +223,7 @@ describe('mounted Three entity animation and variants', () => {
     snapshot.state.physicalTick = (snapshot.state.physicalTick ?? 0) + 3
     snapshot.state.actors[0].position.x += 1024
     snapshot.state.mobs[0].position.x += 1024
+    snapshot.state.stormCloud!.position.x += 1024
     store.update(snapshot, 100)
     await renderer.update(scene(snapshot, store, atlas))
     expect(actorNode(renderer, actorId).instance).toBe(restingActor)
@@ -230,6 +235,8 @@ describe('mounted Three entity animation and variants', () => {
       .toBe(atlas.geometry('actor.one.east.3', 'feet'))
     expect(renderer.scene.find(({ instance }) => instance.name === 'mob:9').instance.position.x)
       .toBeCloseTo(4.5)
+    expect(renderer.scene.find(({ instance }) => instance.name === 'storm-cloud').instance.position.x)
+      .toBeCloseTo(5.5)
 
     const movingMob = renderer.scene.find(({ instance }) => instance.name === 'mob:9').instance
     snapshot.state.physicalTick += 3
@@ -241,10 +248,19 @@ describe('mounted Three entity animation and variants', () => {
     expect(frozenMob).not.toBe(movingMob)
     expect(frozenMob.position.x).toBeCloseTo(6)
 
-    const floatingCloud = renderer.scene.find(({ instance }) => instance.name === 'storm-cloud').instance
-    now = 260
+    const floatingCloud = renderer.scene.find(({ instance }) => instance.name === 'storm-cloud')
+    const cloudSprite = floatingCloud.find(({ instance }) =>
+      instance.name === 'billboard:environment.stormCloud').instance
+    const cloudShadow = floatingCloud.find(({ instance }) =>
+      instance.name === 'billboard:actor.shadow').instance
+    now = Math.PI * 260 / 2
     await renderer.advanceFrames(1, 0.016)
-    expect(floatingCloud.position.y).toBeGreaterThan(1.15)
+    expect(worldPosition(cloudSprite).y).toBeCloseTo(1.23)
+    expect(worldPosition(cloudShadow).y).toBeCloseTo(0.003)
+    now = Math.PI * 260 * 3 / 2
+    await renderer.advanceFrames(1, 0.016)
+    expect(worldPosition(cloudSprite).y).toBeCloseTo(1.07)
+    expect(worldPosition(cloudShadow).y).toBeCloseTo(0.003)
     store.setReducedMotion(true)
     snapshot.state.physicalTick += 3
     snapshot.state.actors[0].position.x += 1024
@@ -254,8 +270,11 @@ describe('mounted Three entity animation and variants', () => {
     expect(actorNode(renderer, actorId).instance.position.x).toBeCloseTo(3.5)
     expect(meshNamed(renderer, 'billboard:actor.one.east.0').geometry)
       .toBe(atlas.geometry('actor.one.east.0', 'feet'))
-    expect(renderer.scene.find(({ instance }) => instance.name === 'storm-cloud').instance.position.y)
-      .toBeCloseTo(1.15)
+    const reducedCloud = renderer.scene.find(({ instance }) => instance.name === 'storm-cloud')
+    expect(worldPosition(reducedCloud.find(({ instance }) =>
+      instance.name === 'billboard:environment.stormCloud').instance).y).toBeCloseTo(1.15)
+    expect(worldPosition(reducedCloud.find(({ instance }) =>
+      instance.name === 'billboard:actor.shadow').instance).y).toBeCloseTo(0.003)
     await renderer.unmount(); atlas.dispose(); vi.restoreAllMocks()
   })
 })

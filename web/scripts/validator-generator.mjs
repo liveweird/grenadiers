@@ -3,11 +3,27 @@ import { createRequire } from 'node:module'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import Ajv from 'ajv'
+import Ajv2020 from 'ajv/dist/2020.js'
 import standaloneCode from 'ajv/dist/standalone/index.js'
 import ts from 'typescript'
 import { build } from 'vite'
 
 const validatorDefinitions = {
+  'cpu-debug': {
+    schema: '../api/cpu-debug.schema.json',
+    draft2020: true,
+    declaration: `import type { ErrorObject } from 'ajv'
+import type { CpuDebugResponse } from '../../game/client/cpuDebugTypes'
+
+declare const validate: {
+  (value: unknown): value is CpuDebugResponse
+  errors?: ErrorObject[] | null
+}
+
+export default validate
+`,
+    compile: (ajv, schema) => ajv.compile(schema),
+  },
   'gameplay-v17': {
     schema: '../api/gameplay-v17.schema.json',
     declaration: `import type { ErrorObject } from 'ajv'
@@ -286,7 +302,9 @@ export async function bundleStandaloneValidator(name, commonJs, webDirectory) {
 async function generateValidator(name, schema, webDirectory) {
   const definition = validatorDefinitions[name]
   if (!definition) throw new Error(`Unknown validator ${name}`)
-  const ajv = new Ajv({ allErrors: true, code: { source: true } })
+  const ajv = definition.draft2020
+    ? new Ajv2020({ allErrors: true, code: { source: true } })
+    : new Ajv({ allErrors: true, code: { source: true } })
   const commonJs = standaloneCode(ajv, definition.compile(ajv, schema))
   const bundled = await bundleStandaloneValidator(name, commonJs, webDirectory)
   return { ...bundled, declaration: definition.declaration }

@@ -10,6 +10,15 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
+## CPU intent and observability
+
+- [next] **Persistent CPU objectives.** Track an exact item, block or opponent separately from
+  movement routes; retain intent through safety interruptions, use meaningful switch thresholds
+  and progress deadlines, and expose explicit exploration/waiting when no productive target exists.
+- [todo] **Developer intent overlay.** Add an operator-enabled, participant-authenticated,
+  opt-in view of each visible CPU's objective, target, phase and latest switch reason, with
+  recipient privacy, bounded diagnostics and no effect on gameplay scheduling.
+
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

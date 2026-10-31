@@ -60,7 +60,7 @@ second each). A correlated operation throttle preserves authentication; per-sock
 still close with policy code 1008. Peer admission below adds independent budgets without replacing
 these global backstops.
 Malformed text messages yield a typed error and policy close. Control frames remain protocol
-control frames. The diagnostic envelope is v2; authenticated gameplay requires v16; versions 1 through 15 are
+control frames. The diagnostic envelope is v2; authenticated gameplay requires v17; versions 1 through 16 are
 rejected before credential lookup.
 
 ## Peer identity and admission
@@ -151,3 +151,20 @@ explicit test recordings contain private seeds and remain subject to the same re
 Restarting or routing a reconnect attempt to another replica loses the room; multi-replica
 capability routing and durable recovery are not implemented. See the
 [recording policy](decisions/0025-production-replay-recording.md).
+
+## CPU intent diagnostics
+
+`CPU_DEBUG_ENABLED=false` disables the CPU intent route before credential/body processing.
+When enabled, a connected human's room resume capability authorizes only a read-only query;
+reserved, retired, foreign and wrong-room capabilities fail closed. The handler does not invoke
+resume, claim, replacement or rotation. Credentials remain out of URLs, logs and observable UI
+state. Strict Origin checks, 128-byte bodies, 100 ms body/query deadlines, a dedicated two-Hz
+peer bucket, four concurrent queries and a separate four-entry owner queue isolate diagnostics
+from gameplay admission and command capacity.
+
+The response is projected against the current human recipient view and physical-round binding.
+Hidden CPUs or unavailable targets and bomb-blind viewers reveal no intent, phase, reason or
+coordinates. Browser projection and admission-scoped response guards prevent stale disclosure.
+No raw controller/memory/seed/RNG/path/certificate is serialized. Enabling the flag grants this
+view to authenticated participants; no separate developer-role authorization is implied. See the
+[intent guide](game/cpu-intent.md) and [HTTP contract](../api/openapi.json).

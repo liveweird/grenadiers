@@ -7,6 +7,7 @@ export const scenarioSpecMap = {
   'scenarios/browser-hardening.md': ['hardening-tests/visibility.spec.ts'],
   'scenarios/controls.md': ['controls-tests/controls.spec.ts'],
   'scenarios/content-security.md': ['csp-tests/content-security.spec.ts'],
+  'scenarios/cpu-debug.md': ['cpu-debug-tests/enabled.spec.ts', 'cpu-debug-tests/disabled.spec.ts'],
   'scenarios/cpu-item.md': ['cpu-item-tests/cpu-item.spec.ts'],
   'scenarios/diarrhea.md': ['diarrhea-tests/diarrhea.spec.ts'],
   'scenarios/duel.md': ['tests/duel.spec.ts'],

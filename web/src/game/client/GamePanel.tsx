@@ -1,5 +1,6 @@
 import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput, Title } from '@mantine/core'
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
 import type { Direction } from '../arena/types'
@@ -19,6 +20,9 @@ import { presentSnapshot } from './presentation'
 import { ActorDetails, OwnStatusBar } from './OwnStatusBar'
 import { OwnPickupNotice } from './OwnPickupNotice'
 import { controllersAvailable, isLegacySolo, roomCopy } from './roomControllers'
+import { CpuDebugPanel } from './CpuDebugPanel'
+import { useCpuDebug } from './useCpuDebug'
+import { cpuDebugOptedIn } from './cpuDebugOptIn'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 const BOARD_PRESETS = [
@@ -305,7 +309,11 @@ function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof pres
     ? format(copy.arena.punchHint, { equipment }) : copy.arena.focusHint
 }
 
-export function GamePanelView({ state, actions }: { state: GameClientState; actions: GameActions }) {
+export function GamePanelView({ state, actions, developerPanel }: {
+  state: GameClientState
+  actions: GameActions
+  developerPanel?: ReactNode
+}) {
   const translatedCopy = useGameCopy()
   const copy = useMemo(() => roomCopy(translatedCopy, state.room), [translatedCopy, state.room])
   const [bindings, setBindings] = useState(loadControlBindings)
@@ -358,6 +366,7 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
         {failureText && <Alert color="red" title={copy.error.title}>{failureText}</Alert>}
         {state.room ? <RoomControls state={state} actions={actions} copy={copy} />
           : <LobbyControls state={state} actions={actions} copy={copy} />}
+        {developerPanel}
         {state.connection !== 'disconnected' && !state.room && <Group gap="xs" className="connection-note">
           <span className="connection-dot" aria-hidden="true" /><Text size="sm">{copy.connection[state.connection]}</Text>
         </Group>}
@@ -370,5 +379,8 @@ export function GamePanelView({ state, actions }: { state: GameClientState; acti
 
 export function GamePanel() {
   const [state, client] = useGameClient()
-  return <GamePanelView state={state} actions={client} />
+  const debugEnabled = cpuDebugOptedIn(window.location.search)
+  const debug = useCpuDebug(state, client, debugEnabled)
+  return <GamePanelView state={state} actions={client}
+    developerPanel={debugEnabled && state.room ? <CpuDebugPanel state={state} debug={debug} /> : null} />
 }

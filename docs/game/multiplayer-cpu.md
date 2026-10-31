@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy 23 on rules 9 for every live two-to-four-seat
+The live environment CPU implementation uses policy 24 on rules 9 for every live two-to-four-seat
 room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,7 +19,8 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` select Utility23 for live rules9 rooms.
+`CpuProfile::RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` select Utility24 for live rules9 rooms.
+`RESPAWN_V23_STANDARD`/`RESPAWN_V23_EASY` retain Utility23 with goal-cell persistence.
 `RESPAWN_V22_STANDARD`/`RESPAWN_V22_EASY` retain Utility22 with certified pickup handoffs.
 `RESPAWN_V21_STANDARD`/`RESPAWN_V21_EASY` retain Utility21 for archived rules9 planning.
 `LAIRS_STANDARD`/`LAIRS_EASY` retain Utility20 on historical rules8.
@@ -62,9 +63,9 @@ Live controller selection uses the lair profile below, including when both envir
 
 ## Lair profile boundaries
 
-`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify Utility23 on rules9. The checked
+`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify Utility24 on rules9. The checked
 v17 observation adds independent nullable lair deadlines and mob poses without targets, paths
-or hidden thaw deadlines. Use `survival::plan_respawn_v23_with_origin`; historical entry points
+or hidden thaw deadlines. Use `survival::plan_respawn_v24_with_origin`; historical entry points
 remain closed to rules9. Disabled lairs use the same solid-player profile.
 
 The planner returns a separate finite contact lease beside the existing bomb/escape proof.
@@ -87,7 +88,7 @@ workers or observations are late. See [CPU contracts](cpu-contracts.md).
 
 ## Combat pressure and player blocking
 
-Every visible living rival is an enemy, whether human or CPU. CPU23 seeks reachable firing
+Every visible living rival is an enemy, whether human or CPU. CPU24 seeks reachable firing
 positions whose actual blast can threaten a rival instead of walking into its occupied cell.
 Useful pickups remain valuable; combat pressure outranks routine crate clearing. Planting still
 requires a complete escape certificate, so increased aggression does not authorize suicide.
@@ -131,29 +132,18 @@ delayed start; a neighboring pickup touched only by the footprint does not block
 Teleporter and Diarrhea collection remain outside this handoff because they can relocate the
 actor or spawn a bomb during the stopped suffix. Other hazard/contact checks and moving-plan
 admission requirements remain unchanged. Archived CPU21 retains its original entry points;
-replay8 executes matching CPU21–23 inputs with archived mob navigation; current replay9
-binds CPU23 and mob navigation2. Neither reruns the planner.
+replay8 executes matching CPU21–24 inputs with archived mob navigation; current replay9
+binds CPU23/24 and mob navigation2. Neither reruns the planner.
 
-## Productive goals and bomb opportunities
+## Persistent strategic intent
 
-CPU23 retains a reachable pickup, crate-clearing or combat goal across short movement pulses.
-It revalidates the goal's current kind and value after collection or board changes, ranks
-reachable goals, and uses a bounded history of settled cell transitions to avoid unproductive
-reversals. An unreachable high-value item cannot suppress a reachable lower-value objective.
-Escape planning can still reverse immediately when danger requires it.
-
-Outside combat, reachable firing positions beside destructible blocks offer upgrade opportunities;
-the CPU does not know hidden drops before a block is destroyed. At a useful firing position it
-tries planting before leaving for another position. Unrelated exposed pickups no longer bypass
-that decision. A bounded set of distinct first movements, including Stop, can yield a certified
-placement even when the ordinary navigation direction cannot.
-
-Optional bomb attempts share a charged budget after a safe movement fallback has been computed.
-Each accepted placement still requires the existing escape and mob-contact proofs; failed or
-exhausted tactics return the saved fallback. These improvements apply with lairs enabled or
-disabled. Easy retains its slower cadence; Standard gains stronger decisions without additional
-visibility, reaction privileges or larger planning allowances. Strategic memory commits only
-with accepted inputs and resets with the world. Archived CPU21/22 retain their original paths.
+CPU24 keeps an exact item, block or opponent separate from its approach cell and execution route.
+Commitment, material utility differences and observed progress govern switching. Safety overrides
+revoke execution authority while retaining the subject for resumption. Optional bombing serves
+that subject; pickup pursuit does not opportunistically bomb unrelated objects. Explicit phases
+and switch reasons make the behavior inspectable through an operator-enabled, recipient-filtered
+developer view. See [intent and diagnostics](cpu-intent.md) for lifecycle, thresholds and usage.
+CPU21–23 retain their historical selection and memory-reset paths.
 
 ## Focused checks
 

@@ -4,6 +4,55 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.6 — 2026-10-31
+
+Leave small dark-red blood pools on the floor at recipient-visible player and mob deaths.
+Pools remain after the knockout body and shadow disappear, through the result screen until
+the next round. One pool per tile bounds repeated lair deaths. Stains have no simulation,
+collision, damage or AI effect and do not reconstruct hidden or baseline death positions.
+
+The shared sheet appends `effect.bloodPool` at slot 185 without changing its 1120×2128 canvas,
+the preceding 185 frame entries or any pixel outside the new rectangle. Four reserved and
+four unassigned cells remain transparent. The [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.6/grenadiers-artist-v1.1.6.zip)
+contains the source pair, new guides, slices, labelled overview and 3D preview.
+
+### Verification
+
+Accepted production source: `6fc9d151276029abd1188c5e53cc70ee3cc9e2c4`. Independent review
+found and resolved a replacement-room clock rollback case that dropped a valid coalesced
+death. Strictly newer generations retain fresh cues; stale same-generation envelopes remain
+fenced. Seen-cue history is capped at 128, independently of the per-tile pool bound.
+
+- Full web gate passes: 7,303 tests in 152 files (263.34s); coverage 95.24% lines,
+  88.80% branches, 92.06% statements and 91.33% functions. Lint, Knip, contracts and production
+  build pass; JS is 395,197/400,000 gzip bytes, CSS 15,430/20,000.
+- E2E static/types/scenario checks pass (107 mappings). Native Three passes fifteen cases
+  with seven intentional project skips. All player appearances and mobs expire exactly to
+  independent pool-only references in full/reduced motion without another snapshot. Ground
+  placement, foreground readability, duplicate envelopes and lifecycle resets are covered.
+- Native artwork acceptance passes nine unchanged cases plus the focused inventory rerun.
+  The inventory assertion now explicitly separates twenty death frames from the appended
+  blood frame. Standard export passes: 182 runtime frames, 2040×704 / 5,744,640 RGBA bytes.
+  Direct pixel review confirms 438 opaque pixels, four dark-red colors, binary alpha and
+  zero changes to previous pixels. No existing floor, character or item art is repainted.
+- Exact-image Compose passes four duel/auth/CPU cases (36.2s), disabled diagnostics (11.0s)
+  and an all-on visual smoke with zero browser errors. Kubernetes duel/auth passes (23.2s),
+  with runtime restrictions/probes/resources and cleanup of owned test resources.
+- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings. Every image web file equals
+  the verified build. Backend implementation, dependencies and gameplay contracts are unchanged;
+  reuse their recorded acceptance. The image includes a fresh Linux release build.
+
+### Operation
+
+Localhost:8085 runs exact accepted image
+`sha256:35a4c62d9bc7dccfa8aa768b703f5e0e47f4a22bf03e488da0f6ec4f80c75c33`,
+labelled 1.1.6/source 6fc9d151. Local CPU diagnostics remain enabled; deployment defaults remain
+disabled. Promotion checks identity, cgroups/security, probes, CSP/cache and served bytes.
+A fresh all-on match renders without browser errors; the test room is left explicitly.
+Immutable v1.1.5 remains available for rollback. Refresh old tabs after restart.
+
+Spike-pit work remains a separate backlog item; this release adds no spike gameplay.
+
 ## v1.1.5 — 2026-10-31
 
 Adopt the owner-supplied retro-texture PNG directly. All ten 3D material maps now use bolder

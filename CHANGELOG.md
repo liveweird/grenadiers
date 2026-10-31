@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.1.5 — 2026-10-31
+
+- Adopt the owner-supplied retro arena textures: tan sandstone floors, bolder stone and brick
+  maps, and distinct lair surfaces, preserving every non-material sprite and manifest entry.
+
 ## 1.1.4 — 2026-10-31
 
 - Keep characters visible beneath compact Remote Armed and Invisible Bombs badges instead

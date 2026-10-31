@@ -235,6 +235,36 @@ pub(super) fn terminal(
             }
             continue;
         }
+        if context.observation.parts().rules.version == 10 {
+            match pits.stationary_until(request.survive_until, lane.motion.position, work) {
+                Ok(()) => {}
+                Err(RouteFailure::NoRoute) => return Ok(false),
+                Err(error) => return Err(error),
+            }
+            let window = crate::cpu::forecast::TickWindow {
+                start: lane.ready,
+                end: request.survive_until,
+            };
+            if window.start < window.end {
+                match check_transition_all(
+                    context,
+                    forecasts,
+                    &stationary_segment(lane.motion.position),
+                    window,
+                    request.mode,
+                    CollisionProofs {
+                        placement_origin: lane.origin_grace,
+                        recipient_barrier: lane.recipient_barrier,
+                    },
+                    work,
+                ) {
+                    Ok(found) => assumptions.extend(found),
+                    Err(RouteFailure::NoRoute) => return Ok(false),
+                    Err(error) => return Err(error),
+                }
+            }
+            continue;
+        }
         let mut simulation = lane.motion.clone();
         for tick in lane.ready.0..request.survive_until.0 {
             super::storm::charge_tick(context.storm, work)?;

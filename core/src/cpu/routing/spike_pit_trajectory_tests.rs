@@ -9,7 +9,7 @@ use crate::room::{SpikePitConfig, SpikePitSettings};
 
 use super::*;
 
-fn observed(
+pub(crate) fn observed(
     phase: SpikePitPhase,
     remaining_ticks: u64,
     shield_ticks: Option<u16>,

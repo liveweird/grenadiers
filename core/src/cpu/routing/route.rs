@@ -250,7 +250,7 @@ fn validate_request(
     Ok(())
 }
 
-fn initial_lanes(
+pub(super) fn initial_lanes(
     context: &Context<'_>,
     forecasts: &[&HazardForecast],
     request: RouteRequest,

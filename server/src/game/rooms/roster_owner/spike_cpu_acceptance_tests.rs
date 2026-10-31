@@ -24,9 +24,12 @@ use crate::{
 #[derive(Clone, Copy, Debug)]
 struct Case {
     difficulty: CpuDifficulty,
+    board: BoardSize,
     cloud: StormCloudConfig,
+    lairs: bool,
     pits: SpikePitTuning,
     seed: u8,
+    arena_seed: Option<[u8; 32]>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -35,7 +38,9 @@ struct Outcome {
     alive: bool,
     accepted_motion_ticks: usize,
     accepted_bomb_births: usize,
+    first_bomb_tick: Option<u64>,
     planned_moves: usize,
+    planned_bombs: usize,
     delivered: usize,
     max_work: u32,
     saw_warning: bool,
@@ -65,7 +70,7 @@ impl Episode {
         let configuration = RoomConfiguration::new(
             &[SeatControl::Human, SeatControl::Cpu],
             Some(case.difficulty),
-            BoardSize::FifteenByThirteen,
+            case.board,
         )
         .unwrap();
         let mut runtime = RosterRuntime::new_spike_with_navigation(
@@ -77,10 +82,14 @@ impl Episode {
             },
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             case.cloud,
-            RespawnLairTuning::new(false, RespawnLairSettings::new(10).unwrap()),
+            RespawnLairTuning::new(case.lairs, RespawnLairSettings::new(10).unwrap()),
             case.pits,
             RoundSeedSource::with_entropy(move |bytes| {
-                bytes.fill(case.seed);
+                if let Some(seed) = case.arena_seed {
+                    bytes.copy_from_slice(&seed);
+                } else {
+                    bytes.fill(case.seed);
+                }
                 Ok(())
             }),
             Arc::new(move |epoch| {
@@ -160,7 +169,9 @@ impl Episode {
                 alive: true,
                 accepted_motion_ticks: 0,
                 accepted_bomb_births: 0,
+                first_bomb_tick: None,
                 planned_moves: 0,
+                planned_bombs: 0,
                 delivered: 0,
                 max_work: 0,
                 saw_warning: false,
@@ -183,6 +194,11 @@ impl Episode {
             .iter()
             .filter(|intent| intent.movement != grenadiers_core::cpu::MovementIntent::Stop)
             .count();
+        self.outcome.planned_bombs += report
+            .planned_intents
+            .iter()
+            .filter(|intent| intent.manual == Some(grenadiers_core::cpu::ManualIntent::Bomb))
+            .count();
         self.outcome.max_work = self
             .outcome
             .max_work
@@ -201,6 +217,9 @@ impl Episode {
         self.outcome.alive = actor.alive();
         let bombs = state.world().bombs().len();
         self.outcome.accepted_bomb_births += usize::from(bombs > self.last_bombs);
+        if bombs > self.last_bombs && self.outcome.first_bomb_tick.is_none() {
+            self.outcome.first_bomb_tick = Some(state.tick().0);
+        }
         self.last_bombs = bombs;
         let pits = state.spike_pits().unwrap_or_default();
         self.outcome.saw_warning |= pits.iter().any(|pit| pit.phase == SpikePitPhase::Warning);
@@ -262,9 +281,12 @@ fn tuning(enabled: bool, warning: u64, raised: u64) -> SpikePitTuning {
 fn queued_cpu26_intentionally_avoids_idle_pits_without_publication_stall() {
     let outcome = Episode::new(Case {
         difficulty: CpuDifficulty::Standard,
+        board: BoardSize::FifteenByThirteen,
         cloud: StormCloudConfig::Disabled,
+        lairs: false,
         pits: tuning(true, 6, 60),
         seed: 41,
+        arena_seed: None,
     })
     .run(840);
     assert!(outcome.alive, "{outcome:?}");
@@ -283,9 +305,12 @@ fn queued_cpu26_intentionally_avoids_idle_pits_without_publication_stall() {
 fn easy_cpu26_progresses_with_storm_and_maximum_raised_duration() {
     let outcome = Episode::new(Case {
         difficulty: CpuDifficulty::Easy,
+        board: BoardSize::FifteenByThirteen,
         cloud: StormCloudConfig::Single,
+        lairs: false,
         pits: tuning(true, 120, 600),
         seed: 53,
+        arena_seed: None,
     })
     .run(840);
     assert!(outcome.alive, "{outcome:?}");
@@ -298,13 +323,39 @@ fn easy_cpu26_progresses_with_storm_and_maximum_raised_duration() {
 fn disabled_pits_are_deterministic_and_keep_queued_navigation_playable() {
     let case = Case {
         difficulty: CpuDifficulty::Standard,
+        board: BoardSize::FifteenByThirteen,
         cloud: StormCloudConfig::Disabled,
+        lairs: false,
         pits: tuning(false, 6, 600),
         seed: 67,
+        arena_seed: None,
     };
     let first = Episode::new(case).run(360);
     let second = Episode::new(case).run(360);
     assert_eq!(first, second);
     assert!(first.alive && first.accepted_motion_ticks > 0, "{first:?}");
     assert!(!first.saw_warning && !first.saw_raised, "{first:?}");
+}
+
+#[test]
+fn compact_easy_cpu26_plants_with_default_all_on_rules() {
+    let outcome = Episode::new(Case {
+        difficulty: CpuDifficulty::Easy,
+        board: BoardSize::ElevenByNine,
+        cloud: StormCloudConfig::Single,
+        lairs: true,
+        pits: tuning(true, 36, 180),
+        seed: 2,
+        arena_seed: Some({
+            let mut seed = [0; 32];
+            seed[0] = 2;
+            seed
+        }),
+    })
+    .run(720);
+    assert!(outcome.accepted_motion_ticks > 0, "{outcome:?}");
+    assert!(outcome.planned_bombs > 0, "{outcome:?}");
+    assert!(outcome.accepted_bomb_births > 0, "{outcome:?}");
+    assert!(outcome.first_bomb_tick.is_some(), "{outcome:?}");
+    assert!(outcome.max_work <= WORK_ALLOWANCE, "{outcome:?}");
 }

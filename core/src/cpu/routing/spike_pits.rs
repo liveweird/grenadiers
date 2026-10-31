@@ -309,4 +309,4 @@ fn charge(work: &mut WorkBudget, units: u32) -> Result<(), RouteFailure> {
 
 #[cfg(test)]
 #[path = "spike_pit_trajectory_tests.rs"]
-mod tests;
+pub(super) mod tests;

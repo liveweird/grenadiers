@@ -12,9 +12,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
-- [next] **ARENA3D — modern retro miniature arena.** Use Three.js/React Three Fiber, detailed
-  billboard characters, shared artist-sheet surface textures, restrained final filters and
-  native lifecycle/privacy/visual acceptance. Preserve authoritative gameplay and existing guards.
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view

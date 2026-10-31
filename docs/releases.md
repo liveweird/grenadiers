@@ -97,62 +97,67 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.0.6 — 2026-10-31
+## v1.1.0 — 2026-10-31
 
-Fix CPUs repeatedly stopping at an attained farming/combat approach when no safe bomb can be
-certified. Default Teleporter uncertainty can suppress planting while another bomb, flame,
-burning Oil or exposed Teleporter exists. CPU25 prefers a certified pulse whose entire final
-position envelope excludes staying put, defers the failed subject for two seconds, and discards
-the stale approach route before replanning. It still certifies clear-scene plants; trapped CPUs
-may still have to wait. Bomb/contact safety checks are unchanged.
+The arena now uses Three.js and React Three Fiber: a miniature textured courtyard with shallow
+chamfered walls, directional lighting, grounded shadows and a restrained warm colour/dither
+finish. Detailed billboard sprites retain all four uniforms and existing animation. The fixed
+orthographic camera preserves keyboard directions. Rust simulation, controls, contracts and
+recipient visibility rules are unchanged. Future character models remain a separate proposal.
 
-Archived CPU24 retains its original selection, scoring and entry points. New rules9 matches use
-CPU25; private replay8 accepts matching CPU21–25 and replay9 CPU23–25 with navigation2. Public
-gameplay17, web/API contracts, arena rules and artwork are unchanged.
+The artist sheet adds ten named 48×48 material maps and preserves every existing sprite pixel.
+Use the [artist workflow](../assets/art/README.md) and the downloadable
+[artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.0/grenadiers-artist-v1.1.0.zip),
+including canonical inputs, guides, labelled inventory, optional slices and a 3D preview.
 
 ### Verification
 
-Accepted source: `c4d7c49515fde1e327097ed3326314dbe4242895`,
-[PR #289](https://github.com/liveweird/grenadiers/pull/289). Independent production and queued
-regression reviews are clear. Focused tests cover lairs on/off, clear-scene certified planting,
-blocked Teleporter planting, guaranteed-progress bounds, physically advanced follow-up
-retargeting, stale-route removal and preserved CPU24/replay identities.
+Accepted production source: `4a9259ec7057ff9ca8595f0fa8423f9e5a124634`,
+[PR #290](https://github.com/liveweird/grenadiers/pull/290). Independent renderer and presentation
+reviews are clear, including GPU normals/lighting, resource ownership, concealed-history resets,
+interpolation, painted shadow anchors and a grounded cloud shadow throughout bobbing.
 
-- Fresh debug/release suites pass: 1,582 core tests, 587 server tests and doctests. Repository,
-  tooling, formatting, Clippy and build pass. Independent Rust coverage is 48,647/52,687 lines
-  (92.33%), above the unchanged 90% floor; the full local helper takes 270.462 seconds.
-- The deterministic 1,200-update queued-controller/physics fixture uses all items and three CPUs
-  in both lair configurations. CPU24 reproduces same-target/same-position farming pauses of
-  213/186 updates; CPU25's longest runs are 11/24 updates, below the asserted 60-update limit.
-  It also asserts attained farming, movement plans, Stalled intent, zero planner failures and
-  planning work within the existing allowance. This is fixed-scene regression evidence, not a
-  general difficulty rating.
-- Exact-image native diagnostics pass two enabled cases in 11.6 seconds and one disabled case
-  in 5.5 seconds, including EN/PL, accessibility and keyboard controls. Four general Compose
-  cases pass in 24.2 seconds; pickup/progress recovery passes in 11.5 seconds. Two Kubernetes cases pass
-  in 5.4 seconds.
-  Runtime restrictions, probes and zero restarts are checked; owned temporary resources are removed.
-- Fresh dependency policy/audits pass at HIGH/CRITICAL thresholds. Existing upstream tooling
+- Web coverage: 7,268 tests pass in 264.29 seconds; statements 91.70%, branches 88.49%, functions
+  91.16%, lines 94.83%. Existing floors remain unchanged. Production bundle is 392,505/400,000
+  gzip JS bytes and 15,430/20,000 CSS bytes. The actual emitted module graph excludes the Pixi
+  reference renderer and authoring factories.
+- Native graphics: eight Three cases, ten source-atlas cases and both DPR1/DPR2 reference
+  comparisons pass. Checks cover all three boards, four uniforms, item/entity variants,
+  narrow/reduced-motion views, final framebuffer colour calibration, removal/concealment resets,
+  suspend/resume, context recovery and teardown. No page, shader or CSP errors are observed.
+- Atlas extension: all 155 original assigned rectangles, 3,247,104 RGBA bytes, compare unchanged.
+  The source is 1120×1904 with 165 frames; the runtime pack is 2040×584 with 161 frames and
+  4,765,440 RGBA bytes, within unchanged texture limits. The artist export and guides validate.
+- E2E static checks pass, including 100 scenario mappings and camera-projection checks. Four
+  Compose duel/auth/CPU cases and disabled diagnostics pass. All 21 general Kubernetes cases
+  are accepted: 18 passed initially; the three affected geometry/cloud/turning cases pass after
+  correcting the flat-board assertion and the macOS graphics backend. Runtime probes,
+  restrictions and zero restarts are checked; owned namespaces are removed.
+- Five focused item/privacy suites pass with unchanged deadlines: Oil Barrel, Cloak, Kick,
+  Wall Pass and Bracelet. Projection-aware compositor sampling preserves concealment and
+  reconnect assertions; graded colour-family checks retain Oil state evidence. macOS and CI
+  explicitly align ANGLE WebGL/compositing and default to one shared-backend worker.
+- Fresh dependency policy/audits pass at the HIGH/CRITICAL threshold; existing upstream tooling
   advisories remain 20 moderate web and 12 moderate E2E entries. Pinned Trivy 0.74 finds zero
-  fixable HIGH/CRITICAL image vulnerabilities.
-- Unchanged web/API/art/E2E-static/Kubernetes inputs reuse the
-  [v1.0.5 acceptance](history/releases.md#v105--2026-10-31): 7,208 web tests and all unchanged
-  coverage/bundle thresholds. Extracted candidate HTML/JS/CSS/PNG bytes equal that accepted
-  build. Only independently reviewed historical ExpandedV5 exhaustive mask executions are reused:
-  all 4,194,304 per debug/release/coverage profile from source 336503ed; fresh Rust coverage
-  merges no old counters.
-- [Unique Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41190408307) pass for the accepted source. Final release documentation preserves all production inputs.
+  fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
+- Rust implementation, contracts and deterministic fixtures are unchanged from v1.0.6; only local
+  package-version metadata changes. Reuse that release's full macOS debug/release/coverage
+  acceptance rather than repeat the simulation matrix. The image compiles the Linux release
+  target; [fresh Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41196323616)
+  pass for the new package versions. Final docs/tests preserve production inputs.
 
 ### Operation
 
-Localhost:8085 runs accepted image
-`sha256:2d4d4a9d34a969a3b72361dfccd3ade9aa35c67c6948b8abe91224adb8216803`, labelled 1.0.6/source c4d7c495.
-The local runtime keeps diagnostics enabled at `http://localhost:8085/?cpuDebug=1`; base Compose
-and Kubernetes still default to disabled. Promotion verifies exact image, runtime restrictions,
-health/readiness, CSP/cache policy and served assets. Immutable v1.0.5 remains available for
-rollback. Restart ends in-memory matches: refresh and create a new match to try CPU25.
-See [CPU intent](game/cpu-intent.md) for behavior. The artist bundle remains v1.0.2;
-remaining playtesting work lives in [BACKLOG.md](../BACKLOG.md).
+Localhost:8085 runs the exact accepted image
+`sha256:832ab2e4c96db7f6498a5a49a72645d48b585c451edf1944245bdf6986133b43`,
+labelled 1.1.0/source 4a9259ec. The local operator keeps CPU diagnostics enabled at
+`http://localhost:8085/?cpuDebug=1`; base Compose and Kubernetes default to disabled. Promotion
+checks image identity, runtime restrictions, health/readiness, CSP/cache policy and served bytes.
+Immutable v1.0.6 remains available for rollback. Restart ends in-memory matches; refresh and
+create a new match. Human visual/difficulty feedback and proposals live in [BACKLOG.md](../BACKLOG.md).
+
+<a id="v106--2026-10-31"></a>
+The [v1.0.6 record](history/releases.md#v106--2026-10-31) is preserved in release history.
 
 <a id="v105--2026-10-31"></a>
 The [v1.0.5 record](history/releases.md#v105--2026-10-31) is preserved in release history.

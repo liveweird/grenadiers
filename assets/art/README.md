@@ -1,8 +1,8 @@
 # Grenadiers arena art handoff
 
-This directory contains the reviewed, artist-editable arena source: `arena-source.png` and its
-paired `arena-source.json` manifest. ART-ATLAS v0.3.48 supplies the extraction, validation and
-preview workflow. Published v0.3.49 adopts these same inputs in gameplay; see the
+This directory contains the artist-editable arena source: `arena-source.png` and its
+paired `arena-source.json` manifest. The extraction, validation and
+preview workflow shares this artwork with the production 3D renderer; see the
 [rendering guide](../../docs/game/art-atlas.md) for the build/runtime ownership and checks.
 
 ## Prerequisites
@@ -188,7 +188,7 @@ node e2e/scripts/art-atlas-materials.mjs \
 ```
 
 It renders the ten placeholders through the existing Pixi/browser Canvas pipeline, copies only
-their canonical rectangles, and writes `pixel-proof.json`. The adopted extension compared all 155
-previous assigned rectangles (3,247,104 RGBA bytes) with zero changed bytes. Use the normal
+their canonical rectangles, and writes `pixel-proof.json`. The previous assigned drawings stay
+unchanged; acceptance evidence lives in the [release record](../../docs/releases.md). Use the normal
 `art:template` and `art:export` commands for ongoing artist work; this helper is only for auditing
 or reproducing the one-time append operation.

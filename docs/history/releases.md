@@ -4,6 +4,51 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.0.1 — 2026-10-30
+
+Fix CPUs dying beside their own bombs in multi-CPU openings. Concurrent bomb placements still
+invalidate obsolete escape routes, but fresh rules 8 planning now uses retained origin proof and
+certifies movement against the current bomb, storm and mob scene. Short conditional movement
+keeps named stationary-bomb assumptions and the three-update limit. Escape guidance avoids
+visible bombs; origin grace still ends at footprint exit.
+
+Scheduled route stops retain contact checks, and contact invalidation preserves independently
+valid recovery provenance while revoking old movement. Live CPU policy advances to 20; archived
+CPU 19 accepted-input replay remains supported. Gameplay16/rules 8, artwork and web/API contracts
+are unchanged.
+
+### Verification and source identity
+
+Accepted source: `114b9ce484a62f1dea8f2f0e0d76af26e4770315`; source PR
+[#282](https://github.com/liveweird/grenadiers/pull/282) merged as
+`b754d6c68639e0754d42b1a5b80f00c5385b8566` with an identical source tree.
+Independent production review is clear.
+
+- The regression reproduces all three CPUs planting at tick 205 and dying at tick 385 before
+  the fix. Four default maps and all three boards with Easy/Standard now survive the first
+  owned detonations and full flame interval. Controller, uncertainty and replay regressions pass.
+- Fresh full Rust debug/release suites, formatting/Clippy/build and independent coverage pass:
+  42,708/46,311 lines (92.22%) in 242.627 seconds.
+- Only the unchanged historical ExpandedV5 exhaustive-mask execution reuses v0.3.116 acceptance
+  after a reviewed dependency-closure comparison. Default gates remain exhaustive; no old
+  coverage counts are combined. Web/art/API/dependency inputs retain v1.0.0 full-web acceptance.
+- Fresh repository/tooling/E2E-static checks, Rust dependency policy and both npm audits pass.
+  The exact-image Trivy 0.74 scan reports zero fixable HIGH/CRITICAL vulnerabilities.
+- Compose native acceptance passes 5/5, including real three-CPU bomb/flame survival and Easy
+  Solo completion/rematch/reconnect; Kubernetes native smoke passes 2/2 with exact digest,
+  restricted security, resource limits, probes/readiness, zero restarts and scoped cleanup.
+
+### Distribution, operation and rollback
+
+Stable source release. The accepted local image is
+`sha256:8c024abfc87055df9b4f62dd4aa54a35e17eda40a4a2d4e233895b3c13870bf1`, labelled 1.0.1
+and source 114b9ce4. Localhost:8085 runs that exact image; fresh promotion verifies health/readiness,
+served HTML/JS/CSS/PNG equality, CSP/cache policy and runtime limits.
+The immutable v1.0.0 image/override is retained for rollback. Restart or rollback ends
+process-local matches and resume credentials. No hosted deployment, durable accounts/statistics
+or production replay export is added. Human difficulty and interaction tuning remain in
+[BACKLOG.md](../../BACKLOG.md).
+
 ## v1.0.0 — 2026-10-30
 
 The first stable Grenadiers milestone promotes the verified v0.3.118 game to 1.0.0:

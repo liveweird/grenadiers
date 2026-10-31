@@ -97,50 +97,64 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.0.1 — 2026-10-30
+## v1.0.2 — 2026-10-31
 
-Fix CPUs dying beside their own bombs in multi-CPU openings. Concurrent bomb placements still
-invalidate obsolete escape routes, but fresh rules 8 planning now uses retained origin proof and
-certifies movement against the current bomb, storm and mob scene. Short conditional movement
-keeps named stationary-bomb assumptions and the three-update limit. Escape guidance avoids
-visible bombs; origin grace still ends at footprint exit.
+Correct arena playability and adopt the owner-supplied stone-wall sprite sheet. Each lair keeps
+one living mob and starts its configurable replacement delay after that mob dies. Living players
+occupy distinct cells without overlapping; movement reservations also cover turns, Bracelet
+shoves and atomic Teleporter swaps. CPUs seek safe firing positions against all visible rivals,
+including other CPUs, while retaining checked escapes and bounded planning work.
 
-Scheduled route stops retain contact checks, and contact invalidation preserves independently
-valid recovery provenance while revoking old movement. Live CPU policy advances to 20; archived
-CPU 19 accepted-input replay remains supported. Gameplay16/rules 8, artwork and web/API contracts
-are unchanged.
+Landmines are additional single-use weapons: placement consumes the item without occupying an
+ordinary bomb slot; detonation or destruction creates no refund or capacity increase. Ordinary,
+Remote and automatic bombs retain their normal slots. The paired browser/server uses
+gameplay17/rules9/CPU21, with private replay8 and closed historical contracts.
+
+The new PNG retains the 1120×1792 layout, all 155 frame entries, pivots, anchors and animation
+metadata. The redundant input file was removed. The current [artist source](../assets/art/README.md)
+and downloadable artist bundle accompany this release.
 
 ### Verification and source identity
 
-Accepted source: `114b9ce484a62f1dea8f2f0e0d76af26e4770315`; source PR
-[#282](https://github.com/liveweird/grenadiers/pull/282) merged as
-`b754d6c68639e0754d42b1a5b80f00c5385b8566` with an identical source tree.
-Independent production review is clear.
+Accepted image source: `45a44893de0bdcf665738d3a4908013fc4157355`; source PRs
+[#284](https://github.com/liveweird/grenadiers/pull/284) and
+[#285](https://github.com/liveweird/grenadiers/pull/285). Independent physics, CPU and
+protocol/runtime reviews are clear. Final Rust inputs were verified at
+`1900c1c6aefacaaeb440c1fba1a53f969930f588`; later changes preserve those inputs.
 
-- The regression reproduces all three CPUs planting at tick 205 and dying at tick 385 before
-  the fix. Four default maps and all three boards with Easy/Standard now survive the first
-  owned detonations and full flame interval. Controller, uncertainty and replay regressions pass.
-- Fresh full Rust debug/release suites, formatting/Clippy/build and independent coverage pass:
-  42,708/46,311 lines (92.22%) in 242.627 seconds.
-- Only the unchanged historical ExpandedV5 exhaustive-mask execution reuses v0.3.116 acceptance
-  after a reviewed dependency-closure comparison. Default gates remain exhaustive; no old
-  coverage counts are combined. Web/art/API/dependency inputs retain v1.0.0 full-web acceptance.
-- Fresh repository/tooling/E2E-static checks, Rust dependency policy and both npm audits pass.
-  The exact-image Trivy 0.74 scan reports zero fixable HIGH/CRITICAL vulnerabilities.
-- Compose native acceptance passes 5/5, including real three-CPU bomb/flame survival and Easy
-  Solo completion/rematch/reconnect; Kubernetes native smoke passes 2/2 with exact digest,
-  restricted security, resource limits, probes/readiness, zero restarts and scoped cleanup.
+- Fresh debug/release workspace suites, formatting/Clippy/build and independent Rust coverage
+  pass: 1,548 core tests, 564 server tests and 45,955/49,832 lines (92.22%) in 403.499 seconds.
+  Only the unchanged historical ExpandedV5 exhaustive execution reuses the immediately preceding
+  full gate at 336503ed: all 4,194,304 masks in each of debug, release and coverage, 32 partitions,
+  four workers and no retries. No old coverage counters were merged.
+- Frontend: 7,174 tests pass with 93.81% line and 88.17% branch coverage. Production build and
+  compressed budgets pass: JavaScript 360,047/400,000 and CSS 15,226/20,000 bytes. The native
+  Rust/browser corpus contains 30 authoritative frames, including 34 physical bombs with one
+  occupied regular slot and recipient privacy. Typed maximum frames fit the bounded 196,608-byte
+  outgoing cap; incoming commands remain 4,096 bytes.
+- Targeted native lair, Bracelet, Teleporter and extra-mine scenarios pass, alongside seven-case
+  Compose gameplay acceptance. The final art image passes four-case rendered/CPU Compose
+  acceptance and two-case Kubernetes smoke with exact digest, restricted security, probes,
+  resource limits, zero restarts and scoped cleanup. Atlas/workbench checks pass 10/10;
+  two-density renderer parity/lifecycle checks pass 2/2. Legacy procedural fingerprints were
+  corrected for the already accepted weather-layer ordering, independently of the PNG.
+- Repository/tooling/E2E-static checks, strict Kubernetes schemas and dependency audits pass.
+  Trivy 0.74 reports zero fixable HIGH/CRITICAL findings on the exact final image.
+  [Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41146992961)
+  pass for the final Rust inputs.
 
 ### Distribution, operation and rollback
 
-Stable source release. The accepted local image is
-`sha256:8c024abfc87055df9b4f62dd4aa54a35e17eda40a4a2d4e233895b3c13870bf1`, labelled 1.0.1
-and source 114b9ce4. Localhost:8085 runs that exact image; fresh promotion verifies health/readiness,
-served HTML/JS/CSS/PNG equality, CSP/cache policy and runtime limits.
-The immutable v1.0.0 image/override is retained for rollback. Restart or rollback ends
-process-local matches and resume credentials. No hosted deployment, durable accounts/statistics
-or production replay export is added. Human difficulty and interaction tuning remain in
-[BACKLOG.md](../BACKLOG.md).
+Stable source release. Localhost:8085 runs the exact accepted image
+`sha256:84e147f388036905dba79f108bd0ee16069fa05a426ec8860d8ad993d02cb48b`, labelled 1.0.2 and source45a44893.
+Promotion verifies health/readiness, runtime limits, CSP/cache policy and served HTML/JS/CSS/PNG
+byte equality, including the adopted sprite sheet. Reload browser tabs and start a new match.
+The immutable v1.0.1 image/override is retained for rollback. Restart or rollback ends process-local
+matches and resume credentials. No hosted deployment, durable accounts/statistics or production
+replay export is added. Human playtesting remains in [BACKLOG.md](../BACKLOG.md).
+
+<a id="v101--2026-10-30"></a>
+The [v1.0.1 record](history/releases.md#v101--2026-10-30) is preserved in release history.
 
 <a id="v100--2026-10-30"></a>
 The [v1.0.0 record](history/releases.md#v100--2026-10-30) is preserved in release history.

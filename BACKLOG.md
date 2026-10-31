@@ -10,20 +10,6 @@ waiting on a stated dependency. Explicit user requests and accepted plans are co
 new assistant suggestions start as `[new]`. Existing authorization carries forward without
 repeated approval for routine implementation choices. Entries are not delivery-date promises.
 
-## Arena playability
-
-- [next] **Lair lifecycle.** Limit each lair to one living mob. After its death, wait the
-  configured interval before replacement; show the waiting/occupied state honestly and remove
-  the multi-mob capacity control. Preserve historical rules/replay behavior.
-- [todo] **Solid players.** Prevent living players from sharing a tile or overlapping through
-  movement, turns or forced movement. Keep deterministic contested movement, contact Bracelet
-  behavior and safe atomic Teleporter swaps; adapt CPU movement to player blockers.
-- [todo] **CPU combat pressure.** Make CPUs pursue reachable attack positions against all
-  visible rivals, including other CPUs, while retaining checked bomb escape and mob safety.
-  Add real multiplayer progress/combat regressions rather than only utility-score assertions.
-- [todo] **Extra landmines.** Consume the single-use mine item when planting without using a
-  regular bomb slot. Triggering the mine must not increase or refund regular bomb capacity.
-
 ## Single-player
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the

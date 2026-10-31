@@ -23,4 +23,24 @@ describe('Three arena coordinates and camera', () => {
     expect(camera.right - camera.left).toBeGreaterThan(17)
     expect(camera.position.x).toBe(7.5)
   })
+
+  it.each([
+    [11, 9, 320, 640], [11, 9, 1200, 500],
+    [13, 11, 320, 640], [13, 11, 1200, 500],
+    [15, 13, 320, 640], [15, 13, 1200, 500],
+  ] as const)('resets zoom and retains the padded rim for %sx%s at %sx%s', (
+    width, height, viewportWidth, viewportHeight,
+  ) => {
+    const camera = createArenaCamera()
+    camera.zoom = 2
+    fitArenaCamera(camera, { width, height }, { width: viewportWidth, height: viewportHeight })
+    const usableWidth = (camera.right - camera.left) / 1.075
+    const usableHeight = (camera.top - camera.bottom) / 1.075
+    const rimWidth = width + 2.2
+    const rimProjectedHeight = (height + 2.2) * Math.sin(55 * Math.PI / 180)
+      + 1.1 * Math.cos(55 * Math.PI / 180)
+    expect(camera.zoom).toBe(1)
+    expect(usableWidth).toBeGreaterThanOrEqual(rimWidth)
+    expect(usableHeight).toBeGreaterThanOrEqual(rimProjectedHeight)
+  })
 })

@@ -4,6 +4,12 @@ import { WORLD_TILE } from './coordinates'
 const ELEVATION = 55 * Math.PI / 180
 const MAX_SCENERY_HEIGHT = 1.1
 const FIT_PADDING = 1.13
+const CAMERA_DISTANCE = 26
+
+export interface ArenaCameraOffset {
+  zoom: number
+  yaw: number
+}
 
 export function createArenaCamera(): OrthographicCamera {
   const camera = new OrthographicCamera(-1, 1, 1, -1, 1, 100_000)
@@ -26,15 +32,27 @@ export function fitArenaCamera(
   camera.right = viewWidth / 2
   camera.top = viewHeight / 2
   camera.bottom = -viewHeight / 2
-  const distance = 26
-  const centerX = board.width * WORLD_TILE / 2
-  const centerZ = board.height * WORLD_TILE / 2
-  camera.position.set(
-    centerX, Math.sin(ELEVATION) * distance, centerZ + Math.cos(ELEVATION) * distance,
-  )
-  camera.lookAt(centerX, 0, centerZ)
   camera.near = 0.1
   camera.far = 70
+  applyArenaCameraOffset(camera, board, { zoom: 1, yaw: 0 })
+}
+
+/** Rebuilds the pose from the fixed board center, preventing accumulated animation drift. */
+export function applyArenaCameraOffset(
+  camera: OrthographicCamera,
+  board: { width: number; height: number },
+  offset: ArenaCameraOffset,
+): void {
+  const centerX = board.width * WORLD_TILE / 2
+  const centerZ = board.height * WORLD_TILE / 2
+  const horizontalDistance = Math.cos(ELEVATION) * CAMERA_DISTANCE
+  camera.position.set(
+    centerX + Math.sin(offset.yaw) * horizontalDistance,
+    Math.sin(ELEVATION) * CAMERA_DISTANCE,
+    centerZ + Math.cos(offset.yaw) * horizontalDistance,
+  )
+  camera.lookAt(centerX, 0, centerZ)
+  camera.zoom = offset.zoom
   camera.updateProjectionMatrix()
   camera.updateMatrixWorld()
 }

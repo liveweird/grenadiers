@@ -10,6 +10,10 @@ const hooks = vi.hoisted(() => ({
   store: {
     read: vi.fn(), subscribe: vi.fn(), update: vi.fn(), clear: vi.fn(), setReducedMotion: vi.fn(),
   },
+  roundCamera: {
+    update: vi.fn(), apply: vi.fn(), reapply: vi.fn(), clear: vi.fn(), setReducedMotion: vi.fn(),
+  },
+  createRoundCamera: vi.fn(),
   advance: vi.fn(),
   setSize: vi.fn(),
   resetGlState: vi.fn(),
@@ -27,6 +31,9 @@ vi.mock('./atlas', () => ({ createThreeAtlas: vi.fn(async () => {
   return hooks.atlas
 }) }))
 vi.mock('./sceneStore', () => ({ createArenaSceneStore: vi.fn(() => hooks.store) }))
+vi.mock('./roundCamera', () => ({
+  createRoundCameraController: hooks.createRoundCamera,
+}))
 vi.mock('@react-three/fiber', () => ({
   extend: vi.fn(),
   createRoot: vi.fn(() => ({
@@ -43,6 +50,8 @@ beforeEach(() => {
   hooks.atlas.dispose.mockReset()
   hooks.atlas.texture.needsUpdate = false
   for (const method of Object.values(hooks.store)) method.mockReset()
+  for (const method of Object.values(hooks.roundCamera)) method.mockReset()
+  hooks.createRoundCamera.mockReset().mockReturnValue(hooks.roundCamera)
   hooks.advance.mockReset()
   hooks.setSize.mockReset()
   hooks.resetGlState.mockReset()
@@ -99,9 +108,14 @@ describe('manual Three renderer lifetime', () => {
 
     const snapshot = gameSnapshot()
     renderer.update(snapshot)
+    expect(hooks.roundCamera.update).toHaveBeenCalledWith(snapshot, expect.any(Number))
+    expect(hooks.roundCamera.update.mock.invocationCallOrder[0])
+      .toBeLessThan(hooks.store.update.mock.invocationCallOrder[0]!)
     expect(hooks.store.update).toHaveBeenCalledWith(snapshot, expect.any(Number))
     expect(canvas?.style.visibility).toBe('hidden')
     runFrame(123)
+    expect(hooks.roundCamera.apply.mock.invocationCallOrder.at(-1))
+      .toBeLessThan(hooks.advance.mock.invocationCallOrder[0]!)
     expect(hooks.advance).toHaveBeenCalledWith(0.123, true)
     expect(canvas?.style.visibility).toBe('visible')
 
@@ -110,6 +124,7 @@ describe('manual Three renderer lifetime', () => {
     expect(contextLoss.defaultPrevented).toBe(true)
     expect(canvas?.style.visibility).toBe('hidden')
     expect(hooks.frames.size).toBe(0)
+    expect(hooks.roundCamera.clear).toHaveBeenCalled()
     canvas?.dispatchEvent(new Event('webglcontextrestored'))
     runFrame(234)
     expect(canvas?.style.visibility).toBe('visible')
@@ -119,6 +134,9 @@ describe('manual Three renderer lifetime', () => {
     expect(hooks.atlas.texture.needsUpdate).toBe(true)
 
     renderer.setReducedMotion(true)
+    expect(hooks.roundCamera.setReducedMotion).toHaveBeenCalledWith(
+      true, expect.anything(), expect.objectContaining({ width: 15, height: 13 }),
+    )
     expect(hooks.store.setReducedMotion).toHaveBeenCalledWith(true)
     renderer.suspend()
     expect(canvas?.style.visibility).toBe('hidden')
@@ -146,6 +164,7 @@ describe('manual Three renderer lifetime', () => {
     hooks.advance.mockImplementationOnce(() => { throw new Error('GPU frame failed') })
     renderer.update(snapshot)
     runFrame()
+    expect(hooks.roundCamera.clear).toHaveBeenCalled()
     expect(() => renderer.update(snapshot)).toThrow('GPU frame failed')
     expect(hooks.frames.size).toBe(0)
     renderer.destroy()
@@ -170,6 +189,14 @@ describe('manual Three renderer lifetime', () => {
     snapshot.state.arena.height = 11
     renderer.update(snapshot)
     expect(hooks.setSize).toHaveBeenCalled()
+    expect(hooks.roundCamera.reapply).toHaveBeenCalled()
+    renderer.destroy()
+  })
+
+  it('passes an injected random source to the per-renderer camera controller', async () => {
+    const random = vi.fn(() => 0.5)
+    const renderer = await createThreeArenaRenderer(document.createElement('div'), random)
+    expect(hooks.createRoundCamera).toHaveBeenCalledWith(random)
     renderer.destroy()
   })
 

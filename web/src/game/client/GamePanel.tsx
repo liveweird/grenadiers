@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
-import type { Direction, PresentationDeaths } from '../arena/types'
+import type { Direction, PresentationDeaths, PresentationOpening } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
@@ -310,11 +310,12 @@ function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof pres
     ? format(copy.arena.punchHint, { equipment }) : copy.arena.focusHint
 }
 
-export function GamePanelView({ state, actions, developerPanel, presentationDeaths }: {
+export function GamePanelView({ state, actions, developerPanel, presentationDeaths, presentationOpening }: {
   state: GameClientState
   actions: GameActions
   developerPanel?: ReactNode
   presentationDeaths?: PresentationDeaths
+  presentationOpening?: PresentationOpening | null
 }) {
   const translatedCopy = useGameCopy()
   const copy = useMemo(() => roomCopy(translatedCopy, state.room), [translatedCopy, state.room])
@@ -327,7 +328,8 @@ export function GamePanelView({ state, actions, developerPanel, presentationDeat
   const reconnecting = state.room && (state.admissionPending
     || ['reconnecting', 'connecting', 'authenticating'].includes(state.connection))
   const arenaSnapshot = useMemo(
-    () => presentSnapshot(state, presentationDeaths), [state, presentationDeaths],
+    () => presentSnapshot(state, presentationDeaths, presentationOpening),
+    [state, presentationDeaths, presentationOpening],
   )
   const ownActor = ownStatusActor(state)
   const focusHint = arenaFocusHint(state, arenaSnapshot, bindings, copy)
@@ -383,9 +385,10 @@ export function GamePanelView({ state, actions, developerPanel, presentationDeat
 }
 
 export function GamePanel() {
-  const [state, client, presentationDeaths] = useGameClient()
+  const [state, client, presentationDeaths, presentationOpening] = useGameClient()
   const debugEnabled = cpuDebugOptedIn(window.location.search)
   const debug = useCpuDebug(state, client, debugEnabled)
   return <GamePanelView state={state} actions={client} presentationDeaths={presentationDeaths}
+    presentationOpening={presentationOpening}
     developerPanel={debugEnabled && state.room ? <CpuDebugPanel state={state} debug={debug} /> : null} />
 }

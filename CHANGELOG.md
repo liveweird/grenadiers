@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 1.2.3 — 2026-11-01
+
+- Add random 900ms zoom-in, zoom-out and left/right camera transitions at genuine round starts
+  and observed round/match results, with an exact return to the normal framing.
+- Latch snapshot-free countdowns before React updates and keep reconnect, recovery and
+  reduced-motion boundaries free of replayed camera effects.
+
 ## 1.2.2 — 2026-10-31
 
 - Adopt the owner-supplied spike-pit and fire artwork with bounded palettes and seamless

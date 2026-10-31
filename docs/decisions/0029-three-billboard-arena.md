@@ -15,7 +15,8 @@ Use Three.js and React Three Fiber behind the existing `ArenaRenderer` interface
 Fiber root registers only required classes. Production imports exclude Pixi and its procedural
 drawing factories; the emitted module graph and unchanged bundle budgets enforce this boundary.
 
-Use a fixed orthographic camera with elevation and no yaw. One world unit represents one tile;
+Use an elevated orthographic camera with a north-aligned normal view. Bounded, optional
+round-boundary camera motion returns to that view; reduced motion keeps it stationary. One world unit represents one tile;
 simulation X/Y maps to world X/Z. Build shallow, chamfered terrain and a raised tray. Floors,
 tops, sides and trim sample named material frames in the canonical artist sheet. Keep characters,
 mobs and effects as anchored billboard sprites initially. An engine-independent actor view

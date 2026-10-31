@@ -30,6 +30,7 @@ export const scenarioSpecMap = {
   'scenarios/power-bomb.md': ['power-bomb-tests/power-bomb.spec.ts'],
   'scenarios/punch.md': ['punch-tests/punch.spec.ts'],
   'scenarios/realtime.md': ['tests/realtime.spec.ts'],
+  'scenarios/round-camera.md': ['tests/round-camera.spec.ts'],
   'scenarios/reconnect.md': ['reconnect-tests/reconnect.spec.ts'],
   'scenarios/remote-bomb.md': ['remote-bomb-tests/remote-bomb.spec.ts'],
   'scenarios/renderer-diagnostics.md': ['renderer-diagnostic-tests/lifecycle.spec.ts'],
@@ -48,6 +49,7 @@ export const scenarioSpecMap = {
   'scenarios/spike-pits.md': ['spike-pit-tests/spike-pits.spec.ts'],
   'scenarios/three-arena.md': [
     'three-arena-tests/fire.spec.ts',
+    'three-arena-tests/round-camera.spec.ts',
     'three-arena-tests/three-arena.spec.ts',
   ],
   'scenarios/terrain-pixels.md': ['terrain-pixel-tests/terrain.spec.ts'],

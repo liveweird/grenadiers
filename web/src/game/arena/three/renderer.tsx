@@ -10,6 +10,7 @@ import type { SnapshotMessage } from '../types'
 import { createThreeAtlas } from './atlas'
 import { createArenaCamera, fitArenaCamera } from './camera'
 import { RendererRoot } from './RendererRoot'
+import { createRoundCameraController } from './roundCamera'
 import { createArenaSceneStore } from './sceneStore'
 
 extend({ DirectionalLight, Group, HemisphereLight, InstancedMesh, Mesh, Object3D })
@@ -25,7 +26,9 @@ function viewportSize(host: HTMLElement): { width: number; height: number } {
 }
 
 /** Creates an isolated manual Fiber root. The canvas stays hidden until a completed GPU frame. */
-export async function createThreeArenaRenderer(host: HTMLElement): Promise<ArenaRenderer> {
+export async function createThreeArenaRenderer(
+  host: HTMLElement, random: () => number = Math.random,
+): Promise<ArenaRenderer> {
   const atlas = await createThreeAtlas()
   const canvas = document.createElement('canvas')
   canvas.setAttribute('aria-hidden', 'true')
@@ -45,6 +48,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
   let board = { width: 15, height: 13 }
   const camera: OrthographicCamera = createArenaCamera()
   const store = createArenaSceneStore()
+  const roundCamera = createRoundCameraController(random)
 
   const hideAndStop = (): void => {
     canvas.style.visibility = 'hidden'
@@ -64,6 +68,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
         atlas.texture.needsUpdate = true
         restoreRendererState = false
       }
+      roundCamera.apply(camera, board, timestamp)
       state.advance(timestamp / 1000, true)
       canvas.style.visibility = 'visible'
       frameRequest = requestAnimationFrame(frame)
@@ -72,6 +77,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
       wantedActive = false
       hideAndStop()
       store.clear()
+      roundCamera.clear(camera, board)
     }
   }
   const scheduleFrame = (): void => {
@@ -84,16 +90,19 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
     const size = viewportSize(host)
     rootStore.getState().setSize(size.width, size.height, 0, 0)
     fitArenaCamera(camera, board, size)
+    roundCamera.reapply(camera, board)
   }
   const onContextLost = (event: Event): void => {
     event.preventDefault()
     contextLost = true
     hideAndStop()
+    roundCamera.clear(camera, board)
   }
   const onContextRestored = (): void => {
     if (destroyed) return
     contextLost = false
     restoreRendererState = true
+    roundCamera.clear(camera, board)
     scheduleFrame()
   }
   const removeCanvas = (): void => {
@@ -145,6 +154,7 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
     resizeObserver?.disconnect()
     resizeObserver = null
     store.clear()
+    roundCamera.clear(camera, board)
     removeCanvas()
     if (root) unmountComponentAtNode(canvas, () => atlas.dispose())
     else atlas.dispose()
@@ -159,7 +169,10 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
         || board.height !== snapshot.state.arena.height
       board = { width: snapshot.state.arena.width, height: snapshot.state.arena.height }
       if (dimensionsChanged) resize()
-      store.update(snapshot, performance.now())
+      const receivedAt = performance.now()
+      roundCamera.update(snapshot, receivedAt)
+      roundCamera.apply(camera, board, receivedAt)
+      store.update(snapshot, receivedAt)
       wantedActive = true
       scheduleFrame()
     },
@@ -168,9 +181,13 @@ export async function createThreeArenaRenderer(host: HTMLElement): Promise<Arena
       wantedActive = false
       hideAndStop()
       store.clear()
+      roundCamera.clear(camera, board)
     },
     setReducedMotion(reduced) {
-      if (!destroyed) store.setReducedMotion(reduced)
+      if (!destroyed) {
+        roundCamera.setReducedMotion(reduced, camera, board)
+        store.setReducedMotion(reduced)
+      }
     },
     destroy() {
       if (destroyed) return

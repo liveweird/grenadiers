@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## 1.2.1 — 2026-10-31
+
+- Light nearby terrain and characters from public fire, with a bounded pool and static
+  reduced-motion presentation.
+- Add six-frame flames, local ignition flares, rising embers and smoke to the shared artist
+  sheet while preserving all previous artwork.
+- Restore terrain, sprites, shadows and clear colour after WebGL context loss.
+- Reduce current gameplay validator code size while retaining exact canonical compiler
+  parity and unchanged historical validators.
+
 ## 1.2.0 — 2026-10-31
 
 - Add contact-triggered spike pits with configurable warning and raised durations, normal

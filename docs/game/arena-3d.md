@@ -47,8 +47,21 @@ the full inventory; exported slices are optional review assets.
 ## Lighting, motion and privacy
 
 Directional light, hemisphere fill, shadows and textured chamfers provide depth. A small final
-pass adds warm colour grading and static ordered dithering. Pixel artwork retains nearest
-sampling; blur, animated grain and screen shake do not obscure players or blast cells.
+pass adds warm colour grading and static ordered dithering. Up to four pooled, local fire lights
+warm nearby terrain; public flames and burning Oil supply their positions. Gentle flicker stays
+bounded when explosions overlap. Character sprites receive a subtle warm tint at their displayed
+position, with public walls and blocks occluding that tint. Hidden bombs and actors supply no light.
+
+Artist-authored flames use six poses, with brief ignition flares, small rising embers and pale
+smoke. The renderer caps ignition flares at eight and particles at twelve. These are cosmetic:
+the server's flame cells still own damage and duration. Sprite footprints, nearest sampling and
+death-card layering preserve readable blast boundaries. The final colour pass remains restrained;
+there is no full-scene blur or screen shake.
+
+Reduced motion uses static fire artwork and illumination, with no ignition flashes, flicker,
+smoke or embers. Admission into existing fire does not replay ignition. Room/round changes,
+backward timelines, long observation gaps, suspension and preference changes reset transient
+fire history. A fresh round-ending public blast can still show a short ignition cue.
 
 Positions interpolate between received snapshots without extrapolation. Reduced motion uses
 static animation frames and immediate positions. Teleports, freezes, room/round changes,
@@ -68,7 +81,7 @@ Player cues require a fresh elimination event and that recipient's currently vis
 actor position. A cloaked opponent's hidden row cannot supply a death position, so no spatial
 cue is drawn for that recipient. Events are latched before React can coalesce client callbacks.
 Mob cues use the last public pose when a mob disappears from tightly continuous snapshots of
-the same round and lair; fire is the only in-round mob removal. A long publication gap suppresses
+the same round and lair after fire or spike damage. A long publication gap suppresses
 this inferred pose instead of showing an old location. Round-ending and match-winning blasts
 can show player and mob cues together.
 
@@ -88,6 +101,8 @@ The production build verifies its emitted module graph excludes Pixi reference d
 The shared atlas retains PNG decode, binary-alpha, palette, anchor, padding and GPU texture
 bounds. Renderer suspension hides the canvas immediately; final teardown releases instance
 buffers, geometry, materials, textures, render targets, observers and the graphics context.
+After WebGL context recovery, the first new frame restores the clear colour, shadow map and
+atlas upload after Three rebuilds its caches, before making the canvas visible again.
 
 Run `npm --prefix e2e run test:three-arena` for the separate credential-free native WebGL fixture.
 It covers board sizes, desktop/narrow viewports, entity removal, reset and context recovery.

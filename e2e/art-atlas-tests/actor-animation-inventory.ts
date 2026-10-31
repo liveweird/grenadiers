@@ -12,10 +12,19 @@ export type ActorInventoryMetric = {
   distinctFamilies: Array<{ family: string; unique: boolean }>
 }
 
+export type DeathInventoryMetric = {
+  appearance: string
+  frameCount: number
+  opaquePixels: number[]
+  invalidAlpha: number
+  distinctFrameCount: number
+  unexpectedColors: string[]
+}
+
 export function inspectActorInventory(
   page: Page,
   source: Source,
-): Promise<ActorInventoryMetric[]> {
+): Promise<{ actors: ActorInventoryMetric[]; deaths: DeathInventoryMetric[] }> {
   return page.evaluate(async (request) => {
     const binary = atob(request.pngBase64)
     const bytes = Uint8Array.from(binary, (value) => value.charCodeAt(0))
@@ -36,7 +45,7 @@ export function inspectActorInventory(
       }
       return false
     }
-    return ['one', 'two', 'three', 'four'].map((appearance) => {
+    const actors = ['one', 'two', 'three', 'four'].map((appearance) => {
       const frames = manifest.frames.filter(({ id }) =>
         new RegExp(`^actor\\.${appearance}\\.(north|east|south|west)\\.[0-3]$`).test(id))
       const colors = new Set<string>()
@@ -77,5 +86,50 @@ export function inspectActorInventory(
         colors: colors.size, coatPixels, distinctFamilies,
       }
     })
+    const colorsIn = (frames: typeof manifest.frames): Set<string> => {
+      const colors = new Set<string>()
+      for (const { sourceRect } of frames) {
+        const data = context.getImageData(
+          sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height,
+        ).data
+        for (let offset = 0; offset < data.length; offset += 4) {
+          if (data[offset + 3] !== 0) colors.add(`${data[offset]},${data[offset + 1]},${data[offset + 2]}`)
+        }
+      }
+      return colors
+    }
+    const deaths = ['one', 'two', 'three', 'four', 'mob'].map((appearance) => {
+      const directional = manifest.frames.filter(({ id }) => appearance === 'mob'
+        ? /^mob\.(north|east|south|west)$/.test(id)
+        : new RegExp(`^actor\\.${appearance}\\.(north|east|south|west)\\.[0-3]$`).test(id))
+      const frames = manifest.frames.filter(({ id }) => new RegExp(
+        appearance === 'mob' ? '^mob\\.death\\.[0-3]$' : `^actor\\.${appearance}\\.death\\.[0-3]$`,
+      ).test(id))
+      const directionalColors = colorsIn(directional)
+      const deathColors = new Set<string>()
+      let invalidAlpha = 0
+      const framePixels = frames.map(({ sourceRect }) => {
+        const data = context.getImageData(
+          sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height,
+        ).data
+        let opaque = 0
+        for (let offset = 0; offset < data.length; offset += 4) {
+          const alpha = data[offset + 3]
+          if (alpha !== 0 && alpha !== 255) invalidAlpha += 1
+          if (alpha === 0) continue
+          opaque += 1
+          deathColors.add(`${data[offset]},${data[offset + 1]},${data[offset + 2]}`)
+        }
+        return { data, opaque }
+      })
+      return {
+        appearance, frameCount: frames.length,
+        opaquePixels: framePixels.map(({ opaque }) => opaque), invalidAlpha,
+        distinctFrameCount: framePixels.filter(({ data }, index) =>
+          framePixels.slice(0, index).every(({ data: prior }) => differs(data, prior))).length,
+        unexpectedColors: [...deathColors].filter((color) => !directionalColors.has(color)),
+      }
+    })
+    return { actors, deaths }
   }, source)
 }

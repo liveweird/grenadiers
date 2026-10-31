@@ -206,9 +206,15 @@ export function validateSourceManifest(manifest: ArtManifest, pixels?: PixelBuff
   for (const frame of manifest.frames) {
     if (!canonicalById.has(frame.id)) issues.push({ code: 'unexpected_frame', path: `frames.${frame.id}`, message: 'append new IDs to the catalogue first' })
   }
-  const feet = manifest.frames.filter(({ id }) => /^actor\.(one|two|three|four)\.(north|east|south|west)\.[0-3]$/.test(id))
-  if (feet.length !== 64 || feet.some(({ footAnchor }) => footAnchor?.x !== 40 || footAnchor?.y !== 65)) {
-    issues.push({ code: 'foot_anchor', path: 'frames', message: 'all 64 actor poses require the same 40,65 foot anchor' })
+  const anchored = manifest.frames.filter(({ id }) =>
+    /^actor\.(one|two|three|four)\.(?:(north|east|south|west)\.[0-3]|death\.[0-3])$/.test(id)
+    || /^mob\.(?:(north|east|south|west)|death\.[0-3])$/.test(id))
+  if (anchored.length !== 88
+    || anchored.some(({ footAnchor }) => footAnchor?.x !== 40 || footAnchor?.y !== 65)) {
+    issues.push({
+      code: 'foot_anchor', path: 'frames',
+      message: 'all directional and death actor/mob frames require the same 40,65 foot anchor',
+    })
   }
   const baselineIds = new Set(manifest.frames.filter(({ status }) => status === 'baseline').map(({ id }) => id))
   validateReferences(baselineIds, manifest.animations, manifest.aliases, manifest.compositions, issues)

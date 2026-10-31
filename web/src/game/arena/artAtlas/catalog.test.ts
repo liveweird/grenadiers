@@ -34,9 +34,9 @@ describe('art atlas catalogue', () => {
       'reserved.actor.one.death', 'reserved.actor.two.death',
       'reserved.terrain.block.destruction', 'reserved.pickup.collection',
     ])
-    expect(manifest.frames).toHaveLength(165)
-    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(161)
-    expect(manifest.sheet).toEqual({ width: 1120, height: 1904, slotSize: 112, columns: 10 })
+    expect(manifest.frames).toHaveLength(185)
+    expect(manifest.frames.filter(({ status }) => status === 'baseline')).toHaveLength(181)
+    expect(manifest.sheet).toEqual({ width: 1120, height: 2128, slotSize: 112, columns: 10 })
     expect(Object.keys(manifest.animations).filter((id) => id.endsWith('.walk'))).toHaveLength(16)
   })
 
@@ -93,14 +93,14 @@ describe('art atlas catalogue', () => {
   it('appends the ten 48px material maps without moving prior artwork', () => {
     const frames = createSourceManifest().frames
     expect(frames.slice(0, 155)).toEqual(adoptedSource.frames.slice(0, 155))
-    expect(frames.slice(155).map(({ id }) => id)).toEqual([
+    expect(frames.slice(155, 165).map(({ id }) => id)).toEqual([
       'material.floor.top.0', 'material.floor.top.1',
       'material.wall.top', 'material.wall.side',
       'material.block.top', 'material.block.side',
       'material.lair.top', 'material.lair.side',
       'material.rim.top', 'material.rim.side',
     ])
-    expect(frames.slice(155).every(({ sourceRect, localBounds, pivot }) =>
+    expect(frames.slice(155, 165).every(({ sourceRect, localBounds, pivot }) =>
       sourceRect.width === 48 && sourceRect.height === 48
       && localBounds.x === 0 && localBounds.y === 0
       && localBounds.width === 48 && localBounds.height === 48
@@ -128,6 +128,48 @@ describe('art atlas catalogue', () => {
       && localBounds.width === 80 && localBounds.height === 80
       && pivot.x === 40 && pivot.y === 44
       && footAnchor?.x === 40 && footAnchor.y === 65)).toBe(true)
+  })
+
+  it('appends complete actor and mob death sequences after every established frame', () => {
+    const manifest = createSourceManifest()
+    const deathIds = ['one', 'two', 'three', 'four'].flatMap((appearance) =>
+      [0, 1, 2, 3].map((frame) => `actor.${appearance}.death.${frame}`))
+      .concat([0, 1, 2, 3].map((frame) => `mob.death.${frame}`))
+
+    expect(manifest.frames.slice(0, 165)).toEqual(adoptedSource.frames.slice(0, 165))
+    expect(manifest.frames.slice(165).map(({ id }) => id)).toEqual(deathIds)
+    expect(manifest.frames.slice(165).every(({ sourceRect, localBounds, pivot, footAnchor }) =>
+      sourceRect.width === 80 && sourceRect.height === 80
+      && localBounds.x === -40 && localBounds.y === -44
+      && localBounds.width === 80 && localBounds.height === 80
+      && pivot.x === 40 && pivot.y === 44
+      && footAnchor?.x === 40 && footAnchor.y === 65)).toBe(true)
+    expect(manifest.frames[165].sourceRect).toEqual({ x: 560, y: 1792, width: 80, height: 80 })
+    expect(manifest.frames[184].sourceRect).toEqual({ x: 448, y: 2016, width: 80, height: 80 })
+    for (const animation of [
+      'actor.one.death', 'actor.two.death', 'actor.three.death', 'actor.four.death', 'mob.death',
+    ]) {
+      expect(manifest.animations[animation]).toEqual({
+        frameIds: [0, 1, 2, 3].map((frame) => `${animation}.${frame}`),
+        frameDurationMs: 150,
+        reducedMotionFrame: `${animation}.3`,
+      })
+    }
+  })
+
+  it('provides transformed procedural references for every death frame', () => {
+    const entries = createArtCatalog().entries.filter(({ frame }) => frame.id.includes('.death.'))
+    expect(entries).toHaveLength(20)
+    const transforms = entries.map((candidate) => {
+      const lease = candidate.createDrawing()
+      const result = {
+        x: lease.drawing.position.x, y: lease.drawing.position.y,
+        rotation: lease.drawing.rotation, scale: lease.drawing.scale.x,
+      }
+      lease.destroy()
+      return result
+    })
+    expect(new Set(transforms.map((transform) => JSON.stringify(transform))).size).toBe(4)
   })
 
   it('leases named parts without depending on child indexes or changing gameplay alpha', () => {

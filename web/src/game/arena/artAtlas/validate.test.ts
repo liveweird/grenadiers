@@ -26,9 +26,9 @@ describe('art atlas validation', () => {
     expect(validateRuntimeManifest(first)).toEqual([])
     expect(first.frames.some(({ id }) => id.startsWith('reserved.'))).toBe(false)
     expect(first.texture).toEqual({
-      width: 2040, height: 584, padding: 2, extrusion: 2,
+      width: 2040, height: 704, padding: 2, extrusion: 2,
     })
-    expect(first.texture.width * first.texture.height * 4).toBe(4_765_440)
+    expect(first.texture.width * first.texture.height * 4).toBe(5_744_640)
   })
 
   it('accepts JSON round trips that reorder object keys but retain array order', () => {
@@ -51,12 +51,14 @@ describe('art atlas validation', () => {
     manifest.frames[0].sourceRect.x += 1
     manifest.frames[1].id = manifest.frames[0].id
     manifest.frames.find(({ id }) => id === 'actor.one.north.0')!.footAnchor = { x: 39, y: 65 }
+    manifest.frames.find(({ id }) => id === 'mob.death.3')!.footAnchor = { x: 40, y: 64 }
     manifest.animations.flame.frameIds = ['effect.missing']
     manifest.animations.spark.frameDurationMs = 91
+    manifest.animations['actor.one.death'].reducedMotionFrame = 'actor.one.death.0'
     const codes = validateSourceManifest(manifest).map(({ code }) => code)
     expect(codes).toEqual(expect.arrayContaining([
       'unstable_frame', 'duplicate_id', 'missing_frame', 'foot_anchor',
-      'unknown_reference', 'animation_policy',
+      'unknown_reference', 'animation_policy', 'required_animation',
     ]))
   })
 

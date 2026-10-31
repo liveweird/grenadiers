@@ -4,6 +4,16 @@
     "bomb.shell.contact.power": "bomb.shell.contact.standard"
   },
   "animations": {
+    "actor.four.death": {
+      "frameDurationMs": 150,
+      "frameIds": [
+        "actor.four.death.0",
+        "actor.four.death.1",
+        "actor.four.death.2",
+        "actor.four.death.3"
+      ],
+      "reducedMotionFrame": "actor.four.death.3"
+    },
     "actor.four.east.walk": {
       "frameDurationMs": 110,
       "frameIds": [
@@ -43,6 +53,16 @@
         "actor.four.west.3"
       ],
       "reducedMotionFrame": "actor.four.west.0"
+    },
+    "actor.one.death": {
+      "frameDurationMs": 150,
+      "frameIds": [
+        "actor.one.death.0",
+        "actor.one.death.1",
+        "actor.one.death.2",
+        "actor.one.death.3"
+      ],
+      "reducedMotionFrame": "actor.one.death.3"
     },
     "actor.one.east.walk": {
       "frameDurationMs": 110,
@@ -84,6 +104,16 @@
       ],
       "reducedMotionFrame": "actor.one.west.0"
     },
+    "actor.three.death": {
+      "frameDurationMs": 150,
+      "frameIds": [
+        "actor.three.death.0",
+        "actor.three.death.1",
+        "actor.three.death.2",
+        "actor.three.death.3"
+      ],
+      "reducedMotionFrame": "actor.three.death.3"
+    },
     "actor.three.east.walk": {
       "frameDurationMs": 110,
       "frameIds": [
@@ -123,6 +153,16 @@
         "actor.three.west.3"
       ],
       "reducedMotionFrame": "actor.three.west.0"
+    },
+    "actor.two.death": {
+      "frameDurationMs": 150,
+      "frameIds": [
+        "actor.two.death.0",
+        "actor.two.death.1",
+        "actor.two.death.2",
+        "actor.two.death.3"
+      ],
+      "reducedMotionFrame": "actor.two.death.3"
     },
     "actor.two.east.walk": {
       "frameDurationMs": 110,
@@ -198,6 +238,16 @@
         "effect.flame.1"
       ],
       "reducedMotionFrame": "effect.flame.0"
+    },
+    "mob.death": {
+      "frameDurationMs": 150,
+      "frameIds": [
+        "mob.death.0",
+        "mob.death.1",
+        "mob.death.2",
+        "mob.death.3"
+      ],
+      "reducedMotionFrame": "mob.death.3"
     },
     "spark": {
       "frameDurationMs": 90,
@@ -3791,12 +3841,492 @@
         "y": 1792
       },
       "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.death.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.death.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.death.2",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.one.death.3",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.death.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 1792
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.death.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.death.2",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.two.death.3",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.three.death.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.three.death.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.three.death.2",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 560,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.three.death.3",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 672,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.four.death.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 784,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.four.death.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 896,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.four.death.2",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 1008,
+        "y": 1904
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "actor.four.death.3",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 0,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "mob.death.0",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 112,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "mob.death.1",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 224,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "mob.death.2",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 336,
+        "y": 2016
+      },
+      "status": "baseline"
+    },
+    {
+      "footAnchor": {
+        "x": 40,
+        "y": 65
+      },
+      "id": "mob.death.3",
+      "localBounds": {
+        "height": 80,
+        "width": 80,
+        "x": -40,
+        "y": -44
+      },
+      "pivot": {
+        "x": 40,
+        "y": 44
+      },
+      "sourceRect": {
+        "height": 80,
+        "width": 80,
+        "x": 448,
+        "y": 2016
+      },
+      "status": "baseline"
     }
   ],
   "schemaVersion": 1,
   "sheet": {
     "columns": 10,
-    "height": 1904,
+    "height": 2128,
     "slotSize": 112,
     "width": 1120
   },

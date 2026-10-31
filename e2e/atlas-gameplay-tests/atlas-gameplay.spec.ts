@@ -153,7 +153,7 @@ test('atlas gameplay matches procedural pixels and retains renderer resources th
     expect(result.resources.atlasSprites).toBeGreaterThan(195)
     expect(result.resources.atlasNodes).toBeLessThan(400)
     expect(result.resources).toMatchObject({
-      textureSources: 1, textureWidth: 2040, textureHeight: 584, rgbaBytes: 4_765_440,
+      textureSources: 1, textureWidth: 2040, textureHeight: 704, rgbaBytes: 5_744_640,
     })
     expect(result.performance.retainedFrames).toBe(30)
     expect(result.performance.coldStartupMs).toBeLessThan(10_000)

@@ -155,6 +155,7 @@ impl State {
         let lairs = LairState::new(
             rules.lair_config(),
             rules.version(),
+            rules.mob_navigation_policy(),
             world.arena.board(),
             &world.arena,
             tick,

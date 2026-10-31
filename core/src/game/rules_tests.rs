@@ -1,5 +1,5 @@
 use super::RulesConfig;
-use crate::game::{EnabledItems, SpeedLevel};
+use crate::game::{EnabledItems, MobNavigationPolicy, SpeedLevel};
 use crate::room::{RespawnLairConfig, RespawnLairSettings, RoomSettings};
 
 #[test]
@@ -46,6 +46,21 @@ fn environment_v9_uses_fixed_one_respawn_lairs() {
     };
     assert_eq!(settings.spawn_ticks(), 300);
     assert_eq!(settings.mobs_per_lair(), 1);
+    assert_eq!(rules.mob_navigation_policy(), MobNavigationPolicy::LegacyV1);
+}
+
+#[test]
+fn environment_v9_can_select_escape_navigation_explicitly() {
+    let rules = RulesConfig::environment_v9_with_mob_navigation(
+        RoomSettings::DEFAULT,
+        super::StormCloudConfig::Disabled,
+        RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()),
+        MobNavigationPolicy::EscapeV2,
+    );
+
+    assert_eq!(MobNavigationPolicy::LegacyV1.version(), 1);
+    assert_eq!(MobNavigationPolicy::EscapeV2.version(), 2);
+    assert_eq!(rules.mob_navigation_policy(), MobNavigationPolicy::EscapeV2);
 }
 
 #[test]

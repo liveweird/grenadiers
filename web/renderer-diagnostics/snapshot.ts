@@ -58,6 +58,8 @@ export function diagnosticSnapshot(
       bombs: [],
       flames: [],
       pickups: [],
+      lairs: [],
+      mobs: [],
     },
   } satisfies SnapshotMessage
 }

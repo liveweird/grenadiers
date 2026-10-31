@@ -8,7 +8,7 @@ application. Realtime/session API versions are independent.
 
 ## Profile and settings
 
-The room binds rules9, CPU21, roster lifecycle3, lair layout1 and unchanged simulation/environment
+The room binds rules9, CPU22, roster lifecycle3, lair layout1 and unchanged simulation/environment
 randomness versions. Generator3 covers 15×13; generator4 covers 13×11 and11×9.
 
 Environment settings retain `stormCloud` and `lairs { enabled, spawnSeconds, maxLivingMobs }`.
@@ -43,7 +43,7 @@ messages are not relabelled through the closed v16 validator. The Rust-generated
 cooldowns, occupied/null timers, blocked-zero eligibility, lifecycle and privacy.
 
 Rules8/gameplay16/replay7 remain closed historical profiles. Test-only replay8 records accepted
-rules9/CPU21 inputs and reconstructs lair births/deaths, player collision and randomness exactly;
+rules9/CPU22 (or archived CPU21) inputs and reconstructs lair births/deaths, player collision and randomness exactly;
 production replay recording stays disabled. Upgrade/restart ends process-local matches.
 
 ## Mines and bounded publication

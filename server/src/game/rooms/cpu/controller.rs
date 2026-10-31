@@ -139,6 +139,7 @@ impl CpuController {
         let (sender, receiver) = sync_channel(1);
         let live = Arc::new(AtomicBool::new(true));
         let job = PlanJob {
+            policy: self.profile.policy,
             observation,
             memory: *self.memory.as_ref().expect("world memory initialized"),
             hazard_memory: self

@@ -37,7 +37,7 @@ replacement cannot inherit the departed creator's settings authority.
 
 Round construction uses rules 9 and the actual physical-round assignment. It selects generator 3
 for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
-participants initially inactive. Every live room uses CPU policy 21. The exact profile table is in
+participants initially inactive. Every live room uses CPU policy 22. The exact profile table is in
 [board geometry](board-sizes.md).
 
 ## Boundaries and randomness

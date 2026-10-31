@@ -6,8 +6,8 @@ create 15×13 rooms regardless of the custom form's selected **Board size** / **
 
 | Configuration | Runtime profile | Rules | Generator | CPU policy |
 | --- | --- | --- | --- | --- |
-| Two to four seats, 15×13 | Roster owner | 9 | 3 | 21 |
-| Two to four seats, 11×9 or 13×11 | Roster owner | 9 | 4 | 21 |
+| Two to four seats, 15×13 | Roster owner | 9 | 3 | 22 |
+| Two to four seats, 11×9 or 13×11 | Roster owner | 9 | 4 | 22 |
 
 ## Checked presets
 

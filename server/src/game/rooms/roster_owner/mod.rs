@@ -116,3 +116,6 @@ mod lair_cpu_opening_tests;
 mod lifecycle_tests;
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod cpu_pickup_progress_tests;

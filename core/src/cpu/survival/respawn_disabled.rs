@@ -14,6 +14,7 @@ pub(super) fn plan(
     origin: Option<&PlantEscapeOrigin>,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
+    pickup_handoff: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     if observation.parts().rules.version != 9 || observation.respawn_lairs().is_some() {
         return Err(PolicyError::InvalidObservation);
@@ -27,5 +28,6 @@ pub(super) fn plan(
         rng,
         work,
         true,
+        pickup_handoff,
     )
 }

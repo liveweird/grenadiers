@@ -28,6 +28,7 @@ pub enum CpuPolicy {
     UtilityV19,
     UtilityV20,
     UtilityV21,
+    UtilityV22,
 }
 
 impl CpuPolicy {
@@ -55,6 +56,7 @@ impl CpuPolicy {
             Self::UtilityV19 => 19,
             Self::UtilityV20 => 20,
             Self::UtilityV21 => 21,
+            Self::UtilityV22 => 22,
         }
     }
 }
@@ -223,15 +225,25 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
-    /// Rules-v9 Standard profile with respawning lairs and solid-player tactics.
-    pub const RESPAWN_LAIRS_STANDARD: Self = Self {
+    /// Archived rules-v9 profile before certified pickup handoffs.
+    pub const RESPAWN_V21_STANDARD: Self = Self {
         policy: CpuPolicy::UtilityV21,
         difficulty: CpuDifficulty::Standard,
     };
 
-    /// Rules-v9 Easy profile with respawning lairs and solid-player tactics.
-    pub const RESPAWN_LAIRS_EASY: Self = Self {
+    pub const RESPAWN_V21_EASY: Self = Self {
         policy: CpuPolicy::UtilityV21,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Rules-v9 Standard profile with certified one-update pickup handoffs.
+    pub const RESPAWN_LAIRS_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV22,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const RESPAWN_LAIRS_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV22,
         difficulty: CpuDifficulty::Easy,
     };
 
@@ -324,8 +336,10 @@ mod tests {
         assert_eq!(CpuProfile::LAIRS_V19_EASY.policy.version(), 19);
         assert_eq!(CpuProfile::LAIRS_STANDARD.policy.version(), 20);
         assert_eq!(CpuProfile::LAIRS_EASY.policy.version(), 20);
-        assert_eq!(CpuProfile::RESPAWN_LAIRS_STANDARD.policy.version(), 21);
-        assert_eq!(CpuProfile::RESPAWN_LAIRS_EASY.policy.version(), 21);
+        assert_eq!(CpuProfile::RESPAWN_LAIRS_STANDARD.policy.version(), 22);
+        assert_eq!(CpuProfile::RESPAWN_V21_STANDARD.policy.version(), 21);
+        assert_eq!(CpuProfile::RESPAWN_LAIRS_EASY.policy.version(), 22);
+        assert_eq!(CpuProfile::RESPAWN_V21_EASY.policy.version(), 21);
         assert!(CpuProfile::CURRENT.is_current());
         assert!(CpuProfile::CURRENT_EASY.is_current());
         assert!(!CpuProfile::MULTIPLAYER_STANDARD.is_current());

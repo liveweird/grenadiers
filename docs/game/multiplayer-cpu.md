@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy 21 on rules 9 for every live two-to-four-seat
+The live environment CPU implementation uses policy 22 on rules 9 for every live two-to-four-seat
 room. The legacy multiplayer profiles remain policy 17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,7 +19,8 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` select Utility21 for live rules9 rooms.
+`CpuProfile::RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` select Utility22 for live rules9 rooms.
+`RESPAWN_V21_STANDARD`/`RESPAWN_V21_EASY` retain Utility21 for archived rules9 planning.
 `LAIRS_STANDARD`/`LAIRS_EASY` retain Utility20 on historical rules8.
 `ENVIRONMENT_STANDARD`/`ENVIRONMENT_EASY` retain Utility18 on rules7; multiplayer, current
 legacy and historical replay profiles keep their previous identities. Planning uses the shared
@@ -60,9 +61,9 @@ Live controller selection uses the lair profile below, including when both envir
 
 ## Lair profile boundaries
 
-`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify Utility21 on rules9. The checked
+`RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` identify Utility22 on rules9. The checked
 v17 observation adds independent nullable lair deadlines and mob poses without targets, paths
-or hidden thaw deadlines. Use `survival::plan_respawn_with_origin`; historical entry points
+or hidden thaw deadlines. Use `survival::plan_respawn_v22_with_origin`; historical entry points
 remain closed to rules9. Disabled lairs use the same solid-player profile.
 
 The planner returns a separate finite contact lease beside the existing bomb/escape proof.
@@ -85,7 +86,7 @@ workers or observations are late. See [CPU contracts](cpu-contracts.md).
 
 ## Combat pressure and player blocking
 
-Every visible living rival is an enemy, whether human or CPU. CPU21 seeks reachable firing
+Every visible living rival is an enemy, whether human or CPU. CPU22 seeks reachable firing
 positions whose actual blast can threaten a rival instead of walking into its occupied cell.
 Useful pickups remain valuable; combat pressure outranks routine crate clearing. Planting still
 requires a complete escape certificate, so increased aggression does not authorize suicide.
@@ -116,6 +117,20 @@ Scheduled stops between route legs retain their contact lease. Contact invalidat
 route or pulse while preserving valid origin provenance for a fresh proof; completed commitments
 release their leases. Historical rules8 controllers retain policy20; archived policy19 replay records
 remain readable without rerunning their planner.
+
+## Pickup handoff
+
+CPU22 retains both movement and optional mob-contact certificates when approaching a pickup.
+A clear scene with no observed bombs, flames or burning Oil permits one manual-free movement
+update, followed by a confirmed Stop and fresh planning. The lease covers every admitted start
+tick and the stopped suffix; changed inventory, timers or controls invalidate the old proof.
+This also applies with lairs disabled. An eligible pickup under the current center prevents a
+delayed start; a neighboring pickup touched only by the footprint does not block approach.
+
+Teleporter and Diarrhea collection remain outside this handoff because they can relocate the
+actor or spawn a bomb during the stopped suffix. Other hazard/contact checks and moving-plan
+admission requirements remain unchanged. Archived CPU21 retains its original entry points;
+replay8 executes matching CPU21 or CPU22 accepted inputs without rerunning either planner.
 
 ## Focused checks
 

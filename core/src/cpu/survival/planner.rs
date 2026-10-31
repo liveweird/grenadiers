@@ -62,6 +62,7 @@ pub fn plan_with_origin(
         rng,
         work,
         false,
+        false,
     )
 }
 
@@ -75,6 +76,7 @@ pub(super) fn plan_inner(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
     respawn: bool,
+    pickup_handoff: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -170,6 +172,20 @@ pub(super) fn plan_inner(
         start: Tick(parts.tick.0 + 1),
         end: Tick(end),
     };
+    if pickup_handoff
+        && let Some(plan) = super::pickup_handoff::disabled(
+            observation,
+            &forecast,
+            ordinary,
+            clear_movement,
+            start_window,
+            end,
+            settled_stop_tick,
+            work,
+        )
+    {
+        return Ok(plan);
+    }
     let Some(route_survive_until) = super::deadline::ordinary_route_end(
         observation,
         start_window,

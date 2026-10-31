@@ -11,10 +11,11 @@ use grenadiers_core::cpu::{
     policy::UtilityMemory,
     survival::{
         PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_lairs_with_origin,
-        plan_respawn_with_origin, plan_with_origin,
+        plan_respawn_v22_with_origin, plan_respawn_with_origin, plan_with_origin,
     },
 };
 use grenadiers_core::game::Tick;
+use grenadiers_core::room::CpuPolicy;
 
 const WORKERS: usize = 2;
 const QUEUE_CAPACITY: usize = 32;
@@ -49,6 +50,7 @@ pub(super) struct PlanResult {
 }
 
 pub(super) struct PlanJob {
+    pub(super) policy: CpuPolicy,
     pub(super) observation: Observation,
     pub(super) memory: UtilityMemory,
     pub(super) hazard_memory: ObservedHazardMemory,
@@ -196,16 +198,28 @@ fn execute_job(
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
     let planned = if job.observation.parts().rules.version == 9 {
-        plan_respawn_with_origin(
-            &job.observation,
-            &job.memory,
-            &job.hazard_memory,
-            job.settled_stop_tick,
-            job.escape_origin.as_ref(),
-            &mut job.rng,
-            &mut work,
-        )
-        .map(|plan| (plan.survival, plan.contact))
+        let plan = if job.policy == CpuPolicy::UtilityV22 {
+            plan_respawn_v22_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else {
+            plan_respawn_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        };
+        plan.map(|plan| (plan.survival, plan.contact))
     } else if job.observation.parts().rules.version == 8 {
         plan_lairs_with_origin(
             &job.observation,

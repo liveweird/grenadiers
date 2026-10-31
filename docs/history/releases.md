@@ -4,6 +4,62 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.0.2 — 2026-10-31
+
+Correct arena playability and adopt the owner-supplied stone-wall sprite sheet. Each lair keeps
+one living mob and starts its configurable replacement delay after that mob dies. Living players
+occupy distinct cells without overlapping; movement reservations also cover turns, Bracelet
+shoves and atomic Teleporter swaps. CPUs seek safe firing positions against all visible rivals,
+including other CPUs, while retaining checked escapes and bounded planning work.
+
+Landmines are additional single-use weapons: placement consumes the item without occupying an
+ordinary bomb slot; detonation or destruction creates no refund or capacity increase. Ordinary,
+Remote and automatic bombs retain their normal slots. The paired browser/server uses
+gameplay17/rules9/CPU21, with private replay8 and closed historical contracts.
+
+The new PNG retains the 1120×1792 layout, all 155 frame entries, pivots, anchors and animation
+metadata. The redundant input file was removed. The current [artist source](../../assets/art/README.md)
+and downloadable artist bundle accompany this release.
+
+### Verification and source identity
+
+Accepted image source: `45a44893de0bdcf665738d3a4908013fc4157355`; source PRs
+[#284](https://github.com/liveweird/grenadiers/pull/284) and
+[#285](https://github.com/liveweird/grenadiers/pull/285). Independent physics, CPU and
+protocol/runtime reviews are clear. Final Rust inputs were verified at
+`1900c1c6aefacaaeb440c1fba1a53f969930f588`; later changes preserve those inputs.
+
+- Fresh debug/release workspace suites, formatting/Clippy/build and independent Rust coverage
+  pass: 1,548 core tests, 564 server tests and 45,955/49,832 lines (92.22%) in 403.499 seconds.
+  Only the unchanged historical ExpandedV5 exhaustive execution reuses the immediately preceding
+  full gate at 336503ed: all 4,194,304 masks in each of debug, release and coverage, 32 partitions,
+  four workers and no retries. No old coverage counters were merged.
+- Frontend: 7,174 tests pass with 93.81% line and 88.17% branch coverage. Production build and
+  compressed budgets pass: JavaScript 360,047/400,000 and CSS 15,226/20,000 bytes. The native
+  Rust/browser corpus contains 30 authoritative frames, including 34 physical bombs with one
+  occupied regular slot and recipient privacy. Typed maximum frames fit the bounded 196,608-byte
+  outgoing cap; incoming commands remain 4,096 bytes.
+- Targeted native lair, Bracelet, Teleporter and extra-mine scenarios pass, alongside seven-case
+  Compose gameplay acceptance. The final art image passes four-case rendered/CPU Compose
+  acceptance and two-case Kubernetes smoke with exact digest, restricted security, probes,
+  resource limits, zero restarts and scoped cleanup. Atlas/workbench checks pass 10/10;
+  two-density renderer parity/lifecycle checks pass 2/2. Legacy procedural fingerprints were
+  corrected for the already accepted weather-layer ordering, independently of the PNG.
+- Repository/tooling/E2E-static checks, strict Kubernetes schemas and dependency audits pass.
+  Trivy 0.74 reports zero fixable HIGH/CRITICAL findings on the exact final image.
+  [Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41146992961)
+  pass for the final Rust inputs.
+
+### Distribution, operation and rollback
+
+Stable source release. Localhost:8085 runs the exact accepted image
+`sha256:84e147f388036905dba79f108bd0ee16069fa05a426ec8860d8ad993d02cb48b`, labelled 1.0.2 and source45a44893.
+Promotion verifies health/readiness, runtime limits, CSP/cache policy and served HTML/JS/CSS/PNG
+byte equality, including the adopted sprite sheet. Reload browser tabs and start a new match.
+The immutable v1.0.1 image/override is retained for rollback. Restart or rollback ends process-local
+matches and resume credentials. No hosted deployment, durable accounts/statistics or production
+replay export is added. Human playtesting remains in [BACKLOG.md](../../BACKLOG.md).
+
 ## v1.0.1 — 2026-10-30
 
 Fix CPUs dying beside their own bombs in multi-CPU openings. Concurrent bomb placements still

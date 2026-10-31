@@ -2,6 +2,7 @@
 
 mod bracelet_guard;
 mod motion;
+mod pickup_pulse;
 mod plant;
 mod plant_types;
 mod pulse;
@@ -32,13 +33,12 @@ pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailu
 
 pub(crate) use bracelet_guard::BraceletGuard;
 
+pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};
 pub(crate) use plant::{
     derive_bomb_modifiers, plan_lair_ordinary_plant, plan_lair_timed_weapon_plant,
 };
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
-pub(crate) use pulse::{
-    PulseOriginGrace, certify_escape_pulse, certify_lair_contact_pulse, certify_lair_escape_pulse,
-};
+pub(crate) use pulse::{PulseOriginGrace, certify_escape_pulse, certify_lair_escape_pulse};
 pub use pulse::{certify_lair_pulse, certify_pulse};
 pub use punch::plan_punch;
 pub(crate) use respawn_pulse::certify_respawn_pulse;

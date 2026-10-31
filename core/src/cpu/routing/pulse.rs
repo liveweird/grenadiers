@@ -7,10 +7,11 @@ use crate::cpu::{MovementIntent, Observation, WorkBudget};
 use crate::game::{CellId, EntityId, Tick};
 
 use super::motion::{Motion, advance};
+use super::pickup_pulse::PickupSafety;
 use super::pulse_support::{
     aggregate, aggregate_motion, certify_wait_before_start, contact_envelope, contact_failure,
     guard_teleporter_collection, one_tick, reject_pickups, reject_teleporter_pickups,
-    take_segments, update_origin, validate_origin_forecast,
+    reject_unmodeled_pickups, take_segments, update_origin, validate_origin_forecast,
 };
 use super::safety::{static_segment_clear, stationary_segment};
 use super::types::{PulseLease, PulseRequest};
@@ -37,7 +38,15 @@ pub fn certify_pulse(
     if observation.parts().rules.version >= 8 {
         return Err(RouteFailure::InvalidRequest);
     }
-    certify_pulse_inner(observation, forecast, request, None, false, None, work)
+    certify_pulse_inner(
+        observation,
+        forecast,
+        request,
+        None,
+        PickupSafety::Reject,
+        None,
+        work,
+    )
 }
 
 pub fn certify_lair_pulse(
@@ -52,7 +61,7 @@ pub fn certify_lair_pulse(
         forecast,
         request,
         None,
-        false,
+        PickupSafety::Reject,
         Some(&envelope),
         work,
     )?;
@@ -60,25 +69,6 @@ pub fn certify_lair_pulse(
         lease,
         MobContactLease::new(envelope, request.stopped_safe_until),
     ))
-}
-
-pub(crate) fn certify_lair_contact_pulse(
-    observation: &Observation,
-    forecast: &HazardForecast,
-    request: PulseRequest,
-    work: &mut WorkBudget,
-) -> Result<MobContactLease, RouteFailure> {
-    let envelope = contact_envelope(observation, request, work)?;
-    let _ = certify_pulse_inner(
-        observation,
-        forecast,
-        request,
-        None,
-        true,
-        Some(&envelope),
-        work,
-    )?;
-    Ok(MobContactLease::new(envelope, request.stopped_safe_until))
 }
 
 pub(crate) fn certify_escape_pulse(
@@ -94,7 +84,7 @@ pub(crate) fn certify_escape_pulse(
         forecast,
         request,
         Some(origin),
-        false,
+        PickupSafety::Reject,
         None,
         work,
     )
@@ -114,7 +104,7 @@ pub(crate) fn certify_lair_escape_pulse(
         forecast,
         request,
         Some(origin),
-        false,
+        PickupSafety::Reject,
         Some(&envelope),
         work,
     )?;
@@ -129,7 +119,7 @@ pub(super) fn certify_pulse_inner(
     forecast: &HazardForecast,
     request: PulseRequest,
     origin: Option<PulseOriginGrace>,
-    allow_pickups: bool,
+    pickup_safety: PickupSafety,
     contact: Option<&MobContactEnvelope>,
     work: &mut WorkBudget,
 ) -> Result<PulseLease, RouteFailure> {
@@ -150,11 +140,14 @@ pub(super) fn certify_pulse_inner(
         forecast,
         request,
         origin,
-        allow_pickups,
+        pickup_safety != PickupSafety::Reject,
         contact.is_some(),
         work,
         &mut assumptions,
     )?;
+    if pickup_safety == PickupSafety::AllowUnmodeledGuard {
+        reject_unmodeled_pickups(observation, &stationary_segment(context.actor.position))?;
+    }
     if let Some(contact) = contact {
         let last_start = request
             .start_window
@@ -198,10 +191,14 @@ pub(super) fn certify_pulse_inner(
             if contact.is_some() {
                 guard_teleporter_collection(observation, one_tick(tick)?, &segments, work)?;
             }
-            if !allow_pickups {
-                reject_pickups(observation, &segments)?;
-            } else {
-                reject_teleporter_pickups(observation, &segments)?;
+            match pickup_safety {
+                PickupSafety::Reject => reject_pickups(observation, &segments)?,
+                PickupSafety::AllowTeleporterGuard => {
+                    reject_teleporter_pickups(observation, &segments)?
+                }
+                PickupSafety::AllowUnmodeledGuard => {
+                    reject_unmodeled_pickups(observation, &segments)?
+                }
             }
             if let Some(contact) = contact
                 && !contact

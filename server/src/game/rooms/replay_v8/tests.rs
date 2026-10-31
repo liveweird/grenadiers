@@ -113,7 +113,7 @@ fn replay8_reconstructs_bomb_death_and_terminal_physics_exactly() {
 }
 
 #[test]
-fn replay8_header_is_closed_to_rules9_cpu21_and_cap_one() {
+fn replay8_header_is_closed_to_rules9_supported_cpu_profiles_and_cap_one() {
     let mut header = ReplayHeader::new(
         configuration(),
         RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
@@ -170,4 +170,39 @@ fn replay8_debug_redacts_private_cpu_seed() {
     let debug = format!("{header:?}");
     assert!(debug.contains("<redacted>"));
     assert!(!debug.contains("9, 9, 9"));
+}
+
+#[test]
+fn replay8_keeps_cpu21_and_cpu22_inputs_exact_without_mixed_provenance() {
+    let mut runtime = recorder();
+    start(&mut runtime);
+    runtime
+        .cpu_action(
+            SeatId::Two,
+            1,
+            ReplayAction::Movement(Some(Direction::West)),
+        )
+        .unwrap();
+    for _ in 0..12 {
+        runtime.settle([None; 4]).unwrap();
+    }
+    runtime
+        .cpu_action(SeatId::Two, 1, ReplayAction::Movement(None))
+        .unwrap();
+    runtime.settle([None; 4]).unwrap();
+    let (runtime, journal) = runtime.into_parts();
+    let expected = runtime.replay_inspection();
+    assert_eq!(journal.header.cpu_policy_version, 22);
+    assert_eq!(journal.header.cpus[0].policy_version, 22);
+    verify_exact(&journal, &expected).unwrap();
+    let mut archived = journal.clone();
+    archived.header.cpu_policy_version = 21;
+    archived.header.cpus[0].policy_version = 21;
+    verify_exact(&archived, &expected).unwrap();
+    for (header_version, provenance) in [(20, 20), (23, 23), (21, 22), (22, 21)] {
+        let mut mixed = journal.clone();
+        mixed.header.cpu_policy_version = header_version;
+        mixed.header.cpus[0].policy_version = provenance;
+        assert!(replay(&mixed).is_err());
+    }
 }

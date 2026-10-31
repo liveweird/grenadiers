@@ -4,6 +4,48 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.1.4 — 2026-10-31
+
+Fix two 3D presentation defects without changing artwork or gameplay. Remote-armed and Invisible
+Bombs indicators become compact, separate head badges, leaving player uniforms visible. Lairs
+have taller stone bodies with their existing barred-doorway sprite upright on the camera-facing
+side. Their ordinary pillar geometry is removed so it cannot obscure the entrance.
+
+### Verification
+
+Accepted source: `a8a5cd18e6c2b6918763fe6c682312aaa7ee42cd`. Independent review finds no remaining
+actionable defects after correcting overlapping badges, the underlying lair wall and invalid
+diagnostic terrain. Stored weapons, armed ownership and recipient visibility remain unchanged.
+
+- `scripts/gates.sh web`: 7,294 tests in 150 files pass (288.72s), with 95.32% line and
+  88.86% branch coverage; compressed JS is 394,500/400,000 bytes. Lint, dependency reachability,
+  contract checks, coverage and production bundle limits pass without lowering any floor.
+- `scripts/gates.sh e2e`: lint, dependency reachability, types and all 105 scenario mappings pass.
+- Native Three acceptance passes 13 executed cases, with five intentional project skips. The
+  narrow remote-badge regression retains at least 85% of the actor-only pixel mask and proves
+  the badge adds visible pixels outside it. Lair matrix tests prove upright orientation, face
+  clearance and ordinary-wall exclusion; a hard-wall native fixture supplies the visual capture.
+- Exact-image Compose passes four duel/auth/CPU cases and disabled diagnostics; an all-on
+  four-player visual smoke has zero browser errors. The ad-hoc smoke helper initially attempted
+  to apply already-current defaults; correcting that helper required no application change or
+  repetition of the five passing runtime cases. Kubernetes duel/auth and runtime restrictions
+  pass. Owned test stacks and namespace are removed.
+- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings. Backend implementation,
+  dependencies, contracts and artwork are unchanged; reuse their recorded acceptance, including
+  Linux Rust debug/release coverage. The image supplies a fresh production Linux release build.
+  All five container web files equal the verified local build.
+
+### Operation
+
+Localhost:8085 runs exact accepted image
+`sha256:4cb3efaf0816ef6ac3184ff56cea679594cd6e034dcd5bafcb4a4299d1136c2e`,
+labelled 1.1.4/source a8a5cd18. Local CPU diagnostics remain enabled; deployment defaults remain
+disabled. Promotion checks image identity, runtime restrictions, probes, CSP/cache and served
+asset equality. Immutable v1.1.3 remains available for rollback. Refresh old tabs after restart.
+
+The [v1.1.3 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.3/grenadiers-artist-v1.1.3.zip)
+still contains the current, unchanged PNG and manifest. No artist revision is needed for either fix.
+
 ## v1.1.3 — 2026-10-31
 
 Adopt the owner-supplied polished arena PNG directly, without resizing, recoloring or metadata

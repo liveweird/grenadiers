@@ -18,7 +18,7 @@ pub struct LairSurvivalPlan {
 #[path = "lair_entry.rs"]
 mod entry;
 pub use entry::{plan_lairs, plan_lairs_with_origin};
-pub(super) use entry::{plan_lairs_v23, plan_lairs_v24};
+pub(super) use entry::{plan_lairs_v23, plan_lairs_v24, plan_lairs_v25};
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn plan_lairs_inner(
@@ -33,6 +33,7 @@ pub(super) fn plan_lairs_inner(
     pickup_handoff: bool,
     opportunistic_planting: bool,
     strategic_goals: bool,
+    failed_plant_recovery: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -86,14 +87,19 @@ pub(super) fn plan_lairs_inner(
         return Ok(plan);
     }
 
-    let ordinary = if strategic_goals {
-        crate::cpu::policy::plan_respawn_v24(observation, memory, rng, work)?
-    } else if opportunistic_planting {
-        crate::cpu::policy::plan_respawn_v23(observation, memory, rng, work)?
-    } else if rules_version == 8 {
+    let ordinary = if rules_version == 8 {
         crate::cpu::policy::plan_lairs(observation, memory, rng, work)?
     } else {
-        crate::cpu::policy::plan_respawn(observation, memory, rng, work)?
+        super::ordinary_planner::plan(
+            observation,
+            memory,
+            rng,
+            work,
+            true,
+            opportunistic_planting,
+            strategic_goals,
+            failed_plant_recovery,
+        )?
     };
     let Ok(hazards) = forecast(observation, history, None, ForecastLimits::default(), work) else {
         return Ok(stop());
@@ -118,7 +124,10 @@ pub(super) fn plan_lairs_inner(
         ordinary.intent.movement != MovementIntent::Stop,
         work,
     );
+    let recovering_plant = failed_plant_recovery
+        && super::strategic_recovery::attained_firing_position(observation, &ordinary);
     if opportunistic_planting
+        && !recovering_plant
         && let Some(plan) = super::lair_v23::opening(
             observation,
             &hazards,
@@ -263,9 +272,6 @@ pub(super) fn plan_lairs_inner(
                 continue;
             };
             let score = target.map_or(0, |target| super::steering::score(&lease, target));
-            let end_pose = lease.pose_after(lease.hold_ticks());
-            let progresses = movement != MovementIntent::Stop
-                && (end_pose.min() != actor.position || end_pose.max() != actor.position);
             let candidate = LairSurvivalPlan {
                 survival: SurvivalPlan {
                     control: ControlPlan {
@@ -291,8 +297,17 @@ pub(super) fn plan_lairs_inner(
                 },
                 contact: Some(contact),
             };
+            let progresses = if recovering_plant {
+                super::strategic_recovery::pulse_progresses(&candidate.survival, actor.position)
+            } else {
+                super::steering::certified_pulse_progresses(&candidate.survival, actor.position)
+            };
             if best.as_ref().is_none_or(|(old_score, old_progresses, _)| {
-                score < *old_score || (score == *old_score && progresses && !*old_progresses)
+                if recovering_plant && progresses != *old_progresses {
+                    progresses
+                } else {
+                    score < *old_score || (score == *old_score && progresses && !*old_progresses)
+                }
             }) {
                 best = Some((score, progresses, candidate));
             }
@@ -335,6 +350,17 @@ pub(super) fn plan_lairs_inner(
             survival: plant,
             contact: Some(contact),
         });
+    }
+    let mut fallback = fallback;
+    if recovering_plant
+        && super::strategic_recovery::pulse_progresses(&fallback.survival, actor.position)
+    {
+        fallback.survival.control.next_memory = fallback
+            .survival
+            .control
+            .next_memory
+            .defer_strategic_target(observation.parts().tick)
+            .without_execution_authority();
     }
     Ok(fallback)
 }

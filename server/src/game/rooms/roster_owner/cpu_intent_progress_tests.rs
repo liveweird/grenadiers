@@ -69,7 +69,7 @@ fn queued_cpu24_plans_with_bounded_work_and_an_explicit_intent() {
         SeatId::Two,
         9_024,
         [24; 32],
-        CpuProfile::RESPAWN_LAIRS_STANDARD,
+        CpuProfile::RESPAWN_V24_STANDARD,
     );
     let notice = runtime.current_notice().unwrap();
     let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));

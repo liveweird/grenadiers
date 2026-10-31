@@ -39,7 +39,7 @@ fn with_enabled_lairs(observation: Observation) -> Observation {
     with_lairs(observation, true)
 }
 
-fn with_lairs(observation: Observation, spawning: bool) -> Observation {
+pub(super) fn with_lairs(observation: Observation, spawning: bool) -> Observation {
     let environment = observation.environment().unwrap().clone();
     let mut parts = observation.into_parts();
     let cells = lair_layout_v1(BoardSize::FifteenByThirteen);

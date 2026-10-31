@@ -305,7 +305,7 @@ focused commands supplement the unchanged full Rust/coverage release gates.
 
 ## Rules9 occupancy and respawn profile
 
-CPU24 receives checked v17 facts through `new_rules_v9`, with no lair overlay when disabled.
+CPU25 receives checked v17 facts through `new_rules_v9`, with no lair overlay when disabled.
 Visible living players are blockers through the same fixed-point cell/footprint geometry as
 physics. Fresh next-segment checks supplement pose/epoch/scene guards without requiring every
 unrelated rival to stand still. Hidden positions remain unknown. Corner alignment and forward

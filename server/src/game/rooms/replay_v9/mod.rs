@@ -33,7 +33,7 @@ pub(in crate::game::rooms) fn replay(
 ) -> Result<RosterRuntimeInspection, ReplayError> {
     if journal.format_version != 9
         || journal.mob_navigation_version != MobNavigationPolicy::EscapeV2.version()
-        || !matches!(journal.body.cpu_policy_version(), 23 | 24)
+        || !matches!(journal.body.cpu_policy_version(), 23..=25)
     {
         return Err(ReplayError::InvalidHeader);
     }

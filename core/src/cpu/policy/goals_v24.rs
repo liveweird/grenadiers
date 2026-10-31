@@ -12,6 +12,10 @@ use super::super::{
 };
 use super::{cell_index, pickup_value, search_map};
 
+#[path = "goals_v24_order.rs"]
+mod order;
+use order::{position_distance, target_order};
+
 #[path = "goals_v24_validation.rs"]
 mod validation;
 use validation::validate_previous;
@@ -42,6 +46,27 @@ pub(in crate::cpu::policy) fn select(
     current: CellId,
     memory: &UtilityMemory,
     work: &mut WorkBudget,
+) -> Option<GuidanceV24> {
+    select_inner(observation, actor, current, memory, work, false)
+}
+
+pub(in crate::cpu::policy) fn select_v25(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+) -> Option<GuidanceV24> {
+    select_inner(observation, actor, current, memory, work, true)
+}
+
+fn select_inner(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+    failed_plant_recovery: bool,
 ) -> Option<GuidanceV24> {
     let map = search_map(observation, actor, current, work)?;
     let (distance, first_step) = reachable(observation, current, &map, work)?;
@@ -187,7 +212,13 @@ pub(in crate::cpu::policy) fn select(
                 });
             }
         } else {
-            reason = valid.err().unwrap_or(StrategicSwitchReason::TargetInvalid);
+            reason = if failed_plant_recovery
+                && retained_failure.is_some_and(|(target, _)| target == previous.target)
+            {
+                StrategicSwitchReason::Stalled
+            } else {
+                valid.err().unwrap_or(StrategicSwitchReason::TargetInvalid)
+            };
             candidates.first().copied()
         }
     } else {
@@ -352,22 +383,6 @@ fn fallback(
 
 fn add_ticks(tick: Tick, amount: u64) -> Tick {
     Tick(tick.0.saturating_add(amount))
-}
-
-fn position_distance(left: Position, right: Position) -> u32 {
-    left.x
-        .abs_diff(right.x)
-        .saturating_add(left.y.abs_diff(right.y))
-}
-
-fn target_order(target: StrategicTarget) -> (u8, u16, u16, u8) {
-    match target {
-        StrategicTarget::Pickup { cell, .. } => (0, cell.row, cell.column, 0),
-        StrategicTarget::Block { cell } => (1, cell.row, cell.column, 0),
-        StrategicTarget::Opponent { seat } => (2, 0, 0, seat as u8),
-        StrategicTarget::Tile { cell } => (3, cell.row, cell.column, 0),
-        StrategicTarget::None => (4, 0, 0, 0),
-    }
 }
 
 #[cfg(test)]

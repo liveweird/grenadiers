@@ -1,6 +1,6 @@
 # CPU intent and developer diagnostics
 
-CPU24 separates a persistent objective from its current route. A subject is an exact exposed
+CPU25 separates a persistent objective from its current route. A subject is an exact exposed
 pickup (cell and kind), destructible block, or visible opponent seat. Firing/approach cells can
 change without changing that subject. When no productive subject is available, the CPU explicitly
 explores, waits, or survives instead of pretending to have an attack target.
@@ -22,6 +22,11 @@ bombs and their relevant flame window suspend progress deadlines. Waiting stays 
 safety requires evasion. Pickup pursuit cannot plant an unrelated useful bomb; farming/combat
 placement must still threaten the selected exact subject and pass the existing escape/contact
 proofs. Admission rechecks the target against fresh visible facts. Easy retains its slower cadence.
+
+Reaching an approach tile does not imply a safe bomb is available. If planting is refused,
+CPU25 attempts a certified movement pulse and temporarily defers that exact subject instead
+of repeatedly stopping beside it. Safety and contact proofs remain mandatory; a genuinely
+trapped CPU may still have to stop. CPU24 retains its archived decision behavior.
 
 ## Inspecting a match
 

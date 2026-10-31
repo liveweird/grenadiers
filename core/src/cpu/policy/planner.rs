@@ -19,6 +19,10 @@ use super::placement::{
 };
 use super::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
 
+#[path = "planner_version.rs"]
+mod version;
+use version::PlannerVersion;
+
 const PER_PULSE_IDLE_TICKS: u64 = 10;
 const CENTER_TOLERANCE: u64 = 64;
 
@@ -31,7 +35,7 @@ pub fn plan(
     if observation.parts().rules.version >= 8 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, true, false, false)
+    plan_inner(observation, memory, rng, work, PlannerVersion::Legacy)
 }
 
 pub(crate) fn plan_lairs(
@@ -43,7 +47,7 @@ pub(crate) fn plan_lairs(
     if observation.parts().rules.version != 8 || observation.lairs().is_none() {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, false, false)
+    plan_inner(observation, memory, rng, work, PlannerVersion::Lairs)
 }
 
 pub(crate) fn plan_respawn(
@@ -55,7 +59,7 @@ pub(crate) fn plan_respawn(
     if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, false, false)
+    plan_inner(observation, memory, rng, work, PlannerVersion::Respawn)
 }
 
 pub(crate) fn plan_respawn_v23(
@@ -67,7 +71,7 @@ pub(crate) fn plan_respawn_v23(
     if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, true, false)
+    plan_inner(observation, memory, rng, work, PlannerVersion::RespawnV23)
 }
 
 pub(crate) fn plan_respawn_v24(
@@ -79,7 +83,19 @@ pub(crate) fn plan_respawn_v24(
     if observation.parts().rules.version != 9 {
         return Err(PolicyError::InvalidObservation);
     }
-    plan_inner(observation, memory, rng, work, false, true, true)
+    plan_inner(observation, memory, rng, work, PlannerVersion::RespawnV24)
+}
+
+pub(crate) fn plan_respawn_v25(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 9 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, PlannerVersion::RespawnV25)
 }
 
 fn plan_inner(
@@ -87,10 +103,12 @@ fn plan_inner(
     memory: &UtilityMemory,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
-    follow_committed: bool,
-    persistent_goals: bool,
-    strategic_goals: bool,
+    version: PlannerVersion,
 ) -> Result<ControlPlan, PolicyError> {
+    let follow_committed = version.follow_committed();
+    let persistent_goals = version.persistent_goals();
+    let strategic_goals = version.strategic_goals();
+    let failed_plant_recovery = version.failed_plant_recovery();
     let parts = observation.parts();
     let key = MemoryKey {
         world: parts.world,
@@ -186,6 +204,7 @@ fn plan_inner(
         work,
         persistent_goals,
         strategic_goals,
+        failed_plant_recovery,
     )
 }
 
@@ -199,11 +218,16 @@ fn navigate(
     work: &mut WorkBudget,
     persistent_goals: bool,
     strategic_goals: bool,
+    failed_plant_recovery: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let key = memory.key();
     if strategic_goals {
-        let Some(guidance) = super::goals::select_v24(observation, actor, current, memory, work)
-        else {
+        let guidance = if failed_plant_recovery {
+            super::goals::select_v25(observation, actor, current, memory, work)
+        } else {
+            super::goals::select_v24(observation, actor, current, memory, work)
+        };
+        let Some(guidance) = guidance else {
             return Ok(ControlPlan::stop(*memory));
         };
         let next_memory = UtilityMemory::from_route(key, &[guidance.first_step], false)

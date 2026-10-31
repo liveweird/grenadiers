@@ -88,7 +88,7 @@ workers or observations are late. See [CPU contracts](cpu-contracts.md).
 
 ## Combat pressure and player blocking
 
-Every visible living rival is an enemy, whether human or CPU. CPU24 seeks reachable firing
+Every visible living rival is an enemy, whether human or CPU. CPU25 seeks reachable firing
 positions whose actual blast can threaten a rival instead of walking into its occupied cell.
 Useful pickups remain valuable; combat pressure outranks routine crate clearing. Planting still
 requires a complete escape certificate, so increased aggression does not authorize suicide.
@@ -132,18 +132,18 @@ delayed start; a neighboring pickup touched only by the footprint does not block
 Teleporter and Diarrhea collection remain outside this handoff because they can relocate the
 actor or spawn a bomb during the stopped suffix. Other hazard/contact checks and moving-plan
 admission requirements remain unchanged. Archived CPU21 retains its original entry points;
-replay8 executes matching CPU21–24 inputs with archived mob navigation; current replay9
-binds CPU23/24 and mob navigation2. Neither reruns the planner.
+replay8 executes matching CPU21–25 inputs with archived mob navigation; current replay9
+binds CPU23/24/25 and mob navigation2. Neither reruns the planner.
 
 ## Persistent strategic intent
 
-CPU24 keeps an exact item, block or opponent separate from its approach cell and execution route.
+CPU25 keeps an exact item, block or opponent separate from its approach cell and execution route.
 Commitment, material utility differences and observed progress govern switching. Safety overrides
 revoke execution authority while retaining the subject for resumption. Optional bombing serves
 that subject; pickup pursuit does not opportunistically bomb unrelated objects. Explicit phases
 and switch reasons make the behavior inspectable through an operator-enabled, recipient-filtered
 developer view. See [intent and diagnostics](cpu-intent.md) for lifecycle, thresholds and usage.
-CPU21–23 retain their historical selection and memory-reset paths.
+CPU21–24 retain their historical selection and memory-reset paths.
 
 ## Focused checks
 

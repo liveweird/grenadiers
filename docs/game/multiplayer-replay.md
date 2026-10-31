@@ -45,13 +45,13 @@ together. Mob actions are not journal entries: deterministic simulation regenera
 pursuit, contacts and deaths from accepted player inputs. Exact state inspection includes mob
 positions, retreat anchors, lair deadlines, living counts and simulation randomness.
 
-Format8 binds rules9 and CPU21–24, with archived mob navigation1 and the same
+Format8 binds rules9 and CPU21–25, with archived mob navigation1 and the same
 generator/layout/lifecycle/randomness identities.
 It reconstructs one-mob respawn timers, solid movement, Bracelet contacts and atomic Teleporter
 exchanges from accepted inputs. Format7 retains rules8 and its original overlap/periodic lairs.
 Every CPU entry must match its header policy; mixed or unknown policy versions are rejected.
 
-Format9 adds an explicit immutable mob-navigation identity: navigation2, rules9 and CPU23/24.
+Format9 adds an explicit immutable mob-navigation identity: navigation2, rules9 and CPU23/24/25.
 Its envelope reuses the checked format8 accepted-input body, header/provenance checks, limits,
 seed derivation and normalized executor. The standalone format8 reader always reconstructs
 navigation1; a format9 envelope cannot be interpreted as an archived recording. Unknown outer

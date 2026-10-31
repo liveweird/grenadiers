@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.0.6 — 2026-10-31
+
+- Fix CPUs remaining at a farming approach tile when a safe bomb cannot currently be
+  certified. Reposition using certified movement and temporarily defer the unproductive
+  target, with CPU25 identity and archived CPU24 behavior retained.
+
 ## 1.0.5 — 2026-10-31
 
 - Add CPU24 strategic objectives with exact subjects, explicit phases, stable commitment,

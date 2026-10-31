@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { KeyboardBindings } from '../arena/bindings'
 import { GameArena } from '../arena/GameArena'
-import type { Direction } from '../arena/types'
+import type { Direction, PresentationDeaths } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type {
@@ -309,10 +309,11 @@ function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof pres
     ? format(copy.arena.punchHint, { equipment }) : copy.arena.focusHint
 }
 
-export function GamePanelView({ state, actions, developerPanel }: {
+export function GamePanelView({ state, actions, developerPanel, presentationDeaths }: {
   state: GameClientState
   actions: GameActions
   developerPanel?: ReactNode
+  presentationDeaths?: PresentationDeaths
 }) {
   const translatedCopy = useGameCopy()
   const copy = useMemo(() => roomCopy(translatedCopy, state.room), [translatedCopy, state.room])
@@ -324,7 +325,9 @@ export function GamePanelView({ state, actions, developerPanel }: {
   const round = state.room?.roundNumber
   const reconnecting = state.room && (state.admissionPending
     || ['reconnecting', 'connecting', 'authenticating'].includes(state.connection))
-  const arenaSnapshot = useMemo(() => presentSnapshot(state), [state])
+  const arenaSnapshot = useMemo(
+    () => presentSnapshot(state, presentationDeaths), [state, presentationDeaths],
+  )
   const ownActor = ownStatusActor(state)
   const focusHint = arenaFocusHint(state, arenaSnapshot, bindings, copy)
   const updateBindings = (next: KeyboardBindings): void => {
@@ -378,9 +381,9 @@ export function GamePanelView({ state, actions, developerPanel }: {
 }
 
 export function GamePanel() {
-  const [state, client] = useGameClient()
+  const [state, client, presentationDeaths] = useGameClient()
   const debugEnabled = cpuDebugOptedIn(window.location.search)
   const debug = useCpuDebug(state, client, debugEnabled)
-  return <GamePanelView state={state} actions={client}
+  return <GamePanelView state={state} actions={client} presentationDeaths={presentationDeaths}
     developerPanel={debugEnabled && state.room ? <CpuDebugPanel state={state} debug={debug} /> : null} />
 }

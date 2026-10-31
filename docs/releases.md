@@ -97,72 +97,50 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.1.1 — 2026-10-31
+## v1.1.2 — 2026-10-31
 
-Add short, non-gory knockout animations for all four player uniforms and mobs. Each appearance
-has four artist-owned poses, played once over 600ms; reduced motion shows only the collapsed
-pose for 180ms. The detached sprite/shadow then disappear. Elimination, collisions, scoring and
-round timing remain immediate and authoritative.
-
-Player cues require a fresh event and the recipient's currently visible dead pose; hidden Cloak
-positions never appear. Client ingress latches events before React batching can drop them.
-Qualified mob removal uses its last public pose only across tightly continuous same-round/lair
-snapshots, with long gaps suppressed. Final round and match wins can animate both together.
-Admission/reconnect, suspension, timeline/round changes and preference changes purge cues;
-duplicate publications cannot replay them.
-
-The shared sheet appends twenty poses and preserves every previous sprite and material map.
-Download the [updated artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.1/grenadiers-artist-v1.1.1.zip),
-including canonical PNG/JSON, guides, labelled inventory, slices, and a death-pose overview.
-See [presentation](game/arena-3d.md#death-animation) and [artist rules](../assets/art/README.md).
+Keep knockout sprites readable during ordinary explosions and persistent Oil fire. The death
+body now uses the minimum layer above world hazard overlays; its grounded shadow stays
+unchanged and higher actor status cues remain visible. Artwork, animation timing and gameplay
+are unchanged. The [v1.1.1 artist bundle](https://github.com/liveweird/grenadiers/releases/download/v1.1.1/grenadiers-artist-v1.1.1.zip)
+remains current, including the wall maps and all twenty death poses.
 
 ### Verification
 
-Accepted production source: `65bcea9656eb3a3fce530fa37aef14c4862a193a`,
-[PR #291](https://github.com/liveweird/grenadiers/pull/291). Independent review is clear after
-terminal-mob and preference-transition corrections. Tests cover callback coalescing,
-recipient privacy, same-tick departures, terminal wins, mob continuity, bounded state, reset
-fences and expiry without another snapshot.
+Accepted source: `dbf17457781ace59fce4ba7ac18cf48f70b5db67`,
+[PR #292](https://github.com/liveweird/grenadiers/pull/292). Independent review confirms the
+transparent-depth ordering cause and the minimal replacement layer. The pre-fix native
+regression retains only 124/889 death-mask pixels (13.95%). The correction passes ≥75% body
+retention for both ordinary and burning-Oil flames, while separate comparisons prove the
+surrounding hazard is still visible.
 
-- Full web gate: 7,290 tests in 149 files pass in 248.87 seconds. Coverage is 95.20% lines,
-  88.84% branches, 92.05% statements and 91.44% functions. Existing floors remain unchanged.
-  Verified build is 394,344/400,000 gzip JS bytes and 15,430/20,000 CSS bytes; all five container
-  web files equal the verified build. Repository, tooling, API/schema, lint and static E2E
-  checks pass, including 102 scenario mappings.
-- Native Three acceptance: ten cases pass. Full frame progression for all five appearances
-  and exact empty-pixel equality after expiry are checked without another snapshot; reduced
-  motion holds the final pose byte-identically. Two cross-project skips intentionally select
-  desktop full playback and narrow reduced playback. All eight existing graphics cases pass.
-- Ten artist-workbench cases and both DPR reference comparisons pass. All twenty death frames
-  are nonempty, binary-alpha, distinct within each family and subsets of their original palettes.
-  The 165 previous rectangles, 3,339,264 RGBA bytes, and their frame/animation/alias/composition
-  contracts compare unchanged. Source is 1120×2128 with 185 assigned frames; runtime is
-  2040×704 with 181 frames and 5,744,640 RGBA bytes. The source-only PNG extent cap is explicitly
-  2128; compressed/decoded 16MiB and runtime 2048px/16MiB limits remain intact.
-- The legacy DPR2 pulse reference changes one 19-pixel edge row (49 RGB bytes, zero alpha) when
-  texture height grows from 584 to 704, due to nearest-sampling UV rounding at 1.125 scale.
-  Recreating the old extent reproduces the old hashes exactly; only three current DPR2 hashes
-  are updated. Historical and DPR1 hashes, parity assertions and source artwork remain intact.
-- Exact-image runtime acceptance passes: four Compose duel/auth/CPU cases (37.1s), disabled
-  diagnostics (11.2s), and two Kubernetes duel/auth cases (23.0s). Health/readiness, restricted
-  runtime, configured probes/resources and zero restarts are verified; owned stacks/namespaces
-  are removed. Strict Kubernetes schemas also pass.
-- Fresh cargo-deny/npm audits pass at HIGH/CRITICAL thresholds; existing tooling advisories
-  remain 20 moderate web and 12 moderate E2E entries. Pinned Trivy 0.74 reports zero fixable
-  HIGH/CRITICAL vulnerabilities in the exact accepted image.
-- Rust implementation/contracts are unchanged from v1.1.0; only package versions change.
-  Reuse the recorded macOS simulation/coverage acceptance. Fresh
-  [Linux debug/release units](https://github.com/liveweird/grenadiers/actions/runs/41206812465)
-  pass for the new versions. Final reference/doc changes preserve production inputs.
+- Fresh focused Three/client tests: 57 pass. Full native graphics: 11 executed cases pass;
+  three intentional cross-project skips select the appropriate desktop/reduced-motion cases.
+  Lint, Knip, types, repository/tooling, static E2E and 103 scenario mappings pass.
+- Fresh production build: 394,348/400,000 gzip JS bytes; 15,430/20,000 CSS bytes. All five
+  container web files equal the verified build. The sole production behavior change is a
+  death-body draw-order value, exercised by the focused tests and native red/green proof.
+- Reuse [v1.1.1](history/releases.md#v111--2026-10-31) full 7,290-test/coverage acceptance and
+  unchanged artwork, dependencies and Rust acceptance. Existing floors remain intact. Rust
+  package metadata changes only; the exact image supplies a fresh Linux release build and
+  runtime checks. Duplicate unchanged Rust CI is deliberately cancelled.
+- Exact-image Compose acceptance passes four duel/auth/CPU cases (37.7s) and disabled
+  diagnostics (11.3s). Kubernetes passes duel/auth (23.7s), configured probes/resources,
+  restricted runtime and zero restarts. Owned stacks and namespace are removed.
+- Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
+  Dependency/security inputs are unchanged from the accepted v1.1.1 checks.
 
 ### Operation
 
-Localhost:8085 runs exact accepted image
-`sha256:ecef3dd99eae78e63b8e2b922fb52adb92ee49ad8c0553154e81f3c9b5209b10`,
-labelled 1.1.1/source 65bcea96. Local CPU diagnostics remain enabled; base Compose/Kubernetes
-still default to disabled. Promotion verifies identity, runtime restrictions, health/readiness,
-CSP/cache policy and served bytes. Immutable v1.1.0 is retained for rollback. Refresh old tabs
-and create a new match after restart. Human feedback remains in [BACKLOG.md](../BACKLOG.md).
+Localhost:8085 runs accepted image
+`sha256:aa2a199cddf9e8369a4058aa3e7782ad267f4d1f1ef53da98fd3b6e118a2f90d`,
+labelled 1.1.2/source dbf17457. The local CPU-diagnostic flag remains enabled; base deployments
+still default to disabled. Promotion verifies image/runtime restrictions, health/readiness,
+CSP/cache and served bytes. Immutable v1.1.1 remains available for rollback. Refresh the browser
+and create a new match after restart.
+
+<a id="v111--2026-10-31"></a>
+The [v1.1.1 record](history/releases.md#v111--2026-10-31) is preserved in release history.
 
 <a id="v110--2026-10-31"></a>
 The [v1.1.0 record](history/releases.md#v110--2026-10-31) is preserved in release history.

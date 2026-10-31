@@ -3,7 +3,7 @@
 The server provides HTTP liveness/readiness, diagnostic WebSockets, anonymous credentials,
 and authenticated authoritative two-to-four-seat matches with at least one human controller
 and a configurable win target (three by default). React/Mantine provides room admission and
-the HUD; PixiJS renders public game snapshots.
+the HUD; Three.js and React Three Fiber render public game snapshots.
 A separate deterministic simulation in `core::game` implements movement, owned bombs,
 flames, damage, and one-round outcomes. Room owners advance that simulation at a fixed
 server-controlled tick.
@@ -50,7 +50,8 @@ or shared mutable state before those decisions are documented and tested.
 
 M1 fixes the integer 60 Hz movement model in [ADR 0002](decisions/0002-deterministic-movement.md).
 The [headless API](game/movement.md) covers its state, collision, and deterministic input boundary.
-[ADR 0003](decisions/0003-arena-rendering.md) selects exact PixiJS 8.22.0 for the arena and React for
+[ADR 0029](decisions/0029-three-billboard-arena.md) selects Three.js/React Three Fiber for the
+production arena, retaining Pixi only for isolated artwork diagnostics, and React for
 menus/HUD. [Browser behavior](game/browser.md) documents input, interpolation, and teardown.
 
 [Combat phases](game/combat.md) and ADRs 0004–0006 define owned placement, immutable explosion
@@ -107,7 +108,7 @@ The active `roster_runtime` server adapter owns real per-round physics, assignme
 generation, epoch-fenced input, settled reconnect grace, and checked v17 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v17 client/panel shares the Pixi presentation boundary, validates v17 messages, keeps
+The active v17 client/panel shares the Three.js presentation boundary, validates v17 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
 authoritative facts. Production routing uses v17 on `/api/v1/game/ws`; versions 1 through 16 are
 rejected before credential claim. Gameplay v7–v11 added

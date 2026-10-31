@@ -20,11 +20,12 @@ Artists can use `npm --prefix e2e run art:template -- --out target/art-template`
 The **two-to-four-player arena match is playable** with human and CPU-controlled seats.
 Create a custom lineup, share its invitation with the other humans, and choose Ready.
 Every match includes at least one human; CPUs join and ready automatically. Select the courtyard to move with arrows
-or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; PixiJS draws public
+or W/A/S/D and plant bombs with Space. Rust owns the 60 Hz simulation; Three.js/React Three Fiber draw public
 20 Hz snapshots while React/Mantine provides the room controls, scores, phase timers, results, and rematch.
 
-The [retro pixel-art arena](docs/game/pixel-art.md) adds original weathered terrain, directional
-characters, animated grenades/flames and distinct item symbols, with reduced-motion support.
+The [modern retro 3D arena](docs/game/arena-3d.md) adds textured, chamfered terrain, detailed
+billboard characters, animated grenades/flames and a restrained final colour pass. The shared
+artist sheet owns both sprite artwork and 3D surface maps; reduced motion remains supported.
 
 Default rooms allow turns within a quarter tile of a corridor centerline, including natural
 wall stops. The creator can adjust starting speed, turning tolerance, wins needed and fuse
@@ -64,7 +65,7 @@ and [product backlog](BACKLOG.md) for behavior and planned work.
 | --- | --- |
 | `core/` | Rust wire types, deterministic game rules, and room lifecycle, independent of I/O |
 | `server/` | Axum/Tokio HTTP and WebSocket adapters, tracing, optional SQLx readiness |
-| `web/` | React, TypeScript, Vite, Mantine, PixiJS arena, EN/PL localization |
+| `web/` | React, TypeScript, Vite, Mantine, Three.js/R3F arena, EN/PL localization |
 | `api/` | Authoritative OpenAPI and realtime JSON Schema contracts |
 | `api-guidelines/` | Stable API rules and Spectral configuration |
 | `e2e/` | Standalone Playwright blackbox tests and matching scenario documents |
@@ -77,7 +78,7 @@ See [architecture](docs/architecture.md), [Flow equivalents](docs/decisions/0001
 Product versioning and candidate checks are documented in [releases](docs/releases.md).
 The [headless movement API](docs/game/movement.md) and [combat phases](docs/game/combat.md)
 document the deterministic domain; the arena uses
-[PixiJS alongside React](docs/decisions/0003-arena-rendering.md).
+[Three.js arena and billboard characters](docs/decisions/0029-three-billboard-arena.md).
 
 ## Prerequisites
 

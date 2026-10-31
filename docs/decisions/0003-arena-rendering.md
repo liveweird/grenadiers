@@ -1,6 +1,7 @@
 # ADR 0003: PixiJS arena with a React interface
 
-Status: implemented in M3 with exact PixiJS 8.22.0; M1 remained headless.
+Status: implemented in M3 with exact PixiJS 8.22.0; M1 remained headless. Superseded for the
+production arena by [ADR 0029](0029-three-billboard-arena.md); retained for artwork diagnostics.
 
 ## Context
 

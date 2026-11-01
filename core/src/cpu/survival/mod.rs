@@ -34,9 +34,10 @@ pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
 pub use respawn_v22::{
-    plan_hard_v28_with_origin, plan_reliable_v27_with_origin, plan_respawn,
-    plan_respawn_v22_with_origin, plan_respawn_v23_with_origin, plan_respawn_v24_with_origin,
-    plan_respawn_v25_with_origin, plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
+    plan_counter_pressure_v29_with_origin, plan_hard_v28_with_origin,
+    plan_reliable_v27_with_origin, plan_respawn, plan_respawn_v22_with_origin,
+    plan_respawn_v23_with_origin, plan_respawn_v24_with_origin, plan_respawn_v25_with_origin,
+    plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
 };
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 
@@ -64,6 +65,12 @@ mod reliable_v27_oil_tests;
 
 #[cfg(test)]
 mod hard_v28_tactic_tests;
+
+#[cfg(test)]
+mod counter_pressure_v29_tests;
+
+#[cfg(test)]
+mod counter_pressure_v29_acceptance_tests;
 
 #[cfg(test)]
 mod reliable_v27_oil_guard_tests;

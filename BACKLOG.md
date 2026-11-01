@@ -25,11 +25,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   or a free bomb slot alone does not establish a missed safe action. Preserve safety certificates,
   bounded scheduling, replay/privacy and sustained per-seat progress regressions.
 
-- [next] **CPU-PRESSURE — certified counter-pressure in clear arenas.** Permit useful Hard
-  planting against visible unpaused timed bombs after a completed running update, with no soft
-  blocks, finite flames or exposed Teleporter. Preserve all escape/contact/usefulness proofs,
-  old policies and exact replay bindings; keep conservative motion refusals explicit.
-- [todo] **HARD-CPU — deepen fair tactics.** Extend terminal-refuge handoffs, productive farming,
+- [next] **HARD-CPU — deepen fair tactics.** Add certified terminal-refuge handoffs, productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
   observations, bounded planning and unchanged physics. Require authoritative before/after
   witnesses and independent review; preserve archived policies and complete seeded episodes.

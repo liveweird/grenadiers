@@ -52,6 +52,7 @@ pub fn plan_lairs_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 
@@ -76,6 +77,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v23(
         9,
         true,
         true,
+        false,
         false,
         false,
         false,
@@ -108,6 +110,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v24(
         false,
         false,
         false,
+        false,
     )
 }
 
@@ -134,6 +137,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v25(
         true,
         true,
         true,
+        false,
         false,
         false,
     )

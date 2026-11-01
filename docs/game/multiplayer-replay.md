@@ -91,7 +91,11 @@ the room-wide tier and policy. Formats11/12 remain gameplay18 and reject Hard ev
 body configuration and CPU provenance agree. All versions reuse accepted inputs rather than
 rerunning planners. Production recording/export stays disabled.
 
-Formats6/7/8/9/10/11/12/13 normalize their closed operations into shared executors rather than duplicating
+Format14 keeps gameplay19/rules10/navigation3 and advances only Hard to CPU29. Its reader
+requires Hard29 or Easy/Standard27 with exact header/body/provenance agreement; format13 remains
+Hard28 and rejects future policy29 even when a forged journal is internally consistent.
+
+Formats6/7/8/9/10/11/12/13/14 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

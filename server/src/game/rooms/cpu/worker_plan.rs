@@ -3,8 +3,9 @@ use grenadiers_core::cpu::{
     MobContactLease, WorkBudget,
     policy::PolicyError,
     survival::{
-        SurvivalPlan, plan_counter_pressure_v29_with_origin, plan_farm_origins_v38_with_origin,
-        plan_farm_refuges_v36_with_origin, plan_hard_farm_origins_v39_with_origin,
+        SurvivalPlan, plan_contact_topology_v40_with_origin, plan_counter_pressure_v29_with_origin,
+        plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
+        plan_hard_contact_topology_v41_with_origin, plan_hard_farm_origins_v39_with_origin,
         plan_hard_farm_refuges_v37_with_origin, plan_hard_pickup_progress_v32_with_origin,
         plan_hard_v28_with_origin, plan_lairs_with_origin, plan_pickup_progress_v31_with_origin,
         plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
@@ -35,9 +36,31 @@ pub(super) fn plan(
                 | CpuPolicy::UtilityV37
                 | CpuPolicy::UtilityV38
                 | CpuPolicy::UtilityV39
+                | CpuPolicy::UtilityV40
+                | CpuPolicy::UtilityV41
         )
     {
-        let plan = if job.policy == CpuPolicy::UtilityV38 {
+        let plan = if job.policy == CpuPolicy::UtilityV40 {
+            plan_contact_topology_v40_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV41 {
+            plan_hard_contact_topology_v41_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV38 {
             plan_farm_origins_v38_with_origin(
                 &job.observation,
                 &job.memory,

@@ -13,6 +13,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V35
                         | grenadiers_core::room::CpuProfile::HARD_V37
                         | grenadiers_core::room::CpuProfile::HARD_V39
+                        | grenadiers_core::room::CpuProfile::HARD_V41
                 );
         }
         match rules_version {
@@ -59,6 +60,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::FARM_REFUGES_V36_EASY
                     | grenadiers_core::room::CpuProfile::FARM_ORIGINS_V38_STANDARD
                     | grenadiers_core::room::CpuProfile::FARM_ORIGINS_V38_EASY
+                    | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD
+                    | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_EASY
             ),
             _ => false,
         }
@@ -70,6 +73,16 @@ impl CpuController {
             grenadiers_core::room::CpuProfile::HARD_V35
                 | grenadiers_core::room::CpuProfile::HARD_V37
                 | grenadiers_core::room::CpuProfile::HARD_V39
+                | grenadiers_core::room::CpuProfile::HARD_V41
+        )
+    }
+
+    pub(super) const fn supports_contact_topology(&self) -> bool {
+        matches!(
+            self.profile,
+            grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD
+                | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V41
         )
     }
 }
@@ -94,7 +107,7 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V39);
+        let hard = controller(CpuProfile::HARD_V41);
         assert!(hard.profile_supports(10));
         assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
@@ -102,6 +115,7 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V34).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V35).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V37).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V39).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -113,6 +127,7 @@ mod tests {
             CpuPolicy::UtilityV33,
             CpuPolicy::UtilityV36,
             CpuPolicy::UtilityV38,
+            CpuPolicy::UtilityV40,
         ] {
             let forged = controller(CpuProfile {
                 policy,
@@ -130,6 +145,7 @@ mod tests {
             CpuPolicy::UtilityV35,
             CpuPolicy::UtilityV37,
             CpuPolicy::UtilityV39,
+            CpuPolicy::UtilityV41,
         ] {
             for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
                 let forged = controller(CpuProfile { policy, difficulty });
@@ -145,6 +161,8 @@ mod tests {
             CpuProfile::FARM_REFUGES_V36_STANDARD,
             CpuProfile::FARM_ORIGINS_V38_EASY,
             CpuProfile::FARM_ORIGINS_V38_STANDARD,
+            CpuProfile::CONTACT_TOPOLOGY_V40_EASY,
+            CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
         ] {
             assert!(controller(profile).profile_supports(10));
             assert!(!controller(profile).profile_supports(9));
@@ -152,6 +170,12 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V35).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V37).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V39).supports_refuge_handoff());
+        assert!(controller(CpuProfile::HARD_V41).supports_refuge_handoff());
         assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
+        assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD).supports_contact_topology());
+        assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_EASY).supports_contact_topology());
+        assert!(controller(CpuProfile::HARD_V41).supports_contact_topology());
+        assert!(!controller(CpuProfile::FARM_ORIGINS_V38_STANDARD).supports_contact_topology());
+        assert!(!controller(CpuProfile::HARD_V39).supports_contact_topology());
     }
 }

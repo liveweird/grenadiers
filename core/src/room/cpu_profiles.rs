@@ -315,6 +315,23 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Farming with plant-bound contact-topology authority.
+    pub const CONTACT_TOPOLOGY_V40_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV40,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const CONTACT_TOPOLOGY_V40_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV40,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Hard contact topology with terminal-hold replacement retained.
+    pub const HARD_V41: Self = Self {
+        policy: CpuPolicy::UtilityV41,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

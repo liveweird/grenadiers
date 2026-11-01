@@ -11,8 +11,19 @@ pub(in crate::game::rooms) enum ContactStatus {
 
 impl CpuController {
     #[cfg(test)]
-    pub(in crate::game::rooms) const fn has_committed_contact(&self) -> bool {
+    pub(in crate::game::rooms) fn has_committed_contact(&self) -> bool {
         self.committed_contact.is_some()
+            || self
+                .committed_route
+                .as_ref()
+                .is_some_and(grenadiers_core::cpu::survival::CommittedRoute::has_contact_authority)
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn has_committed_topology_contact(&self) -> bool {
+        self.committed_route
+            .as_ref()
+            .is_some_and(grenadiers_core::cpu::survival::CommittedRoute::has_contact_authority)
     }
 
     #[cfg(test)]

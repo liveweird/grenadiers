@@ -160,6 +160,18 @@ impl CpuController {
             lease,
             execution,
         } = result.plan;
+        let topology_contact = matches!(
+            execution.as_ref(),
+            Some(ExecutionCertificate::ContactPlant(_))
+        );
+        if topology_contact && !self.supports_contact_topology() {
+            return self.reject(AdmissionRejection::InvalidShape);
+        }
+        let contact_required = (result.basis.parts().rules.version == 8
+            || (matches!(result.basis.parts().rules.version, 9 | 10)
+                && result.basis.respawn_lairs().is_some()))
+            && (control.intent.manual.is_some()
+                || control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop);
         let contact = match result.contact {
             Some(contact)
                 if contact.safe_until() > current_tick
@@ -168,14 +180,6 @@ impl CpuController {
                 Some(contact)
             }
             Some(_) => return self.reject(AdmissionRejection::Contact),
-            None if (result.basis.parts().rules.version == 8
-                || (matches!(result.basis.parts().rules.version, 9 | 10)
-                    && result.basis.respawn_lairs().is_some()))
-                && (control.intent.manual.is_some()
-                    || control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop) =>
-            {
-                return self.reject(AdmissionRejection::Contact);
-            }
             None => None,
         };
         let certified_manual = execution
@@ -226,6 +230,14 @@ impl CpuController {
             },
             None => None,
         };
+        if contact_required
+            && contact.is_none()
+            && committed_route
+                .as_ref()
+                .is_none_or(|route| !route.has_contact_authority())
+        {
+            return self.reject(AdmissionRejection::Contact);
+        }
         let current = AdmissionContext {
             world: self.world?,
             command_epoch,

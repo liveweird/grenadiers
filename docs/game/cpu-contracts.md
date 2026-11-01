@@ -339,8 +339,8 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU40, including
-certified planting around persistent burning Oil. Hard selects CPU41 with range-aware firing
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU42, including
+certified planting around persistent burning Oil. Hard selects CPU43 with range-aware firing
 positions against visible rivals. Both retain the same 65,536-work budget and full planting,
 route, mob-contact and admission proofs. Hard does not receive hidden positions, concealed loot,
 private seeds or faster physics.
@@ -356,16 +356,19 @@ flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. E
 farming retains its prior support. This changes a Teleporter support precondition, not the
 route proof, public observation facts or work limit; all conservative motion checks remain.
 
-Current CPU40/41 can certify a one-update pickup handoff on rules10 even though ordinary clear
+Current CPU42/43 can certify a one-update pickup handoff on rules10 even though ordinary clear
 navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop and fresh
 observation requirements remain. The longer ordinary pulse still rejects physics-changing
 collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are unchanged.
 
-CPU40/41 can refine a failed mob-contact envelope for an ordinary plant when retained public
+CPU42/43 retain the refinement of a failed mob-contact envelope for an ordinary plant when public
 barriers separate every source from the complete certified escape. Potentially destroyed blocks
 are treated as open throughout. The opaque plant-bound certificate retains scene, bomb-presence,
 source and barrier checks at admission and each publication; unsupported changes withdraw it.
+When every original source is a possible birth blocked by a retained soft wall, the new profiles
+can prove an empty reachable source set. Every birth barrier must remain intact; any observed mob
+withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay20 binds these identities; replay19 retains CPU38/39. Lairs-disabled planning
-delegates unchanged to CPU38/39, and older policy/replay contracts remain isolated.
+Private replay21 binds these identities; replay20 retains CPU40/41. Lairs-disabled planning
+delegates unchanged to CPU40/41, and older policy/replay contracts remain isolated.

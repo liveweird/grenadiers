@@ -19,14 +19,16 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [todo] **CPU-RELIABILITY — validate remaining CPU liveness.** Reproduce remaining long-match
+- [next] **CPU-RELIABILITY — validate remaining CPU liveness.** Investigate the reproduced
+  farm-approach route-search refusal and retain complete escape/contact proofs within the
+  existing work allowance. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone
   does not establish a missed safe action. Preserve safety certificates, bounded scheduling,
   replay/privacy and sustained per-seat progress regressions.
 
-- [next] **HARD-CPU — deepen fair tactics.** Add certified terminal-refuge handoffs, productive farming,
+- [todo] **HARD-CPU — deepen fair tactics.** Improve productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
   observations, bounded planning and unchanged physics. Require authoritative before/after
   witnesses and independent review; preserve archived policies and complete seeded episodes.

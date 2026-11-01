@@ -79,10 +79,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::REFUGE_V33_EASY)
+            Some(CpuProfile::FARM_REFUGES_V36_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::REFUGE_V33_STANDARD)
+            Some(CpuProfile::FARM_REFUGES_V36_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -106,7 +106,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V35)
+            Some(CpuProfile::HARD_V37)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -163,6 +163,12 @@ mod cpu_intent_progress_tests;
 
 #[cfg(test)]
 mod cpu_farm_progress_tests;
+
+#[cfg(test)]
+mod farm_refuge_owner_support;
+
+#[cfg(test)]
+mod farm_refuge_owner_tests;
 
 #[cfg(test)]
 mod reliable_profile_tests;

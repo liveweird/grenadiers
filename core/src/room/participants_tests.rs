@@ -151,3 +151,24 @@ fn hard35_adds_handoff_without_relabeling_refuge_profiles() {
     assert_eq!(CpuProfile::REFUGE_V33_STANDARD.policy.version(), 33);
     assert_eq!(CpuProfile::REFUGE_V33_EASY.policy.version(), 33);
 }
+
+#[test]
+fn farm_refuge_profiles_extend_without_relabeling_prior_policies() {
+    assert_eq!(CpuProfile::FARM_REFUGES_V36_STANDARD.policy.version(), 36);
+    assert_eq!(
+        CpuProfile::FARM_REFUGES_V36_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(CpuProfile::FARM_REFUGES_V36_EASY.policy.version(), 36);
+    assert_eq!(
+        CpuProfile::FARM_REFUGES_V36_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V37.policy.version(), 37);
+    assert_eq!(CpuProfile::HARD_V37.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::HARD_V35.policy.version(), 35);
+    assert_eq!(CpuProfile::REFUGE_V33_STANDARD.policy.version(), 33);
+    assert!(!CpuProfile::FARM_REFUGES_V36_STANDARD.is_current());
+    assert!(!CpuProfile::FARM_REFUGES_V36_EASY.is_current());
+    assert!(!CpuProfile::HARD_V37.is_current());
+}

@@ -11,6 +11,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V32
                         | grenadiers_core::room::CpuProfile::HARD_V34
                         | grenadiers_core::room::CpuProfile::HARD_V35
+                        | grenadiers_core::room::CpuProfile::HARD_V37
                 );
         }
         match rules_version {
@@ -53,9 +54,19 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::PICKUP_V31_EASY
                     | grenadiers_core::room::CpuProfile::REFUGE_V33_STANDARD
                     | grenadiers_core::room::CpuProfile::REFUGE_V33_EASY
+                    | grenadiers_core::room::CpuProfile::FARM_REFUGES_V36_STANDARD
+                    | grenadiers_core::room::CpuProfile::FARM_REFUGES_V36_EASY
             ),
             _ => false,
         }
+    }
+
+    pub(super) const fn supports_refuge_handoff(&self) -> bool {
+        matches!(
+            self.profile,
+            grenadiers_core::room::CpuProfile::HARD_V35
+                | grenadiers_core::room::CpuProfile::HARD_V37
+        )
     }
 }
 
@@ -79,12 +90,13 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V35);
+        let hard = controller(CpuProfile::HARD_V37);
         assert!(hard.profile_supports(10));
         assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V32).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V34).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V35).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -94,6 +106,7 @@ mod tests {
             CpuPolicy::UtilityV27,
             CpuPolicy::UtilityV31,
             CpuPolicy::UtilityV33,
+            CpuPolicy::UtilityV36,
         ] {
             let forged = controller(CpuProfile {
                 policy,
@@ -109,6 +122,7 @@ mod tests {
             CpuPolicy::UtilityV32,
             CpuPolicy::UtilityV34,
             CpuPolicy::UtilityV35,
+            CpuPolicy::UtilityV37,
         ] {
             for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
                 let forged = controller(CpuProfile { policy, difficulty });
@@ -120,9 +134,14 @@ mod tests {
             CpuProfile::PICKUP_V31_STANDARD,
             CpuProfile::REFUGE_V33_EASY,
             CpuProfile::REFUGE_V33_STANDARD,
+            CpuProfile::FARM_REFUGES_V36_EASY,
+            CpuProfile::FARM_REFUGES_V36_STANDARD,
         ] {
             assert!(controller(profile).profile_supports(10));
             assert!(!controller(profile).profile_supports(9));
         }
+        assert!(controller(CpuProfile::HARD_V35).supports_refuge_handoff());
+        assert!(controller(CpuProfile::HARD_V37).supports_refuge_handoff());
+        assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
     }
 }

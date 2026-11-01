@@ -35,7 +35,7 @@ impl CpuController {
         observation: Observation,
         command_epoch: u64,
     ) -> bool {
-        if self.profile.policy.version() != 35 {
+        if !self.supports_refuge_handoff() {
             return false;
         }
         self.enqueue_refuge_handoff(observation, command_epoch)

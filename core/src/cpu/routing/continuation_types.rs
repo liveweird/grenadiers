@@ -73,7 +73,7 @@ pub(crate) struct ContinuationCheckpointView {
 // to exercise independent failure branches, but production cannot duplicate it.
 #[cfg_attr(test, derive(Clone))]
 #[allow(dead_code)] // Inactive guidance; executor integration is a later package.
-pub(crate) struct ContinuationCertificate {
+pub struct ContinuationCertificate {
     key: MemoryKey,
     basis: Observation,
     basis_tick: Tick,

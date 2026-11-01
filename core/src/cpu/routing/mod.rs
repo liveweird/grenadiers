@@ -51,10 +51,10 @@ pub(crate) use continuation::certify_continuation;
 #[cfg(test)]
 pub(crate) use continuation::certify_nominal_for_test;
 pub(crate) use continuation_candidates::continuation_candidates;
-pub(crate) use continuation_renewal::{
-    CONTINUATION_RENEWAL_ALLOWANCE, PreparedFrame, PreparedGrant,
-};
-pub(crate) use continuation_types::{ContinuationCertificate, ContinuationRequest, NominalLeg};
+pub use continuation_renewal::CONTINUATION_RENEWAL_ALLOWANCE;
+pub(crate) use continuation_renewal::{PreparedFrame, PreparedGrant};
+pub use continuation_types::ContinuationCertificate;
+pub(crate) use continuation_types::{ContinuationRequest, NominalLeg};
 
 pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};
 pub(crate) use plant::{

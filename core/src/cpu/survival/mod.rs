@@ -47,18 +47,16 @@ pub use compatibility::can_admit_ordinary;
 pub use contact_plant::PlantContactCertificate;
 #[cfg(test)]
 pub(crate) use contact_plant::contact_scene_candidate_for_test;
-#[allow(unused_imports)] // Inactive executor; server integration is intentionally deferred.
-pub(crate) use continuation_execution::{
+pub use continuation_execution::{
     CommittedContinuation, ContinuationCommand, ContinuationPublication, ContinuationStatus,
     PreparedContinuation, PreparedRenewal,
 };
-#[allow(unused_imports)] // Inactive executor; server integration is intentionally deferred.
-pub(crate) use continuation_pending::PendingContinuation;
+pub use continuation_pending::PendingContinuation;
 #[allow(unused_imports)] // Inactive proof entry; no policy dispatch in this package.
 pub(crate) use continuation_planner::certify_continuation;
-#[allow(unused_imports)] // Inactive selector; policy identity is intentionally deferred.
-pub(crate) use continuation_selection::{
-    OriginRecoveryChoice, plan_lairs as plan_continuation_lairs,
+pub use continuation_selection::{
+    OriginRecoveryChoice, continuation_recovery_memory, continuation_recovery_stop,
+    plan_lairs as plan_continuation_lairs,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};

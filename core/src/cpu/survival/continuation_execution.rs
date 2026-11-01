@@ -2,26 +2,43 @@
 
 use std::sync::Arc;
 
-use crate::cpu::routing::{
-    CONTINUATION_RENEWAL_ALLOWANCE, ContinuationCertificate, PreparedFrame, PreparedGrant,
-    RouteFailure,
-};
+use crate::cpu::routing::{ContinuationCertificate, PreparedFrame, PreparedGrant, RouteFailure};
 use crate::cpu::{DecisionId, MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct ContinuationPublication {
+pub struct ContinuationPublication {
     pub(crate) decision: DecisionId,
     pub(crate) key: MemoryKey,
     pub(crate) sequence: u64,
     pub(crate) tick: Tick,
 }
 
+impl ContinuationPublication {
+    pub fn new(
+        decision: DecisionId,
+        key: MemoryKey,
+        sequence: u64,
+        tick: Tick,
+    ) -> Result<Self, RouteFailure> {
+        if decision.world != key.world || tick < decision.observation_tick {
+            return Err(RouteFailure::IdentityMismatch);
+        }
+        Ok(Self {
+            decision,
+            key,
+            sequence,
+            tick,
+        })
+    }
+}
+
 #[derive(Debug)]
 struct EpisodeToken;
 
-#[derive(Clone, Debug)]
-pub(crate) struct ContinuationCommand {
+#[cfg_attr(test, derive(Clone))]
+#[derive(Debug)]
+pub struct ContinuationCommand {
     token: Arc<EpisodeToken>,
     movement: MovementIntent,
     admission_tick: Tick,
@@ -29,17 +46,17 @@ pub(crate) struct ContinuationCommand {
 }
 
 impl ContinuationCommand {
-    pub(crate) const fn movement(&self) -> MovementIntent {
+    pub const fn movement(&self) -> MovementIntent {
         self.movement
     }
 
-    pub(crate) const fn admission_tick(&self) -> Tick {
+    pub const fn admission_tick(&self) -> Tick {
         self.admission_tick
     }
 }
 
-#[derive(Clone, Debug)]
-pub(crate) enum ContinuationStatus {
+#[derive(Debug)]
+pub enum ContinuationStatus {
     Continue,
     Wait,
     Submit(ContinuationCommand),
@@ -48,17 +65,19 @@ pub(crate) enum ContinuationStatus {
     Invalidated,
 }
 
-pub(crate) struct PreparedContinuation {
+pub struct PreparedContinuation {
     token: Arc<EpisodeToken>,
     certificate: Box<ContinuationCertificate>,
     publication: ContinuationPublication,
     frame: Box<PreparedGrant>,
+    command_issued: bool,
 }
 
-pub(crate) struct PreparedRenewal {
+pub struct PreparedRenewal {
     token: Arc<EpisodeToken>,
     publication: ContinuationPublication,
     kind: PreparedRenewalKind,
+    command_issued: bool,
 }
 
 enum PreparedRenewalKind {
@@ -66,12 +85,13 @@ enum PreparedRenewalKind {
     Complete,
 }
 
-pub(crate) struct CommittedContinuation {
+pub struct CommittedContinuation {
     certificate: Box<ContinuationCertificate>,
     token: Arc<EpisodeToken>,
     publication: ContinuationPublication,
     frame: Box<PreparedGrant>,
     next_input: usize,
+    input_issued: bool,
     movement: MovementIntent,
     revoked: bool,
     completed: bool,
@@ -93,7 +113,7 @@ pub(super) fn prepare_admission(
     {
         return Err(RouteFailure::IdentityMismatch);
     }
-    let frame = prepare_checked(&certificate, current, work)?;
+    let frame = super::continuation_compatibility::prepare_checked(&certificate, current, work)?;
     let PreparedFrame::Grant(frame) = frame else {
         return Err(RouteFailure::InvalidRequest);
     };
@@ -102,19 +122,24 @@ pub(super) fn prepare_admission(
         certificate,
         publication,
         frame,
+        command_issued: false,
     })
 }
 
 impl PreparedContinuation {
-    pub(crate) fn command(&self) -> ContinuationCommand {
-        command(&self.token, &self.frame, 0)
+    pub fn command(&mut self) -> Result<ContinuationCommand, RouteFailure> {
+        if self.command_issued {
+            return Err(RouteFailure::IdentityMismatch);
+        }
+        self.command_issued = true;
+        Ok(command(&self.token, &self.frame, 0))
     }
 
-    pub(crate) fn commit(
+    pub fn commit(
         self,
         accepted: ContinuationCommand,
     ) -> Result<CommittedContinuation, RouteFailure> {
-        if !accepted.matches(&self.command()) {
+        if !self.command_issued || !accepted.matches(&command(&self.token, &self.frame, 0)) {
             return Err(RouteFailure::IdentityMismatch);
         }
         Ok(CommittedContinuation {
@@ -124,6 +149,7 @@ impl PreparedContinuation {
             movement: accepted.movement,
             frame: self.frame,
             next_input: 1,
+            input_issued: false,
             revoked: false,
             completed: false,
             pending: None,
@@ -132,7 +158,15 @@ impl PreparedContinuation {
 }
 
 impl PreparedRenewal {
-    pub(crate) fn command(&self) -> ContinuationCommand {
+    pub fn command(&mut self) -> Result<ContinuationCommand, RouteFailure> {
+        if self.command_issued {
+            return Err(RouteFailure::IdentityMismatch);
+        }
+        self.command_issued = true;
+        Ok(self.expected_command())
+    }
+
+    fn expected_command(&self) -> ContinuationCommand {
         match &self.kind {
             PreparedRenewalKind::Grant(frame) => command(&self.token, frame, 0),
             PreparedRenewalKind::Complete => ContinuationCommand {
@@ -170,6 +204,7 @@ impl CommittedContinuation {
             publication: self.publication,
             frame: self.frame.clone(),
             next_input: self.next_input,
+            input_issued: self.input_issued,
             movement: self.movement,
             revoked: self.revoked,
             completed: self.completed,
@@ -182,7 +217,7 @@ impl CommittedContinuation {
         self.certificate.set_survive_until_for_test(survive_until);
     }
 
-    pub(crate) fn prepare_grant(
+    pub fn prepare_grant(
         &mut self,
         current: &Observation,
         publication: ContinuationPublication,
@@ -213,7 +248,11 @@ impl CommittedContinuation {
             self.revoked = true;
             return Err(RouteFailure::IdentityMismatch);
         }
-        let frame = match prepare_checked(&self.certificate, current, work) {
+        let frame = match super::continuation_compatibility::prepare_checked(
+            &self.certificate,
+            current,
+            work,
+        ) {
             Ok(frame) => frame,
             Err(failure) => {
                 self.revoked = true;
@@ -228,14 +267,11 @@ impl CommittedContinuation {
                 PreparedFrame::Grant(frame) => PreparedRenewalKind::Grant(frame),
                 PreparedFrame::Complete => PreparedRenewalKind::Complete,
             },
+            command_issued: false,
         })
     }
 
-    pub(crate) fn poll_command(
-        &mut self,
-        current_tick: Tick,
-        command_epoch: u64,
-    ) -> ContinuationStatus {
+    pub fn poll_command(&mut self, current_tick: Tick, command_epoch: u64) -> ContinuationStatus {
         if self.revoked
             || current_tick >= self.certificate.survive_until()
             || command_epoch != self.publication.decision.command_epoch
@@ -250,7 +286,14 @@ impl CommittedContinuation {
             let expected = command(&self.token, &self.frame, self.next_input);
             return match current_tick.cmp(&expected.admission_tick) {
                 std::cmp::Ordering::Less => self.active_status(),
-                std::cmp::Ordering::Equal => ContinuationStatus::Submit(expected),
+                std::cmp::Ordering::Equal if !self.input_issued => {
+                    self.input_issued = true;
+                    ContinuationStatus::Submit(expected)
+                }
+                std::cmp::Ordering::Equal => {
+                    self.revoked = true;
+                    ContinuationStatus::Invalidated
+                }
                 std::cmp::Ordering::Greater => {
                     self.revoked = true;
                     ContinuationStatus::Invalidated
@@ -268,8 +311,8 @@ impl CommittedContinuation {
         }
     }
 
-    pub(crate) fn commit_command(&mut self, accepted: ContinuationCommand) -> bool {
-        if self.revoked || self.completed || self.next_input >= 3 {
+    pub fn commit_command(&mut self, accepted: ContinuationCommand) -> bool {
+        if self.revoked || self.completed || self.next_input >= 3 || !self.input_issued {
             self.revoked = true;
             return false;
         }
@@ -279,11 +322,12 @@ impl CommittedContinuation {
             return false;
         }
         self.next_input += 1;
+        self.input_issued = false;
         self.movement = accepted.movement;
         true
     }
 
-    pub(crate) fn commit_grant(
+    pub fn commit_grant(
         &mut self,
         prepared: PreparedRenewal,
         accepted: ContinuationCommand,
@@ -295,7 +339,8 @@ impl CommittedContinuation {
             || self.pending != Some(prepared.publication())
             || expected_publication != Some(prepared.publication().sequence)
             || !Arc::ptr_eq(&self.token, prepared.token())
-            || !accepted.matches(&prepared.command())
+            || !prepared.command_issued
+            || !accepted.matches(&prepared.expected_command())
         {
             self.revoked = true;
             return false;
@@ -306,6 +351,7 @@ impl CommittedContinuation {
             PreparedRenewalKind::Grant(frame) => {
                 self.frame = frame;
                 self.next_input = 1;
+                self.input_issued = false;
                 self.movement = accepted.movement;
             }
             PreparedRenewalKind::Complete => {
@@ -316,7 +362,7 @@ impl CommittedContinuation {
         true
     }
 
-    pub(crate) fn revoke(&mut self) {
+    pub fn revoke(&mut self) {
         self.revoked = true;
         self.movement = MovementIntent::Stop;
     }
@@ -327,38 +373,6 @@ impl CommittedContinuation {
             MovementIntent::Direction(_) => ContinuationStatus::Continue,
         }
     }
-}
-
-fn prepare_checked(
-    certificate: &ContinuationCertificate,
-    current: &Observation,
-    work: &mut WorkBudget,
-) -> Result<PreparedFrame, RouteFailure> {
-    let mut bounded = WorkBudget::new(work.remaining().min(CONTINUATION_RENEWAL_ALLOWANCE));
-    let result = (|| {
-        if !super::continuation_compatibility::actor_compatible_charged(
-            certificate.basis(),
-            current,
-            certificate.evolution(),
-            &mut bounded,
-        ) {
-            return Err(RouteFailure::NoRoute);
-        }
-        let frame = certificate.prepare_frame(current, &mut bounded)?;
-        if let PreparedFrame::Grant(frame) = &frame
-            && !super::continuation_compatibility::rivals_allow_segments_charged(
-                current,
-                frame.segments(),
-                &mut bounded,
-            )
-        {
-            return Err(RouteFailure::NoRoute);
-        }
-        Ok(frame)
-    })();
-    work.try_take(bounded.spent())
-        .map_err(|_| RouteFailure::WorkExhausted)?;
-    result
 }
 
 fn command(token: &Arc<EpisodeToken>, frame: &PreparedGrant, index: usize) -> ContinuationCommand {

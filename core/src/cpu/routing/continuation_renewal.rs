@@ -8,7 +8,7 @@ use super::continuation_contact::ContinuationContact;
 use super::continuation_types::{ContinuationCertificate, ContinuationCheckpoint, StopBranch};
 use super::{RouteFailure, storm};
 
-pub(crate) const CONTINUATION_RENEWAL_ALLOWANCE: u32 = 8_192;
+pub const CONTINUATION_RENEWAL_ALLOWANCE: u32 = 8_192;
 const GRANT_INPUTS: usize = 3;
 const SHORT_WINDOW_UPDATES: u64 = 14;
 

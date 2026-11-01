@@ -33,15 +33,16 @@ fn build_certificate(
 }
 
 fn publication(decision: DecisionId, sequence: u64, tick: Tick) -> ContinuationPublication {
-    ContinuationPublication {
+    ContinuationPublication::new(
         decision,
-        key: MemoryKey {
+        MemoryKey {
             world: decision.world,
             cpu_seat: CPU,
         },
         sequence,
         tick,
-    }
+    )
+    .unwrap()
 }
 
 fn input(seat: SeatId, movement: MovementIntent) -> SeatInput {
@@ -129,8 +130,8 @@ fn no_lair_renewal_rejects_an_enabled_overlay() {
             assert!(prepared.is_none());
             continue;
         }
-        let prepared = prepared.unwrap();
-        let first = prepared.command();
+        let mut prepared = prepared.unwrap();
+        let first = prepared.command().unwrap();
         let mut executor = prepared.commit(first.clone()).unwrap();
         let mut next = first;
         while disabled.state.tick() < Tick(205) {
@@ -233,7 +234,7 @@ fn execute_scene(
             .is_err()
     );
     let mut measured = WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE);
-    let prepared = pending
+    let mut prepared = pending
         .fork_for_test()
         .observe(&current, initial, &mut measured)
         .expect("charged admission")
@@ -253,7 +254,7 @@ fn execute_scene(
             .is_err()
     );
 
-    let foreign = pending
+    let mut foreign = pending
         .observe(
             &current,
             initial,
@@ -261,17 +262,29 @@ fn execute_scene(
         )
         .unwrap()
         .unwrap();
-    assert!(prepared.commit(foreign.command()).is_err());
-    let prepared = foreign;
-
-    let first = prepared.command();
-    let mut committed = prepared.commit(first.clone()).unwrap();
+    let _own = prepared.command().unwrap();
+    assert!(prepared.command().is_err());
+    let foreign_command = foreign.command().unwrap();
+    assert!(prepared.commit(foreign_command.clone()).is_err());
+    let first = foreign_command;
+    let mut committed = foreign.commit(first.clone()).unwrap();
     let mut expired = committed.fork_for_test();
     expired.shorten_horizon_for_test(Tick(203));
     assert!(matches!(
         expired.poll_command(Tick(203), decision.command_epoch),
         ContinuationStatus::Invalidated
     ));
+    let mut duplicate_due = committed.fork_for_test();
+    let ContinuationStatus::Submit(duplicate) =
+        duplicate_due.poll_command(Tick(203), decision.command_epoch)
+    else {
+        panic!("second exact input must be issued once")
+    };
+    assert!(matches!(
+        duplicate_due.poll_command(Tick(203), decision.command_epoch),
+        ContinuationStatus::Invalidated
+    ));
+    assert!(!duplicate_due.commit_command(duplicate));
     let mut missed = committed.fork_for_test();
     let ContinuationStatus::Submit(second) = missed.poll_command(Tick(203), decision.command_epoch)
     else {
@@ -337,7 +350,7 @@ fn execute_scene(
                     assert_renewal_bound_and_rejections(&committed, &current, identity);
                 }
                 let mut work = WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE);
-                let prepared = committed
+                let mut prepared = committed
                     .prepare_grant(&current, identity, &mut work)
                     .expect("fresh charged renewal");
                 if state.tick() == Tick(241) {
@@ -351,7 +364,10 @@ fn execute_scene(
                     );
                 }
                 maximum_work = maximum_work.max(work.spent());
-                let command = prepared.command();
+                let command = prepared.command().unwrap();
+                if state.tick() == Tick(205) {
+                    assert!(prepared.command().is_err());
+                }
                 assert!(committed.commit_grant(prepared, command.clone()));
                 next = command;
             }

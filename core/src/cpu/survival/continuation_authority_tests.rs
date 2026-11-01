@@ -39,12 +39,7 @@ fn publication(
     sequence: u64,
     tick: Tick,
 ) -> ContinuationPublication {
-    ContinuationPublication {
-        decision,
-        key,
-        sequence,
-        tick,
-    }
+    ContinuationPublication::new(decision, key, sequence, tick).unwrap()
 }
 
 fn input(seat: SeatId, command: &ContinuationCommand) -> SeatInput {
@@ -60,22 +55,25 @@ fn input(seat: SeatId, command: &ContinuationCommand) -> SeatInput {
 fn next_command(
     executor: &mut CommittedContinuation,
     observation: &Observation,
-    identity: ContinuationPublication,
+    decision: DecisionId,
+    key: MemoryKey,
+    sequence: &mut u64,
 ) -> ContinuationCommand {
-    match executor.poll_command(observation.parts().tick, identity.decision.command_epoch) {
+    match executor.poll_command(observation.parts().tick, decision.command_epoch) {
         ContinuationStatus::Submit(command) => {
             assert!(executor.commit_command(command.clone()));
             command
         }
         ContinuationStatus::RenewalRequired => {
-            let prepared = executor
+            *sequence += 1;
+            let mut prepared = executor
                 .prepare_grant(
                     observation,
-                    identity,
+                    publication(decision, key, *sequence, observation.parts().tick),
                     &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
                 )
                 .unwrap();
-            let command = prepared.command();
+            let command = prepared.command().unwrap();
             assert!(executor.commit_grant(prepared, command.clone()));
             command
         }
@@ -156,7 +154,8 @@ fn assert_mirrored_authority(
     let mut rival_command = rival.1;
     let mut cpu_executor = cpu.0;
     let mut rival_executor = rival.0;
-    let mut sequence = 30;
+    let mut cpu_sequence = 30;
+    let mut rival_sequence = 30;
     while state.tick() < Tick(244) {
         state
             .step(&[input(CPU, &cpu_command), input(SeatId::One, &rival_command)])
@@ -164,21 +163,19 @@ fn assert_mirrored_authority(
         if state.tick() == Tick(244) {
             break;
         }
-        if matches!(
-            cpu_executor.poll_command(state.tick(), decision.command_epoch),
-            ContinuationStatus::RenewalRequired
-        ) {
-            sequence += 1;
-        }
         cpu_command = next_command(
             &mut cpu_executor,
             &observe(&state, settings),
-            publication(decision, key, sequence, state.tick()),
+            decision,
+            key,
+            &mut cpu_sequence,
         );
         rival_command = next_command(
             &mut rival_executor,
             &observe_for(&state, settings, SeatId::One),
-            publication(decision, rival_key, sequence, state.tick()),
+            decision,
+            rival_key,
+            &mut rival_sequence,
         );
     }
 
@@ -187,14 +184,14 @@ fn assert_mirrored_authority(
     let cpu_prepared = cpu_splice
         .prepare_grant(
             &observe(&state, settings),
-            publication(decision, key, sequence + 1, Tick(244)),
+            publication(decision, key, cpu_sequence + 1, Tick(244)),
             &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
         )
         .unwrap();
-    let rival_prepared = rival_splice
+    let mut rival_prepared = rival_splice
         .prepare_grant(
             &observe_for(&state, settings, SeatId::One),
-            publication(decision, rival_key, sequence + 1, Tick(244)),
+            publication(decision, rival_key, rival_sequence + 1, Tick(244)),
             &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
         )
         .unwrap();
@@ -214,7 +211,7 @@ fn assert_mirrored_authority(
             MovementIntent::Direction(Direction::West),
         ])
     );
-    let foreign = rival_prepared.command();
+    let foreign = rival_prepared.command().unwrap();
     assert!(!cpu_splice.commit_grant(rival_prepared, foreign));
 }
 
@@ -224,7 +221,7 @@ fn admit(
     decision: DecisionId,
     key: MemoryKey,
 ) -> (CommittedContinuation, ContinuationCommand) {
-    let prepared = pending
+    let mut prepared = pending
         .observe(
             &observation,
             publication(decision, key, 30, Tick(202)),
@@ -232,7 +229,7 @@ fn admit(
         )
         .unwrap()
         .unwrap();
-    let command = prepared.command();
+    let command = prepared.command().unwrap();
     let executor = prepared.commit(command.clone()).unwrap();
     (executor, command)
 }

@@ -1,23 +1,40 @@
 //! Shared-budget selection between inactive continuation guidance and legacy recovery.
 
 use crate::cpu::forecast::{ForecastLimits, HazardForecast, ObservedHazardMemory, forecast};
-use crate::cpu::policy::UtilityMemory;
+use crate::cpu::policy::{ControlPlan, UtilityMemory};
 use crate::cpu::routing::{
     ContinuationCertificate, ContinuationRequest, NominalLeg, continuation_candidates,
 };
 use crate::cpu::{BombKnowledge, Observation, WorkBudget};
 use crate::game::Tick;
 
-use super::{LairSurvivalPlan, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
+use super::{LairSurvivalPlan, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
 
 const GENERATION_ALLOWANCE: u32 = 2_048;
 
-pub(crate) enum OriginRecoveryChoice {
+pub enum OriginRecoveryChoice {
     Continuation(Box<ContinuationCertificate>),
     Pulse(Box<LairSurvivalPlan>),
 }
 
-pub(crate) fn plan_lairs(
+#[must_use]
+pub fn continuation_recovery_memory(previous: &UtilityMemory) -> UtilityMemory {
+    UtilityMemory::new(previous.key()).carry_progress(*previous)
+}
+
+#[must_use]
+pub fn continuation_recovery_stop(previous: &UtilityMemory) -> LairSurvivalPlan {
+    LairSurvivalPlan {
+        survival: SurvivalPlan {
+            control: ControlPlan::stop(continuation_recovery_memory(previous)),
+            lease: None,
+            execution: None,
+        },
+        contact: None,
+    }
+}
+
+pub fn plan_lairs(
     observation: &Observation,
     history: &ObservedHazardMemory,
     settled_stop_tick: Tick,
@@ -44,16 +61,16 @@ pub(crate) fn plan_lairs(
     } else {
         super::origin_planner::plan_disabled_with_forecast
     };
-    fallback(
+    let mut plan = fallback(
         observation,
         &prepared.forecast,
         settled_stop_tick,
         memory,
         origin,
         work,
-    )
-    .map(Box::new)
-    .map(OriginRecoveryChoice::Pulse)
+    )?;
+    plan.survival.control.next_memory = continuation_recovery_memory(memory);
+    Some(OriginRecoveryChoice::Pulse(Box::new(plan)))
 }
 
 struct Prepared {

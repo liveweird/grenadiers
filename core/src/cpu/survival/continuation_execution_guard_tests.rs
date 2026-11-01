@@ -1,12 +1,30 @@
 use crate::cpu::routing::CONTINUATION_RENEWAL_ALLOWANCE;
 use crate::cpu::{
-    BombKnowledge, Observation, ObservedActor, ObservedEffect, ObservedPickup, WorkBudget,
+    BombKnowledge, DecisionId, Observation, ObservedActor, ObservedEffect, ObservedPickup,
+    WorkBudget,
 };
 use crate::game::{CellId, EffectKind, PickupKind, Position, Tick};
 
 use super::continuation_execution::{
     CommittedContinuation, ContinuationPublication, ContinuationStatus,
 };
+use super::continuation_scene_fixture::no_lair_scene;
+
+#[test]
+fn publication_constructor_rejects_cross_world_and_rewind() {
+    let scene = no_lair_scene();
+    let decision = DecisionId {
+        world: scene.basis.parts().world,
+        command_epoch: 4,
+        observation_tick: scene.basis.parts().tick,
+        checked_request_serial: 9,
+    };
+    let mut wrong_key = scene.key;
+    wrong_key.world.physical_round += 1;
+    assert!(ContinuationPublication::new(decision, wrong_key, 1, Tick(199)).is_err());
+    assert!(ContinuationPublication::new(decision, scene.key, 1, Tick(195)).is_err());
+    assert!(ContinuationPublication::new(decision, scene.key, 1, Tick(196)).is_ok());
+}
 
 pub(super) fn assert_renewal_bound_and_rejections(
     committed: &CommittedContinuation,

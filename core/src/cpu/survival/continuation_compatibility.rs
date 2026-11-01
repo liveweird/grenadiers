@@ -1,6 +1,9 @@
 //! Charged public-fact compatibility for inactive continuation renewal.
 
 use crate::cpu::forecast::ForecastEvolution;
+use crate::cpu::routing::{
+    CONTINUATION_RENEWAL_ALLOWANCE, ContinuationCertificate, PreparedFrame, RouteFailure,
+};
 use crate::cpu::{Observation, WorkBudget};
 
 pub(super) fn actor_compatible_charged(
@@ -71,4 +74,32 @@ pub(super) fn rivals_allow_segments_charged(
         }
     }
     true
+}
+
+pub(super) fn prepare_checked(
+    certificate: &ContinuationCertificate,
+    current: &Observation,
+    work: &mut WorkBudget,
+) -> Result<PreparedFrame, RouteFailure> {
+    let mut bounded = WorkBudget::new(work.remaining().min(CONTINUATION_RENEWAL_ALLOWANCE));
+    let result = (|| {
+        if !actor_compatible_charged(
+            certificate.basis(),
+            current,
+            certificate.evolution(),
+            &mut bounded,
+        ) {
+            return Err(RouteFailure::NoRoute);
+        }
+        let frame = certificate.prepare_frame(current, &mut bounded)?;
+        if let PreparedFrame::Grant(frame) = &frame
+            && !rivals_allow_segments_charged(current, frame.segments(), &mut bounded)
+        {
+            return Err(RouteFailure::NoRoute);
+        }
+        Ok(frame)
+    })();
+    work.try_take(bounded.spent())
+        .map_err(|_| RouteFailure::WorkExhausted)?;
+    result
 }

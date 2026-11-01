@@ -8,7 +8,7 @@ use super::continuation_execution::{
     ContinuationPublication, PreparedContinuation, prepare_admission,
 };
 
-pub(crate) struct PendingContinuation {
+pub struct PendingContinuation {
     certificate: Option<Box<ContinuationCertificate>>,
     decision: DecisionId,
     key: MemoryKey,
@@ -19,7 +19,7 @@ pub(crate) struct PendingContinuation {
 }
 
 impl PendingContinuation {
-    pub(crate) fn new(
+    pub fn new(
         certificate: Box<ContinuationCertificate>,
         decision: DecisionId,
         key: MemoryKey,
@@ -50,7 +50,7 @@ impl PendingContinuation {
         })
     }
 
-    pub(crate) fn observe(
+    pub fn observe(
         &mut self,
         current: &Observation,
         publication: ContinuationPublication,

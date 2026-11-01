@@ -24,6 +24,9 @@ mod physical_tests;
 pub(crate) mod teleport;
 #[path = "lair_contact_topology.rs"]
 mod topology;
+#[cfg(test)]
+#[path = "lair_contact_topology_tests.rs"]
+mod topology_tests;
 pub(crate) use topology::{PLANT_CONTACT_RENEWAL_ALLOWANCE, PlantContactProof};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

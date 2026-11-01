@@ -219,12 +219,34 @@ pub(super) fn contact_scene_candidate(
     established: PlantPresence,
 ) -> Option<PlantPresence> {
     let mut work = WorkBudget::new(PLANT_CONTACT_RENEWAL_ALLOWANCE);
-    let candidate = plant.contact_scene_candidate(basis, current, established, &mut work)?;
-    plant_actor_compatible_charged(basis, current, plant, candidate, &mut work)
+    contact_scene_candidate_with_work(basis, current, plant, proof, established, &mut work)
+}
+
+fn contact_scene_candidate_with_work(
+    basis: &Observation,
+    current: &Observation,
+    plant: &PlantCertificate,
+    proof: &PlantContactProof,
+    established: PlantPresence,
+    work: &mut WorkBudget,
+) -> Option<PlantPresence> {
+    let candidate = plant.contact_scene_candidate(basis, current, established, work)?;
+    plant_actor_compatible_charged(basis, current, plant, candidate, work)
         .then_some(())
-        .and_then(|()| {
-            proof
-                .observation_fits(current, &mut work)
-                .then_some(candidate)
-        })
+        .and_then(|()| proof.observation_fits(current, work).then_some(candidate))
+}
+
+#[cfg(test)]
+pub(crate) fn contact_scene_candidate_for_test(
+    basis: &Observation,
+    current: &Observation,
+    plant: &PlantCertificate,
+    proof: &PlantContactProof,
+    established: PlantPresence,
+    allowance: u32,
+) -> (Option<PlantPresence>, u32) {
+    let mut work = WorkBudget::new(allowance);
+    let result =
+        contact_scene_candidate_with_work(basis, current, plant, proof, established, &mut work);
+    (result, work.spent())
 }

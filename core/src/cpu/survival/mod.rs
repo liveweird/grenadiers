@@ -33,6 +33,8 @@ mod strategic_recovery;
 
 pub use compatibility::can_admit_ordinary;
 pub use contact_plant::PlantContactCertificate;
+#[cfg(test)]
+pub(crate) use contact_plant::contact_scene_candidate_for_test;
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
 pub use manual_execution::ExecutionCertificate;

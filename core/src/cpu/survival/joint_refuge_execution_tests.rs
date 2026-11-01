@@ -8,8 +8,9 @@ use crate::room::{RespawnLairConfig, SpikePitConfig};
 
 use super::farm_progress_tests::{captured_tick_7022, key, north_farm_memory};
 use super::{
-    ExecutionCertificate, WORK_ALLOWANCE, plan_farm_origins_v38_with_origin,
-    plan_farm_refuges_v36_with_origin, plan_hard_farm_origins_v39_with_origin,
+    ExecutionCertificate, WORK_ALLOWANCE, plan_contact_topology_v40_with_origin,
+    plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
+    plan_hard_contact_topology_v41_with_origin, plan_hard_farm_origins_v39_with_origin,
     plan_hard_farm_refuges_v37_with_origin, plan_refuge_guidance_v33_with_origin,
     plan_refuge_guidance_v34_with_origin,
 };
@@ -265,7 +266,7 @@ fn exhausted_hint_allowance_preserves_a_nonplant_fallback() {
 }
 
 #[test]
-fn no_lair_v36_through_v39_preserve_their_archived_base_policies() {
+fn no_lair_v36_through_v41_preserve_their_archived_base_policies() {
     let observed = captured_tick_7022()
         .map_parts(|parts| {
             let ObservedActor::Visible(cpu) = &mut parts.actors[CPU.index()] else {
@@ -289,9 +290,11 @@ fn no_lair_v36_through_v39_preserve_their_archived_base_policies() {
         let mut old_rng = CpuRng::from_seed(key, [137 + u8::from(hard); 32]);
         let mut new_rng = old_rng.clone();
         let mut recovery_rng = old_rng.clone();
+        let mut topology_rng = old_rng.clone();
         let mut old_work = WorkBudget::new(WORK_ALLOWANCE);
         let mut new_work = WorkBudget::new(WORK_ALLOWANCE);
         let mut recovery_work = WorkBudget::new(WORK_ALLOWANCE);
+        let mut topology_work = WorkBudget::new(WORK_ALLOWANCE);
         let old = if hard {
             plan_refuge_guidance_v34_with_origin(
                 &observed,
@@ -313,6 +316,20 @@ fn no_lair_v36_through_v39_preserve_their_archived_base_policies() {
                 &mut old_work,
             )
         }
+        .unwrap();
+        let topology = if hard {
+            plan_hard_contact_topology_v41_with_origin
+        } else {
+            plan_contact_topology_v40_with_origin
+        }(
+            &observed,
+            &memory,
+            &history,
+            observed.parts().tick,
+            None,
+            &mut topology_rng,
+            &mut topology_work,
+        )
         .unwrap();
         let new = if hard {
             plan_hard_farm_refuges_v37_with_origin(
@@ -362,12 +379,17 @@ fn no_lair_v36_through_v39_preserve_their_archived_base_policies() {
         assert_eq!(new.contact, old.contact);
         assert_eq!(recovery.survival, new.survival);
         assert_eq!(recovery.contact, new.contact);
+        assert_eq!(topology.survival, recovery.survival);
+        assert_eq!(topology.contact, recovery.contact);
         assert_eq!(new_work, old_work);
         assert_eq!(recovery_work, new_work);
+        assert_eq!(topology_work, recovery_work);
         assert_eq!(new_rng.draws(), old_rng.draws());
         assert_eq!(recovery_rng.draws(), new_rng.draws());
+        assert_eq!(topology_rng.draws(), recovery_rng.draws());
         let expected = old_rng.bounded_u32(1_000);
         assert_eq!(new_rng.bounded_u32(1_000), expected);
         assert_eq!(recovery_rng.bounded_u32(1_000), expected);
+        assert_eq!(topology_rng.bounded_u32(1_000), expected);
     }
 }

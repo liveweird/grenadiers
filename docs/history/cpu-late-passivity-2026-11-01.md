@@ -79,6 +79,25 @@ state from public JSON, assign a saved tick as the Stop clock, or relocate the a
 endpoint. A declared controlled scene may characterize the geometry without claiming restored
 match provenance. No missed safe action or rejection-memory defect is established yet.
 
+### Conditional CPU47 scene characterization
+
+`core/src/cpu/lair_contact_v1310_late_teleporter_{fixture,tests}.rs` preserves every public
+observation field from sample 88/tick 5461. The fixture-local world identity and default/all-items
+admission configuration are explicit assumptions; private actor facts remain unknown. The tests
+also explicitly assume fresh utility/hazard memory, a fixed test RNG seed and settled Stop at
+5461. None of those private execution facts is recovered from the capture.
+
+Under those premises, the exact no-origin Hard47 worker sequence spends 3,804 work on its ordinary
+fallback and selects a typed Teleporter step at 14,176 total within the shared 65,536 allowance.
+Guidance targets Collect `(3,2)` and moves North; a direct certificate is Approach with the assumed
+Stop provenance. The direct selector succeeds with exactly 10,372 work; one less preserves the
+unchanged ordinary fallback. This establishes conditional selection, not actual captured
+admission, a complete physical approach, a missed safe action or the cause of unavailable intent.
+
+Three focused regressions, strict Core test Clippy, formatting and repository checks pass.
+Independent review matched every fixture field to the raw sample. Production behavior and the
+accepted v1.3.10 image remain unchanged; a continuous owner/Stop/admission witness is still needed.
+
 ## Earlier CPU43 match
 
 In `target/quality-review/births-v138-long-match.json`, sample 90/tick 5580 has seat three at

@@ -38,7 +38,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   observed at an unchanged sampled pose with unavailable diagnostics, while seat Two keeps
   cycling farming approaches.
   Preserve real Stop provenance, worker/refusal/admission evidence and full useful-action
-  execution; static reachability alone is insufficient. Reproduce remaining long-match
+  execution; static reachability alone is insufficient. Conditional Core characterization already
+  selects a northward typed step with fresh memory/Stop provenance at 14,176 work; this does not
+  recover the captured controller history or explain unavailable intent. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone

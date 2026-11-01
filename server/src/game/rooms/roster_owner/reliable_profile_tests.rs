@@ -24,23 +24,23 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
     for (difficulty, accepted, archived, wrong_tier, other_archived) in [
         (
             CpuDifficulty::Standard,
+            CpuProfile::CORNER_REFUGES_V56_STANDARD,
             CpuProfile::RECOVERY_V54_STANDARD,
-            CpuProfile::PIT_AVOIDANCE_V52_STANDARD,
-            CpuProfile::RECOVERY_V54_EASY,
+            CpuProfile::CORNER_REFUGES_V56_EASY,
             CpuProfile::TELEPORTER_V46_STANDARD,
         ),
         (
             CpuDifficulty::Easy,
+            CpuProfile::CORNER_REFUGES_V56_EASY,
             CpuProfile::RECOVERY_V54_EASY,
-            CpuProfile::PIT_AVOIDANCE_V52_EASY,
-            CpuProfile::RECOVERY_V54_STANDARD,
+            CpuProfile::CORNER_REFUGES_V56_STANDARD,
             CpuProfile::TELEPORTER_V46_EASY,
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V57,
             CpuProfile::HARD_V55,
-            CpuProfile::HARD_V53,
-            CpuProfile::RECOVERY_V54_STANDARD,
+            CpuProfile::CORNER_REFUGES_V56_STANDARD,
             CpuProfile::HARD_V47,
         ),
     ] {

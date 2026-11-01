@@ -1,4 +1,8 @@
 use crate::cpu::forecast::ObservedHazardMemory;
+use crate::cpu::policy::{
+    StrategicIntent, StrategicObjectiveKind, StrategicPhase, StrategicSwitchReason,
+    StrategicTarget, UtilityMemory,
+};
 use crate::cpu::{BombKnowledge, MemoryKey, Observation, ObservedActor, ObservedEnvironment};
 use crate::game::{CellId, Direction, EntityId, Position, StormCloudConfig, StormCloudView, Tick};
 
@@ -10,6 +14,7 @@ pub(super) const FARM_TARGET: CellId = CellId::new(11, 2);
 pub(super) struct ClearBasis {
     pub observation: Observation,
     pub hazard_memory: ObservedHazardMemory,
+    pub memory: UtilityMemory,
 }
 
 pub(super) fn captured_clear_basis() -> ClearBasis {
@@ -74,9 +79,34 @@ pub(super) fn captured_clear_basis() -> ClearBasis {
     };
     let mut hazard_memory = ObservedHazardMemory::new(key);
     hazard_memory.observe(&observation).unwrap();
+    let memory = UtilityMemory::from_route(key, &[CellId::new(11, 1)], false)
+        .with_strategic_intent(StrategicIntent {
+            objective: StrategicObjectiveKind::Farm,
+            target: StrategicTarget::Block { cell: FARM_TARGET },
+            approach_cell: Some(CellId::new(11, 1)),
+            phase: StrategicPhase::Approach,
+            last_switch_reason: StrategicSwitchReason::Stalled,
+            observation_tick: Tick(417),
+            score: 2,
+            committed_until: Tick(504),
+            progress_deadline: Tick(570),
+            last_distance: 1,
+            last_cpu_position: Position {
+                x: 10_752,
+                y: 1_497,
+            },
+            deferred_until: Some(Tick(504)),
+        })
+        .with_failed_target(Some((
+            StrategicTarget::Block {
+                cell: CellId::new(9, 1),
+            },
+            Tick(504),
+        )));
     ClearBasis {
         observation,
         hazard_memory,
+        memory,
     }
 }
 

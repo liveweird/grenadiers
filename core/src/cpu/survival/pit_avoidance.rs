@@ -4,6 +4,7 @@ use crate::cpu::{CpuRng, Observation, WorkBudget};
 use crate::game::Tick;
 
 use super::contact_plant::ContactTopology;
+use super::joint_refuge::FarmRefugeMode;
 use super::steering::RefugeGuidance;
 use super::{LairSurvivalPlan, PlantEscapeOrigin};
 
@@ -75,7 +76,7 @@ fn plan(
         hard_tactics,
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
-        true,
+        FarmRefugeMode::Legacy,
         true,
         ContactTopology::BlockedBirths,
         true,

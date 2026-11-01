@@ -32,6 +32,11 @@ fn shared_recovery_easy_preserves_the_physical_stop_and_pause() {
     assert_teleporter_easy_cadence(CpuProfile::RECOVERY_V54_EASY);
 }
 
+#[test]
+fn corner_refuge_easy_preserves_the_physical_stop_and_pause() {
+    assert_teleporter_easy_cadence(CpuProfile::CORNER_REFUGES_V56_EASY);
+}
+
 fn assert_teleporter_easy_cadence(profile: CpuProfile) {
     let basis = at_tick(teleporter_observation(), Tick(20));
     let mut controller = CpuController::new(

@@ -192,10 +192,10 @@ impl GameRooms {
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::RECOVERY_V54_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::RECOVERY_V54_STANDARD,
-            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V55,
-            None => CpuProfile::RECOVERY_V54_STANDARD,
+            Some(CpuDifficulty::Easy) => CpuProfile::CORNER_REFUGES_V56_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::CORNER_REFUGES_V56_STANDARD,
+            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V57,
+            None => CpuProfile::CORNER_REFUGES_V56_STANDARD,
         };
         let mut cpus = Vec::new();
         for seat in base.cpu_seats() {

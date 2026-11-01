@@ -4,6 +4,70 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.14 — 2026-11-01
+
+CPUs can resume checked movement after simultaneous bomb plants when a supported forecast
+exceeds the old preparation allowance. The previous selector spent its 32,768-unit half-budget
+and returned before pulse fallback, despite the same forecast fitting the full shared budget.
+
+CPU54/55 prepare one forecast first. Preparation that fits the original allowance retains
+identical continuation/fallback choices and work; more expensive preparation reserves at least
+half the remainder for the existing checked fallback. The 65,536 total limit, candidate caps,
+RNG, physical Stop, contact, Oil, pit and strict publication guards remain unchanged. Non-origin
+planning delegates to CPU52/53. Private replay27 binds Easy/Standard54 and Hard55; previous
+policies and replays remain isolated.
+
+The controlled owner witness preserves three CPU53 deaths at tick 1042. All six new difficulty
+and Oil combinations reproduce the same natural three-way range-three wave at 862, survive its
+detonation/flames, then remain alive through a fixed tick 2180 bomb cohort's computed blast
+horizon. Later bombs do not extend that finite cohort. Actual old queued bases also select a
+certified Pulse within budget. Inputs, upgrades and stopped clocks arise through real owner
+execution. Concealed contents and fresh seed/history are explicit controlled assumptions.
+
+Completed rules10 pulses also wait for a fresh publication before strict admission, within the
+existing age/start-window limits. A captured 837-refusal native stall identifies the missing
+historical pit guard; the controller now retains the result without granting input. Changed
+pit state and pose still reject, and Core admission remains fail-closed. Existing journal
+playback is preserved; newly played matches can accept input at different ticks.
+
+This repairs the demonstrated recovery bottlenecks. The separate foreign-bomb planting/future-
+loot guard and broader tactical tuning remain in the backlog. No UI, art, protocol, physics,
+dependency or database changes; restart ends in-memory matches.
+
+### Verification
+
+Accepted source: `a5d723f995dee228a048f89136d91f4a02f2a7cb`.
+Accepted image:
+`sha256:ee8e02ce832b5ffb67dd26fc8de432bfca88470d30cf4305f2c2bffe27081842`.
+Subsequent changes update release documentation/backlog only; Docker build inputs are unchanged.
+
+- Independent Core, runtime, replay, owner and CI reviews are clear. Successful-preparation
+  equivalence, allowance boundaries, partly spent budgets and fail-closed cases pass.
+- The frozen local Rust gate passes in 988 seconds: 1,879 Core and 759 server tests per
+  profile (755 ordinary plus four isolated native cases). All 4,194,304 item masks pass in
+  debug, release and coverage with 32 partitions, four workers and zero retries. Official
+  coverage is 68,411/73,249 lines (93.40%), above the unchanged 90% floor; all 40 raw profiles,
+  including the native cohort, contribute to the report. Formatting, strict Clippy, build,
+  repository and runner-contract checks pass. The earlier coverage failure and its exact
+  missing-guard diagnostic remain separate; no clocks, assertions or work limits were relaxed.
+- Linux x86_64 workspace units and doctests pass in debug/release
+  ([run 41351629226](https://github.com/liveweird/grenadiers/actions/runs/41351629226)).
+  Local and Linux runners share one timing catalog; all four native cases execute once
+  serially after ordinary tests, retaining coverage where applicable.
+- Exact-image Compose authentication/keyboard duel/three-CPU play and restricted Kubernetes
+  acceptance pass. Pinned Trivy reports zero fixable high/critical findings. Dependency
+  policies/audits pass the configured threshold with existing moderate tooling advisories.
+- All five web assets match v1.3.13 byte-for-byte. Unchanged frontend inputs reuse
+  accepted checks. Dependency audits reuse the unchanged manifest/lockfile inputs.
+
+### Operation
+
+The exact accepted image is running on localhost:8085. Image/source labels, restricted container
+settings, health/readiness, security headers, CSP/cache and all five served assets pass. Fresh
+three-Hard-CPU play shows all three moving and CPU bombs, without browser errors.
+The immutable v1.3.13 image/override remain available for rollback. This is a source/local-runtime
+release; no hosted service or production registry is configured. The artist bundle is unchanged.
+
 ## v1.3.13 — 2026-11-01
 
 CPUs exclude pit sites from ordinary pickup, farming and attack approaches, retained routes

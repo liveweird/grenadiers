@@ -66,6 +66,11 @@ then confirms the actual visible bomb or the absent outcome. The same committed 
 without another worker. A rejected Bomb action is not retried. Conservative limits can still
 refuse a useful bomb; the earlier restricted planting fallback remains available.
 
+At a committed farming approach, the CPU can try a sideways escape when the usual retreat
+faces an indestructible wall or lair. It still needs a complete safe route and contact proof
+before planting. This can make short clear windows useful near arena borders; existing bombs
+and flames retain their conservative support checks.
+
 If another observed bomb interrupts a confirmed planting escape while the CPU still overlaps
 its own origin, it stops the old route and first tries a complete certified continuation toward
 a stable legal exit. The continuation is delivered in fresh three-update grants, with a safe Stop

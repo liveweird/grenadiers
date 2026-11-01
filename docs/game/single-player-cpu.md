@@ -313,7 +313,7 @@ required alongside geometric separation tests.
 
 ## Ordinary pit avoidance
 
-Live CPU54/55 inherit CPU52/53's fair observation, shared work limit and multi-Teleporter recovery,
+Live CPU56/57 inherit CPU52/53's fair observation, shared work limit and multi-Teleporter recovery,
 while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
 pulse check covers swept footprint contact, including partial overlaps; a rejected candidate can
 fall through to another checked direction. This prevents choosing a locally safe approach that
@@ -321,14 +321,23 @@ leaves the CPU standing on a pit when its warning expires.
 
 Complete planting and continuation routes keep their time-dependent pit proofs and may cross
 pits when the entire escape is certified. Already-on-pit recovery remains checked and can still
-be impossible. Private replay27 binds these profiles; older formats retain their original policy
+be impossible. Private replay28 binds these profiles; older formats retain their original policy
 identities. See the [pit contract](cpu-contracts.md#voluntary-pit-avoidance).
 
 ## Shared preparation for interrupted escapes
 
-CPU54/55 build the common forecast before reserving optional continuation work. Preparation
+CPU56/57 retain CPU54/55's common forecast before reserving optional continuation work. Preparation
 that fits the historical half allowance retains its exact previous continuation/fallback
 allocation. More expensive supported forecasts can use the shared allowance, with at least
 half the remaining work reserved for the existing checked pulse fallback. Both paths reuse
 one forecast and retain the 65,536-work ceiling, actual Stop and origin provenance, contact,
 Oil and pit guards. See the [allocation contract](cpu-contracts.md#shared-escape-preparation).
+
+## Bounded farming refuges
+
+When an adjacent farming target leaves the usual retreat facing a hard wall or lair, CPU56/57
+can try two lateral-first refuge hints. This requires a current committed approach and a clear
+bomb/flame scene. Geometry and the complete route, usefulness and contact proofs share the
+existing optional hint allowance; failed attempts leave the normal checked fallback available.
+The earlier foreign-bomb/future-loot support boundary remains unchanged. See the
+[refuge contract](cpu-contracts.md#farming-when-the-usual-retreat-is-blocked).

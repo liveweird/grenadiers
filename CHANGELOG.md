@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.15 — 2026-11-01
+
+- Let CPU farmers choose a lateral, fully certified escape when their usual route points into an indestructible wall, making short clear planting windows useful near arena borders.
+- Preserve the existing shared/child work limits, foreign-bomb guard, contact/pit/publication checks and prior controller/replay identities; bind Easy/Standard56 and Hard57 to private replay28.
+- Verify natural useful planting and complete blast/flame survival with three active CPUs on every difficulty, retaining the archived no-plant witness.
+
 ## 1.3.14 — 2026-11-01
 
 - Prepare the shared escape forecast before optional continuation work, so expensive but supported three-bomb scenes can reach certified movement without raising the work limit.

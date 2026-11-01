@@ -410,3 +410,30 @@ This proves a useful raw clear-scene route. It does not yet prove that new hint 
 the real allocated child allowance or that natural owner execution plants and survives when
 other CPUs act. Existing away-first hints point to hard-wall row 0 in this geometry; a bounded,
 version-isolated lateral hint is the next comparison. Independent fixture/trace review is clear.
+
+## Bounded corner-refuge owner comparison
+
+CPU56/57 add the blocked-away hint behind a new policy identity. The internal Disabled/Legacy
+modes preserve archived behavior. The new mode requires the committed adjacent farming
+approach, visible empty bombs, no flames and a static wall/lair/out-of-bounds directly away
+from the target. Two lateral-first hints retain complete route, usefulness and contact proofs.
+No foreign-bomb support guard, work cap or RNG rule changes.
+
+The complete planner on the actual 432 fixture spends 343 parent work before allocating an
+8,149-unit hint child under the unchanged `min(8,192, remaining / 8)` formula. The useful plant
+completes at 4,239 total work. A total allowance of 31,511 still permits the plant; 31,510 declines
+it because the child allocation is smaller. Archived clear CPU53 remains at 58,041 work; the
+foreign-bomb basis remains guarded and selects North at 10,627 under CPU57.
+
+Natural three-CPU owner execution now plants Two's first ordinary bomb at (11,1)/439 on Hard,
+Standard and Easy. The committed block (11,2) is intact at 618 and destroyed at detonation 619;
+its flame is observed through the actual 649 expiry and absent at 650. All three CPUs remain
+alive through the full 600-update episode ending at 780. Other CPUs continue planting rather
+than being disabled. Every job delivers, admissions have no denials, and maximum decision work
+is 57,932 on Hard and 58,208 on Standard/Easy. The old CPU55 no-plant episode stays unchanged.
+
+Focused Core geometry, charged-budget and negative tests, private replay28, controller-capability
+and current-owner checks accompany the change. Independent Core and server reviews are clear
+after correcting the new private replay module's test-only declaration. The documented boundary
+is useful planting in the demonstrated clear window, not planting through unsupported foreign
+bomb motion or future Teleporter loot.

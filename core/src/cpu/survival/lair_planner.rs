@@ -40,7 +40,7 @@ pub(super) fn plan_lairs_inner(
     counter_pressure: bool,
     pickup_progress: bool,
     refuge_guidance: RefugeGuidance,
-    joint_refuges: bool,
+    farm_refuges: super::joint_refuge::FarmRefugeMode,
     farm_origin_recovery: bool,
     contact_topology: super::contact_plant::ContactTopology,
     avoid_pits: bool,
@@ -151,7 +151,7 @@ pub(super) fn plan_lairs_inner(
             work,
         )
     });
-    if joint_refuges
+    if farm_refuges != super::joint_refuge::FarmRefugeMode::Disabled
         && let Some(plan) = super::joint_refuge::certified_farm_plant(
             observation,
             history,
@@ -159,6 +159,7 @@ pub(super) fn plan_lairs_inner(
             memory,
             &ordinary,
             plant_support,
+            farm_refuges,
             work,
         )
     {

@@ -21,6 +21,7 @@ mod plant_tactic;
 mod plant_value;
 mod punch_tactic;
 mod refuge_guidance;
+mod refuge_handoff;
 mod respawn_disabled;
 mod respawn_v22;
 mod route_execution;
@@ -41,6 +42,7 @@ pub use plant_value::strategic_plant_still_targets;
 pub use refuge_guidance::{
     plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
 };
+pub use refuge_handoff::TerminalRefugeHandoff;
 pub use respawn_v22::{
     plan_counter_pressure_v29_with_origin, plan_hard_v28_with_origin,
     plan_reliable_v27_with_origin, plan_respawn, plan_respawn_v22_with_origin,
@@ -94,6 +96,9 @@ mod refuge_centering_tests;
 
 #[cfg(test)]
 mod refuge_centering_episode_tests;
+
+#[cfg(test)]
+mod refuge_handoff_tests;
 
 #[cfg(test)]
 mod reliable_v27_oil_guard_tests;

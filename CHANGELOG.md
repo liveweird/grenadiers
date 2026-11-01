@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.10 — 2026-11-01
+
+- Recover from exposed-Teleporter farming stalls through certified one-update Approach/Collect actions, all-partner swap checks and mandatory physical Stop confirmation.
+- Preserve observed-progress deadlines, bounded candidate work, Easy cadence and existing fallback/continuation behavior.
+- Select Easy/Standard46 and Hard47 with private replay23; verify real queued collection, useful planting, named block destruction and flame survival.
+
 ## 1.3.9 — 2026-11-01
 
 - Continue certified CPU escapes across fresh observation checkpoints after rival bombs invalidate the original route, preserving motion and checked Stop fallbacks.

@@ -15,10 +15,10 @@ use grenadiers_core::room::CpuProfile;
 use self::cadence::CadenceState;
 pub(in crate::game::rooms) use self::continuation::ContinuationService;
 use self::continuation_types::{ContinuationAuthority, ContinuationClock, PreparedAdmission};
+pub(in crate::game::rooms) use self::teleporter::TeleporterService;
 pub(in crate::game::rooms) use self::types::AcceptedPlan;
 use self::types::{Pending, StopAdmission};
 use super::worker::{CpuPlanner, PlanJob};
-
 pub(in crate::game::rooms) struct CpuController {
     planner: CpuPlanner,
     cpu_seat: SeatId,
@@ -50,6 +50,7 @@ pub(in crate::game::rooms) struct CpuController {
     prepared_continuation: Option<PreparedAdmission>,
     continuation: Option<ContinuationAuthority>,
     continuation_fence_required: bool,
+    committed_teleporter: Option<grenadiers_core::cpu::survival::CommittedTeleporterStep>,
     #[cfg(test)]
     continuation_trace: continuation_types::ContinuationTrace,
     #[cfg(test)]
@@ -95,6 +96,7 @@ impl CpuController {
             prepared_continuation: None,
             continuation: None,
             continuation_fence_required: false,
+            committed_teleporter: None,
             #[cfg(test)]
             continuation_trace: continuation_types::ContinuationTrace::default(),
             #[cfg(test)]
@@ -116,6 +118,7 @@ impl CpuController {
             || self.committed_route.is_some()
             || self.prepared_continuation.is_some()
             || self.continuation.is_some()
+            || self.committed_teleporter.is_some()
             || self.pending.is_some()
             || self.world != Some(observation.parts().world)
         {
@@ -255,6 +258,7 @@ impl CpuController {
             pending.live.store(false, Ordering::Release);
         }
         self.invalidate_continuation();
+        self.committed_teleporter = None;
     }
 
     pub(in crate::game::rooms) const fn has_pending(&self) -> bool {
@@ -376,6 +380,9 @@ mod continuation;
 
 #[path = "controller_continuation_types.rs"]
 mod continuation_types;
+
+#[path = "controller_teleporter.rs"]
+mod teleporter;
 
 #[cfg(test)]
 #[path = "controller_continuation_tests.rs"]

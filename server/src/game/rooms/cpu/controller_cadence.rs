@@ -47,8 +47,13 @@ const fn is_easy_profile(profile: CpuProfile) -> bool {
             | CpuProfile::CONTACT_TOPOLOGY_V40_EASY
             | CpuProfile::BLOCKED_BIRTHS_V42_EASY
             | CpuProfile::CONTINUATION_V44_EASY
+            | CpuProfile::TELEPORTER_V46_EASY
     )
 }
+
+#[cfg(test)]
+#[path = "controller_teleporter_cadence_tests.rs"]
+mod teleporter_tests;
 
 impl CpuController {
     pub(super) fn arm_cadence_after(&mut self, accepted: &AcceptedPlan, actual: Intent) {

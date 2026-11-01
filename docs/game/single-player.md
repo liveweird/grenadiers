@@ -75,6 +75,22 @@ placement record lasts only while its bomb, pose and player state remain valid; 
 ends that exception, and accepting the first continuation input prevents the old record from being
 restored. Recovery uses ordinary movement without planting another bomb.
 
+Outside confirmed-origin recovery, the CPU can deliberately clear exactly one exposed Teleporter
+when the complete living roster and the surrounding scene are visible and supported. It first
+uses ordinary checked navigation to reach a stable neighboring approach, then advances through
+one-update Approach or Collect steps. Every such step is followed unconditionally by Stop on the
+next physical update and a fresh observation proving that the CPU is physically stopped before
+planning or movement can continue. Collection may swap with any living player; the proof checks
+both resulting endpoints while leaving the other player's held input untouched.
+
+This recovery requires visible empty bombs, no flames or Oil, and no Bracelet, unsupported forced
+effects, immediately usable Remote or Landmine, or reachable pickup that could invalidate the
+motion proof. It supports both lair settings and checks mobs, pits, mines and storm bounds, but
+only promises the CPU's safety under observed supported facts. It does not promise the swap
+partner's future survival or predict unseen enemy actions. Unsupported scenes retain the prior
+ordinary decision or Stop; clearing one Teleporter does not make curses ordinary pickup goals or
+solve broader farming and contact stalls.
+
 Bomb motion remains partially unknown. Short conditional pulses may explicitly assume a bomb
 has stayed stationary; observing it move withdraws that assumption. Complete conditional routes
 retain the same explicit assumptions. Pauses and remote/contact triggers cannot use this

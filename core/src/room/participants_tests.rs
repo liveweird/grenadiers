@@ -262,3 +262,24 @@ fn continuation_profiles_extend_without_relabeling_blocked_births() {
     assert!(!CpuProfile::CONTINUATION_V44_EASY.is_current());
     assert!(!CpuProfile::HARD_V45.is_current());
 }
+
+#[test]
+fn teleporter_profiles_are_inactive_and_preserve_legacy_current_profiles() {
+    assert_eq!(CpuProfile::TELEPORTER_V46_STANDARD.policy.version(), 46);
+    assert_eq!(CpuProfile::TELEPORTER_V46_EASY.policy.version(), 46);
+    assert_eq!(CpuProfile::HARD_V47.policy.version(), 47);
+    assert_eq!(
+        CpuProfile::TELEPORTER_V46_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(
+        CpuProfile::TELEPORTER_V46_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V47.difficulty, CpuDifficulty::Hard);
+    assert!(!CpuProfile::TELEPORTER_V46_STANDARD.is_current());
+    assert!(!CpuProfile::TELEPORTER_V46_EASY.is_current());
+    assert!(!CpuProfile::HARD_V47.is_current());
+    assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
+    assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
+}

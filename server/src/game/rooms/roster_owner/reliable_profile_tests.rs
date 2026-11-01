@@ -24,24 +24,24 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
     for (difficulty, accepted, archived, wrong_tier, other_archived) in [
         (
             CpuDifficulty::Standard,
+            CpuProfile::TELEPORTER_V46_STANDARD,
             CpuProfile::CONTINUATION_V44_STANDARD,
+            CpuProfile::TELEPORTER_V46_EASY,
             CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
-            CpuProfile::CONTINUATION_V44_EASY,
-            CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
         ),
         (
             CpuDifficulty::Easy,
+            CpuProfile::TELEPORTER_V46_EASY,
             CpuProfile::CONTINUATION_V44_EASY,
+            CpuProfile::TELEPORTER_V46_STANDARD,
             CpuProfile::BLOCKED_BIRTHS_V42_EASY,
-            CpuProfile::CONTINUATION_V44_STANDARD,
-            CpuProfile::CONTACT_TOPOLOGY_V40_EASY,
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V47,
             CpuProfile::HARD_V45,
+            CpuProfile::TELEPORTER_V46_STANDARD,
             CpuProfile::HARD_V43,
-            CpuProfile::RELIABLE_V27_STANDARD,
-            CpuProfile::HARD_V41,
         ),
     ] {
         let configuration = RoomConfiguration::new(

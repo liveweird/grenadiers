@@ -42,6 +42,43 @@ contacts without observing private partner-selection randomness. Destruction wou
 cover collection throughout the certified bomb escape, not merely show that the eventual blast
 reaches the pickup.
 
+## Fresh CPU47 match
+
+The exact v1.3.10 candidate image was observed through public snapshots and CPU diagnostics with
+one human and three Hard CPUs. The round reached a result in 180 seconds with no JavaScript
+errors. `target/quality-review/teleporter-v1310-long-match.json` retains 181 public samples and
+319 diagnostic responses. The CPUs planted 3/10/11 observed bombs by seats Two/Three/Four.
+This is not a matched balance comparison.
+
+Two exposed Teleporters disappear with actual public swap markers followed by renewed bombing:
+`(11,2)` appears at sample 16/tick 1141; Two/Three share marker 1931 and Three plants at 1943.
+`(11,10)` appears at sample 54/tick 3421; One/Four share marker 4025, followed by bombs at 4037
+(Three) and 4298 (Four). The public capture does not identify which internal certificate path ran.
+
+A third Teleporter at `(3,2)` first appears at sample 88/tick 5461 and remains through 10981;
+there are no later bombs or new teleport markers. Preserve sample 87/tick 5401 and diagnostic
+responses at 5413/5449/5488 as context. Four is already at the unchanged exact pose `(1536,2724)`,
+south, from sample 86/tick 5341 onward. Its diagnostics become unavailable at 5449; this does not
+identify planner refusal, work exhaustion or a stopped controller. Two continues moving between
+saved samples while alternating Farm/Approach/Stalled between blocks `(3,8)` and `(4,9)`, both
+from approach `(3,9)`. Three dies between saved ticks 4501 and 4561 while holding Wall Pass; its
+4510 diagnostic remains stale. The capture does not establish the death cause.
+
+Sample 88 has 48 blocks, exactly one Teleporter, visible empty bombs, no flames or Oil, and the
+complete visible roster (One/Two/Four alive, Three dead). Four has speed zero, capacity one/live
+zero/range two, no equipment, weapon or effects, and is unfrozen. Two unfrozen mobs are at
+`(5632,6656)` and `(9728,6656)`; both lairs have one living mob and no spawn countdown. Four pits
+are idle; the storm is at `(3648,7680)`, east, leg remainder 120. A static floor search gives Four
+`(1,2)→(1,1)→(2,1)→(3,1)→(3,2)`; Two has no floor-only path from its separate eight-cell component.
+This is reachability, not a certified physical approach.
+
+The next witness must record real recipient observations, admitted Stop and later physical Stop
+confirmation, controller memory, worker work/delivery/cancellation, admission outcomes and a
+continuous productive trajectory. Do not reconstruct hidden residuals, RNG history or controller
+state from public JSON, assign a saved tick as the Stop clock, or relocate the actor to a favorable
+endpoint. A declared controlled scene may characterize the geometry without claiming restored
+match provenance. No missed safe action or rejection-memory defect is established yet.
+
 ## Earlier CPU43 match
 
 In `target/quality-review/births-v138-long-match.json`, sample 90/tick 5580 has seat three at

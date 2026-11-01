@@ -366,6 +366,24 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Teleporter-handoff Standard profile for private replay23.
+    pub const TELEPORTER_V46_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV46,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    /// Teleporter-handoff Easy profile for private replay23.
+    pub const TELEPORTER_V46_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV46,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Teleporter-handoff Hard profile for private replay23.
+    pub const HARD_V47: Self = Self {
+        policy: CpuPolicy::UtilityV47,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

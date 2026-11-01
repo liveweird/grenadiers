@@ -6,8 +6,14 @@ use crate::room::{LairConfig, RespawnLairConfig};
 use super::routing::{RouteCertificate, RouteFailure};
 use super::{Observation, WorkBudget};
 
+#[cfg(test)]
+#[path = "lair_contact_connectivity_tests.rs"]
+mod connectivity_tests;
 #[path = "lair_contact_sources.rs"]
 mod contact_sources;
+#[cfg(test)]
+#[path = "lair_contact_physical_tests.rs"]
+mod physical_tests;
 #[path = "lair_contact_teleport.rs"]
 pub(crate) mod teleport;
 

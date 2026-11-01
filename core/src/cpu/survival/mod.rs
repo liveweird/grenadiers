@@ -46,6 +46,8 @@ pub use refuge_guidance::{
     plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
 };
 pub use refuge_handoff::TerminalRefugeHandoff;
+#[cfg(test)]
+pub(crate) use reliable_v27_oil_tests::observe_with_lairs;
 pub use respawn_v22::{
     plan_counter_pressure_v29_with_origin, plan_hard_v28_with_origin,
     plan_reliable_v27_with_origin, plan_respawn, plan_respawn_v22_with_origin,

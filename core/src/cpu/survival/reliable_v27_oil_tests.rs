@@ -114,6 +114,13 @@ pub(super) fn state(
 }
 
 pub(super) fn observe(state: &State, room_settings: RoomSettings) -> Observation {
+    observe_with_lairs(state, (room_settings, RespawnLairSettings::new(5).unwrap()))
+}
+
+pub(crate) fn observe_with_lairs(
+    state: &State,
+    config: (RoomSettings, RespawnLairSettings),
+) -> Observation {
     let view = state.public_view();
     let actors = view
         .actors
@@ -169,7 +176,7 @@ pub(super) fn observe(state: &State, room_settings: RoomSettings) -> Observation
             tick_rate: 60,
             running_updates: u16::try_from(view.running_updates).unwrap(),
             remaining_ticks: u16::try_from(view.remaining_ticks).unwrap(),
-            settings: room_settings,
+            settings: config.0,
         },
         arena: ObservedArena {
             width: view.arena.width,
@@ -209,7 +216,7 @@ pub(super) fn observe(state: &State, room_settings: RoomSettings) -> Observation
     };
     let respawn_lairs = state.lair_statuses().map(|lairs| {
         ObservedRespawnLairs::new(
-            RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()),
+            RespawnLairConfig::Enabled(config.1),
             lairs.to_vec(),
             state.mobs(),
         )

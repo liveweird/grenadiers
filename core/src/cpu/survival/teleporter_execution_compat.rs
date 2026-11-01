@@ -9,12 +9,13 @@ pub(super) fn admission_fits(
     basis: &Observation,
     current: &Observation,
     admission_tick: Tick,
+    roster_v48: bool,
     work: &mut WorkBudget,
 ) -> Result<bool, RouteFailure> {
     charge_observations(basis, current, work)?;
     if basis != step.basis_observation()
         || current.parts().tick != admission_tick
-        || !scene_fits(step, basis, current, None, work)?
+        || !scene_fits(step, basis, current, None, roster_v48, work)?
         || !step.admission_contact_fits(current, work)?
         || !step.pit_layout_fits(current, work)?
         || !crate::cpu::routing::storm::observation_fits(basis, current, None)
@@ -28,6 +29,7 @@ pub(super) fn stopped_fits(
     step: &TeleporterStep,
     current: &Observation,
     movement_tick: Tick,
+    roster_v48: bool,
     work: &mut WorkBudget,
 ) -> Result<bool, RouteFailure> {
     let basis = step.basis_observation();
@@ -38,7 +40,7 @@ pub(super) fn stopped_fits(
     let marker_ok = after.last_teleport_tick == before.last_teleport_tick
         || after.last_teleport_tick == Some(movement_tick);
     if !marker_ok
-        || !scene_fits(step, basis, current, Some(movement_tick), work)?
+        || !scene_fits(step, basis, current, Some(movement_tick), roster_v48, work)?
         || !step.contact_fits_with_expected_marker(current, after.last_teleport_tick, work)?
         || !step.pit_layout_fits(current, work)?
         || !crate::cpu::routing::storm::observation_fits(basis, current, None)
@@ -71,6 +73,7 @@ fn scene_fits(
     basis: &Observation,
     current: &Observation,
     movement_tick: Option<Tick>,
+    roster_v48: bool,
     work: &mut WorkBudget,
 ) -> Result<bool, RouteFailure> {
     let old = basis.parts();
@@ -109,6 +112,7 @@ fn scene_fits(
             elapsed,
             movement_tick.is_some() && before.seat != old.recipient,
             storm_slow_cleared,
+            roster_v48,
         ) || (before.seat == old.recipient && before.live_bomb_count != after.live_bomb_count)
             || (before.seat == old.recipient
                 && movement_tick.is_none()
@@ -149,7 +153,14 @@ fn actor_facts_fit(
     elapsed: u64,
     rival_may_die: bool,
     storm_slow_cleared: bool,
+    roster_v48: bool,
 ) -> bool {
+    // Dead roster members are inert, but remain in every public snapshot.
+    // Certification excludes them from swap partners; require their complete
+    // facts to remain unchanged rather than rejecting every subsequent step.
+    if roster_v48 && !before.alive {
+        return before == after;
+    }
     let stable = before.id == after.id
         && before.seat == after.seat
         && before.alive

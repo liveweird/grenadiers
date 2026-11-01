@@ -264,7 +264,7 @@ fn continuation_profiles_extend_without_relabeling_blocked_births() {
 }
 
 #[test]
-fn teleporter_profiles_are_inactive_and_preserve_legacy_current_profiles() {
+fn teleporter_profiles_extend_for_stable_dead_rosters_without_relabeling_archived_policies() {
     assert_eq!(CpuProfile::TELEPORTER_V46_STANDARD.policy.version(), 46);
     assert_eq!(CpuProfile::TELEPORTER_V46_EASY.policy.version(), 46);
     assert_eq!(CpuProfile::HARD_V47.policy.version(), 47);
@@ -280,6 +280,21 @@ fn teleporter_profiles_are_inactive_and_preserve_legacy_current_profiles() {
     assert!(!CpuProfile::TELEPORTER_V46_STANDARD.is_current());
     assert!(!CpuProfile::TELEPORTER_V46_EASY.is_current());
     assert!(!CpuProfile::HARD_V47.is_current());
+    assert_eq!(CpuProfile::TELEPORTER_V48_STANDARD.policy.version(), 48);
+    assert_eq!(CpuProfile::TELEPORTER_V48_EASY.policy.version(), 48);
+    assert_eq!(CpuProfile::HARD_V49.policy.version(), 49);
+    assert_eq!(
+        CpuProfile::TELEPORTER_V48_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(
+        CpuProfile::TELEPORTER_V48_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V49.difficulty, CpuDifficulty::Hard);
+    assert!(!CpuProfile::TELEPORTER_V48_STANDARD.is_current());
+    assert!(!CpuProfile::TELEPORTER_V48_EASY.is_current());
+    assert!(!CpuProfile::HARD_V49.is_current());
     assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
     assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
 }

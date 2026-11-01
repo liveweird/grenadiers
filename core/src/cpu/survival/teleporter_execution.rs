@@ -26,6 +26,54 @@ impl PreparedTeleporterStep {
         admission_tick: Tick,
         work: &mut WorkBudget,
     ) -> Result<Self, RouteFailure> {
+        Self::admit_inner(
+            plan,
+            basis,
+            current,
+            actual_settled_stop_tick,
+            decision,
+            admission_tick,
+            false,
+            work,
+        )
+    }
+
+    /// CPU48/49 preserve inert dead roster members and accept a fresh Stop
+    /// confirmation observed after the physical Stop. The original constructor
+    /// retains CPU46/47's archived admission and confirmation semantics.
+    #[allow(clippy::too_many_arguments)]
+    pub fn admit_v48(
+        plan: TeleporterStepPlan,
+        basis: Observation,
+        current: &Observation,
+        actual_settled_stop_tick: Tick,
+        decision: DecisionId,
+        admission_tick: Tick,
+        work: &mut WorkBudget,
+    ) -> Result<Self, RouteFailure> {
+        Self::admit_inner(
+            plan,
+            basis,
+            current,
+            actual_settled_stop_tick,
+            decision,
+            admission_tick,
+            true,
+            work,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn admit_inner(
+        plan: TeleporterStepPlan,
+        basis: Observation,
+        current: &Observation,
+        actual_settled_stop_tick: Tick,
+        decision: DecisionId,
+        admission_tick: Tick,
+        roster_v48: bool,
+        work: &mut WorkBudget,
+    ) -> Result<Self, RouteFailure> {
         let mut bounded = WorkBudget::new(work.remaining().min(TELEPORTER_ADMISSION_ALLOWANCE));
         let result = (|| {
             let first_update = add_tick(admission_tick, 1)?;
@@ -46,6 +94,7 @@ impl PreparedTeleporterStep {
                     &basis,
                     current,
                     admission_tick,
+                    roster_v48,
                     &mut bounded,
                 )?
             {
@@ -58,6 +107,7 @@ impl PreparedTeleporterStep {
                 decision,
                 admission_tick,
                 command_issued: false,
+                roster_v48,
             })
         })();
         work.try_take(bounded.spent())
@@ -103,6 +153,7 @@ impl PreparedTeleporterStep {
             stop_recorded: false,
             completed: None,
             revoked: false,
+            roster_v48: self.roster_v48,
         })
     }
 
@@ -214,15 +265,22 @@ impl CommittedTeleporterStep {
             return TeleporterStepStatus::Invalidated;
         };
         let movement_tick = Tick(self.admission_tick.0 + 1);
+        let confirmed_stop = if self.roster_v48 {
+            actual_settled_stop_tick >= physical_stop
+                && actual_settled_stop_tick <= current.parts().tick
+        } else {
+            actual_settled_stop_tick == physical_stop
+        };
         if self.revoked
             || !self.stop_recorded
             || current.parts().tick < physical_stop
             || current.parts().tick >= self.step.safe_until()
-            || actual_settled_stop_tick != physical_stop
+            || !confirmed_stop
             || !super::teleporter_execution_compat::stopped_fits(
                 &self.step,
                 current,
                 movement_tick,
+                self.roster_v48,
                 work,
             )
             .unwrap_or(false)

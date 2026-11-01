@@ -8,14 +8,23 @@ use super::{AcceptedPlan, CpuController};
 use crate::game::rooms::cpu::{CpuPlanner, worker_teleporter_tests::teleporter_observation};
 
 #[test]
-fn teleporter_easy_retains_the_real_stop_through_the_same_twelve_tick_pause() {
+fn archived_teleporter_easy_retains_the_real_stop_through_the_same_twelve_tick_pause() {
+    assert_teleporter_easy_cadence(CpuProfile::TELEPORTER_V46_EASY);
+}
+
+#[test]
+fn current_teleporter_easy_retains_the_real_stop_through_the_same_twelve_tick_pause() {
+    assert_teleporter_easy_cadence(CpuProfile::TELEPORTER_V48_EASY);
+}
+
+fn assert_teleporter_easy_cadence(profile: CpuProfile) {
     let basis = at_tick(teleporter_observation(), Tick(20));
     let mut controller = CpuController::new(
         CpuPlanner::without_workers(),
         SeatId::Two,
         7,
         [46; 32],
-        CpuProfile::TELEPORTER_V46_EASY,
+        profile,
     );
     assert!(controller.accept_observation(&basis));
     controller.settled_stop_tick = Some(basis.parts().tick);

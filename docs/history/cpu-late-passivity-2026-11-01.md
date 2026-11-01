@@ -72,12 +72,12 @@ are idle; the storm is at `(3648,7680)`, east, leg remainder 120. A static floor
 `(1,2)→(1,1)→(2,1)→(3,1)→(3,2)`; Two has no floor-only path from its separate eight-cell component.
 This is reachability, not a certified physical approach.
 
-The next witness must record real recipient observations, admitted Stop and later physical Stop
+The required follow-up was to record real recipient observations, admitted Stop and later physical Stop
 confirmation, controller memory, worker work/delivery/cancellation, admission outcomes and a
 continuous productive trajectory. Do not reconstruct hidden residuals, RNG history or controller
 state from public JSON, assign a saved tick as the Stop clock, or relocate the actor to a favorable
 endpoint. A declared controlled scene may characterize the geometry without claiming restored
-match provenance. No missed safe action or rejection-memory defect is established yet.
+match provenance. At this capture-only stage, no missed safe action or rejection-memory defect was established.
 
 ### Conditional CPU47 scene characterization
 
@@ -96,7 +96,36 @@ admission, a complete physical approach, a missed safe action or the cause of un
 
 Three focused regressions, strict Core test Clippy, formatting and repository checks pass.
 Independent review matched every fixture field to the raw sample. Production behavior and the
-accepted v1.3.10 image remain unchanged; a continuous owner/Stop/admission witness is still needed.
+accepted v1.3.10 image remained unchanged at that checkpoint. The following owner reproduction
+supplies the missing execution evidence.
+
+## Continuous owner reproduction and CPU48/49 repair
+
+The controlled production-owner episode in
+`server/src/game/rooms/roster_owner/late_teleporter_owner_{support,tests}.rs` keeps sample 88’s
+CPU pose, 48 soft blocks, Teleporter, dead seat Three and fixed lair/pit geometry. Initial clock,
+controller/RNG history, the departure used to create the dead actor, and subsequent cloud/mob
+states are declared controlled assumptions. This reproduces the refusal mechanism, without
+claiming restoration of the captured private match.
+
+Archived Hard47 delivers valid typed recovery plans but fences the first admission at tick 187:
+compatibility requires every roster member to have been alive, although certification permits
+an unchanged dead member. No movement, collection or intent memory commits. A second mismatch
+requires the confirmation tick to equal the physical Stop tick, although the controller records
+the later publication that actually confirms it.
+
+CPU48/49 isolate both corrections. An already-dead visible actor must retain identical public
+facts. The sealed Stop still executes at admission `A+2`; a later confirmation is accepted only
+between that physical deadline and the current observation, before the original safety expiry.
+Every scene/contact, command, work and authority check remains. CPU46/47 retain their old behavior.
+
+The new Hard49 episode completes 74 admitted Move/Stop pairs with no invalidation fences,
+collects at tick 626, plants at 635, destroys a block and remains alive through tick 1381.
+All 84 jobs are delivered without failures/cancellations and within 65,536 work. The witness
+checks actual next-update Stop poses, later confirmation and committed collection intent.
+Focused Core tests additionally reject resurrection, changed dead facts, premature/future
+confirmation, omitted Stop, expired authority and changed scenes; archived admission remains
+closed. Private replay24 binds CPU48/49 while replay23 retains CPU46/47.
 
 ## Earlier CPU43 match
 

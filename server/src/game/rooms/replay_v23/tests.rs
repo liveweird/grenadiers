@@ -108,6 +108,8 @@ fn replay23_rejects_archived_policy_pairs() {
         (CpuDifficulty::Hard, 45),
         (CpuDifficulty::Hard, 44),
         (CpuDifficulty::Hard, 46),
+        (CpuDifficulty::Standard, 48),
+        (CpuDifficulty::Hard, 49),
     ] {
         let (_, journal) = recorder(Some(difficulty)).into_parts();
         let mut bad = journal.clone();

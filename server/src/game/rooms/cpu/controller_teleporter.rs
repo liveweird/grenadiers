@@ -138,7 +138,12 @@ impl CpuController {
             return TeleporterService::Invalidated;
         };
         let mut work = WorkBudget::new(TELEPORTER_ADMISSION_ALLOWANCE);
-        let Ok(mut prepared) = PreparedTeleporterStep::admit(
+        let admit = if self.supports_stable_dead_roster() {
+            PreparedTeleporterStep::admit_v48
+        } else {
+            PreparedTeleporterStep::admit
+        };
+        let Ok(mut prepared) = admit(
             *plan,
             result.basis,
             &latest,

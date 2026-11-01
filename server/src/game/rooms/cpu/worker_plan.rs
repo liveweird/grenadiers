@@ -25,6 +25,8 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
             | CpuPolicy::UtilityV45
             | CpuPolicy::UtilityV46
             | CpuPolicy::UtilityV47
+            | CpuPolicy::UtilityV48
+            | CpuPolicy::UtilityV49
     ) && let Some(origin) = job.escape_origin.as_ref()
     {
         return Ok(
@@ -78,11 +80,16 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV45
                 | CpuPolicy::UtilityV46
                 | CpuPolicy::UtilityV47
+                | CpuPolicy::UtilityV48
+                | CpuPolicy::UtilityV49
         )
     {
         let plan = if matches!(
             job.policy,
-            CpuPolicy::UtilityV42 | CpuPolicy::UtilityV44 | CpuPolicy::UtilityV46
+            CpuPolicy::UtilityV42
+                | CpuPolicy::UtilityV44
+                | CpuPolicy::UtilityV46
+                | CpuPolicy::UtilityV48
         ) {
             plan_blocked_births_v42_with_origin(
                 &job.observation,
@@ -95,7 +102,10 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
             )
         } else if matches!(
             job.policy,
-            CpuPolicy::UtilityV43 | CpuPolicy::UtilityV45 | CpuPolicy::UtilityV47
+            CpuPolicy::UtilityV43
+                | CpuPolicy::UtilityV45
+                | CpuPolicy::UtilityV47
+                | CpuPolicy::UtilityV49
         ) {
             plan_hard_blocked_births_v43_with_origin(
                 &job.observation,
@@ -259,7 +269,13 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
             )
         };
         plan.map(|plan| {
-            if matches!(job.policy, CpuPolicy::UtilityV46 | CpuPolicy::UtilityV47) {
+            if matches!(
+                job.policy,
+                CpuPolicy::UtilityV46
+                    | CpuPolicy::UtilityV47
+                    | CpuPolicy::UtilityV48
+                    | CpuPolicy::UtilityV49
+            ) {
                 match select_teleporter_recovery(
                     &job.observation,
                     &job.hazard_memory,

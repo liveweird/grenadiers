@@ -46,10 +46,30 @@ fn inactive_profiles_complete_the_same_physical_witness_across_supported_modes()
 
 #[test]
 fn native_worker_completes_collection_stop_and_productive_follow_up() {
-    let outcome = run_native(CpuProfile::TELEPORTER_V46_STANDARD, CpuDifficulty::Standard);
+    let outcome = run_native(CpuProfile::TELEPORTER_V48_STANDARD, CpuDifficulty::Standard);
     eprintln!("TELEPORTER_OWNER_NATIVE {outcome:?}");
     assert_physical_outcome(&outcome);
     assert_eq!(outcome.named_target, TARGET_BLOCK);
+}
+
+#[test]
+fn current_profiles_complete_physical_handoff_and_useful_follow_up() {
+    for (profile, difficulty, lairs) in [
+        (
+            CpuProfile::TELEPORTER_V48_STANDARD,
+            CpuDifficulty::Standard,
+            false,
+        ),
+        (
+            CpuProfile::TELEPORTER_V48_STANDARD,
+            CpuDifficulty::Standard,
+            true,
+        ),
+        (CpuProfile::TELEPORTER_V48_EASY, CpuDifficulty::Easy, false),
+        (CpuProfile::HARD_V49, CpuDifficulty::Hard, false),
+    ] {
+        assert_physical_outcome(&run(profile, difficulty, lairs));
+    }
 }
 
 fn assert_physical_outcome(outcome: &Outcome) {

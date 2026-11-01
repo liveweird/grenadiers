@@ -4,6 +4,59 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.13 — 2026-11-01
+
+CPUs exclude pit sites from ordinary pickup, farming and attack approaches, retained routes
+and short movement pulses. The pulse check covers swept footprint bounds, including partial
+contact, before selecting a candidate so alternatives remain available. Complete planting and
+continuation routes retain their time-dependent proofs and can still cross pits safely.
+
+Easy/Standard use CPU52, Hard uses CPU53 and private replay26 binds those identities.
+Archived policies/replays, multi-Teleporter recovery, Easy cadence and work limits are preserved.
+The queued-owner regression retains CPU51's pit entry and death at tick 242. All current
+difficulties avoid that trap; a separate one-wall-open variant plants at 235, destroys a wall and
+survives through flame expiry at 446.
+
+This is bounded pit prevention. A boxed CPU can still wait when the existing prover cannot
+certify escape; already-on-pit rescue is not guaranteed. Foreign-bomb farming and the new
+simultaneous-plant/Oil escape capture remain in the backlog. No UI, art, protocol, physics,
+dependency or database changes. Restart ends in-memory matches.
+
+### Verification
+
+Application/image source: `f87e0d729be1c2eacb8007867931b2078102e1d5`.
+Final full-gate source: `7a1320dad094564b7df4fc0e745b48592d33eb6f`; subsequent differences
+are confined to test-only fixtures/shutdown synchronization, local runner scheduling and testing
+documentation. Production application code is unchanged. Accepted image:
+`sha256:a15d4244059bd05640493010318acd6dfb962dccc8e4ad6b52c29e4bb6358b7e`.
+
+- Independent policy, pulse, identity, replay, owner and shutdown-test reviews are clear.
+  Exact/one-short pit work and no-pit base parity pass. A direct valid origin-fallback pit-entry
+  fixture remains a coverage gap; flag propagation is reviewed and full continuation regressions
+  remain unchanged.
+- The clean local Rust gate passes in 840 seconds: 1,871 Core and 748 server tests per
+  profile (744 ordinary plus four isolated timing cases). All 4,194,304 item masks pass in debug,
+  release and coverage, with 32 partitions, four workers and zero retries in the accepted run.
+  Official coverage is 67,865/72,671 lines (93.39%), above the unchanged 90% floor. Formatting,
+  strict Clippy, build, repository and runner-contract checks pass. Earlier candidates exposed
+  stale profile fixtures, a paused-clock shutdown-test race and native timing contention;
+  corrected runs retain every assertion and raw coverage profile. Failure logs remain separate.
+- Linux x86_64 debug/release units and doctests pass
+  ([run 41340023695](https://github.com/liveweird/grenadiers/actions/runs/41340023695)) on
+  `c08413b6`; the later portable test-only synchronization correction passes locally.
+- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes
+  acceptance pass. Pinned Trivy reports zero fixable high/critical findings. Dependency audits
+  pass the configured threshold with the existing moderate npm tooling advisories.
+- All five web assets match v1.3.12 byte-for-byte; unchanged frontend/native inputs reuse
+  accepted checks. No repeated portable remote matrix is required.
+
+### Operation
+
+The accepted image is running on localhost:8085. Exact image/source labels, health/readiness,
+security headers, CSP/cache, all five served assets and fresh three-Hard-CPU play pass.
+The immutable v1.3.12 image/override remain available for rollback. This is a source/local-runtime
+release; no hosted service or production registry is configured. The artist bundle is unchanged.
+
 ## v1.3.12 — 2026-11-01
 
 CPUs can deliberately collect one selected Teleporter while other exposed Teleporters remain

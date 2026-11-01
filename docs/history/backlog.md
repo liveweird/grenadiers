@@ -427,3 +427,13 @@ DEATH-ANIM ships in v1.1.1: four artist-owned knockout poses for each uniform an
 short one-shot or static reduced-motion playback, recipient-safe positions and reset/replay
 fences. The existing sprites and material maps remain intact. See the
 [death presentation guide](../game/arena-3d.md#death-animation) and [release record](../releases.md).
+
+## Concurrent CPU escape recovery — 2026-11-01
+
+Version 1.3.14 shares expensive forecast preparation within the existing work ceiling and
+retains completed rules10 pulses until a fresh publication can pass strict admission. The
+controlled owner comparison covers synchronized plants and complete flame survival on all
+three difficulties with and without Oil. Core guards, recorded-journal playback and archived
+planning contracts remain intact. See the [investigation](cpu-late-passivity-2026-11-01.md) and
+[release record](../releases.md#v1314--2026-11-01). Foreign-bomb farming support and broader Hard
+tactics remain separate entries in the root backlog.

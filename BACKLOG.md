@@ -19,20 +19,16 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — complete concurrent timed-bomb recovery.** Release 1.3.13
-  prevents voluntary pit traps; 1.3.11/1.3.12 repair Teleporter admission/Stop recovery and
-  multiple distant pickups. Preserve their actual-owner bombing, survival and budget regressions.
-  A controlled CPU53 seed47 owner episode now reproduces three synchronized range-three plants:
-  all CPUs retain real origins, but common forecast preparation exceeds its 32,768 sub-budget.
-  Recovery arrives late and all three die at detonation in both Oil/no-Oil worlds. Implement
-  shared preparation within the unchanged 65,536 total limit, then require complete physical
-  escape and flame survival before claiming a repair. Keep natural inputs, actual queued
-  Stop/history, contact/pit proofs, scheduling and archived behavior intact.
-  The [investigation](docs/history/cpu-late-passivity-2026-11-01.md) also retains the exact
-  foreign-bomb farming-support suppression. Prove a useful complete plant, including future
-  loot and arbitrary partner swaps, before relaxing that separate guard. Private seed/history
-  assumptions remain explicit; public captures do not restore the original private match.
-  Broader stalls and tactics require concrete before/after owner outcomes.
+- [next] **CPU-RELIABILITY — prove foreign-bomb farming support.** Version 1.3.14
+  repairs concurrent timed-bomb recovery and between-publication pulse refusal; preserve its
+  actual-owner blast/flame survival, scheduling, replay and budget regressions alongside
+  pit avoidance and multi-Teleporter recovery.
+  The [investigation](docs/history/cpu-late-passivity-2026-11-01.md) retains the exact queued
+  CPU51 foreign-bomb farming suppression. Prove a useful complete plant, including future
+  loot, arbitrary partner swaps and contact obligations, before relaxing that separate guard.
+  Keep natural inputs, actual queued Stop/history, pit proofs and the shared work ceiling.
+  Private seed/history assumptions remain explicit; public captures do not restore the
+  original private match. Broader stalls and tactics require concrete before/after outcomes.
 
 - [todo] **HARD-CPU — deepen fair tactics.** Improve productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted

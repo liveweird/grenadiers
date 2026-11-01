@@ -16,6 +16,38 @@ pub(super) struct Region {
     pub(super) max: Position,
 }
 
+pub(super) fn precharge_outcome_storage(
+    starts: usize,
+    collect: bool,
+    work: &mut WorkBudget,
+) -> Result<(usize, usize, usize), RouteFailure> {
+    const MAX_STARTS: usize = 7;
+    const MAX_LEGS: usize = 2;
+    // Speed Four advances at most ceil(5_120 / 60) units in this stopped step.
+    const MAX_TRAVEL: usize = 86;
+    const MAX_PARTNERS: usize = 3;
+    if starts > MAX_STARTS {
+        return Err(RouteFailure::Capacity);
+    }
+    let positions = MAX_STARTS * (1 + MAX_LEGS + MAX_TRAVEL);
+    let collecting = usize::from(collect) * positions;
+    let landings = usize::from(collect) * MAX_STARTS * MAX_PARTNERS;
+    let total = positions
+        .checked_add(collecting)
+        .and_then(|value| value.checked_add(landings))
+        .ok_or(RouteFailure::Capacity)?;
+    take(work, usize_to_work(total)?)?;
+    Ok((positions, collecting, landings))
+}
+
+pub(super) fn push_bounded<T>(values: &mut Vec<T>, value: T) -> Result<(), RouteFailure> {
+    if values.len() == values.capacity() {
+        return Err(RouteFailure::Capacity);
+    }
+    values.push(value);
+    Ok(())
+}
+
 pub(super) fn reject_pits(
     context: &Context<'_>,
     segments: &[MovementSegment],
@@ -114,21 +146,31 @@ pub(super) fn partial_endpoints(
     segments: &[MovementSegment],
     work: &mut WorkBudget,
 ) -> Result<Vec<Position>, RouteFailure> {
-    take(work, 1)?;
-    let mut points = vec![initial];
+    take(work, usize_to_work(segments.len())?)?;
+    let capacity = segments.iter().try_fold(1_usize, |total, segment| {
+        let dx = segment.end().x - segment.start().x;
+        let dy = segment.end().y - segment.start().y;
+        let distance =
+            usize::try_from(dx.abs().max(dy.abs())).map_err(|_| RouteFailure::Capacity)?;
+        total
+            .checked_add(distance.checked_add(1).ok_or(RouteFailure::Capacity)?)
+            .ok_or(RouteFailure::Capacity)
+    })?;
+    take(work, usize_to_work(capacity)?)?;
+    let mut points = Vec::with_capacity(capacity);
+    push_bounded(&mut points, initial)?;
     for segment in segments {
         let dx = segment.end().x - segment.start().x;
         let dy = segment.end().y - segment.start().y;
         let distance = dx.abs().max(dy.abs());
-        take(
-            work,
-            u32::try_from(distance).map_err(|_| RouteFailure::Capacity)? + 2,
-        )?;
         for offset in 0..=distance {
-            points.push(Position {
-                x: segment.start().x + dx.signum() * offset,
-                y: segment.start().y + dy.signum() * offset,
-            });
+            push_bounded(
+                &mut points,
+                Position {
+                    x: segment.start().x + dx.signum() * offset,
+                    y: segment.start().y + dy.signum() * offset,
+                },
+            )?;
         }
     }
     Ok(points)
@@ -222,7 +264,7 @@ pub(super) fn distance_to_cell(position: Position, cell: CellId) -> i64 {
         + distance_to_interval(i64::from(position.y), top, top + width)
 }
 
-pub(super) fn max_travel(ticks: u64) -> Result<i64, RouteFailure> {
+pub(crate) fn max_travel(ticks: u64) -> Result<i64, RouteFailure> {
     let units = u64::from(SpeedLevel::Four.units_per_second())
         .checked_mul(ticks)
         .ok_or(RouteFailure::Capacity)?

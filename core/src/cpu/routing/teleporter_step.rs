@@ -101,6 +101,8 @@ pub fn certify_teleporter_step(
         movement: request.movement,
         phase,
         initial_position: context.actor.position,
+        nominal_positions: outcome.nominal_positions,
+        collecting_positions: outcome.collecting_positions,
         clipped_positions: outcome.clipped_positions,
         landing_regions: outcome.landing_regions,
         basis: observation.clone(),
@@ -116,7 +118,7 @@ fn validate_scene(
     let parts = observation.parts();
     take(work, 1)?;
     if parts.rules.version != 10
-        || request.settled_stop_tick != parts.tick
+        || request.settled_stop_tick > parts.tick
         || !matches!(request.movement, MovementIntent::Direction(_))
         || !parts.rules.settings.enabled_items().contains_teleporter()
         || !matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())

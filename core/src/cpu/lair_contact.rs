@@ -264,6 +264,16 @@ impl MobContactEnvelope {
         valid_until: Tick,
         work: &mut WorkBudget,
     ) -> Result<bool, ContactEnvelopeError> {
+        self.contains_with_expected_marker(current, valid_until, self.last_teleport_tick, work)
+    }
+
+    pub(crate) fn contains_with_expected_marker(
+        &self,
+        current: &Observation,
+        valid_until: Tick,
+        expected_marker: Option<Tick>,
+        work: &mut WorkBudget,
+    ) -> Result<bool, ContactEnvelopeError> {
         if current.parts().world != self.world
             || current.parts().recipient != self.cpu_seat
             || current.parts().tick < self.basis_tick
@@ -274,7 +284,7 @@ impl MobContactEnvelope {
         let actor_matches = current.parts().actors.iter().any(|actor| {
             matches!(actor, super::ObservedActor::Visible(actor)
                 if actor.seat == self.cpu_seat && actor.id == self.cpu_id
-                    && actor.last_teleport_tick == self.last_teleport_tick)
+                    && actor.last_teleport_tick == expected_marker)
         });
         if !actor_matches {
             return Ok(false);

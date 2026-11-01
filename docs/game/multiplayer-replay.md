@@ -108,7 +108,12 @@ Format17 retains gameplay19/rules10/navigation3 and binds CPU33 on Easy/Standard
 CPU35 on Hard. Header, body and per-seat provenance must agree. Format16 rejects future Hard35
 metadata; production recording/export remains disabled.
 
-Formats6/7/8/9/10/11/12/13/14/15/16/17 normalize their closed operations into shared executors rather than duplicating
+Format18 retains gameplay19/rules10/navigation3 and binds CPU36 on Easy/Standard (or no CPU),
+CPU37 on Hard. Header, body and per-seat provenance must agree. Format17 retains CPU33/35 and
+rejects future CPU36/37 metadata, including internally consistent forged identities.
+Production recording/export remains disabled.
+
+Formats6/7/8/9/10/11/12/13/14/15/16/17/18 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

@@ -339,8 +339,8 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU33, including
-certified planting around persistent burning Oil. Hard selects CPU35 with range-aware firing
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU36, including
+certified planting around persistent burning Oil. Hard selects CPU37 with range-aware firing
 positions against visible rivals. Both retain the same 65,536-work budget and full planting,
 route, mob-contact and admission proofs. Hard does not receive hidden positions, concealed loot,
 private seeds or faster physics.
@@ -356,7 +356,7 @@ flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. E
 farming retains its prior support. This changes a Teleporter support precondition, not the
 route proof, public observation facts or work limit; all conservative motion checks remain.
 
-Current CPU33/35 can certify a one-update pickup handoff on rules10 even though ordinary clear
+Current CPU36/37 can certify a one-update pickup handoff on rules10 even though ordinary clear
 navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop and fresh
 observation requirements remain. The longer ordinary pulse still rejects physics-changing
 collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are unchanged.

@@ -262,3 +262,40 @@ fn replay14_binds_gameplay19_and_exact_easy_standard_hard_policy_pairs() {
         }
     }
 }
+
+#[test]
+fn replay14_rejects_consistently_forged_future_pickup_policies() {
+    for (difficulty, future_policy) in [(CpuDifficulty::Standard, 31), (CpuDifficulty::Hard, 32)] {
+        let pits = SpikePitTuning::DEFAULT;
+        let base = configuration(pits);
+        let hard = SpikeRoomConfiguration::new(
+            LairRoomConfiguration::new(
+                RoomConfiguration::new(
+                    &[SeatControl::Human, SeatControl::Cpu],
+                    Some(difficulty),
+                    base.base().base().board(),
+                )
+                .unwrap(),
+                base.base().storm_cloud(),
+                base.base().lairs(),
+            ),
+            pits,
+        );
+        let (_, mut journal) = RecordingRosterRuntime::new(
+            hard,
+            RoomSettings::DEFAULT,
+            RoundSeedSource::with_entropy(|bytes| {
+                bytes.fill(14);
+                Ok(())
+            }),
+            vec![(SeatId::Two, difficulty, [14; 32])],
+        )
+        .unwrap()
+        .into_parts();
+        journal.header.cpu_policy_version = future_policy;
+        journal.body.header.cpu_policy_version = future_policy;
+        journal.header.cpus[0].policy_version = future_policy;
+        journal.body.header.cpus[0].policy_version = future_policy;
+        assert_eq!(replay(&journal), Err(ReplayError::InvalidHeader));
+    }
+}

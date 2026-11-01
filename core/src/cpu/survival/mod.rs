@@ -15,6 +15,7 @@ mod ordinary_planner;
 mod origin;
 mod origin_planner;
 mod pickup_handoff;
+mod pickup_progress;
 mod planner;
 mod plant_tactic;
 mod plant_value;
@@ -30,6 +31,9 @@ pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
+pub use pickup_progress::{
+    plan_hard_pickup_progress_v32_with_origin, plan_pickup_progress_v31_with_origin,
+};
 pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
@@ -71,6 +75,12 @@ mod counter_pressure_v29_tests;
 
 #[cfg(test)]
 mod counter_pressure_v29_acceptance_tests;
+
+#[cfg(test)]
+mod pickup_stall_tests;
+
+#[cfg(test)]
+mod pickup_progress_execution_tests;
 
 #[cfg(test)]
 mod reliable_v27_oil_guard_tests;

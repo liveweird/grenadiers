@@ -105,3 +105,21 @@ fn hard29_is_distinct_while_hard28_and_legacy_profiles_remain_immutable() {
     assert_eq!(CpuProfile::RELIABLE_V27_STANDARD.policy.version(), 27);
     assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
 }
+
+#[test]
+fn pickup_profiles_preserve_retained_policy_and_difficulty_identities() {
+    assert_eq!(CpuProfile::PICKUP_V31_STANDARD.policy.version(), 31);
+    assert_eq!(
+        CpuProfile::PICKUP_V31_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(CpuProfile::PICKUP_V31_EASY.policy.version(), 31);
+    assert_eq!(CpuProfile::PICKUP_V31_EASY.difficulty, CpuDifficulty::Easy);
+    assert_eq!(CpuProfile::HARD_V32.policy.version(), 32);
+    assert_eq!(CpuProfile::HARD_V32.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::RELIABLE_V27_STANDARD.policy.version(), 27);
+    assert_eq!(CpuProfile::HARD_V29.policy.version(), 29);
+    assert!(!CpuProfile::PICKUP_V31_STANDARD.is_current());
+    assert!(!CpuProfile::PICKUP_V31_EASY.is_current());
+    assert!(!CpuProfile::HARD_V32.is_current());
+}

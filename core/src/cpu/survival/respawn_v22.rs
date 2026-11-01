@@ -89,6 +89,7 @@ pub fn plan_hard_v28_with_origin(
         true,
         true,
         false,
+        false,
     )
 }
 
@@ -113,6 +114,7 @@ pub fn plan_counter_pressure_v29_with_origin(
         true,
         true,
         true,
+        false,
     )
 }
 
@@ -254,6 +256,7 @@ pub fn plan_spike_pits_v26_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 
@@ -278,11 +281,12 @@ pub fn plan_reliable_v27_with_origin(
         true,
         false,
         false,
+        false,
     )
 }
 
 #[allow(clippy::too_many_arguments)]
-fn plan_spike_policy(
+pub(super) fn plan_spike_policy(
     observation: &Observation,
     memory: &UtilityMemory,
     history: &ObservedHazardMemory,
@@ -293,6 +297,7 @@ fn plan_spike_policy(
     persistent_burning_oil: bool,
     hard_tactics: bool,
     counter_pressure: bool,
+    pickup_progress: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     if observation.parts().rules.version != 10 {
         return Err(PolicyError::InvalidObservation);
@@ -314,6 +319,7 @@ fn plan_spike_policy(
             persistent_burning_oil,
             hard_tactics,
             counter_pressure,
+            pickup_progress,
         )
         .map(|survival| LairSurvivalPlan {
             survival,
@@ -336,6 +342,7 @@ fn plan_spike_policy(
         persistent_burning_oil,
         hard_tactics,
         counter_pressure,
+        pickup_progress,
     )
 }
 
@@ -379,6 +386,7 @@ fn plan_respawn_policy(
         work,
         9,
         pickup_handoff,
+        false,
         false,
         false,
         false,

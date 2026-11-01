@@ -116,6 +116,7 @@ impl CpuController {
             live,
             completed: None,
             refuge_handoff: Some(handoff),
+            continuation: None,
         });
         true
     }

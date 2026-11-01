@@ -7,7 +7,7 @@ use grenadiers_core::{
 
 use super::{Driver, fatal};
 use crate::game::rooms::{
-    cpu::{AcceptedPlan, ContactStatus},
+    cpu::{AcceptedPlan, ContactStatus, ContinuationService},
     roster_runtime::{RosterAction, RosterRuntimeError},
 };
 
@@ -31,6 +31,9 @@ impl Driver {
         self.next_cpu = (first + 1) % count;
         for offset in 0..count {
             let index = (first + offset) % count;
+            if self.apply_continuation(index)? {
+                continue;
+            }
             self.apply_route(index)?;
             self.apply_stop(index)?;
             let tick = self.runtime.lifecycle().tick();
@@ -40,6 +43,81 @@ impl Driver {
             }
         }
         Ok(())
+    }
+
+    fn apply_continuation(&mut self, index: usize) -> Result<bool, RosterRuntimeError> {
+        let tick = self.runtime.lifecycle().tick();
+        let epoch = self.runtime.lifecycle().round_attempt();
+        match self.cpus[index].service_continuation(tick, epoch) {
+            ContinuationService::Idle => Ok(false),
+            ContinuationService::Controlled | ContinuationService::Completed => Ok(true),
+            ContinuationService::Invalidated => {
+                self.fail_continuation(index)?;
+                Ok(true)
+            }
+            ContinuationService::Submit(submission) => {
+                let seat = self.cpus[index].seat();
+                if submission.admission_tick() != tick {
+                    self.fail_continuation(index)?;
+                    return Ok(true);
+                }
+                let direction = movement(submission.movement());
+                #[cfg(test)]
+                if std::mem::take(&mut self.continuation_rejections[0]) {
+                    self.fail_continuation(index)?;
+                    return Ok(true);
+                }
+                match self
+                    .runtime
+                    .submit_cpu_intent(seat, epoch, RosterAction::Movement(direction))
+                {
+                    Ok(_) => {}
+                    Err(error) if fatal(error) => {
+                        self.fail_continuation(index)?;
+                        return Err(error);
+                    }
+                    Err(_) => {
+                        self.fail_continuation(index)?;
+                        return Ok(true);
+                    }
+                }
+                if !self.cpus[index].commit_continuation(submission) {
+                    self.fail_continuation(index)?;
+                    return Ok(true);
+                }
+                self.cpu_stationary[seat.index()] = direction.is_none();
+                self.cpu_stop_at[seat.index()] = None;
+                if direction.is_some() {
+                    self.cpus[index].on_movement_admitted();
+                } else {
+                    self.cpus[index].on_stop_admitted(tick);
+                }
+                Ok(true)
+            }
+        }
+    }
+
+    fn fail_continuation(&mut self, index: usize) -> Result<(), RosterRuntimeError> {
+        let seat = self.cpus[index].seat();
+        let epoch = self.runtime.lifecycle().round_attempt();
+        #[cfg(test)]
+        let reject_stop = std::mem::take(&mut self.continuation_rejections[1]);
+        #[cfg(not(test))]
+        let reject_stop = false;
+        let result = if reject_stop {
+            Err(RosterRuntimeError::InvalidPhase)
+        } else {
+            self.runtime
+                .submit_cpu_intent(seat, epoch, RosterAction::Movement(None))
+        };
+        self.runtime.stop_seat_inputs(seat);
+        self.cpus[index].finish_continuation_fence();
+        self.cpu_stationary[seat.index()] = true;
+        self.cpu_stop_at[seat.index()] = None;
+        match result {
+            Err(error) if fatal(error) => Err(error),
+            Ok(_) | Err(_) => Ok(()),
+        }
     }
 
     fn apply_plan(&mut self, index: usize, plan: AcceptedPlan) -> Result<(), RosterRuntimeError> {

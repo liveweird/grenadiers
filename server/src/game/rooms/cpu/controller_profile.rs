@@ -15,6 +15,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V39
                         | grenadiers_core::room::CpuProfile::HARD_V41
                         | grenadiers_core::room::CpuProfile::HARD_V43
+                        | grenadiers_core::room::CpuProfile::HARD_V45
                 );
         }
         match rules_version {
@@ -65,6 +66,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_EASY
                     | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_STANDARD
                     | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_EASY
+                    | grenadiers_core::room::CpuProfile::CONTINUATION_V44_STANDARD
+                    | grenadiers_core::room::CpuProfile::CONTINUATION_V44_EASY
             ),
             _ => false,
         }
@@ -78,6 +81,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V39
                 | grenadiers_core::room::CpuProfile::HARD_V41
                 | grenadiers_core::room::CpuProfile::HARD_V43
+                | grenadiers_core::room::CpuProfile::HARD_V45
         )
     }
 
@@ -90,6 +94,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_STANDARD
                 | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V43
+                | grenadiers_core::room::CpuProfile::CONTINUATION_V44_STANDARD
+                | grenadiers_core::room::CpuProfile::CONTINUATION_V44_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V45
         )
     }
 
@@ -99,6 +106,18 @@ impl CpuController {
             grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_STANDARD
                 | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V43
+                | grenadiers_core::room::CpuProfile::CONTINUATION_V44_STANDARD
+                | grenadiers_core::room::CpuProfile::CONTINUATION_V44_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V45
+        )
+    }
+
+    pub(super) const fn supports_continuation(&self) -> bool {
+        matches!(
+            self.profile,
+            grenadiers_core::room::CpuProfile::CONTINUATION_V44_STANDARD
+                | grenadiers_core::room::CpuProfile::CONTINUATION_V44_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V45
         )
     }
 }
@@ -123,7 +142,7 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V43);
+        let hard = controller(CpuProfile::HARD_V45);
         assert!(hard.profile_supports(10));
         assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
@@ -134,6 +153,7 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V39).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V41).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V43).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V45).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -147,6 +167,7 @@ mod tests {
             CpuPolicy::UtilityV38,
             CpuPolicy::UtilityV40,
             CpuPolicy::UtilityV42,
+            CpuPolicy::UtilityV44,
         ] {
             let forged = controller(CpuProfile {
                 policy,
@@ -166,6 +187,7 @@ mod tests {
             CpuPolicy::UtilityV39,
             CpuPolicy::UtilityV41,
             CpuPolicy::UtilityV43,
+            CpuPolicy::UtilityV45,
         ] {
             for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
                 let forged = controller(CpuProfile { policy, difficulty });
@@ -185,6 +207,8 @@ mod tests {
             CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
             CpuProfile::BLOCKED_BIRTHS_V42_EASY,
             CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
+            CpuProfile::CONTINUATION_V44_EASY,
+            CpuProfile::CONTINUATION_V44_STANDARD,
         ] {
             assert!(controller(profile).profile_supports(10));
             assert!(!controller(profile).profile_supports(9));
@@ -194,16 +218,22 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V39).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V41).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V43).supports_refuge_handoff());
+        assert!(controller(CpuProfile::HARD_V45).supports_refuge_handoff());
         assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
         assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD).supports_contact_topology());
         assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_EASY).supports_contact_topology());
         assert!(controller(CpuProfile::HARD_V41).supports_contact_topology());
         assert!(controller(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD).supports_contact_topology());
         assert!(controller(CpuProfile::HARD_V43).supports_contact_topology());
+        assert!(controller(CpuProfile::HARD_V45).supports_contact_topology());
         assert!(
             controller(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD).supports_blocked_birth_contact()
         );
         assert!(controller(CpuProfile::HARD_V43).supports_blocked_birth_contact());
+        assert!(controller(CpuProfile::HARD_V45).supports_blocked_birth_contact());
+        assert!(controller(CpuProfile::CONTINUATION_V44_STANDARD).supports_continuation());
+        assert!(controller(CpuProfile::HARD_V45).supports_continuation());
+        assert!(!controller(CpuProfile::HARD_V43).supports_continuation());
         assert!(!controller(CpuProfile::HARD_V41).supports_blocked_birth_contact());
         assert!(!controller(CpuProfile::FARM_ORIGINS_V38_STANDARD).supports_contact_topology());
         assert!(!controller(CpuProfile::HARD_V39).supports_contact_topology());

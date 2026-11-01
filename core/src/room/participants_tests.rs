@@ -241,3 +241,24 @@ fn blocked_birth_profiles_extend_without_relabeling_contact_topology() {
     assert!(!CpuProfile::BLOCKED_BIRTHS_V42_EASY.is_current());
     assert!(!CpuProfile::HARD_V43.is_current());
 }
+
+#[test]
+fn continuation_profiles_extend_without_relabeling_blocked_births() {
+    assert_eq!(CpuProfile::CONTINUATION_V44_STANDARD.policy.version(), 44);
+    assert_eq!(
+        CpuProfile::CONTINUATION_V44_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(CpuProfile::CONTINUATION_V44_EASY.policy.version(), 44);
+    assert_eq!(
+        CpuProfile::CONTINUATION_V44_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V45.policy.version(), 45);
+    assert_eq!(CpuProfile::HARD_V45.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD.policy.version(), 42);
+    assert_eq!(CpuProfile::HARD_V43.policy.version(), 43);
+    assert!(!CpuProfile::CONTINUATION_V44_STANDARD.is_current());
+    assert!(!CpuProfile::CONTINUATION_V44_EASY.is_current());
+    assert!(!CpuProfile::HARD_V45.is_current());
+}

@@ -295,8 +295,10 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
     let (sender, receiver) = sync_channel(1);
     sender
         .send(PlanResult {
-            plan,
-            contact: None,
+            outcome: super::super::worker::WorkerPlan::Ordinary {
+                plan: Box::new(plan),
+                contact: None,
+            },
             basis,
             rng,
             escape_origin: None,
@@ -308,6 +310,7 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
         refuge_handoff: None,
+        continuation: None,
     });
     controller.request_serial = 1;
 }

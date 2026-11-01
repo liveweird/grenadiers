@@ -115,12 +115,14 @@ fn a_cross_seat_completion_is_rejected_without_committing_rng() {
     let (sender, receiver) = sync_channel(1);
     sender
         .send(PlanResult {
-            plan: SurvivalPlan {
-                control: ControlPlan::stop(UtilityMemory::new(foreign_key)),
-                lease: None,
-                execution: None,
+            outcome: super::super::worker::WorkerPlan::Ordinary {
+                plan: Box::new(SurvivalPlan {
+                    control: ControlPlan::stop(UtilityMemory::new(foreign_key)),
+                    lease: None,
+                    execution: None,
+                }),
+                contact: None,
             },
-            contact: None,
             basis: foreign,
             rng: CpuRng::from_seed(foreign_key, [8; 32]),
             escape_origin: None,
@@ -132,6 +134,7 @@ fn a_cross_seat_completion_is_rejected_without_committing_rng() {
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
         refuge_handoff: None,
+        continuation: None,
     });
     controller.request_serial = 1;
     assert!(controller.poll(Tick(20), 4).is_none());
@@ -209,12 +212,14 @@ fn seat_four_accepts_both_v17_levels_and_rejects_two_and_three_results() {
         let (sender, receiver) = sync_channel(1);
         sender
             .send(PlanResult {
-                plan: SurvivalPlan {
-                    control: ControlPlan::stop(UtilityMemory::new(foreign_key)),
-                    lease: None,
-                    execution: None,
+                outcome: super::super::worker::WorkerPlan::Ordinary {
+                    plan: Box::new(SurvivalPlan {
+                        control: ControlPlan::stop(UtilityMemory::new(foreign_key)),
+                        lease: None,
+                        execution: None,
+                    }),
+                    contact: None,
                 },
-                contact: None,
                 basis: foreign,
                 rng: CpuRng::from_seed(foreign_key, [8; 32]),
                 escape_origin: None,
@@ -226,6 +231,7 @@ fn seat_four_accepts_both_v17_levels_and_rejects_two_and_three_results() {
             live: Arc::new(AtomicBool::new(true)),
             completed: None,
             refuge_handoff: None,
+            continuation: None,
         });
         controller.request_serial = 1;
         assert!(controller.poll(Tick(20), 4).is_none());

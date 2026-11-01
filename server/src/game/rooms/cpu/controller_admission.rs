@@ -7,6 +7,7 @@ use grenadiers_core::cpu::survival::{
 use grenadiers_core::cpu::{AdmissionContext, DecisionAdmission, WorkBudget};
 use grenadiers_core::game::Tick;
 
+use super::super::worker::WorkerPlan;
 use super::{AcceptedPlan, CpuController};
 
 #[cfg(test)]
@@ -41,6 +42,30 @@ enum AdmissionRejection {
 }
 
 impl CpuController {
+    pub(super) fn admit_continuation_decision(
+        &mut self,
+        decision: grenadiers_core::cpu::DecisionId,
+        command_epoch: u64,
+    ) -> bool {
+        let Some(world) = self.world else {
+            return false;
+        };
+        let current = AdmissionContext {
+            world,
+            command_epoch,
+            observation_tick: decision.observation_tick,
+            checked_request_serial: self.request_serial,
+        };
+        grenadiers_core::cpu::admit_decision(
+            self.admission_memory
+                .as_mut()
+                .expect("world admission memory initialized"),
+            current,
+            decision,
+            &mut WorkBudget::new(1),
+        ) == DecisionAdmission::Accepted
+    }
+
     pub(in crate::game::rooms) fn poll(
         &mut self,
         current_tick: Tick,
@@ -88,8 +113,10 @@ impl CpuController {
             self.pending.as_mut()?.completed = Some(result);
         }
         let result = self.pending.as_ref()?.completed.as_ref()?;
-        let manual_admission = result
-            .plan
+        let WorkerPlan::Ordinary { plan, .. } = &result.outcome else {
+            return None;
+        };
+        let manual_admission = plan
             .execution
             .as_ref()
             .and_then(ExecutionCertificate::manual_execution_tick)
@@ -111,23 +138,25 @@ impl CpuController {
     fn admit_completed(&mut self, current_tick: Tick, command_epoch: u64) -> Option<AcceptedPlan> {
         let pending = self.pending.take()?;
         let result = pending.completed?;
-        let ordinary_navigation = result.plan.lease.is_none()
-            && result.plan.execution.is_none()
-            && result.plan.control.intent.manual.is_none()
-            && result.plan.control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop
+        let WorkerPlan::Ordinary { plan, contact } = result.outcome else {
+            return self.reject(AdmissionRejection::InvalidShape);
+        };
+        let ordinary_navigation = plan.lease.is_none()
+            && plan.execution.is_none()
+            && plan.control.intent.manual.is_none()
+            && plan.control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop
             && super::cadence::is_clear_for_easy(&result.basis);
         let latest = self.latest_observation.as_ref()?;
         let refuge_handoff = pending.refuge_handoff.as_ref();
         if refuge_handoff.is_some_and(|handoff| {
             result.escape_origin.is_some()
-                || result.plan.lease.is_some()
-                || result.plan.control.intent
+                || plan.lease.is_some()
+                || plan.control.intent
                     != grenadiers_core::cpu::Intent {
                         movement: grenadiers_core::cpu::MovementIntent::Stop,
                         manual: Some(grenadiers_core::cpu::ManualIntent::Bomb),
                     }
-                || result
-                    .plan
+                || plan
                     .execution
                     .as_ref()
                     .is_none_or(|execution| !handoff.accepts_replacement(execution))
@@ -142,24 +171,22 @@ impl CpuController {
         };
         if self.settled_stop_tick.is_none()
             || (matches!(result.basis.parts().rules.version, 9 | 10)
-                && result.plan.control.intent.movement
-                    != grenadiers_core::cpu::MovementIntent::Stop
-                && result.plan.lease.is_none()
-                && result.plan.execution.is_none())
-            || ((matches!(result.basis.parts().rules.version, 8 | 9)
-                || result.plan.execution.is_none())
+                && plan.control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop
+                && plan.lease.is_none()
+                && plan.execution.is_none())
+            || ((matches!(result.basis.parts().rules.version, 8 | 9) || plan.execution.is_none())
                 && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
         {
             return self.reject(AdmissionRejection::StaleScene);
         }
-        if !(1..=MAX_HOLD_TICKS).contains(&result.plan.control.hold_ticks) {
+        if !(1..=MAX_HOLD_TICKS).contains(&plan.control.hold_ticks) {
             return self.reject(AdmissionRejection::InvalidHold);
         }
         let grenadiers_core::cpu::survival::SurvivalPlan {
             control,
             lease,
             execution,
-        } = result.plan;
+        } = *plan;
         let topology_contact = matches!(
             execution.as_ref(),
             Some(ExecutionCertificate::ContactPlant(_))
@@ -178,7 +205,7 @@ impl CpuController {
                 && result.basis.respawn_lairs().is_some()))
             && (control.intent.manual.is_some()
                 || control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop);
-        let contact = match result.contact {
+        let contact = match contact {
             Some(contact)
                 if contact.safe_until() > current_tick
                     && contact.observation_fits(latest, &mut WorkBudget::new(65_536)) =>
@@ -244,19 +271,7 @@ impl CpuController {
         {
             return self.reject(AdmissionRejection::Contact);
         }
-        let current = AdmissionContext {
-            world: self.world?,
-            command_epoch,
-            observation_tick: pending.decision.observation_tick,
-            checked_request_serial: self.request_serial,
-        };
-        if grenadiers_core::cpu::admit_decision(
-            self.admission_memory.as_mut()?,
-            current,
-            pending.decision,
-            &mut WorkBudget::new(1),
-        ) != DecisionAdmission::Accepted
-        {
+        if !self.admit_continuation_decision(pending.decision, command_epoch) {
             return self.reject(AdmissionRejection::DuplicateDecision);
         }
         Some(AcceptedPlan {

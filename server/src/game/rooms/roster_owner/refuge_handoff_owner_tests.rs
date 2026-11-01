@@ -70,9 +70,9 @@ fn third_seat_urgent_job_claims_the_last_queue_slot_before_optional_refuge_work(
     owner.cpus = vec![owner.cpus.remove(0), dummy, urgent];
     owner.submit_cpu_candidates(
         &[
-            fixture.observation,
-            urgent_observation.clone(),
-            urgent_observation,
+            Some(&fixture.observation),
+            Some(&urgent_observation),
+            Some(&urgent_observation),
         ],
         &[false, false, true],
         &[true, false, false],

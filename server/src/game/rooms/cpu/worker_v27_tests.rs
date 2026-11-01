@@ -11,7 +11,8 @@ fn queued_worker_dispatches_cpu27_only_through_its_exact_policy() {
     let report = planner.pump_for_test(1);
     assert_eq!((report.delivered, report.failed), (1, 0));
     assert!(report.work[0] <= WORK_ALLOWANCE);
-    let planned = result.recv().unwrap().plan;
+    let result = result.recv().unwrap();
+    let planned = result.ordinary();
     assert!(planned.lease.is_some() || planned.execution.is_some());
 }
 
@@ -38,7 +39,7 @@ fn queued_worker_dispatches_cpu28_with_identical_core_control_rng_and_work() {
     assert_eq!(report.work, vec![work.spent()]);
     assert!(report.work[0] <= WORK_ALLOWANCE);
     let queued = result.recv().unwrap();
-    assert_eq!(queued.plan.control, direct.survival.control);
+    assert_eq!(queued.ordinary().control, direct.survival.control);
     assert_eq!(queued.rng.draws(), rng.draws());
 }
 
@@ -65,7 +66,7 @@ fn queued_worker_dispatches_cpu29_with_identical_core_control_rng_and_work() {
     assert_eq!(report.work, vec![work.spent()]);
     assert!(report.work[0] <= WORK_ALLOWANCE);
     let queued = result.recv().unwrap();
-    assert_eq!(queued.plan.control, direct.survival.control);
+    assert_eq!(queued.ordinary().control, direct.survival.control);
     assert_eq!(queued.rng.draws(), rng.draws());
 }
 
@@ -103,7 +104,7 @@ fn queued_worker_dispatches_pickup_profiles_with_identical_core_control_rng_and_
         assert_eq!(report.work, vec![work.spent()]);
         assert!(report.work[0] <= WORK_ALLOWANCE);
         let queued = result.recv().unwrap();
-        assert_eq!(queued.plan.control, direct.survival.control);
+        assert_eq!(queued.ordinary().control, direct.survival.control);
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }
@@ -144,7 +145,7 @@ fn queued_worker_dispatches_refuge_profiles_with_identical_core_control_rng_and_
         assert_eq!(report.work, vec![work.spent()]);
         assert!(report.work[0] <= WORK_ALLOWANCE);
         let queued = result.recv().unwrap();
-        assert_eq!(queued.plan.control, direct.survival.control);
+        assert_eq!(queued.ordinary().control, direct.survival.control);
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }
@@ -188,7 +189,7 @@ fn queued_worker_dispatches_farm_refuge_profiles_with_direct_parity() {
         assert_eq!(report.work, vec![work.spent()]);
         assert!(report.work[0] <= WORK_ALLOWANCE);
         let queued = result.recv().unwrap();
-        assert_eq!(queued.plan.control, direct.survival.control);
+        assert_eq!(queued.ordinary().control, direct.survival.control);
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }
@@ -232,7 +233,7 @@ fn queued_worker_dispatches_farm_origin_profiles_with_direct_parity() {
         assert_eq!(report.work, vec![work.spent()]);
         assert!(report.work[0] <= WORK_ALLOWANCE);
         let queued = result.recv().unwrap();
-        assert_eq!(queued.plan.control, direct.survival.control);
+        assert_eq!(queued.ordinary().control, direct.survival.control);
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }
@@ -251,12 +252,14 @@ fn queued_worker_dispatches_contact_topology_profiles_with_direct_parity() {
         CpuPolicy::UtilityV41,
         CpuPolicy::UtilityV42,
         CpuPolicy::UtilityV43,
+        CpuPolicy::UtilityV44,
+        CpuPolicy::UtilityV45,
     ] {
         let planner = CpuPlanner::without_workers();
         let (job, result) = spike_job(policy);
         let mut rng = job.rng.clone();
         let mut work = WorkBudget::new(WORK_ALLOWANCE);
-        let direct = if policy == CpuPolicy::UtilityV42 {
+        let direct = if matches!(policy, CpuPolicy::UtilityV42 | CpuPolicy::UtilityV44) {
             plan_blocked_births_v42_with_origin(
                 &job.observation,
                 &job.memory,
@@ -266,7 +269,7 @@ fn queued_worker_dispatches_contact_topology_profiles_with_direct_parity() {
                 &mut rng,
                 &mut work,
             )
-        } else if policy == CpuPolicy::UtilityV43 {
+        } else if matches!(policy, CpuPolicy::UtilityV43 | CpuPolicy::UtilityV45) {
             plan_hard_blocked_births_v43_with_origin(
                 &job.observation,
                 &job.memory,
@@ -304,7 +307,7 @@ fn queued_worker_dispatches_contact_topology_profiles_with_direct_parity() {
         assert_eq!(report.work, vec![work.spent()]);
         assert!(report.work[0] <= WORK_ALLOWANCE);
         let queued = result.recv().unwrap();
-        assert_eq!(queued.plan.control, direct.survival.control);
+        assert_eq!(queued.ordinary().control, direct.survival.control);
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }

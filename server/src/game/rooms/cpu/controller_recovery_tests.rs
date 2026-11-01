@@ -82,7 +82,7 @@ fn recovery_movement_without_a_pulse_is_rejected_without_losing_valid_origin() {
     assert_eq!(controller.planner.pump_for_test(1).delivered, 1);
     let pending = controller.pending.as_mut().unwrap();
     let mut result = pending.receiver.try_recv().unwrap();
-    result.plan.lease = None;
+    result.ordinary_mut().lease = None;
     pending.completed = Some(result);
 
     assert!(controller.poll(Tick(31), 4).is_none());

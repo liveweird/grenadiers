@@ -10,6 +10,11 @@ fn current_blocked_birth_profiles_queue_plant_destroy_and_survive() {
             CpuDifficulty::Standard,
         ),
         (CpuProfile::HARD_V43, CpuDifficulty::Hard),
+        (
+            CpuProfile::CONTINUATION_V44_STANDARD,
+            CpuDifficulty::Standard,
+        ),
+        (CpuProfile::HARD_V45, CpuDifficulty::Hard),
     ] {
         let outcome = run(profile, difficulty);
         assert!(

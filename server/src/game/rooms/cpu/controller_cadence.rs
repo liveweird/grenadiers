@@ -26,28 +26,34 @@ pub(super) struct CadenceState {
     deadline: Option<CadenceDeadline>,
 }
 
+const fn is_easy_profile(profile: CpuProfile) -> bool {
+    matches!(
+        profile,
+        CpuProfile::CURRENT_EASY
+            | CpuProfile::MULTIPLAYER_EASY
+            | CpuProfile::ENVIRONMENT_EASY
+            | CpuProfile::LAIRS_EASY
+            | CpuProfile::RESPAWN_LAIRS_EASY
+            | CpuProfile::RESPAWN_V24_EASY
+            | CpuProfile::RESPAWN_V23_EASY
+            | CpuProfile::RESPAWN_V22_EASY
+            | CpuProfile::RESPAWN_V21_EASY
+            | CpuProfile::SPIKE_PITS_EASY
+            | CpuProfile::RELIABLE_V27_EASY
+            | CpuProfile::PICKUP_V31_EASY
+            | CpuProfile::REFUGE_V33_EASY
+            | CpuProfile::FARM_REFUGES_V36_EASY
+            | CpuProfile::FARM_ORIGINS_V38_EASY
+            | CpuProfile::CONTACT_TOPOLOGY_V40_EASY
+            | CpuProfile::BLOCKED_BIRTHS_V42_EASY
+            | CpuProfile::CONTINUATION_V44_EASY
+    )
+}
+
 impl CpuController {
     pub(super) fn arm_cadence_after(&mut self, accepted: &AcceptedPlan, actual: Intent) {
-        if !matches!(
-            self.profile,
-            CpuProfile::CURRENT_EASY
-                | CpuProfile::MULTIPLAYER_EASY
-                | CpuProfile::ENVIRONMENT_EASY
-                | CpuProfile::LAIRS_EASY
-                | CpuProfile::RESPAWN_LAIRS_EASY
-                | CpuProfile::RESPAWN_V24_EASY
-                | CpuProfile::RESPAWN_V23_EASY
-                | CpuProfile::RESPAWN_V22_EASY
-                | CpuProfile::RESPAWN_V21_EASY
-                | CpuProfile::SPIKE_PITS_EASY
-                | CpuProfile::RELIABLE_V27_EASY
-                | CpuProfile::PICKUP_V31_EASY
-                | CpuProfile::REFUGE_V33_EASY
-                | CpuProfile::FARM_REFUGES_V36_EASY
-                | CpuProfile::FARM_ORIGINS_V38_EASY
-                | CpuProfile::CONTACT_TOPOLOGY_V40_EASY
-                | CpuProfile::BLOCKED_BIRTHS_V42_EASY
-        ) || !accepted.ordinary_navigation
+        if !is_easy_profile(self.profile)
+            || !accepted.ordinary_navigation
             || actual.manual.is_some()
             || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
         {
@@ -61,27 +67,7 @@ impl CpuController {
     }
 
     pub(super) fn observe_cadence(&mut self, observation: &Observation) {
-        if !matches!(
-            self.profile,
-            CpuProfile::CURRENT_EASY
-                | CpuProfile::MULTIPLAYER_EASY
-                | CpuProfile::ENVIRONMENT_EASY
-                | CpuProfile::LAIRS_EASY
-                | CpuProfile::RESPAWN_LAIRS_EASY
-                | CpuProfile::RESPAWN_V24_EASY
-                | CpuProfile::RESPAWN_V23_EASY
-                | CpuProfile::RESPAWN_V22_EASY
-                | CpuProfile::RESPAWN_V21_EASY
-                | CpuProfile::SPIKE_PITS_EASY
-                | CpuProfile::RELIABLE_V27_EASY
-                | CpuProfile::PICKUP_V31_EASY
-                | CpuProfile::REFUGE_V33_EASY
-                | CpuProfile::FARM_REFUGES_V36_EASY
-                | CpuProfile::FARM_ORIGINS_V38_EASY
-                | CpuProfile::CONTACT_TOPOLOGY_V40_EASY
-                | CpuProfile::BLOCKED_BIRTHS_V42_EASY
-        ) || !is_clear_for_easy(observation)
-        {
+        if !is_easy_profile(self.profile) || !is_clear_for_easy(observation) {
             self.cadence = CadenceState::default();
             return;
         }

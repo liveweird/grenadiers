@@ -216,8 +216,10 @@ fn inject(
     let (sender, receiver) = sync_channel(1);
     sender
         .send(PlanResult {
-            plan,
-            contact,
+            outcome: super::super::worker::WorkerPlan::Ordinary {
+                plan: Box::new(plan),
+                contact,
+            },
             basis,
             rng,
             escape_origin: None,
@@ -229,6 +231,7 @@ fn inject(
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
         refuge_handoff: None,
+        continuation: None,
     });
     controller.request_serial = 1;
 }

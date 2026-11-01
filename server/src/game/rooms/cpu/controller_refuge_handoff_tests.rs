@@ -126,23 +126,25 @@ fn hard41_queues_and_admits_a_real_refuge_replacement() {
 }
 
 #[test]
-fn hard43_queues_and_admits_a_real_refuge_replacement() {
-    let mut fixture = queued_refuge_for(CpuProfile::HARD_V43);
-    assert!(fixture.controller.has_pending());
-    assert_eq!(fixture.planner.pump_for_test(1).delivered, 1);
+fn hard43_and_hard45_queue_and_admit_real_refuge_replacements() {
+    for profile in [CpuProfile::HARD_V43, CpuProfile::HARD_V45] {
+        let mut fixture = queued_refuge_for(profile);
+        assert!(fixture.controller.has_pending());
+        assert_eq!(fixture.planner.pump_for_test(1).delivered, 1);
 
-    let mut accepted = None;
-    for _ in 0..=grenadiers_core::cpu::survival::MAX_PLAN_AGE_TICKS {
-        accepted = fixture.controller.poll(fixture.state.tick(), EPOCH);
-        if accepted.is_some() {
-            break;
+        let mut accepted = None;
+        for _ in 0..=grenadiers_core::cpu::survival::MAX_PLAN_AGE_TICKS {
+            accepted = fixture.controller.poll(fixture.state.tick(), EPOCH);
+            if accepted.is_some() {
+                break;
+            }
+            fixture.advance_publication();
         }
-        fixture.advance_publication();
+        assert!(
+            accepted.is_some_and(|plan| plan.is_refuge_handoff()),
+            "{profile:?} worker result did not reach ordinary handoff admission"
+        );
     }
-    assert!(
-        accepted.is_some_and(|plan| plan.is_refuge_handoff()),
-        "Hard43 worker result did not reach ordinary handoff admission"
-    );
 }
 
 #[test]
@@ -194,10 +196,16 @@ fn nonplant_worker_result_is_rejected_without_replacing_old_authority() {
         .completed
         .as_mut()
         .unwrap();
-    let route = result.plan.execution.as_ref().unwrap().route().clone();
-    result.plan.execution = Some(grenadiers_core::cpu::survival::ExecutionCertificate::Route(
-        Box::new(route),
-    ));
+    let route = result
+        .ordinary()
+        .execution
+        .as_ref()
+        .unwrap()
+        .route()
+        .clone();
+    result.ordinary_mut().execution = Some(
+        grenadiers_core::cpu::survival::ExecutionCertificate::Route(Box::new(route)),
+    );
     for _ in 0..=grenadiers_core::cpu::survival::MAX_PLAN_AGE_TICKS {
         assert!(
             fixture

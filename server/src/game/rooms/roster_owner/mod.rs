@@ -175,6 +175,15 @@ mod contact_topology_owner_support;
 mod contact_topology_owner_tests;
 
 #[cfg(test)]
+mod continuation_owner_support;
+
+#[cfg(test)]
+mod continuation_owner_tests;
+
+#[cfg(test)]
+mod continuation_perturbation_tests;
+
+#[cfg(test)]
 mod farm_refuge_owner_support;
 
 #[cfg(test)]

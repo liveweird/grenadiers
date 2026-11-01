@@ -1,7 +1,7 @@
 use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
-    mpsc::{Receiver, sync_channel},
+    mpsc::sync_channel,
 };
 
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
@@ -13,35 +13,11 @@ use grenadiers_core::game::{SeatId, Tick};
 use grenadiers_core::room::CpuProfile;
 
 use self::cadence::CadenceState;
-use super::worker::{CpuPlanner, PlanJob, PlanResult};
-
-struct Pending {
-    decision: DecisionId,
-    receiver: Receiver<PlanResult>,
-    live: Arc<AtomicBool>,
-    completed: Option<PlanResult>,
-    refuge_handoff: Option<grenadiers_core::cpu::survival::TerminalRefugeHandoff>,
-}
-
-pub(in crate::game::rooms) struct AcceptedPlan {
-    pub(in crate::game::rooms) decision: DecisionId,
-    pub(in crate::game::rooms) intent: Intent,
-    pub(in crate::game::rooms) hold_ticks: u8,
-    next_memory: UtilityMemory,
-    next_rng: CpuRng,
-    committed_pulse: Option<CommittedPulse>,
-    committed_route: Option<CommittedRoute>,
-    contact: Option<grenadiers_core::cpu::MobContactLease>,
-    certified_manual: Option<grenadiers_core::cpu::ManualIntent>,
-    escape_origin: bool,
-    ordinary_navigation: bool,
-    refuge_handoff: bool,
-}
-
-#[derive(Clone, Copy)]
-struct StopAdmission {
-    tick: Tick,
-}
+pub(in crate::game::rooms) use self::continuation::ContinuationService;
+use self::continuation_types::{ContinuationAuthority, ContinuationClock, PreparedAdmission};
+pub(in crate::game::rooms) use self::types::AcceptedPlan;
+use self::types::{Pending, StopAdmission};
+use super::worker::{CpuPlanner, PlanJob};
 
 pub(in crate::game::rooms) struct CpuController {
     planner: CpuPlanner,
@@ -70,6 +46,12 @@ pub(in crate::game::rooms) struct CpuController {
     cadence: CadenceState,
     strategic_blast: Option<intent::StrategicBlastContext>,
     refuge_attempt: Option<refuge_handoff::AttemptIdentity>,
+    publication_sequence: Option<u64>,
+    prepared_continuation: Option<PreparedAdmission>,
+    continuation: Option<ContinuationAuthority>,
+    continuation_fence_required: bool,
+    #[cfg(test)]
+    continuation_trace: continuation_types::ContinuationTrace,
     #[cfg(test)]
     admission_trace: admission::AdmissionTrace,
 }
@@ -109,6 +91,12 @@ impl CpuController {
             cadence: CadenceState::default(),
             strategic_blast: None,
             refuge_attempt: None,
+            publication_sequence: None,
+            prepared_continuation: None,
+            continuation: None,
+            continuation_fence_required: false,
+            #[cfg(test)]
+            continuation_trace: continuation_types::ContinuationTrace::default(),
             #[cfg(test)]
             admission_trace: admission::AdmissionTrace::default(),
         }
@@ -126,6 +114,8 @@ impl CpuController {
         if self.escaping
             || self.committed_pulse.is_some()
             || self.committed_route.is_some()
+            || self.prepared_continuation.is_some()
+            || self.continuation.is_some()
             || self.pending.is_some()
             || self.world != Some(observation.parts().world)
         {
@@ -145,6 +135,14 @@ impl CpuController {
             command_epoch,
             observation_tick: observation.parts().tick,
             checked_request_serial: serial,
+        };
+        let continuation = if self.supports_continuation() && self.escape_origin.is_some() {
+            let Some(sequence) = self.publication_sequence else {
+                return false;
+            };
+            Some(ContinuationClock::new(decision, sequence))
+        } else {
+            None
         };
         let (sender, receiver) = sync_channel(1);
         let live = Arc::new(AtomicBool::new(true));
@@ -173,6 +171,7 @@ impl CpuController {
             live,
             completed: None,
             refuge_handoff: None,
+            continuation,
         });
         true
     }
@@ -255,6 +254,7 @@ impl CpuController {
         if let Some(pending) = self.pending.take() {
             pending.live.store(false, Ordering::Release);
         }
+        self.invalidate_continuation();
     }
 
     pub(in crate::game::rooms) const fn has_pending(&self) -> bool {
@@ -370,6 +370,19 @@ mod profile;
 
 #[path = "controller_refuge_handoff.rs"]
 mod refuge_handoff;
+
+#[path = "controller_continuation.rs"]
+mod continuation;
+
+#[path = "controller_continuation_types.rs"]
+mod continuation_types;
+
+#[cfg(test)]
+#[path = "controller_continuation_tests.rs"]
+mod continuation_tests;
+
+#[path = "controller_types.rs"]
+mod types;
 
 #[cfg(test)]
 #[path = "controller_refuge_handoff_tests.rs"]

@@ -17,8 +17,18 @@ impl Driver {
         &mut self,
         notice: &crate::game::rooms::roster_runtime::RosterNotice,
     ) {
+        let Some(publication_sequence) = self.publication_sequence else {
+            for cpu in &mut self.cpus {
+                let seat = cpu.seat();
+                if !cpu.observe_continuation_publication(u64::MAX, None) {
+                    self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
+                }
+            }
+            return;
+        };
         if self.runtime.lifecycle().phase() != MatchPhase::Running {
             for cpu in &mut self.cpus {
+                let _ = cpu.observe_continuation_publication(publication_sequence, None);
                 cpu.cancel();
             }
             return;
@@ -29,7 +39,7 @@ impl Driver {
             room_instance,
             physical_round,
         };
-        let observations: Option<Vec<_>> =
+        let observations: Vec<Option<_>> =
             if let Some(publication) = notice.spike_v19_cpu_publication() {
                 self.cpus
                     .iter()
@@ -73,16 +83,28 @@ impl Driver {
                     })
                     .collect()
             } else {
+                for cpu in &mut self.cpus {
+                    if !cpu.observe_continuation_publication(publication_sequence, None) {
+                        let seat = cpu.seat();
+                        self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
+                    }
+                }
                 return;
             };
-        let Some(observations) = observations else {
-            return;
-        };
         let epoch = self.runtime.lifecycle().round_attempt();
         let mut urgent_candidates = vec![false; observations.len()];
         let mut refuge_candidates = vec![false; observations.len()];
         for (index, observation) in observations.iter().enumerate() {
             let seat = self.cpus[index].seat();
+            if !self.cpus[index]
+                .observe_continuation_publication(publication_sequence, observation.as_ref())
+            {
+                self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
+                continue;
+            }
+            let Some(observation) = observation.as_ref() else {
+                continue;
+            };
             self.cpus[index].validate_escape_epoch(epoch);
             if !self.cpus[index].accept_observation(observation) {
                 continue;
@@ -137,26 +159,34 @@ impl Driver {
                 urgent_candidates[index] = true;
             }
         }
-        self.submit_cpu_candidates(&observations, &urgent_candidates, &refuge_candidates, epoch);
+        let available = observations
+            .iter()
+            .map(|value| value.as_ref())
+            .collect::<Vec<_>>();
+        self.submit_cpu_candidates(&available, &urgent_candidates, &refuge_candidates, epoch);
     }
 
     pub(super) fn submit_cpu_candidates(
         &mut self,
-        observations: &[grenadiers_core::cpu::Observation],
+        observations: &[Option<&grenadiers_core::cpu::Observation>],
         urgent: &[bool],
         refuge: &[bool],
         epoch: u64,
     ) {
         for (index, observation) in observations.iter().enumerate() {
-            if urgent[index] {
-                let _ = self.cpus[index].submit(observation.clone(), epoch);
+            if urgent[index]
+                && let Some(observation) = observation
+            {
+                let _ = self.cpus[index].submit((*observation).clone(), epoch);
             }
         }
         // Refuge replacement is opportunistic. Every seat's ordinary/urgent
         // work gets first access to the bounded shared queue.
         for (index, observation) in observations.iter().enumerate() {
-            if refuge[index] {
-                let _ = self.cpus[index].submit_refuge_handoff(observation.clone(), epoch);
+            if refuge[index]
+                && let Some(observation) = observation
+            {
+                let _ = self.cpus[index].submit_refuge_handoff((*observation).clone(), epoch);
             }
         }
     }

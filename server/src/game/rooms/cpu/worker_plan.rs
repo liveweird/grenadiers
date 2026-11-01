@@ -1,9 +1,10 @@
-use super::PlanJob;
+use super::{PlanJob, WorkerPlan};
 use grenadiers_core::cpu::{
-    MobContactLease, WorkBudget,
+    WorkBudget,
     policy::PolicyError,
     survival::{
-        SurvivalPlan, plan_blocked_births_v42_with_origin, plan_contact_topology_v40_with_origin,
+        OriginRecoveryChoice, plan_blocked_births_v42_with_origin,
+        plan_contact_topology_v40_with_origin, plan_continuation_lairs,
         plan_counter_pressure_v29_with_origin, plan_farm_origins_v38_with_origin,
         plan_farm_refuges_v36_with_origin, plan_hard_blocked_births_v43_with_origin,
         plan_hard_contact_topology_v41_with_origin, plan_hard_farm_origins_v39_with_origin,
@@ -17,10 +18,37 @@ use grenadiers_core::cpu::{
 };
 use grenadiers_core::room::CpuPolicy;
 
-pub(super) fn plan(
-    job: &mut PlanJob,
-    work: &mut WorkBudget,
-) -> Result<(SurvivalPlan, Option<MobContactLease>), PolicyError> {
+pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPlan, PolicyError> {
+    if matches!(job.policy, CpuPolicy::UtilityV44 | CpuPolicy::UtilityV45)
+        && let Some(origin) = job.escape_origin.as_ref()
+    {
+        return Ok(
+            match plan_continuation_lairs(
+                &job.observation,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                &job.memory,
+                origin,
+                work,
+            ) {
+                Some(OriginRecoveryChoice::Continuation(certificate)) => {
+                    WorkerPlan::Continuation(certificate)
+                }
+                Some(OriginRecoveryChoice::Pulse(plan)) => WorkerPlan::Ordinary {
+                    plan: Box::new(plan.survival),
+                    contact: plan.contact,
+                },
+                None => {
+                    let plan =
+                        grenadiers_core::cpu::survival::continuation_recovery_stop(&job.memory);
+                    WorkerPlan::Ordinary {
+                        plan: Box::new(plan.survival),
+                        contact: plan.contact,
+                    }
+                }
+            },
+        );
+    }
     if job.observation.parts().rules.version == 10
         || matches!(
             job.policy,
@@ -41,9 +69,11 @@ pub(super) fn plan(
                 | CpuPolicy::UtilityV41
                 | CpuPolicy::UtilityV42
                 | CpuPolicy::UtilityV43
+                | CpuPolicy::UtilityV44
+                | CpuPolicy::UtilityV45
         )
     {
-        let plan = if job.policy == CpuPolicy::UtilityV42 {
+        let plan = if matches!(job.policy, CpuPolicy::UtilityV42 | CpuPolicy::UtilityV44) {
             plan_blocked_births_v42_with_origin(
                 &job.observation,
                 &job.memory,
@@ -53,7 +83,7 @@ pub(super) fn plan(
                 &mut job.rng,
                 work,
             )
-        } else if job.policy == CpuPolicy::UtilityV43 {
+        } else if matches!(job.policy, CpuPolicy::UtilityV43 | CpuPolicy::UtilityV45) {
             plan_hard_blocked_births_v43_with_origin(
                 &job.observation,
                 &job.memory,
@@ -215,7 +245,10 @@ pub(super) fn plan(
                 work,
             )
         };
-        plan.map(|plan| (plan.survival, plan.contact))
+        plan.map(|plan| WorkerPlan::Ordinary {
+            plan: Box::new(plan.survival),
+            contact: plan.contact,
+        })
     } else if job.observation.parts().rules.version == 9 {
         let plan = if job.policy == CpuPolicy::UtilityV25 {
             plan_respawn_v25_with_origin(
@@ -268,7 +301,10 @@ pub(super) fn plan(
                 work,
             )
         };
-        plan.map(|plan| (plan.survival, plan.contact))
+        plan.map(|plan| WorkerPlan::Ordinary {
+            plan: Box::new(plan.survival),
+            contact: plan.contact,
+        })
     } else if job.observation.parts().rules.version == 8 {
         plan_lairs_with_origin(
             &job.observation,
@@ -279,7 +315,10 @@ pub(super) fn plan(
             &mut job.rng,
             work,
         )
-        .map(|plan| (plan.survival, plan.contact))
+        .map(|plan| WorkerPlan::Ordinary {
+            plan: Box::new(plan.survival),
+            contact: plan.contact,
+        })
     } else {
         plan_with_origin(
             &job.observation,
@@ -290,6 +329,9 @@ pub(super) fn plan(
             &mut job.rng,
             work,
         )
-        .map(|plan| (plan, None))
+        .map(|plan| WorkerPlan::Ordinary {
+            plan: Box::new(plan),
+            contact: None,
+        })
     }
 }

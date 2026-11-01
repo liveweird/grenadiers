@@ -7,8 +7,14 @@ mod bracelet;
 mod clear_gap;
 mod compatibility;
 mod contact_plant;
-// Explicitly inactive proof adapter. Remove this narrow allowance with the
-// real planner/executor integration, before gameplay activation.
+// Explicitly inactive continuation runtime. Remove these narrow allowances
+// when policy/controller callers land, before gameplay activation.
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_compatibility;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_execution;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_pending;
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation_planner;
 #[cfg_attr(not(test), allow(dead_code))]
@@ -41,11 +47,16 @@ pub use compatibility::can_admit_ordinary;
 pub use contact_plant::PlantContactCertificate;
 #[cfg(test)]
 pub(crate) use contact_plant::contact_scene_candidate_for_test;
+pub use continuation_execution::{
+    CommittedContinuation, ContinuationCommand, ContinuationPublication, ContinuationStatus,
+    PreparedContinuation, PreparedRenewal,
+};
+pub use continuation_pending::PendingContinuation;
 #[allow(unused_imports)] // Inactive proof entry; no policy dispatch in this package.
 pub(crate) use continuation_planner::certify_continuation;
-#[allow(unused_imports)] // Inactive selector; policy identity is intentionally deferred.
-pub(crate) use continuation_selection::{
-    OriginRecoveryChoice, plan_lairs as plan_continuation_lairs,
+pub use continuation_selection::{
+    OriginRecoveryChoice, continuation_recovery_memory, continuation_recovery_stop,
+    plan_lairs as plan_continuation_lairs,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
@@ -111,6 +122,13 @@ mod counter_pressure_v29_acceptance_tests;
 
 #[cfg(test)]
 mod continuation_tests;
+
+#[cfg(test)]
+mod continuation_authority_tests;
+#[cfg(test)]
+mod continuation_execution_guard_tests;
+#[cfg(test)]
+mod continuation_execution_tests;
 
 #[cfg(test)]
 mod continuation_test_fixture;

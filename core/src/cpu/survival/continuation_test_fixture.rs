@@ -86,7 +86,7 @@ fn blocks() -> BTreeSet<CellId> {
     .collect()
 }
 
-pub(super) fn state() -> (State, RoomSettings) {
+pub(super) fn state_with_lairs(enabled: bool) -> (State, RoomSettings) {
     let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
     let fixed = fixed_arena();
     let terrain = std::array::from_fn(|index| {
@@ -125,7 +125,11 @@ pub(super) fn state() -> (State, RoomSettings) {
         RulesConfig::environment_v10(
             settings,
             StormCloudConfig::Disabled,
-            RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()),
+            if enabled {
+                RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap())
+            } else {
+                RespawnLairConfig::Disabled
+            },
             SpikePitConfig::Disabled,
         ),
         world,

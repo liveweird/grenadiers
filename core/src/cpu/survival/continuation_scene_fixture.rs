@@ -2,12 +2,14 @@ use crate::cpu::forecast::ObservedHazardMemory;
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant};
 use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, EntityId, InputAction, Position, SeatId, SeatInput, State, Tick};
+use crate::room::RoomSettings;
 
-use super::continuation_test_fixture::{CPU, observe, observe_for, state, step_until};
+use super::continuation_test_fixture::{CPU, observe, observe_for, state_with_lairs, step_until};
 use super::{PlantEscapeOrigin, WORK_ALLOWANCE};
 
 pub(super) struct ContinuationScene {
     pub(super) state: State,
+    pub(super) settings: RoomSettings,
     pub(super) basis: Observation,
     pub(super) rival_basis: Observation,
     pub(super) origin: PlantEscapeOrigin,
@@ -17,7 +19,15 @@ pub(super) struct ContinuationScene {
 }
 
 pub(super) fn scene() -> ContinuationScene {
-    let (mut state, settings) = state();
+    scene_with_lairs(true)
+}
+
+pub(super) fn no_lair_scene() -> ContinuationScene {
+    scene_with_lairs(false)
+}
+
+fn scene_with_lairs(enabled: bool) -> ContinuationScene {
+    let (mut state, settings) = state_with_lairs(enabled);
     state.step(&[]).unwrap();
     step_until(&mut state, Tick(184));
     let plant_basis = observe(&state, settings);
@@ -104,6 +114,7 @@ pub(super) fn scene() -> ContinuationScene {
     .expect("genuine mirrored stopped plant origin");
     ContinuationScene {
         state,
+        settings,
         basis,
         rival_basis,
         origin,

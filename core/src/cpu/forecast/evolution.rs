@@ -366,3 +366,8 @@ impl ForecastEvolution {
 
 #[path = "evolution_contact.rs"]
 mod contact;
+
+// Inactive continuation renewal; remove this allowance when its executor is wired.
+#[cfg_attr(not(test), allow(dead_code))]
+#[path = "evolution_continuation.rs"]
+mod continuation;

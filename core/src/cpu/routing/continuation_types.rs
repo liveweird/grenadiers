@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use crate::cpu::forecast::ForecastEvolution;
-use crate::cpu::lair_contact::MobContactEnvelope;
 use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::{Direction, EntityId, MovementSegment, Tick};
 
+use super::continuation_contact::ContinuationContact;
 use super::motion::MotionSnapshot;
 use super::pulse::PulseOriginGrace;
 use super::{RouteAssurance, SpikePitGuard};
@@ -69,9 +69,11 @@ pub(crate) struct ContinuationCheckpointView {
     pub(crate) reversed: bool,
 }
 
-#[derive(Clone)]
+// Runtime continuation authority is linear. Tests may fork immutable proof data
+// to exercise independent failure branches, but production cannot duplicate it.
+#[cfg_attr(test, derive(Clone))]
 #[allow(dead_code)] // Inactive guidance; executor integration is a later package.
-pub(crate) struct ContinuationCertificate {
+pub struct ContinuationCertificate {
     key: MemoryKey,
     basis: Observation,
     basis_tick: Tick,
@@ -85,7 +87,7 @@ pub(crate) struct ContinuationCertificate {
     assurance: RouteAssurance,
     assumptions: BTreeSet<EntityId>,
     evolution: ForecastEvolution,
-    contact: MobContactEnvelope,
+    contact: ContinuationContact,
 }
 
 pub(super) struct ContinuationParts {
@@ -100,7 +102,7 @@ pub(super) struct ContinuationParts {
     pub(super) stop_branches: Vec<StopBranch>,
     pub(super) assumptions: BTreeSet<EntityId>,
     pub(super) evolution: ForecastEvolution,
-    pub(super) contact: MobContactEnvelope,
+    pub(super) contact: ContinuationContact,
 }
 
 #[allow(dead_code)] // Accessors are consumed by the later bounded grant package.
@@ -131,15 +133,15 @@ impl ContinuationCertificate {
         })
     }
 
-    pub(super) const fn key(&self) -> MemoryKey {
+    pub(crate) const fn key(&self) -> MemoryKey {
         self.key
     }
 
-    pub(super) const fn basis(&self) -> &Observation {
+    pub(crate) const fn basis(&self) -> &Observation {
         &self.basis
     }
 
-    pub(super) const fn basis_tick(&self) -> Tick {
+    pub(crate) const fn basis_tick(&self) -> Tick {
         self.basis_tick
     }
 
@@ -149,6 +151,11 @@ impl ContinuationCertificate {
 
     pub(crate) const fn survive_until(&self) -> Tick {
         self.survive_until
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_survive_until_for_test(&mut self, survive_until: Tick) {
+        self.survive_until = survive_until;
     }
 
     pub(super) const fn origin(&self) -> PulseOriginGrace {
@@ -202,11 +209,11 @@ impl ContinuationCertificate {
         &self.assumptions
     }
 
-    pub(super) const fn evolution(&self) -> &ForecastEvolution {
+    pub(crate) const fn evolution(&self) -> &ForecastEvolution {
         &self.evolution
     }
 
-    pub(super) const fn contact(&self) -> &MobContactEnvelope {
+    pub(super) const fn contact(&self) -> &ContinuationContact {
         &self.contact
     }
 

@@ -1,7 +1,8 @@
 use grenadiers_core::{
     cpu::{
-        BombKnowledge, Intent, ObservedActor, WorkBudget, WorldId,
-        policy::IntentDebugSummary,
+        BombKnowledge, Intent, Observation, ObservedActor, WorkBudget, WorldId,
+        forecast::ObservedHazardMemory,
+        policy::{IntentDebugSummary, UtilityMemory},
         survival::{WORK_ALLOWANCE, plan_hard_blocked_births_v43_with_origin},
     },
     game::{CellId, EntityId, PickupKind, Position, SeatId, Tick},
@@ -39,6 +40,7 @@ pub(super) struct InteractionOutcome {
 
 #[derive(Debug)]
 pub(super) struct BasisProbe {
+    pub capture: CapturedPlanningBasis,
     pub policy: CpuPolicy,
     pub tick: Tick,
     pub settled_stop_tick: Tick,
@@ -53,6 +55,15 @@ pub(super) struct BasisProbe {
     pub planner_work: u32,
     pub planner_intent: Intent,
     pub planner_execution: bool,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct CapturedPlanningBasis {
+    pub observation: Observation,
+    pub hazard_memory: ObservedHazardMemory,
+    pub memory: UtilityMemory,
+    pub settled_stop_tick: Tick,
+    pub had_origin: bool,
 }
 
 pub(super) fn run(ticks: usize) -> InteractionOutcome {
@@ -144,6 +155,13 @@ fn inspect_cpu_two_approach_basis(basis: PlanningBasis<'_>, captured: &mut Optio
     )
     .unwrap();
     *captured = Some(BasisProbe {
+        capture: CapturedPlanningBasis {
+            observation: basis.observation.clone(),
+            hazard_memory: basis.hazard_memory.clone(),
+            memory: *basis.memory,
+            settled_stop_tick: basis.settled_stop_tick,
+            had_origin: basis.escape_origin.is_some(),
+        },
         policy: *basis.policy,
         tick: basis.observation.parts().tick,
         settled_stop_tick: basis.settled_stop_tick,

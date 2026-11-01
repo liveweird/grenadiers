@@ -20,6 +20,12 @@ mod late_farm_fixture;
 #[path = "lair_contact_late_farm_tests.rs"]
 mod late_farm_tests;
 #[cfg(test)]
+#[path = "lair_contact_v1310_late_teleporter_fixture.rs"]
+pub(crate) mod v1310_late_teleporter_fixture;
+#[cfg(test)]
+#[path = "lair_contact_v1310_late_teleporter_tests.rs"]
+mod v1310_late_teleporter_tests;
+#[cfg(test)]
 #[path = "lair_contact_v138_farm_witness_fixture.rs"]
 mod v138_farm_witness_fixture;
 #[cfg(test)]

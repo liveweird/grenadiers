@@ -121,6 +121,12 @@ pub(super) fn collect_observation() -> Observation {
         .unwrap()
 }
 
+pub(super) fn without_respawn_lairs(observation: Observation) -> Observation {
+    let environment = observation.environment().unwrap().clone();
+    let pits = observation.spike_pits().cloned();
+    Observation::new_rules_v10(observation.into_parts(), environment, None, pits).unwrap()
+}
+
 #[test]
 fn forced_rival_state_and_immediate_weapon_fail_closed() {
     let basis = captured_tick_6121();

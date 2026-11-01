@@ -131,3 +131,6 @@ mod teleporter_step_outcome_tests;
 
 #[cfg(test)]
 mod teleporter_step_hazard_tests;
+
+#[cfg(test)]
+mod teleporter_step_disabled_tests;

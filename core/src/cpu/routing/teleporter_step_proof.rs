@@ -1,10 +1,11 @@
 use crate::cpu::WorkBudget;
 use crate::cpu::forecast::{HazardForecast, TickWindow};
-use crate::cpu::lair_contact::{MobContactEnvelope, distance_to_interval, travel_units};
+use crate::cpu::lair_contact::{distance_to_interval, travel_units};
 use crate::game::geometry::MovementSegment;
 use crate::game::types::HALF_FOOTPRINT;
 use crate::game::{PickupKind, Position, Tick};
 
+use super::continuation_contact::ContinuationContact as TeleporterContact;
 use super::motion::Motion;
 use super::safety::{check_segments_with_grace, static_segment_clear};
 use super::teleporter_step::{take, usize_to_work};
@@ -35,8 +36,8 @@ pub(super) struct ProofOutcome {
 pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFailure> {
     reject_reachable_pickups(&mut input)?;
     reject_contested_target(&mut input)?;
-    let envelope =
-        MobContactEnvelope::new(input.context.observation, input.work).map_err(contact_failure)?;
+    let contact =
+        TeleporterContact::new(input.context.observation, input.work).map_err(contact_failure)?;
     let mut possible = Vec::new();
     let mut landing_regions = Vec::new();
     for (start, motion, segments) in input.nominal {
@@ -68,7 +69,7 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
                 None,
                 None,
             )?;
-            if !envelope
+            if !contact
                 .stationary_is_clear_until(
                     input.context.actor.position,
                     previous_tick(*start)?,
@@ -94,7 +95,7 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
             None,
             None,
         )?;
-        if !envelope
+        if !contact
             .sweep_is_clear(*start, segments, input.work)
             .map_err(contact_failure)?
         {
@@ -120,7 +121,7 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
                 None,
                 None,
             )?;
-            if !envelope
+            if !contact
                 .stationary_is_clear_until(position, previous_tick(input.safe_until)?, input.work)
                 .map_err(contact_failure)?
             {
@@ -133,7 +134,7 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
         if input.phase == TeleporterStepPhase::Collect {
             prove_teleport_outcomes(
                 &mut input,
-                &envelope,
+                &contact,
                 *start,
                 motion.position,
                 &mut landing_regions,
@@ -250,7 +251,7 @@ fn reject_contested_target(input: &mut ProofInput<'_>) -> Result<(), RouteFailur
 
 fn prove_teleport_outcomes(
     input: &mut ProofInput<'_>,
-    envelope: &MobContactEnvelope,
+    contact: &TeleporterContact,
     collect_tick: Tick,
     root_at_pickup: Position,
     landing_regions: &mut Vec<OutcomeRegion>,
@@ -273,7 +274,7 @@ fn prove_teleport_outcomes(
         }
         take(input.work, 1)?;
         let landing = region_around(partner.position, max_travel(elapsed)?)?;
-        validate_landing_region(input, envelope, landing, collect_tick, input.safe_until)?;
+        validate_landing_region(input, contact, landing, collect_tick, input.safe_until)?;
         take(input.work, 1)?;
         landing_regions.push(OutcomeRegion {
             min: landing.min,
@@ -288,7 +289,7 @@ fn prove_teleport_outcomes(
         };
         validate_landing_region(
             input,
-            envelope,
+            contact,
             partner_endpoint,
             collect_tick,
             next_tick(collect_tick)?,
@@ -299,7 +300,7 @@ fn prove_teleport_outcomes(
 
 fn validate_landing_region(
     input: &mut ProofInput<'_>,
-    envelope: &MobContactEnvelope,
+    contact: &TeleporterContact,
     region: Region,
     begins: Tick,
     ends: Tick,
@@ -350,25 +351,27 @@ fn validate_landing_region(
     }
     reject_storm_region(input.context, region, begins, ends, input.work)?;
     let last = previous_tick(ends)?;
-    for source in envelope.sources() {
-        take(input.work, 1)?;
-        if source.begins_at > last {
-            continue;
-        }
-        let travel = travel_units(source.begins_at, last).map_err(contact_failure)?;
-        let contact = i64::from(HALF_FOOTPRINT) * 2 - 1;
-        let dx = distance_to_interval(
-            i64::from(source.origin.x),
-            i64::from(region.min.x) - contact,
-            i64::from(region.max.x) + contact,
-        );
-        let dy = distance_to_interval(
-            i64::from(source.origin.y),
-            i64::from(region.min.y) - contact,
-            i64::from(region.max.y) + contact,
-        );
-        if dx.saturating_add(dy) <= travel {
-            return Err(RouteFailure::NoRoute);
+    if let TeleporterContact::Enabled(envelope) = contact {
+        for source in envelope.sources() {
+            take(input.work, 1)?;
+            if source.begins_at > last {
+                continue;
+            }
+            let travel = travel_units(source.begins_at, last).map_err(contact_failure)?;
+            let contact = i64::from(HALF_FOOTPRINT) * 2 - 1;
+            let dx = distance_to_interval(
+                i64::from(source.origin.x),
+                i64::from(region.min.x) - contact,
+                i64::from(region.max.x) + contact,
+            );
+            let dy = distance_to_interval(
+                i64::from(source.origin.y),
+                i64::from(region.min.y) - contact,
+                i64::from(region.max.y) + contact,
+            );
+            if dx.saturating_add(dy) <= travel {
+                return Err(RouteFailure::NoRoute);
+            }
         }
     }
     Ok(())

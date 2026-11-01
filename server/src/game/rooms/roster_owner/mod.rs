@@ -168,5 +168,11 @@ mod cpu_farm_progress_tests;
 mod reliable_profile_tests;
 
 #[cfg(test)]
+mod refuge_handoff_physical_support;
+
+#[cfg(test)]
+mod refuge_handoff_physical_tests;
+
+#[cfg(test)]
 #[path = "../cpu/hard_episode_tests.rs"]
 mod hard_episode_tests;

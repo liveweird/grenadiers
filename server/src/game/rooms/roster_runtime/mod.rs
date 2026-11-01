@@ -22,6 +22,9 @@ mod seat_wire;
 mod types;
 
 #[cfg(test)]
+mod test_scene;
+
+#[cfg(test)]
 mod replay_inspection;
 
 pub(in crate::game::rooms) use admission::PreparedRosterAdmission;

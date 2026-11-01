@@ -2,8 +2,7 @@
 
 This is the accepted design boundary for the staged hybrid chosen on 2026-10-25 after comparing
 an independent proposal with [Claude's original proposal](../history/single-player-cpu-proposal.md).
-It defines invariants and acceptance, not delivery status. All sequencing and open work,
-including the prerequisite review and CPU0–CPU4 packages, live in the
+It defines invariants and acceptance, not delivery status. Remaining sequencing and open work live in the
 [product backlog](../../BACKLOG.md#single-player).
 
 ## Chosen approach
@@ -118,7 +117,7 @@ can invalidate pending decisions without creating a new physical world.
 
 <a id="milestones"></a>
 
-The former milestone section is maintained as scoped CPU0–CPU4 work in the
+Remaining CPU work is maintained in the
 [product backlog](../../BACKLOG.md#single-player), the sole source for delivery status.
 
 ## Acceptance

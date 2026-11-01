@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy27 on Easy/Standard and policy29 on Hard for every live
+The live environment CPU implementation uses policy31 on Easy/Standard and policy32 on Hard for every live
 two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,8 +19,9 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::RELIABLE_V27_STANDARD` and `RELIABLE_V27_EASY` select Utility27 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V29` selects Utility29 for Hard rooms with the same observation boundary.
+`CpuProfile::PICKUP_V31_STANDARD` and `PICKUP_V31_EASY` select Utility31 for live rules10 Easy/Standard rooms.
+`CpuProfile::HARD_V32` selects Utility32 for Hard rooms with the same observation boundary.
+`RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
 `RESPAWN_V23_STANDARD`/`RESPAWN_V23_EASY` retain Utility23 with goal-cell persistence.
@@ -81,6 +82,16 @@ These public preconditions authorize only attempting the unchanged full escape/c
 proof. Bomb motion remains uncertain. A bomb's conservative motion envelope can still make a
 nearby or same-axis plant unprovable; the CPU keeps its certified fallback. Its active own-escape
 route retains its existing hold. Replay14 binds CPU29; replay13 keeps CPU28 unchanged.
+
+## Rules10 pickup progress
+
+Current profiles allow a certified one-update approach that can collect a pickup, then require
+Stop and a fresh observation before further movement. This prevents oscillation between drops
+when an ordinary longer movement pulse must stop before collection. The short handoff uses the
+complete hazard forecast, spike/storm checks and mob-contact proof; it does not enable ordinary
+uncertified movement on rules10. Teleporter and Diarrhea retain their existing exclusions.
+Easy keeps its normal clear-navigation cadence. Old policies27–29 remain unchanged; replay15
+binds Easy/Standard31 and Hard32.
 
 ## Retained storm profile
 

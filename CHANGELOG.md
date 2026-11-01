@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 1.3.2 — 2026-11-01
+
+- Fix rules10 CPU oscillation just outside pickup collection by allowing a fully certified
+  one-update pickup handoff, followed by Stop and fresh observation.
+- Keep full hazard, spike/storm and mob-contact proofs and existing Teleporter/Diarrhea exclusions;
+  preserve Easy cadence and archived CPU policies.
+- Bind Easy/Standard31 and Hard32 in private replay15 while retaining prior replay identities.
+
 ## 1.3.1 — 2026-11-01
 
 - Let Hard CPUs certify useful counter-pressure against visible unpaused timed bombs in

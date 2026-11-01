@@ -8,6 +8,7 @@ impl CpuController {
                     self.profile,
                     grenadiers_core::room::CpuProfile::HARD_V28
                         | grenadiers_core::room::CpuProfile::HARD_V29
+                        | grenadiers_core::room::CpuProfile::HARD_V32
                 );
         }
         match rules_version {
@@ -46,6 +47,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::SPIKE_PITS_EASY
                     | grenadiers_core::room::CpuProfile::RELIABLE_V27_STANDARD
                     | grenadiers_core::room::CpuProfile::RELIABLE_V27_EASY
+                    | grenadiers_core::room::CpuProfile::PICKUP_V31_STANDARD
+                    | grenadiers_core::room::CpuProfile::PICKUP_V31_EASY
             ),
             _ => false,
         }
@@ -72,9 +75,10 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V29);
+        let hard = controller(CpuProfile::HARD_V32);
         assert!(hard.profile_supports(10));
         assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -82,6 +86,7 @@ mod tests {
             CpuPolicy::UtilityV1,
             CpuPolicy::UtilityV16,
             CpuPolicy::UtilityV27,
+            CpuPolicy::UtilityV31,
         ] {
             let forged = controller(CpuProfile {
                 policy,
@@ -91,10 +96,19 @@ mod tests {
                 assert!(!forged.profile_supports(rules));
             }
         }
-        let forged = controller(CpuProfile {
-            policy: CpuPolicy::UtilityV28,
-            difficulty: CpuDifficulty::Standard,
-        });
-        assert!(!forged.profile_supports(10));
+        for policy in [
+            CpuPolicy::UtilityV28,
+            CpuPolicy::UtilityV29,
+            CpuPolicy::UtilityV32,
+        ] {
+            for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
+                let forged = controller(CpuProfile { policy, difficulty });
+                assert!(!forged.profile_supports(10));
+            }
+        }
+        for profile in [CpuProfile::PICKUP_V31_EASY, CpuProfile::PICKUP_V31_STANDARD] {
+            assert!(controller(profile).profile_supports(10));
+            assert!(!controller(profile).profile_supports(9));
+        }
     }
 }

@@ -349,6 +349,9 @@ mod tests {
             grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD,
             grenadiers_core::room::CpuProfile::RELIABLE_V27_STANDARD,
             grenadiers_core::room::CpuProfile::RELIABLE_V27_EASY,
+            grenadiers_core::room::CpuProfile::PICKUP_V31_STANDARD,
+            grenadiers_core::room::CpuProfile::PICKUP_V31_EASY,
+            grenadiers_core::room::CpuProfile::HARD_V32,
         ] {
             assert!(controller(profile).accept_observation(&observed));
         }

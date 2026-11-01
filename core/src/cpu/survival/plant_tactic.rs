@@ -14,11 +14,14 @@ use super::{ExecutionCertificate, SurvivalPlan};
 pub(super) enum PlantSupport {
     Strict,
     PersistentBurningOil,
+    ClearArenaCounterPressure,
 }
 
 impl PlantSupport {
-    pub(super) const fn persistent_burning_oil(enabled: bool) -> Self {
-        if enabled {
+    pub(super) const fn for_policy(persistent_burning_oil: bool, counter_pressure: bool) -> Self {
+        if counter_pressure {
+            Self::ClearArenaCounterPressure
+        } else if persistent_burning_oil {
             Self::PersistentBurningOil
         } else {
             Self::Strict
@@ -238,7 +241,7 @@ fn certified_plant_inner(
         return None;
     }
     if matches!(observation.parts().rules.version, 8..=10)
-        && !teleporter_plant_supported(observation, support)
+        && !teleporter_plant_supported(observation, support, work)
     {
         return None;
     }
@@ -269,7 +272,7 @@ fn certified_plant_inner_prefiltered(
         return None;
     }
     if matches!(observation.parts().rules.version, 8..=10)
-        && !teleporter_plant_supported(observation, support)
+        && !teleporter_plant_supported(observation, support, work)
     {
         return None;
     }
@@ -332,18 +335,52 @@ fn certified_plant_inner_prefiltered(
     })
 }
 
-fn teleporter_plant_supported(observation: &Observation, support: PlantSupport) -> bool {
+fn teleporter_plant_supported(
+    observation: &Observation,
+    support: PlantSupport,
+    work: &mut WorkBudget,
+) -> bool {
     let parts = observation.parts();
-    !parts.rules.settings.enabled_items().contains_teleporter()
-        || (parts
-            .pickups
-            .iter()
-            .all(|pickup| pickup.kind != PickupKind::Teleporter)
-            && parts.flames.is_empty()
-            && matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
-            && (matches!(support, PlantSupport::PersistentBurningOil)
-                || parts
-                    .oil
-                    .iter()
-                    .all(|oil| oil.state != OilBarrelState::Burning)))
+    if !parts.rules.settings.enabled_items().contains_teleporter() {
+        return true;
+    }
+    if parts
+        .pickups
+        .iter()
+        .any(|pickup| pickup.kind == PickupKind::Teleporter)
+        || !parts.flames.is_empty()
+    {
+        return false;
+    }
+    let BombKnowledge::Visible(bombs) = &parts.bombs else {
+        return false;
+    };
+    if matches!(support, PlantSupport::ClearArenaCounterPressure) {
+        if parts.rules.running_updates == 0 {
+            return false;
+        }
+        if bombs.is_empty() {
+            return true;
+        }
+        if !parts.arena.blocks.is_empty() {
+            return false;
+        }
+        for bomb in bombs {
+            if work.try_take(1).is_err()
+                || !matches!(
+                    bomb.trigger,
+                    crate::cpu::ObservedBombTrigger::Timed { paused: false, .. }
+                )
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    bombs.is_empty()
+        && (matches!(support, PlantSupport::PersistentBurningOil)
+            || parts
+                .oil
+                .iter()
+                .all(|oil| oil.state != OilBarrelState::Burning))
 }

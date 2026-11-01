@@ -58,6 +58,7 @@ pub fn plan_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 #[allow(clippy::too_many_arguments)]
@@ -76,6 +77,7 @@ pub(super) fn plan_inner(
     failed_plant_recovery: bool,
     persistent_burning_oil: bool,
     hard_tactics: bool,
+    counter_pressure: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -141,7 +143,7 @@ pub(super) fn plan_inner(
         && super::strategic_recovery::attained_firing_position(observation, &ordinary);
     let bounded_tactics = storm_enabled || respawn;
     let plant_support =
-        super::plant_tactic::PlantSupport::persistent_burning_oil(persistent_burning_oil);
+        super::plant_tactic::PlantSupport::for_policy(persistent_burning_oil, counter_pressure);
     let bounded_plant_attempted =
         bounded_tactics && (ordinary.intent.manual.is_some() || clear_movement || recovering_plant);
     if (ordinary.intent.manual.is_some() || clear_movement || recovering_plant)

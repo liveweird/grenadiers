@@ -324,3 +324,17 @@ fn replay17_records_human_only_rooms_with_no_cpu_provenance() {
     forged.body.header.cpu_policy_version = 35;
     assert_eq!(replay(&forged), Err(ReplayError::InvalidHeader));
 }
+
+#[test]
+fn replay17_rejects_future_farm_refuge_policy_pairs() {
+    let base = recorder(SpikePitTuning::DEFAULT);
+    let (_, journal) = base.into_parts();
+    for future in [36, 37] {
+        let mut bad = journal.clone();
+        bad.header.cpu_policy_version = future;
+        bad.body.header.cpu_policy_version = future;
+        bad.header.cpus[0].policy_version = future;
+        bad.body.header.cpus[0].policy_version = future;
+        assert_eq!(replay(&bad), Err(ReplayError::InvalidHeader));
+    }
+}

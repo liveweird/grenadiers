@@ -12,10 +12,27 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
+- [todo] **VIEWPORT — fit the main screen without scrolling.** Rework the layout so the
+  main screen requires neither horizontal nor vertical scrolling. Consider a hideable settings
+  side pane and compact panels/tabs; keep the arena and primary controls usable and all settings
+  accessible. Use a modern interface that fits the game’s retro aesthetic, and verify supported
+  viewport sizes and keyboard access without clipping.
+
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
   boundary while commissioning any required models, rigs and animation.
+
+## Arena layout and environment
+
+- [todo] **LAYOUT-CLEARANCE — improve generated lair surroundings.** Review the current
+  generation and placement rules. Reserve connected, usable spawn/movement space beside every
+  lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
+  sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
+  preserve deterministic generation and player spawn safety.
+- [todo] **SPIKE-DEFAULTS — use a 1-second warning and 5-second raised phase.** Change new-game
+  defaults from the current 0.6/3 seconds to 1/5 seconds (60/300 ticks at 60 Hz). Update UI/default
+  examples and tests while preserving explicitly configured durations and historical replay.
 
 ## Single-player
 
@@ -53,6 +70,13 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   in [security](docs/security.md) and [architecture](docs/architecture.md).
 
 ## Playtesting and extensions
+
+- [todo] **EQUIPMENT-KEY — audit the remaining manual equipment action.** Check which items
+  still require the Equipment key, reconcile input hints and guides with the intended contact
+  behavior, and determine whether the separate key can be removed. Currently only Punch uses
+  Equipment (default E); Kick and Bracelet activate through movement/contact, while Wall Pass
+  and Heart are passive. Keep the existing Punch behavior until the interaction decision is made;
+  see AUTO-PUNCH below.
 
 - [todo] **BASELINE — broaden browser/network validation.** Complete human playtesting and decide
   supported browser/network conditions. The 1.0 release records the current limits and

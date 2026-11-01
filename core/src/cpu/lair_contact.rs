@@ -11,6 +11,12 @@ mod connectivity_tests;
 #[path = "lair_contact_sources.rs"]
 mod contact_sources;
 #[cfg(test)]
+#[path = "lair_contact_late_farm_fixture.rs"]
+mod late_farm_fixture;
+#[cfg(test)]
+#[path = "lair_contact_late_farm_tests.rs"]
+mod late_farm_tests;
+#[cfg(test)]
 use crate::game::types::HALF_FOOTPRINT;
 use contact_sources::position_fits;
 pub(crate) use contact_sources::{distance_to_interval, source_reaches_segment, travel_units};

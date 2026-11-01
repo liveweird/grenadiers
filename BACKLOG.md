@@ -19,20 +19,20 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — validate sustained progress after recovery.** The
-  [late-match investigation](docs/history/cpu-late-passivity-2026-11-01.md) now reproduces and
-  repairs dead-roster admission refusal and delayed Stop-confirmation invalidation through a
-  continuous queued-owner episode. Keep its complete movement, real Stop, committed intent,
-  collection, useful bombing and survival regressions. A fresh CPU49 round exposed two persistent
-  Teleporters. Conditional v50 certificates and a controlled owner episode now cover multiple
-  distant targets with unchanged unselected pickups and all-origin reach exclusion. Observe fresh
-  CPU50/51 matches and preserve refusal/queue evidence before claiming the captured scene resolves. Separately reproduce seat Two's
-  early farming cycle before either pickup appears, plus remaining passive pickups or lethal waits.
-  Preserve exact public observations plus worker/refusal/admission evidence. Unchanged sampled
-  poses, static reachability or a free bomb slot alone do not establish a missed safe action.
-  The earlier CPU43 farming alternatives still lack a complete original-pose physical trajectory;
-  reproduce them under current behavior before adding a further planner refinement. Preserve
-  safety certificates, shared work limits, scheduling, replay/privacy and per-seat progress.
+- [next] **CPU-RELIABILITY — prevent pit traps and improve concurrent play.** Releases
+  1.3.11/1.3.12 repair Teleporter admission/Stop recovery and support multiple distant pickups.
+  Retain their actual-owner collection, useful bombing, survival and budget regressions.
+  The [investigation](docs/history/cpu-late-passivity-2026-11-01.md) now identifies two next cases:
+  quiet CPU51 play enters warning pits and dies on them; reproduce the pre-entry controller
+  sequence, then avoid voluntary pit approaches/contact in ordinary short-pulse navigation
+  while preserving complete plant-route proofs and checked forced-placement behavior.
+  The paired farming witness also captures actual queued support suppression with foreign
+  bombs, soft blocks and Teleporter enabled. Prove a useful complete plant under the unchanged
+  observation, contact and future-loot obligations before relaxing that guard. Keep seed/history
+  assumptions explicit; no public snapshot reconstructs the original private match.
+  Preserve worker/refusal/admission evidence, full escape/contact proofs, shared work limits,
+  scheduling, archived replay/privacy and per-seat progress. Broader stalls and deeper tactics
+  remain subject to original-pose before/after witnesses, not elapsed-time or reachability claims.
 
 - [todo] **HARD-CPU — deepen fair tactics.** Improve productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted

@@ -223,3 +223,54 @@ simultaneous foreign plants invalidating an exact expected-bomb scene, followed 
 whose origin can expire after leaving its bomb footprint and whose ordinary pulse safety
 window is shorter than the full bomb lifetime. Opening-scene recovery already has a witness;
 this later geometry needs a paired actual-owner episode before a defect is claimed or fixed.
+
+## Exact queued CPU51 farming suppression
+
+The controlled owner tests in `early_farm_owner_{support,tests}.rs` preserve the CPU49 sample-0
+public arena: 48 blocks, spawn poses, westbound cloud with leg 128, both lairs and the four pit
+sites. Fresh private history, simulation seed 47, initial clock and empty hidden loot are declared
+assumptions. All eight preselected CPU roots `[0,1,2,3,7,31,47,51]` plant at tick 232 with the same
+six delivered jobs and no admission rejection. Public spawn geometry alone does not reproduce
+the captured non-planting behavior.
+
+`early_farm_owner_interaction_{support,tests}.rs` compares the same scene with real CPU controllers
+for seats Two/Three/Four. Three/Four plant at 205; Two does not plant during 600 updates. Two
+reports Stalled at 235 and later selects the other captured target. This demonstrates a
+behavioral difference with other CPU activity, without attributing every update to bomb waves
+or claiming a continuously restored match. All 263 queued jobs deliver within the work limit;
+admission rejection traces are zero for all three. Origin/route/fence observations cover Two.
+
+A test-only immutable callback inspects the actual queued job immediately before execution.
+It captures Two at observation/confirmed-Stop tick 234, pose `(11727,1536)`, cell `(11,1)`,
+with Teleporter enabled, two visible bombs, 48 soft blocks, no exposed Teleporter, no flames,
+running update 54 and no origin. Calling the existing public planner with cloned RNG and the
+same observation, memory, hazard history and Stop clock spends 10,443 work and returns North,
+no manual action and no execution certificate. Inspection leaves the 263-job trajectory unchanged.
+
+These facts match the existing `ClearArenaCounterPressure` support guard: Teleporter enabled,
+visible bombs and any soft blocks suppress planting before route construction, regardless of
+distance. This establishes support suppression, not a complete safe missed plant. A Core
+follow-up must retain foreign-bomb, contact and unknown future Teleporter obligations; deleting
+facts or disabling the item would only create a counterfactual.
+
+The callback, scenario builder and witnesses are test-only. Independent review is clear after
+adding the earlier guard facts and limiting causal claims. Three early/interaction tests, two
+existing late-owner tests, strict server test Clippy, formatting and repository checks pass.
+The integrated Rust/dependency inputs match the tested isolated worktree exactly. Application
+behavior and the accepted v1.3.12 image are unchanged; no product version bump or repeated full
+matrix/runtime run is needed.
+
+## Quiet pit-entry observations
+
+A separate post-gate capture, `target/quality-review/multi-v1312-quiet-match.json`, retains its
+terminal snapshot. It reaches a result after 28 seconds without browser errors. Dead poses for
+Three `(3584,7645)`, Two `(11776,5430)` and Four `(11776,7645)` lie on pits `(3,7)`, `(11,5)` and
+`(11,7)`. The saved sequence shows warning countdowns before death and raised pits afterward;
+this differs from the earlier concurrent-load bomb scene and is not a matched comparison.
+
+Source inspection confirms path-dependent pit clocks are modeled in pulse certification, but
+ordinary navigation/goal approaches do not exclude pits. A 12-update pulse is checked through
+basis+29, shorter than the default 36-update warning. That permits a locally safe entry without
+establishing that staying at the goal is safe through the later rise. A pre-entry queued-owner
+witness must establish the accepted sequence before changing policy; these public samples alone
+do not identify the last admitted certificate or a missed escape.

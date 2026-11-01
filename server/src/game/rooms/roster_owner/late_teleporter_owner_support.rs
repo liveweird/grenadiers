@@ -159,14 +159,42 @@ pub(super) fn run(profile: CpuProfile, ticks: usize) -> Outcome {
 }
 
 fn driver(profile: CpuProfile) -> (Driver, CpuPlanner) {
+    scenario_driver(profile, CPU, controlled_scene, Some(SeatId::Three))
+}
+
+pub(super) fn scenario_driver(
+    profile: CpuProfile,
+    cpu: SeatId,
+    scene: fn(&State) -> State,
+    departure: Option<SeatId>,
+) -> (Driver, CpuPlanner) {
+    scenario_driver_with_cpu_seed(profile, cpu, scene, departure, [47; 32])
+}
+
+pub(super) fn scenario_driver_with_cpu_seed(
+    profile: CpuProfile,
+    cpu: SeatId,
+    scene: fn(&State) -> State,
+    departure: Option<SeatId>,
+    cpu_seed: [u8; 32],
+) -> (Driver, CpuPlanner) {
+    scenario_driver_for_cpus(profile, &[cpu], scene, departure, cpu_seed)
+}
+
+pub(super) fn scenario_driver_for_cpus(
+    profile: CpuProfile,
+    cpus: &[SeatId],
+    scene: fn(&State) -> State,
+    departure: Option<SeatId>,
+    cpu_seed: [u8; 32],
+) -> (Driver, CpuPlanner) {
     let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
+    let mut controls = [SeatControl::Human; 4];
+    for &cpu in cpus {
+        controls[cpu.index()] = SeatControl::Cpu;
+    }
     let configuration = RoomConfiguration::new(
-        &[
-            SeatControl::Human,
-            SeatControl::Human,
-            SeatControl::Human,
-            SeatControl::Cpu,
-        ],
+        &controls,
         Some(CpuDifficulty::Hard),
         BoardSize::FifteenByThirteen,
     )
@@ -190,7 +218,7 @@ fn driver(profile: CpuProfile) -> (Driver, CpuPlanner) {
         MobNavigationPolicy::TimedEscapeV3,
     )
     .unwrap();
-    for seat in [SeatId::One, SeatId::Two, SeatId::Three] {
+    for seat in SeatId::ALL.into_iter().filter(|seat| !cpus.contains(seat)) {
         let admission = runtime.prepare_join(seat).unwrap();
         runtime.commit_admission(admission);
         runtime
@@ -208,21 +236,22 @@ fn driver(profile: CpuProfile) -> (Driver, CpuPlanner) {
         runtime.settle_boundary([None; 4]).unwrap();
     }
     let basis = runtime.state_for_test().unwrap();
-    let scene = controlled_scene(basis);
-    runtime.install_running_scene_for_test(scene).unwrap();
-    // The public sample has Three dead. This controlled production transition
-    // creates that fact without reconstructing the capture's unknown cause.
-    let notice = runtime
-        .settle_boundary([
-            None,
-            None,
-            Some(grenadiers_core::room::DepartureReason::Explicit),
-            None,
-        ])
-        .unwrap()
-        .unwrap();
+    let scene = scene(basis);
+    let scene_notice = runtime.install_running_scene_for_test(scene).unwrap();
+    let departures = std::array::from_fn(|index| {
+        (departure.is_some_and(|seat| seat.index() == index))
+            .then_some(grenadiers_core::room::DepartureReason::Explicit)
+    });
+    let notice = if departure.is_some() {
+        runtime.settle_boundary(departures).unwrap().unwrap()
+    } else {
+        scene_notice
+    };
     let planner = CpuPlanner::without_workers();
-    let controller = CpuController::new(planner.clone(), CPU, INSTANCE, [47; 32], profile);
+    let controllers = cpus
+        .iter()
+        .map(|&cpu| CpuController::new(planner.clone(), cpu, INSTANCE, cpu_seed, profile))
+        .collect();
     let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));
     drop(receiver);
     let random_fill: Arc<RandomFill> = Arc::new(|bytes| {
@@ -235,7 +264,7 @@ fn driver(profile: CpuProfile) -> (Driver, CpuPlanner) {
         notices,
         Instant::now() + std::time::Duration::from_secs(300),
         random_fill,
-        vec![controller],
+        controllers,
     );
     owner.reset_teleporter_trace_for_test();
     owner.publish(notice);

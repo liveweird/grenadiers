@@ -139,6 +139,14 @@ impl Drop for CleanupGuard {
 }
 
 #[cfg(test)]
+mod early_farm_owner_interaction_support;
+#[cfg(test)]
+mod early_farm_owner_interaction_tests;
+#[cfg(test)]
+mod early_farm_owner_support;
+#[cfg(test)]
+mod early_farm_owner_tests;
+#[cfg(test)]
 mod environment_acceptance_tests;
 #[cfg(test)]
 mod environment_cpu_tests;

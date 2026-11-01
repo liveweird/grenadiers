@@ -71,6 +71,7 @@ pub(super) fn opening(
         memory,
         ordinary,
         strategic,
+        super::plant_tactic::PlantSupport::Strict,
         &mut tactic_work,
     );
     work.try_take(tactic_work.spent()).ok()?;

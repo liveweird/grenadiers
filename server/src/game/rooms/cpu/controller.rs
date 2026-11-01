@@ -67,6 +67,8 @@ pub(in crate::game::rooms) struct CpuController {
     profile: CpuProfile,
     cadence: CadenceState,
     strategic_blast: Option<intent::StrategicBlastContext>,
+    #[cfg(test)]
+    admission_trace: admission::AdmissionTrace,
 }
 
 impl CpuController {
@@ -103,6 +105,8 @@ impl CpuController {
             profile,
             cadence: CadenceState::default(),
             strategic_blast: None,
+            #[cfg(test)]
+            admission_trace: admission::AdmissionTrace::default(),
         }
     }
 
@@ -332,7 +336,7 @@ mod observation;
 mod route;
 
 #[path = "controller_admission.rs"]
-mod admission;
+pub(in crate::game::rooms) mod admission;
 
 #[path = "controller_intent.rs"]
 mod intent;
@@ -349,18 +353,12 @@ pub(in crate::game::rooms) mod contact;
 #[path = "controller_escape.rs"]
 mod escape;
 
+#[path = "controller_seed.rs"]
+mod seed;
+
 #[cfg(test)]
 #[path = "controller_test_support.rs"]
 mod test_support;
-
-fn derive_round_seed(mut seed: [u8; 32], physical_round: u64) -> [u8; 32] {
-    let round = physical_round.to_le_bytes();
-    for (index, value) in seed.iter_mut().enumerate() {
-        *value ^= round[index % round.len()].wrapping_add((index as u8).wrapping_mul(0x5d));
-        *value = value.rotate_left((index % 7 + 1) as u32);
-    }
-    seed
-}
 
 #[cfg(test)]
 #[path = "controller_tests.rs"]

@@ -11,14 +11,13 @@ use grenadiers_core::cpu::{
     policy::UtilityMemory,
     survival::{
         PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_lairs_with_origin,
-        plan_respawn_v22_with_origin, plan_respawn_v23_with_origin, plan_respawn_v24_with_origin,
-        plan_respawn_v25_with_origin, plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
-        plan_with_origin,
+        plan_reliable_v27_with_origin, plan_respawn_v22_with_origin, plan_respawn_v23_with_origin,
+        plan_respawn_v24_with_origin, plan_respawn_v25_with_origin, plan_respawn_with_origin,
+        plan_spike_pits_v26_with_origin, plan_with_origin,
     },
 };
 use grenadiers_core::game::Tick;
 use grenadiers_core::room::CpuPolicy;
-
 const WORKERS: usize = 2;
 const QUEUE_CAPACITY: usize = 32;
 
@@ -67,6 +66,8 @@ struct PlannerInner {
     sender: Mutex<Option<SyncSender<PlanJob>>>,
     workers: Mutex<Vec<JoinHandle<()>>>,
     _receiver: Arc<Mutex<Receiver<PlanJob>>>,
+    #[cfg(test)]
+    trace: Arc<Mutex<PumpReport>>,
 }
 
 impl Drop for PlannerInner {
@@ -93,12 +94,21 @@ impl CpuPlanner {
     fn with_worker_count(worker_count: usize) -> Result<Self, ()> {
         let (sender, receiver) = sync_channel(QUEUE_CAPACITY);
         let receiver = Arc::new(Mutex::new(receiver));
+        #[cfg(test)]
+        let trace = Arc::new(Mutex::new(PumpReport::default()));
         let mut workers = Vec::with_capacity(worker_count);
         for index in 0..worker_count {
             let receiver = Arc::clone(&receiver);
+            #[cfg(test)]
+            let trace = Arc::clone(&trace);
             let worker = thread::Builder::new()
                 .name(format!("grenadiers-cpu-{index}"))
-                .spawn(move || worker_loop(&receiver))
+                .spawn(move || {
+                    #[cfg(test)]
+                    worker_loop(&receiver, &trace);
+                    #[cfg(not(test))]
+                    worker_loop(&receiver);
+                })
                 .map_err(|_| ())?;
             workers.push(worker);
         }
@@ -107,6 +117,8 @@ impl CpuPlanner {
                 sender: Mutex::new(Some(sender)),
                 workers: Mutex::new(workers),
                 _receiver: receiver,
+                #[cfg(test)]
+                trace,
             }),
         })
     }
@@ -156,22 +168,22 @@ impl CpuPlanner {
                     | std::sync::mpsc::TryRecvError::Disconnected,
                 ) => break,
             };
-            report.dequeued += 1;
-            let (status, spent, intent, planner_time) = execute_job(job, true);
-            report.planner_times.extend(planner_time);
-            match status {
-                JobStatus::Delivered => report.delivered += 1,
-                JobStatus::Cancelled => report.cancelled += 1,
-                JobStatus::Failed => report.failed += 1,
-                JobStatus::Dropped => report.dropped += 1,
-            }
-            report.work.push(spent);
-            report.planned_intents.extend(intent);
+            record(&mut report, execute_job(job, true));
         }
         report
     }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn trace_for_test(&self) -> PumpReport {
+        self.inner
+            .trace
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .clone()
+    }
 }
 
+#[cfg(not(test))]
 fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
     loop {
         let job = receiver
@@ -183,6 +195,46 @@ fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
         };
         let _ = execute_job(job, false);
     }
+}
+
+#[cfg(test)]
+fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>, trace: &Arc<Mutex<PumpReport>>) {
+    loop {
+        let job = receiver
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .recv();
+        let Ok(job) = job else {
+            return;
+        };
+        let result = execute_job(job, true);
+        record(
+            &mut trace.lock().unwrap_or_else(|error| error.into_inner()),
+            result,
+        );
+    }
+}
+
+#[cfg(test)]
+fn record(
+    report: &mut PumpReport,
+    (status, spent, intent, planner_time): (
+        JobStatus,
+        u32,
+        Option<grenadiers_core::cpu::Intent>,
+        Option<std::time::Duration>,
+    ),
+) {
+    report.dequeued += 1;
+    report.planner_times.extend(planner_time);
+    match status {
+        JobStatus::Delivered => report.delivered += 1,
+        JobStatus::Cancelled => report.cancelled += 1,
+        JobStatus::Failed => report.failed += 1,
+        JobStatus::Dropped => report.dropped += 1,
+    }
+    report.work.push(spent);
+    report.planned_intents.extend(intent);
 }
 
 fn execute_job(
@@ -199,85 +251,11 @@ fn execute_job(
     }
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
-    let planned =
-        if job.observation.parts().rules.version == 10 || job.policy == CpuPolicy::UtilityV26 {
-            let plan = if job.policy == CpuPolicy::UtilityV26 {
-                plan_spike_pits_v26_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else {
-                plan_respawn_v25_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            };
-            plan.map(|plan| (plan.survival, plan.contact))
-        } else if job.observation.parts().rules.version == 9 {
-            let plan = if job.policy == CpuPolicy::UtilityV25 {
-                plan_respawn_v25_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else if job.policy == CpuPolicy::UtilityV24 {
-                plan_respawn_v24_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else if job.policy == CpuPolicy::UtilityV23 {
-                plan_respawn_v23_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else if job.policy == CpuPolicy::UtilityV22 {
-                plan_respawn_v22_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else {
-                plan_respawn_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            };
-            plan.map(|plan| (plan.survival, plan.contact))
-        } else if job.observation.parts().rules.version == 8 {
-            plan_lairs_with_origin(
+    let planned = if job.observation.parts().rules.version == 10
+        || matches!(job.policy, CpuPolicy::UtilityV26 | CpuPolicy::UtilityV27)
+    {
+        let plan = if job.policy == CpuPolicy::UtilityV27 {
+            plan_reliable_v27_with_origin(
                 &job.observation,
                 &job.memory,
                 &job.hazard_memory,
@@ -286,9 +264,18 @@ fn execute_job(
                 &mut job.rng,
                 &mut work,
             )
-            .map(|plan| (plan.survival, plan.contact))
+        } else if job.policy == CpuPolicy::UtilityV26 {
+            plan_spike_pits_v26_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
         } else {
-            plan_with_origin(
+            plan_respawn_v25_with_origin(
                 &job.observation,
                 &job.memory,
                 &job.hazard_memory,
@@ -297,8 +284,84 @@ fn execute_job(
                 &mut job.rng,
                 &mut work,
             )
-            .map(|plan| (plan, None))
         };
+        plan.map(|plan| (plan.survival, plan.contact))
+    } else if job.observation.parts().rules.version == 9 {
+        let plan = if job.policy == CpuPolicy::UtilityV25 {
+            plan_respawn_v25_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV24 {
+            plan_respawn_v24_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV23 {
+            plan_respawn_v23_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV22 {
+            plan_respawn_v22_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else {
+            plan_respawn_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        };
+        plan.map(|plan| (plan.survival, plan.contact))
+    } else if job.observation.parts().rules.version == 8 {
+        plan_lairs_with_origin(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan.survival, plan.contact))
+    } else {
+        plan_with_origin(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan, None))
+    };
     let Ok((plan, contact)) = planned else {
         return (
             JobStatus::Failed,

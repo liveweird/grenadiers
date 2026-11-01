@@ -9,6 +9,35 @@ use grenadiers_core::game::Tick;
 
 use super::{AcceptedPlan, CpuController};
 
+#[cfg(test)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(in crate::game::rooms) struct AdmissionTrace {
+    pub expired_or_wrong_decision: u32,
+    pub missed_manual_tick: u32,
+    pub stale_scene: u32,
+    pub invalid_hold: u32,
+    pub contact: u32,
+    pub strategic_plant: u32,
+    pub invalid_shape: u32,
+    pub pulse: u32,
+    pub route: u32,
+    pub duplicate_decision: u32,
+}
+
+#[derive(Clone, Copy)]
+enum AdmissionRejection {
+    ExpiredOrWrongDecision,
+    MissedManualTick,
+    StaleScene,
+    InvalidHold,
+    Contact,
+    StrategicPlant,
+    InvalidShape,
+    Pulse,
+    Route,
+    DuplicateDecision,
+}
+
 impl CpuController {
     pub(in crate::game::rooms) fn poll(
         &mut self,
@@ -25,14 +54,14 @@ impl CpuController {
             .checked_sub(pending.decision.observation_tick.0)
         else {
             self.cancel();
-            return None;
+            return self.reject(AdmissionRejection::ExpiredOrWrongDecision);
         };
         if age > MAX_PLAN_AGE_TICKS
             || pending.decision.command_epoch != command_epoch
             || self.world != Some(pending.decision.world)
         {
             self.cancel();
-            return None;
+            return self.reject(AdmissionRejection::ExpiredOrWrongDecision);
         }
         let received = if pending.completed.is_none() {
             match pending.receiver.try_recv() {
@@ -40,7 +69,7 @@ impl CpuController {
                 Err(TryRecvError::Empty) => return None,
                 Err(TryRecvError::Disconnected) => {
                     self.pending = None;
-                    return None;
+                    return self.reject(AdmissionRejection::ExpiredOrWrongDecision);
                 }
             }
         } else {
@@ -62,7 +91,7 @@ impl CpuController {
                 std::cmp::Ordering::Less => return None,
                 std::cmp::Ordering::Greater => {
                     self.cancel();
-                    return None;
+                    return self.reject(AdmissionRejection::MissedManualTick);
                 }
                 std::cmp::Ordering::Equal => {}
             }
@@ -82,7 +111,7 @@ impl CpuController {
         let escape_origin = match (&result.escape_origin, &self.escape_origin) {
             (None, None) => false,
             (Some(result), Some(current)) if result.same_origin(current) => true,
-            _ => return None,
+            _ => return self.reject(AdmissionRejection::StaleScene),
         };
         if self.settled_stop_tick.is_none()
             || (matches!(result.basis.parts().rules.version, 9 | 10)
@@ -94,10 +123,10 @@ impl CpuController {
                 || result.plan.execution.is_none())
                 && !grenadiers_core::cpu::survival::can_admit_ordinary(&result.basis, latest))
         {
-            return None;
+            return self.reject(AdmissionRejection::StaleScene);
         }
         if !(1..=MAX_HOLD_TICKS).contains(&result.plan.control.hold_ticks) {
-            return None;
+            return self.reject(AdmissionRejection::InvalidHold);
         }
         let grenadiers_core::cpu::survival::SurvivalPlan {
             control,
@@ -111,14 +140,14 @@ impl CpuController {
             {
                 Some(contact)
             }
-            Some(_) => return None,
+            Some(_) => return self.reject(AdmissionRejection::Contact),
             None if (result.basis.parts().rules.version == 8
                 || (matches!(result.basis.parts().rules.version, 9 | 10)
                     && result.basis.respawn_lairs().is_some()))
                 && (control.intent.manual.is_some()
                     || control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop) =>
             {
-                return None;
+                return self.reject(AdmissionRejection::Contact);
             }
             None => None,
         };
@@ -137,7 +166,7 @@ impl CpuController {
             plant,
             &mut WorkBudget::new(65_536),
         ) {
-            return None;
+            return self.reject(AdmissionRejection::StrategicPlant);
         }
         if (escape_origin
             && (control.intent.manual.is_some()
@@ -146,25 +175,28 @@ impl CpuController {
                     && lease.is_none())))
             || (execution.is_some() && (lease.is_some() || invalid_manual))
         {
-            return None;
+            return self.reject(AdmissionRejection::InvalidShape);
         }
         let committed_pulse = match lease {
-            Some(lease) => Some(
-                CommittedPulse::admit(lease, result.basis.clone(), latest, current_tick).ok()?,
-            ),
+            Some(lease) => {
+                match CommittedPulse::admit(lease, result.basis.clone(), latest, current_tick) {
+                    Ok(pulse) => Some(pulse),
+                    Err(_) => return self.reject(AdmissionRejection::Pulse),
+                }
+            }
             None => None,
         };
         let committed_route = match execution {
-            Some(execution) => Some(
-                CommittedRoute::admit_execution(
-                    execution,
-                    result.basis,
-                    latest,
-                    current_tick,
-                    control.intent.movement,
-                )
-                .ok()?,
-            ),
+            Some(execution) => match CommittedRoute::admit_execution(
+                execution,
+                result.basis,
+                latest,
+                current_tick,
+                control.intent.movement,
+            ) {
+                Ok(route) => Some(route),
+                Err(_) => return self.reject(AdmissionRejection::Route),
+            },
             None => None,
         };
         let current = AdmissionContext {
@@ -180,7 +212,7 @@ impl CpuController {
             &mut WorkBudget::new(1),
         ) != DecisionAdmission::Accepted
         {
-            return None;
+            return self.reject(AdmissionRejection::DuplicateDecision);
         }
         Some(AcceptedPlan {
             decision: pending.decision,
@@ -195,5 +227,31 @@ impl CpuController {
             escape_origin,
             ordinary_navigation,
         })
+    }
+
+    fn reject(&mut self, reason: AdmissionRejection) -> Option<AcceptedPlan> {
+        #[cfg(test)]
+        match reason {
+            AdmissionRejection::ExpiredOrWrongDecision => {
+                self.admission_trace.expired_or_wrong_decision += 1;
+            }
+            AdmissionRejection::MissedManualTick => self.admission_trace.missed_manual_tick += 1,
+            AdmissionRejection::StaleScene => self.admission_trace.stale_scene += 1,
+            AdmissionRejection::InvalidHold => self.admission_trace.invalid_hold += 1,
+            AdmissionRejection::Contact => self.admission_trace.contact += 1,
+            AdmissionRejection::StrategicPlant => self.admission_trace.strategic_plant += 1,
+            AdmissionRejection::InvalidShape => self.admission_trace.invalid_shape += 1,
+            AdmissionRejection::Pulse => self.admission_trace.pulse += 1,
+            AdmissionRejection::Route => self.admission_trace.route += 1,
+            AdmissionRejection::DuplicateDecision => self.admission_trace.duplicate_decision += 1,
+        }
+        #[cfg(not(test))]
+        let _ = reason;
+        None
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn admission_trace_for_test(&self) -> AdmissionTrace {
+        self.admission_trace.clone()
     }
 }

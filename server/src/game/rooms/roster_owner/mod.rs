@@ -78,8 +78,10 @@ fn validate_cpus(
         runtime.environment(),
         identity.configuration.cpu_difficulty(),
     ) {
-        (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::SPIKE_PITS_EASY),
-        (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => Some(CpuProfile::SPIKE_PITS_STANDARD),
+        (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
+        (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
+            Some(CpuProfile::RELIABLE_V27_STANDARD)
+        }
         (None, Some(_), _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RESPAWN_LAIRS_EASY),
         (None, Some(_), _, _, Some(CpuDifficulty::Standard)) => {
             Some(CpuProfile::RESPAWN_LAIRS_STANDARD)
@@ -149,3 +151,6 @@ mod cpu_intent_progress_tests;
 
 #[cfg(test)]
 mod cpu_farm_progress_tests;
+
+#[cfg(test)]
+mod reliable_profile_tests;

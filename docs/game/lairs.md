@@ -63,7 +63,7 @@ obstructed. `State::mobs()` omits pursuit targets, paths and private thaw deadli
 Rules8 retains its periodic 1–8-mob lifecycle and finite `State::lairs()` view for historical
 contracts/replay7. Rules9 and rules10 use the separate view. Mob AI has its own immutable identity: all existing rules
 constructors and replay8 retain navigation1; replay9/10 retain navigation2. Live construction
-explicitly selects navigation3, bound by private replay11. Settings changes, rounds and rematches
+explicitly selects navigation3; private replay11 binds CPU26 and replay12 binds live CPU27. Settings changes, rounds and rematches
 preserve that selection. These policies share the same speed, collision/contact and recipient
 facts; gameplay18 carries no hidden navigation data. Production replay recording remains disabled.
 

@@ -19,11 +19,11 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — improve current CPU and mob liveness.** Reproduce reported stalls,
-  passive farming/pickup behavior and waiting beside lethal bombs under current rules and CPU policy.
-  Expose action-refusal/queue reasons; test bomb-blocked escape guidance, alternate firing positions
-  and sustained per-CPU progress in complete seeded matches. Keep safety certificates and replay/privacy
-  guarantees. Tune purposeful farming, pickup collection and safe bombing pressure after fixing liveness.
+- [next] **CPU-RELIABILITY — validate remaining CPU liveness.** Reproduce remaining long-match
+  stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
+  Use action-refusal and queue diagnostics plus exact productive-action witnesses; elapsed time
+  or a free bomb slot alone does not establish a missed safe action. Preserve safety certificates,
+  bounded scheduling, replay/privacy and sustained per-seat progress regressions.
 
 - [todo] **CPU-PRESSURE — improve purposeful, safe aggression.** Build on reliable execution:
   pursue useful drops, farm destructible blocks and choose productive bombing approaches. Preserve

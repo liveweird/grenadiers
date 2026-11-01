@@ -192,7 +192,9 @@ fn spike_observation() -> Observation {
     .unwrap()
 }
 
-fn spike_job(policy: grenadiers_core::room::CpuPolicy) -> (PlanJob, Receiver<PlanResult>) {
+pub(super) fn spike_job(
+    policy: grenadiers_core::room::CpuPolicy,
+) -> (PlanJob, Receiver<PlanResult>) {
     let observation = spike_observation();
     let mut hazards = ObservedHazardMemory::new(key());
     hazards.observe(&observation).unwrap();

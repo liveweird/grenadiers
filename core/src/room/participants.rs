@@ -33,6 +33,7 @@ pub enum CpuPolicy {
     UtilityV24,
     UtilityV25,
     UtilityV26,
+    UtilityV27,
 }
 
 impl CpuPolicy {
@@ -65,6 +66,7 @@ impl CpuPolicy {
             Self::UtilityV24 => 24,
             Self::UtilityV25 => 25,
             Self::UtilityV26 => 26,
+            Self::UtilityV27 => 27,
         }
     }
 }
@@ -297,6 +299,17 @@ impl CpuProfile {
     /// Dormant Easy rules-v10 profile; live room selection remains on CPU25.
     pub const SPIKE_PITS_EASY: Self = Self {
         policy: CpuPolicy::UtilityV26,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Opt-in rules-v10 reliability profile; live and archived profiles are unchanged.
+    pub const RELIABLE_V27_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV27,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const RELIABLE_V27_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV27,
         difficulty: CpuDifficulty::Easy,
     };
 

@@ -152,3 +152,24 @@ One westward 12-update prefix passes route/contact checks. Relocating only the a
 allows a contact-safe endpoint plant against `(1,5)`, but the complete approach is not demonstrated.
 No alternating-memory guidance defect is established. Focused tests, strict all-target Clippy,
 formatting and repository checks pass. Independent review corrected the stopped-clock claim.
+
+## Fresh CPU49 full round
+
+`target/quality-review/roster-v1311-long-match.json` records one 180-second all-items
+round with one human and three Hard CPUs, from tick 196 to result 10996. It retains
+181 public samples and 318 diagnostic responses; there are no JavaScript errors.
+CPU bomb counts are 0/3/3 by seats Two/Three/Four. This is an uncontrolled fresh round,
+not a matched comparison with previous releases.
+
+Two exposed Teleporters at `(1,7)` and `(13,7)` persist from sample 20/tick 1381 through
+the end; the last observed CPU bomb was placed at 674. Both guidance and certification
+require exactly one Teleporter, while ordinary planting rejects any exposed Teleporter.
+This identifies another explicit support limit, not an established safe unexecuted collection.
+
+Seat Two also alternates farming targets `(11,2)` from `(11,1)` and `(9,1)` from `(10,1)`
+before the pickups appear. It never plants, traverses four top-row cells and makes 240
+observed cell changes; describing it as continuously stationary would be incorrect.
+Seat Three has a long same-cell interval before moving again; a cell summary alone does
+not establish unchanged exact pose. The public capture does not contain private controller,
+queue, Stop or refusal history. Preserve separate original-pose owner witnesses before
+claiming a missed safe action or changing farming memory.

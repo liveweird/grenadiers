@@ -2,12 +2,14 @@ use crate::cpu::forecast::ObservedHazardMemory;
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant};
 use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, EntityId, InputAction, Position, SeatId, SeatInput, State, Tick};
+use crate::room::RoomSettings;
 
 use super::continuation_test_fixture::{CPU, observe, observe_for, state, step_until};
 use super::{PlantEscapeOrigin, WORK_ALLOWANCE};
 
 pub(super) struct ContinuationScene {
     pub(super) state: State,
+    pub(super) settings: RoomSettings,
     pub(super) basis: Observation,
     pub(super) rival_basis: Observation,
     pub(super) origin: PlantEscapeOrigin,
@@ -104,6 +106,7 @@ pub(super) fn scene() -> ContinuationScene {
     .expect("genuine mirrored stopped plant origin");
     ContinuationScene {
         state,
+        settings,
         basis,
         rival_basis,
         origin,

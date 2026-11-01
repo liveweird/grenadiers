@@ -3,6 +3,21 @@ use crate::cpu::{BombKnowledge, Observation, WorkBudget};
 use super::ForecastEvolution;
 
 impl ForecastEvolution {
+    pub(crate) fn continuation_expected_live_bombs(
+        &self,
+        owner: crate::game::EntityId,
+        tick: crate::game::Tick,
+        work: &mut WorkBudget,
+    ) -> Option<u16> {
+        let units = self
+            .bomb_owners
+            .len()
+            .checked_mul(self.bomb_removals.len().checked_add(2)?)
+            .and_then(|value| u32::try_from(value.checked_add(1)?).ok())?;
+        work.try_take(units).ok()?;
+        self.expected_live_bombs(owner, tick)
+    }
+
     /// Charges the complete observed-bomb scene comparison before traversing it.
     /// Continuation starts without finite flames or Oil; predicted later flames
     /// and bomb removals remain valid, while foreign changes fail scene matching.

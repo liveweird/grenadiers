@@ -8,6 +8,7 @@ mod continuation;
 mod continuation_candidates;
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation_proof;
+mod continuation_renewal;
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation_types;
 mod motion;
@@ -49,6 +50,9 @@ pub(crate) use continuation::certify_continuation;
 #[cfg(test)]
 pub(crate) use continuation::certify_nominal_for_test;
 pub(crate) use continuation_candidates::continuation_candidates;
+pub(crate) use continuation_renewal::{
+    CONTINUATION_RENEWAL_ALLOWANCE, PreparedFrame, PreparedGrant,
+};
 pub(crate) use continuation_types::{ContinuationCertificate, ContinuationRequest, NominalLeg};
 
 pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};

@@ -69,7 +69,9 @@ pub(crate) struct ContinuationCheckpointView {
     pub(crate) reversed: bool,
 }
 
-#[derive(Clone)]
+// Runtime continuation authority is linear. Tests may fork immutable proof data
+// to exercise independent failure branches, but production cannot duplicate it.
+#[cfg_attr(test, derive(Clone))]
 #[allow(dead_code)] // Inactive guidance; executor integration is a later package.
 pub(crate) struct ContinuationCertificate {
     key: MemoryKey,
@@ -131,15 +133,15 @@ impl ContinuationCertificate {
         })
     }
 
-    pub(super) const fn key(&self) -> MemoryKey {
+    pub(crate) const fn key(&self) -> MemoryKey {
         self.key
     }
 
-    pub(super) const fn basis(&self) -> &Observation {
+    pub(crate) const fn basis(&self) -> &Observation {
         &self.basis
     }
 
-    pub(super) const fn basis_tick(&self) -> Tick {
+    pub(crate) const fn basis_tick(&self) -> Tick {
         self.basis_tick
     }
 
@@ -149,6 +151,11 @@ impl ContinuationCertificate {
 
     pub(crate) const fn survive_until(&self) -> Tick {
         self.survive_until
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_survive_until_for_test(&mut self, survive_until: Tick) {
+        self.survive_until = survive_until;
     }
 
     pub(super) const fn origin(&self) -> PulseOriginGrace {
@@ -202,7 +209,7 @@ impl ContinuationCertificate {
         &self.assumptions
     }
 
-    pub(super) const fn evolution(&self) -> &ForecastEvolution {
+    pub(crate) const fn evolution(&self) -> &ForecastEvolution {
         &self.evolution
     }
 

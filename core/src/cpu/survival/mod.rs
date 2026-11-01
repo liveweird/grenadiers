@@ -7,8 +7,14 @@ mod bracelet;
 mod clear_gap;
 mod compatibility;
 mod contact_plant;
-// Explicitly inactive proof adapter. Remove this narrow allowance with the
-// real planner/executor integration, before gameplay activation.
+// Explicitly inactive continuation runtime. Remove these narrow allowances
+// when policy/controller callers land, before gameplay activation.
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_compatibility;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_execution;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_pending;
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation_planner;
 #[cfg_attr(not(test), allow(dead_code))]
@@ -41,6 +47,13 @@ pub use compatibility::can_admit_ordinary;
 pub use contact_plant::PlantContactCertificate;
 #[cfg(test)]
 pub(crate) use contact_plant::contact_scene_candidate_for_test;
+#[allow(unused_imports)] // Inactive executor; server integration is intentionally deferred.
+pub(crate) use continuation_execution::{
+    CommittedContinuation, ContinuationCommand, ContinuationPublication, ContinuationStatus,
+    PreparedContinuation, PreparedRenewal,
+};
+#[allow(unused_imports)] // Inactive executor; server integration is intentionally deferred.
+pub(crate) use continuation_pending::PendingContinuation;
 #[allow(unused_imports)] // Inactive proof entry; no policy dispatch in this package.
 pub(crate) use continuation_planner::certify_continuation;
 #[allow(unused_imports)] // Inactive selector; policy identity is intentionally deferred.
@@ -111,6 +124,13 @@ mod counter_pressure_v29_acceptance_tests;
 
 #[cfg(test)]
 mod continuation_tests;
+
+#[cfg(test)]
+mod continuation_authority_tests;
+#[cfg(test)]
+mod continuation_execution_guard_tests;
+#[cfg(test)]
+mod continuation_execution_tests;
 
 #[cfg(test)]
 mod continuation_test_fixture;

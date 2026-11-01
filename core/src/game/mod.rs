@@ -40,6 +40,8 @@ pub mod geometry;
 pub mod input;
 pub mod inventory;
 mod lairs;
+mod mob_escape;
+mod mob_hazards;
 mod movement;
 mod movement_collision;
 pub mod oil;
@@ -112,6 +114,15 @@ mod generated_match_trace_tests;
 
 #[cfg(test)]
 mod variable_board_tests;
+
+#[cfg(test)]
+mod mob_escape_tests;
+
+#[cfg(test)]
+mod mob_hazard_phase_tests;
+
+#[cfg(test)]
+mod mob_oil_escape_tests;
 
 #[cfg(test)]
 mod invisibility_cloak_tests;

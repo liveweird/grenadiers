@@ -174,19 +174,44 @@ impl LairState {
         tick: Tick,
     ) -> Vec<MovementTrace> {
         let danger = super::explosions::bomb_danger_cells(world);
-        let searches =
-            navigation::target_searches(world, actors, target_order, tick, &danger, spike_pits);
+        let mut budget = super::mob_hazards::WorkBudget::new();
+        let timed = if self.navigation_policy == MobNavigationPolicy::TimedEscapeV3 && !frozen {
+            super::mob_hazards::TimedMobHazards::build(world, tick, &mut budget)
+        } else {
+            None
+        };
+        let timed_danger = timed.as_ref().map(|hazards| {
+            hazards
+                .cells()
+                .chain(world.oil.iter().filter_map(|(cell, state)| {
+                    (state == super::oil::OilState::Pending).then_some(cell)
+                }))
+                .collect::<BTreeSet<_>>()
+        });
+        let navigation_danger = timed_danger.as_ref().unwrap_or(&danger);
+        let searches = navigation::target_searches(
+            world,
+            actors,
+            target_order,
+            tick,
+            navigation_danger,
+            spike_pits,
+        );
         self.mobs
             .iter_mut()
             .map(|mob| {
                 navigation::advance_mob(
                     mob,
                     world,
-                    navigation::NavigationHazards::new(&danger, spike_pits),
+                    navigation::NavigationHazards::new(navigation_danger, spike_pits)
+                        .with_timed(timed.as_ref()),
                     &searches,
                     frozen,
-                    tick,
-                    self.navigation_policy,
+                    navigation::NavigationParameters {
+                        tick,
+                        policy: self.navigation_policy,
+                    },
+                    &mut budget,
                 )
             })
             .collect()
@@ -311,7 +336,7 @@ pub fn lair_layout_v1(board: BoardSize) -> [CellId; MAX_LAIRS] {
     }
 }
 
-fn adjacent(cell: CellId, direction: u8) -> CellId {
+pub(crate) fn adjacent(cell: CellId, direction: u8) -> CellId {
     match direction {
         0 => CellId::new(cell.column, cell.row - 1),
         1 => CellId::new(cell.column + 1, cell.row),

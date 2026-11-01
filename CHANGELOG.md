@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.2.4 — 2026-11-01
+
+- Let mobs escape across multiple future blast cells before stationary timed bombs detonate,
+  using bounded time-aware routes, whole-footprint deadlines and conservative chain forecasts.
+- Preserve older navigation policies and bind the new live navigation3 policy in private replay11.
+
 ## 1.2.3 — 2026-11-01
 
 - Add random 900ms zoom-in, zoom-out and left/right camera transitions at genuine round starts

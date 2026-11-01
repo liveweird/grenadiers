@@ -4,6 +4,55 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.2.3 — 2026-11-01
+
+Each browser randomly chooses a short zoom-in, zoom-out, left-rotation or right-rotation cue at
+fresh round openings and observed round/match results. The 900ms effects return exactly to the
+normal view; reduced motion stays stationary. The full tray remains framed on every board and
+viewport. See the [native camera examples](../screenshots/round-camera.md).
+
+A client presentation latch observes genuine snapshot-free countdowns before React coalescing,
+then starts the intro when the first running arena arrives. Controls remain active. Late admission,
+repeated reconnect countdowns, suspension and context recovery cannot replay consumed cues.
+Animation uses the existing frame loop and adds no timers or GPU resources. See
+[arena rendering](../game/arena-3d.md#round-camera-transitions).
+
+### Verification
+
+Accepted image source: `7153ffd877556fb5e9344cb7780f56fb24e95216`,
+[PR #303](https://github.com/liveweird/grenadiers/pull/303). Independent cross-component review is clear.
+Later changes contain only browser-test corrections, documentation and screenshots; image build
+inputs remain unchanged.
+
+- Full web gate: 7,407 tests in 167 files; coverage 95.59% lines, 92.54% statements,
+  91.69% functions and 88.82% branches. All existing floors remain unchanged. Types, lint,
+  Knip, generated-contract/validator drift and 120 documented browser scenarios pass.
+- Production bundle: JavaScript 399,557/400,000 gzip bytes; CSS 15,474/20,000.
+- Native renderer regression: 25 passed, 13 project-specific skips. All four opening/ending
+  variants change native pixels and settle to byte-identical canonical pixels; reduced motion,
+  billboard/death/fire layering, board sizes and WebGL recovery pass.
+- Isolated warmed callback submission cost, 40 frames each: empty median/p95/max
+  0.20/0.30/0.30ms; worst public fire 1.70/1.80/2.10ms. This is not a hardware FPS claim.
+- Exact-image Compose duel/authentication: two passed. The real two-client browser scenario
+  verifies intros across first and subsequent rounds without fabricating countdown snapshots;
+  both clients use isolated contexts and close cleanly. Fresh three-CPU motion/bomb smoke passes.
+- Exact-image Kubernetes duel/authentication and restricted runtime pass. Owned acceptance
+  stacks and namespace are removed. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings.
+  All five image web files equal the verified production build.
+
+Backend logic, contracts, dependencies and artwork are unchanged. Reuse v1.2.2 artwork/audio
+and v1.2.0/v1.2.1 Rust debug/release, coverage, dependency and distinct Linux acceptance.
+The release image also compiles the server for Linux.
+
+### Operation
+
+Accepted local image:
+`sha256:aea9ced2c51dbbeecc8dba9a22783c77d12d1a279932d6f05c04be47c41be8de`.
+The exact accepted image is promoted to localhost:8085; v1.2.2 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains available in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.2.2 — 2026-10-31
 
 Optional retro sound now includes quiet local footsteps, ordinary and special-bomb placement and

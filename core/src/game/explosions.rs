@@ -3,7 +3,7 @@ use std::ops::ControlFlow;
 
 use super::arena::Terrain;
 use super::blast_geometry::{BlastBomb, BlastField, BlastSource, BlastVisit, visit_blast};
-use super::bombs::BombTrigger;
+use super::bombs::{Bomb, BombTrigger};
 use super::types::{CellId, EntityId, Tick};
 use super::world::World;
 
@@ -97,6 +97,21 @@ pub(crate) fn plan_with_contacts(
 /// This deliberately uses the same immutable occupancy and blast visitor as
 /// explosion planning, including piercing and power geometry.
 pub(crate) fn bomb_danger_cells(world: &World) -> BTreeSet<CellId> {
+    let mut danger = BTreeSet::new();
+    let completed = visit_bomb_footprints(world, |_, cell| {
+        danger.insert(cell);
+        ControlFlow::<()>::Continue(())
+    });
+    debug_assert!(completed.is_continue());
+    danger
+}
+
+/// Visits every live bomb's immutable blast footprint using explosion geometry.
+/// Callers may stop early to enforce their own deterministic work bound.
+pub(crate) fn visit_bomb_footprints<B>(
+    world: &World,
+    mut visitor: impl FnMut(EntityId, CellId) -> ControlFlow<B>,
+) -> ControlFlow<B> {
     let bombs_by_cell: BTreeMap<_, _> = world
         .bombs
         .values()
@@ -106,23 +121,43 @@ pub(crate) fn bomb_danger_cells(world: &World) -> BTreeSet<CellId> {
         world,
         bombs_by_cell: &bombs_by_cell,
     };
-    let mut danger = BTreeSet::new();
     for bomb in world.bombs.values() {
-        let completed = visit_blast(
+        visit_blast(
             &field,
             BlastSource {
                 cell: bomb.cell(),
                 range: bomb.range(),
                 kind: bomb.blast(),
             },
-            |visit| {
-                danger.insert(visit.cell);
-                ControlFlow::<()>::Continue(())
-            },
-        );
-        debug_assert!(completed.is_continue());
+            |visit| visitor(bomb.id(), visit.cell),
+        )?;
     }
-    danger
+    ControlFlow::Continue(())
+}
+
+/// Visits one conservative future blast. Permanent walls stop it; the caller
+/// supplies bombs and removable blockers still present in this phase.
+pub(crate) fn visit_potential_timed_blast<B>(
+    world: &World,
+    bomb: Bomb,
+    bombs_by_cell: &BTreeMap<CellId, EntityId>,
+    removable_blockers: &BTreeSet<CellId>,
+    visitor: impl FnMut(BlastVisit) -> ControlFlow<B>,
+) -> ControlFlow<B> {
+    let field = PotentialBlastField {
+        world,
+        bombs_by_cell,
+        removable_blockers,
+    };
+    visit_blast(
+        &field,
+        BlastSource {
+            cell: bomb.cell(),
+            range: bomb.range(),
+            kind: bomb.blast(),
+        },
+        visitor,
+    )
 }
 
 fn apply_visit(
@@ -184,6 +219,37 @@ impl BlastField for WorldBlastField<'_> {
             id,
             contact: matches!(bomb.trigger(), BombTrigger::Contact),
         })
+    }
+}
+
+struct PotentialBlastField<'a> {
+    world: &'a World,
+    bombs_by_cell: &'a BTreeMap<CellId, EntityId>,
+    removable_blockers: &'a BTreeSet<CellId>,
+}
+
+impl BlastField for PotentialBlastField<'_> {
+    fn dimensions(&self) -> (u16, u16) {
+        (self.world.arena.width(), self.world.arena.height())
+    }
+
+    fn is_floor(&self, cell: CellId) -> bool {
+        self.world.arena.terrain(cell) == Some(Terrain::Floor)
+    }
+
+    fn has_soft_block(&self, cell: CellId) -> bool {
+        self.removable_blockers.contains(&cell)
+    }
+
+    fn has_unlit_oil(&self, _cell: CellId) -> bool {
+        false
+    }
+
+    fn bomb_at(&self, cell: CellId) -> Option<BlastBomb> {
+        self.bombs_by_cell
+            .get(&cell)
+            .copied()
+            .map(|id| BlastBomb { id, contact: false })
     }
 }
 

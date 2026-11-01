@@ -28,10 +28,17 @@ unchanged. Construction rejects a lair cell without a hard wall.
 
 Mobs move at 1.5 cells/second and chase the nearest reachable living, uncloaked player,
 using round priority for ties. Shared blast geometry guides bomb avoidance. Fixed-point
-collision and committed retreat anchors prevent wall crossing. Current navigation2 completes an
-exit from a dangerous origin instead of reversing back into it on the next update. It retreats
-from newly threatened destinations toward a safe center; if that center becomes dangerous,
-it rechecks an alternative exit and preserves exact center alignment when changing direction.
+collision and committed retreat anchors prevent wall crossing. Navigation3 can cross multiple
+future blast cells to reach refuge before stationary timed bombs detonate. It accounts for whole
+mob footprints, fuse deadlines and chain ignition rather than requiring the first neighbouring
+cell to be outside every future blast. Turns remain aligned to cell centers and changed hazards
+or obstructions are rechecked.
+
+The temporal search shares a bounded work allowance. Concealed/Pending Oil uses conservative
+potential blast geometry; Pending cells cannot be used as transit or refuge. Unrelated flames
+and Burning Oil remain local obstacles. Ambiguous moving, Remote, Contact or fire-triggered bombs,
+arithmetic failure and work exhaustion retain navigation2 avoidance. Conservative forecasts may
+refuse some otherwise possible routes; no future item-reveal simulation is required.
 
 Under rules10, ordinary mob routing treats spike-pit cells as unavailable. A mob already
 overlapping a pit may move outward, but this escape exception does not authorize deliberate
@@ -55,10 +62,10 @@ obstructed. `State::mobs()` omits pursuit targets, paths and private thaw deadli
 
 Rules8 retains its periodic 1–8-mob lifecycle and finite `State::lairs()` view for historical
 contracts/replay7. Rules9 and rules10 use the separate view. Mob AI has its own immutable identity: all existing rules
-constructors and replay8 retain navigation1; live construction explicitly selects navigation2,
-bound by private replay9. Settings changes, rounds and rematches preserve that selection.
-Both policies share the same speed, collision/contact and recipient facts; gameplay18 carries
-no hidden navigation data. Production replay recording remains disabled. The artist sheet and mob/lair sprites are unchanged.
+constructors and replay8 retain navigation1; replay9/10 retain navigation2. Live construction
+explicitly selects navigation3, bound by private replay11. Settings changes, rounds and rematches
+preserve that selection. These policies share the same speed, collision/contact and recipient
+facts; gameplay18 carries no hidden navigation data. Production replay recording remains disabled.
 
 The 3D arena retains the dedicated `terrain.lair` doorway sprite upright on the front of a
 taller stone lair, with `material.lair.top` and `material.lair.side` supplying its surface maps.

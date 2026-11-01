@@ -97,54 +97,55 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.2.3 — 2026-11-01
+## v1.2.4 — 2026-11-01
 
-Each browser randomly chooses a short zoom-in, zoom-out, left-rotation or right-rotation cue at
-fresh round openings and observed round/match results. The 900ms effects return exactly to the
-normal view; reduced motion stays stationary. The full tray remains framed on every board and
-viewport. See the [native camera examples](screenshots/round-camera.md).
+Mobs can escape corridors whose first few cells remain inside a future timed blast. Live
+navigation3 finds bounded, time-aware routes to refuge, checking whole footprints against fuse
+and chain deadlines. It rechecks changed obstacles and hazards; uncertain bomb models retain
+conservative avoidance. See [lair navigation](game/lairs.md#movement-and-combat).
 
-A client presentation latch observes genuine snapshot-free countdowns before React coalescing,
-then starts the intro when the first running arena arrives. Controls remain active. Late admission,
-repeated reconnect countdowns, suspension and context recovery cannot replay consumed cues.
-Animation uses the existing frame loop and adds no timers or GPU resources. See
-[arena rendering](game/arena-3d.md#round-camera-transitions).
+Historical navigation and CPU identities remain unchanged. Private replay11 binds rules10,
+CPU26 and navigation3; production recording/export remains disabled. Wire18 and the paired web
+client are unchanged. Conservative Oil forecasts can refuse possible routes; this is not a
+claim that every mob can escape every bomb.
 
 ### Verification
 
-Accepted image source: `7153ffd877556fb5e9344cb7780f56fb24e95216`,
-[PR #303](https://github.com/liveweird/grenadiers/pull/303). Independent cross-component review is clear.
-Later changes contain only browser-test corrections, documentation and screenshots; image build
-inputs remain unchanged.
+Accepted image source: `a335555afbeee8d1a85c84cc3fd840c7bc81c665`.
+Independent review is clear. Later release-record changes do not alter image build inputs.
 
-- Full web gate: 7,407 tests in 167 files; coverage 95.59% lines, 92.54% statements,
-  91.69% functions and 88.82% branches. All existing floors remain unchanged. Types, lint,
-  Knip, generated-contract/validator drift and 120 documented browser scenarios pass.
-- Production bundle: JavaScript 399,557/400,000 gzip bytes; CSS 15,474/20,000.
-- Native renderer regression: 25 passed, 13 project-specific skips. All four opening/ending
-  variants change native pixels and settle to byte-identical canonical pixels; reduced motion,
-  billboard/death/fire layering, board sizes and WebGL recovery pass.
-- Isolated warmed callback submission cost, 40 frames each: empty median/p95/max
-  0.20/0.30/0.30ms; worst public fire 1.70/1.80/2.10ms. This is not a hardware FPS claim.
-- Exact-image Compose duel/authentication: two passed. The real two-client browser scenario
-  verifies intros across first and subsequent rounds without fabricating countdown snapshots;
-  both clients use isolated contexts and close cleanly. Fresh three-CPU motion/bomb smoke passes.
-- Exact-image Kubernetes duel/authentication and restricted runtime pass. Owned acceptance
-  stacks and namespace are removed. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings.
-  All five image web files equal the verified production build.
+- Full local parallel Rust gate passes: debug, release, Clippy, formatting, build and coverage.
+  Core: 1,672 passed and one ignored; server: 601 passed and 15 ignored, plus the separately
+  partitioned exhaustive 22-item catalogue test. All 4,194,304 masks run in each of debug,
+  release and coverage, with four workers, 32 partitions and no retries. The complete gate
+  takes 729 seconds; line coverage is 52,661/56,934 (92.49%), above the unchanged 90% floor.
+- Navigation fixtures cover chain deadlines, multi-cell transit, changing obstacles,
+  whole-footprint safety, bounded work, conservative Oil states and historical-policy isolation.
+  An actual rules10 State with all items/environment enabled survives the corridor where
+  navigation2 waits and dies. Replay11 rejects mixed policy identities.
+- Distinct Linux ARM64 release checks pass: 38 mob, 70 lair and six replay10/11 tests.
+- Exact-image Compose authentication/duel: two passed. A three-CPU all-features match moves
+  all CPUs and plants bombs without browser errors. A two-human match verifies both lairs
+  spawning one mob each and suspending their respawn timers. Random blocked spawn exits
+  retain the documented next-tick retry behavior.
+- Exact-image Kubernetes authentication/duel and restricted runtime pass. Acceptance stacks
+  and namespace are removed. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities.
+  All five image web files equal the accepted v1.2.3 build.
 
-Backend logic, contracts, dependencies and artwork are unchanged. Reuse v1.2.2 artwork/audio
-and v1.2.0/v1.2.1 Rust debug/release, coverage, dependency and distinct Linux acceptance.
-The release image also compiles the server for Linux.
+Reuse v1.2.3 full web/native camera acceptance, bundle budgets and v1.2.2 artwork/audio
+acceptance: those inputs and dependencies did not change.
 
 ### Operation
 
 Accepted local image:
-`sha256:aea9ced2c51dbbeecc8dba9a22783c77d12d1a279932d6f05c04be47c41be8de`.
-The exact accepted image is promoted to localhost:8085; v1.2.2 remains available for rollback.
+`sha256:7e11ff44f5a46148c7deba65a4209add092f7c22155c8a8df9d9fd3390086924`.
+The exact accepted image is promoted to localhost:8085; v1.2.3 remains available for rollback.
 This is a source/local-runtime release without a hosted service or production registry.
-The unchanged artwork remains available in the
+The unchanged artwork remains in the
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v123--2026-11-01"></a>
+The [v1.2.3 record](history/releases.md#v123--2026-11-01) is preserved in release history.
 
 <a id="v122--2026-10-31"></a>
 The [v1.2.2 record](history/releases.md#v122--2026-10-31) is preserved in release history.

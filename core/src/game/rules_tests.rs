@@ -66,6 +66,33 @@ fn environment_v9_can_select_escape_navigation_explicitly() {
 }
 
 #[test]
+fn environment_v9_can_select_timed_escape_without_changing_constructor_defaults() {
+    let legacy = RulesConfig::environment_v9(
+        RoomSettings::DEFAULT,
+        super::StormCloudConfig::Disabled,
+        RespawnLairConfig::Enabled(RespawnLairSettings::DEFAULT),
+    );
+    let timed = RulesConfig::environment_v9_with_mob_navigation(
+        RoomSettings::DEFAULT,
+        super::StormCloudConfig::Disabled,
+        RespawnLairConfig::Enabled(RespawnLairSettings::DEFAULT),
+        MobNavigationPolicy::TimedEscapeV3,
+    );
+
+    assert_eq!(MobNavigationPolicy::TimedEscapeV3.version(), 3);
+    assert_eq!(
+        legacy.mob_navigation_policy(),
+        MobNavigationPolicy::LegacyV1
+    );
+    assert_eq!(
+        timed.mob_navigation_policy(),
+        MobNavigationPolicy::TimedEscapeV3
+    );
+    assert_eq!(timed.version(), legacy.version());
+    assert_eq!(timed.lair_config(), legacy.lair_config());
+}
+
+#[test]
 fn environment_v10_is_the_only_profile_with_opt_in_spike_pits() {
     let settings = RoomSettings::DEFAULT;
     let lairs = RespawnLairConfig::Enabled(RespawnLairSettings::DEFAULT);

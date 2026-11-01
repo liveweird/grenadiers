@@ -188,7 +188,7 @@ impl GameRooms {
             spike_pits,
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,
-            grenadiers_core::game::MobNavigationPolicy::EscapeV2,
+            grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3,
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {

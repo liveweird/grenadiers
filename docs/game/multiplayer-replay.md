@@ -75,7 +75,12 @@ The recorder, reader and runtime inspection remain under `cfg(test)` and add no 
 recording or export path. Truncated, incomplete, malformed, misordered, marker-inconsistent and
 cross-profile journals are rejected before being treated as exact replays.
 
-Formats6/7/8/9/10 normalize their closed operations into shared executors rather than duplicating
+Format11 retains rules10/CPU26 and the same checked accepted-operation executor, but explicitly
+binds navigation3. Its reader rejects navigation2, previous outer versions and mixed CPU provenance;
+format10 remains navigation2. The new identity changes only deterministic mob decisions, not public
+observations, ordinary input submission, lifecycle or recording/export availability.
+
+Formats6/7/8/9/10/11 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

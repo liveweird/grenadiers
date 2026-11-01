@@ -172,3 +172,24 @@ fn farm_refuge_profiles_extend_without_relabeling_prior_policies() {
     assert!(!CpuProfile::FARM_REFUGES_V36_EASY.is_current());
     assert!(!CpuProfile::HARD_V37.is_current());
 }
+
+#[test]
+fn farm_origin_profiles_extend_without_relabeling_prior_policies() {
+    assert_eq!(CpuProfile::FARM_ORIGINS_V38_STANDARD.policy.version(), 38);
+    assert_eq!(
+        CpuProfile::FARM_ORIGINS_V38_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(CpuProfile::FARM_ORIGINS_V38_EASY.policy.version(), 38);
+    assert_eq!(
+        CpuProfile::FARM_ORIGINS_V38_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V39.policy.version(), 39);
+    assert_eq!(CpuProfile::HARD_V39.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::HARD_V37.policy.version(), 37);
+    assert_eq!(CpuProfile::FARM_REFUGES_V36_STANDARD.policy.version(), 36);
+    assert!(!CpuProfile::FARM_ORIGINS_V38_STANDARD.is_current());
+    assert!(!CpuProfile::FARM_ORIGINS_V38_EASY.is_current());
+    assert!(!CpuProfile::HARD_V39.is_current());
+}

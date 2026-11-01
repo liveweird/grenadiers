@@ -213,7 +213,8 @@ world/seat/actor, stopped pose, settings, capabilities/effects/markers, pickup, 
 and the full living roster. Rejected or stale submission cannot commit authority.
 
 Acceptance requires normal adjacent-center approach, actual collection, physical Stop confirmation
-and a subsequent independently certified productive action through both owner paths. A handcrafted
+and a subsequent independently certified productive action through the live roster owner. The
+legacy owner is test-only and keeps its archived profile/rejection regressions. A handcrafted
 edge pose is insufficient. Archived policy behavior and existing Teleporter refusals remain closed.
 
 ## Plant-bound contact topology

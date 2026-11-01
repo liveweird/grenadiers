@@ -6,6 +6,9 @@ use super::routing::{RouteCertificate, RouteFailure};
 use super::{Observation, WorkBudget};
 
 #[cfg(test)]
+#[path = "lair_contact_blocked_birth_parity_tests.rs"]
+mod blocked_birth_parity_tests;
+#[cfg(test)]
 #[path = "lair_contact_connectivity_tests.rs"]
 mod connectivity_tests;
 #[path = "lair_contact_sources.rs"]
@@ -33,6 +36,8 @@ mod topology;
 #[cfg(test)]
 #[path = "lair_contact_topology_tests.rs"]
 mod topology_tests;
+#[cfg(test)]
+pub(crate) use topology::blocked_birth_binding_for_test;
 pub(crate) use topology::{PLANT_CONTACT_RENEWAL_ALLOWANCE, PlantContactProof};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

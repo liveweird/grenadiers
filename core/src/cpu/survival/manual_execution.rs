@@ -63,6 +63,15 @@ impl ExecutionCertificate {
             Self::Punch(punch) => Some(punch.execution_tick()),
         }
     }
+
+    /// Returns the exact opt-in capability required by a typed contact plant.
+    #[must_use]
+    pub const fn contact_plant_requires_blocked_birth_support(&self) -> Option<bool> {
+        match self {
+            Self::ContactPlant(plant) => Some(plant.requires_blocked_birth_support()),
+            Self::Route(_) | Self::Plant(_) | Self::Punch(_) => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -28,12 +28,30 @@ pub(crate) struct PlantContactProof {
     components: BTreeMap<CellId, u16>,
     sources: Vec<BoundSource>,
     envelope: MobContactEnvelope,
+    blocked_births: bool,
 }
 
 impl PlantContactProof {
     pub(crate) fn certify(
         observation: &Observation,
         plant: &PlantCertificate,
+        work: &mut WorkBudget,
+    ) -> Option<Self> {
+        Self::certify_inner(observation, plant, false, work)
+    }
+
+    pub(crate) fn certify_blocked_births(
+        observation: &Observation,
+        plant: &PlantCertificate,
+        work: &mut WorkBudget,
+    ) -> Option<Self> {
+        Self::certify_inner(observation, plant, true, work)
+    }
+
+    fn certify_inner(
+        observation: &Observation,
+        plant: &PlantCertificate,
+        allow_blocked_births: bool,
         work: &mut WorkBudget,
     ) -> Option<Self> {
         let parts = observation.parts();
@@ -69,22 +87,31 @@ impl PlantContactProof {
         let blocks = parts.arena.blocks.iter().copied().collect::<BTreeSet<_>>();
         let retained_blocks = blocks.difference(&opened).copied().collect::<BTreeSet<_>>();
         let components = label_components(observation, &retained_blocks, work)?;
-        let sources = bind_sources(&envelope, &retained_blocks, &components, work)?;
-        let dilations = component_dilations(
-            &sources,
+        let sources = bind_sources(
+            &envelope,
+            &retained_blocks,
             &components,
-            parts.arena.width,
-            parts.arena.height,
+            allow_blocked_births,
             work,
         )?;
-        route_avoids(
-            plant,
-            &sources,
-            &dilations,
-            parts.arena.width,
-            parts.arena.height,
-            work,
-        )?;
+        let blocked_births = sources.is_empty();
+        if !blocked_births {
+            let dilations = component_dilations(
+                &sources,
+                &components,
+                parts.arena.width,
+                parts.arena.height,
+                work,
+            )?;
+            route_avoids(
+                plant,
+                &sources,
+                &dilations,
+                parts.arena.width,
+                parts.arena.height,
+                work,
+            )?;
+        }
         Some(Self {
             key: plant.route().key(),
             basis_tick: parts.tick,
@@ -93,11 +120,16 @@ impl PlantContactProof {
             components,
             sources,
             envelope,
+            blocked_births,
         })
     }
 
     pub(crate) const fn safe_until(&self) -> Tick {
         self.safe_until
+    }
+
+    pub(crate) const fn requires_blocked_birth_support(&self) -> bool {
+        self.blocked_births
     }
 }
 
@@ -171,6 +203,7 @@ fn bind_sources(
     envelope: &MobContactEnvelope,
     retained: &BTreeSet<CellId>,
     components: &BTreeMap<CellId, u16>,
+    allow_empty: bool,
     work: &mut WorkBudget,
 ) -> Option<Vec<BoundSource>> {
     let mut result = Vec::new();
@@ -186,7 +219,26 @@ fn bind_sources(
             component: *components.get(&cell)?,
         });
     }
-    (!result.is_empty()).then_some(result)
+    (!result.is_empty() || (allow_empty && !envelope.sources().is_empty())).then_some(result)
+}
+
+#[cfg(test)]
+pub(crate) fn blocked_birth_binding_for_test(
+    observation: &Observation,
+    allowance: u32,
+) -> (bool, u32) {
+    let mut envelope_work = WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE);
+    let envelope = MobContactEnvelope::new(observation, &mut envelope_work).unwrap();
+    let retained = observation
+        .parts()
+        .arena
+        .blocks
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
+    let mut work = WorkBudget::new(allowance);
+    let result = bind_sources(&envelope, &retained, &BTreeMap::new(), true, &mut work).is_some();
+    (result, work.spent())
 }
 
 fn component_dilations(

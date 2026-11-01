@@ -332,6 +332,23 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Contact topology that can prove every possible birth remains blocked.
+    pub const BLOCKED_BIRTHS_V42_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV42,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const BLOCKED_BIRTHS_V42_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV42,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Hard blocked-birth topology with terminal-hold replacement retained.
+    pub const HARD_V43: Self = Self {
+        policy: CpuPolicy::UtilityV43,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

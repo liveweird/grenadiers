@@ -7,11 +7,13 @@ use crate::cpu::routing::{
     PlantCertificate, PlantRequest, RouteFailure, RouteLimits, plan_lair_ordinary_plant,
 };
 use crate::cpu::survival::{
-    WORK_ALLOWANCE, plan_contact_topology_v40_with_origin,
+    ExecutionCertificate, WORK_ALLOWANCE, plan_blocked_births_v42_with_origin,
+    plan_contact_topology_v40_with_origin, plan_hard_blocked_births_v43_with_origin,
     plan_hard_contact_topology_v41_with_origin,
 };
 use crate::cpu::{CpuRng, MemoryKey, MobContactLease, MovementIntent, WorkBudget};
-use crate::game::{Direction, Position, Tick};
+use crate::cpu::{Observation, ObservedRespawnLairs};
+use crate::game::{CellId, Direction, EntityId, LairStatusView, MobView, Position, Tick};
 
 use super::late_farm_fixture::{
     APPROACH, CPU, TARGET, captured_tick_10741, controlled_physical_state, input,
@@ -89,6 +91,14 @@ fn captured_blocked_births_are_the_exact_topology_refusal() {
             .iter()
             .any(|source| source.origin.cell() == Some(TARGET))
     );
+    assert_eq!(
+        crate::cpu::lair_contact::blocked_birth_binding_for_test(&observation, 8),
+        (true, 8)
+    );
+    assert_eq!(
+        crate::cpu::lair_contact::blocked_birth_binding_for_test(&observation, 7),
+        (false, 0)
+    );
 
     let mut lease_work = WorkBudget::new(WORK_ALLOWANCE);
     assert_eq!(
@@ -99,6 +109,119 @@ fn captured_blocked_births_are_the_exact_topology_refusal() {
     let mut topology_work = WorkBudget::new(WORK_ALLOWANCE);
     assert!(PlantContactProof::certify(&observation, &plant, &mut topology_work).is_none());
     assert_eq!(topology_work.spent(), 1_222);
+    let mut blocked_work = WorkBudget::new(WORK_ALLOWANCE);
+    let proof =
+        PlantContactProof::certify_blocked_births(&observation, &plant, &mut blocked_work).unwrap();
+    assert!(proof.requires_blocked_birth_support());
+    assert_eq!(blocked_work.spent(), 1_222);
+    assert!(
+        PlantContactProof::certify_blocked_births(
+            &observation,
+            &plant,
+            &mut WorkBudget::new(1_221),
+        )
+        .is_none()
+    );
+}
+
+#[test]
+fn new_planners_bind_blocked_birth_authority_inside_the_real_candidate_child() {
+    let observation = captured_tick_10741();
+    let key = MemoryKey {
+        world: observation.parts().world,
+        cpu_seat: CPU,
+    };
+    let mut history = ObservedHazardMemory::new(key);
+    history.observe(&observation).unwrap();
+    for (hard, seed) in [(false, 42), (true, 43)] {
+        let mut work = WorkBudget::new(WORK_ALLOWANCE);
+        let plan = if hard {
+            plan_hard_blocked_births_v43_with_origin(
+                &observation,
+                &UtilityMemory::new(key),
+                &history,
+                observation.parts().tick,
+                None,
+                &mut CpuRng::from_seed(key, [seed; 32]),
+                &mut work,
+            )
+        } else {
+            plan_blocked_births_v42_with_origin(
+                &observation,
+                &UtilityMemory::new(key),
+                &history,
+                observation.parts().tick,
+                None,
+                &mut CpuRng::from_seed(key, [seed; 32]),
+                &mut work,
+            )
+        }
+        .unwrap();
+        let execution = plan.survival.execution.unwrap();
+        assert_eq!(
+            execution.contact_plant_requires_blocked_birth_support(),
+            Some(true)
+        );
+        let ExecutionCertificate::ContactPlant(contact) = execution else {
+            panic!("new policy must retain typed contact authority")
+        };
+        assert_eq!(contact.plant().placement().cell, APPROACH);
+        eprintln!("hard={hard} blocked-birth planner work={}", work.spent());
+        assert_eq!(work.spent(), if hard { 29_206 } else { 30_686 });
+    }
+}
+
+#[test]
+fn empty_source_authority_renews_exactly_and_fails_closed_on_topology_change() {
+    let (observation, plant, _) = certified_plant();
+    let mut construction = WorkBudget::new(WORK_ALLOWANCE);
+    let proof =
+        PlantContactProof::certify_blocked_births(&observation, &plant, &mut construction).unwrap();
+    let mut renewal = WorkBudget::new(crate::cpu::lair_contact::PLANT_CONTACT_RENEWAL_ALLOWANCE);
+    assert!(proof.observation_fits(&observation, &mut renewal));
+    let exact = renewal.spent();
+    assert!(exact <= crate::cpu::lair_contact::PLANT_CONTACT_RENEWAL_ALLOWANCE);
+    assert!(proof.observation_fits(&observation, &mut WorkBudget::new(exact)));
+    assert!(!proof.observation_fits(&observation, &mut WorkBudget::new(exact.saturating_sub(1)),));
+
+    for removed in [CellId::new(5, 6), CellId::new(4, 5)] {
+        let changed = observation
+            .clone()
+            .map_parts(|parts| parts.arena.blocks.retain(|cell| *cell != removed))
+            .unwrap();
+        assert!(!proof.observation_fits(
+            &changed,
+            &mut WorkBudget::new(crate::cpu::lair_contact::PLANT_CONTACT_RENEWAL_ALLOWANCE),
+        ));
+    }
+
+    let mut statuses = observation.respawn_lairs().unwrap().lairs().to_vec();
+    statuses[0] = LairStatusView {
+        cell: statuses[0].cell,
+        next_spawn_at: None,
+        living_mobs: 1,
+    };
+    let future_source = Observation::new_rules_v10(
+        observation.parts().clone(),
+        observation.environment().unwrap().clone(),
+        Some(ObservedRespawnLairs::new(
+            observation.respawn_lairs().unwrap().config(),
+            statuses,
+            vec![MobView {
+                id: EntityId(99),
+                lair: 0,
+                position: Position::center(CellId::new(11, 11)),
+                heading: Direction::West,
+                frozen: false,
+            }],
+        )),
+        observation.spike_pits().cloned(),
+    )
+    .unwrap();
+    assert!(!proof.observation_fits(
+        &future_source,
+        &mut WorkBudget::new(crate::cpu::lair_contact::PLANT_CONTACT_RENEWAL_ALLOWANCE),
+    ));
 }
 
 #[test]

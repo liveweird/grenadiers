@@ -75,6 +75,16 @@ impl CommittedRoute {
             .is_some_and(|plant| plant.contact.is_some())
     }
 
+    /// True only for admitted authority that relies on the opt-in proof that
+    /// every possible mob birth origin remains blocked.
+    #[must_use]
+    pub fn has_blocked_birth_contact_authority(&self) -> bool {
+        self.plant
+            .as_ref()
+            .and_then(|plant| plant.contact.as_ref())
+            .is_some_and(|proof| proof.requires_blocked_birth_support())
+    }
+
     #[cfg(test)]
     pub(crate) fn plant_presence_for_test(&self) -> Option<PlantPresence> {
         self.plant.as_ref().map(|plant| plant.presence)

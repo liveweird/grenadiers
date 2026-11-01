@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temp
         "target": {"name": "grenadiers_server", "kind": ["lib"]},
         "profile": {"test": True}, "executable": str(binary)}) + "\n"
     original_run = module.run
-    original_isolated = module.ISOLATED_TEST
+    original_isolated = module.ISOLATED_TESTS
 
     def fake_run(command, **kwargs):
         if command[0] == "cargo":
@@ -27,23 +27,24 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temp
             return subprocess.CompletedProcess(command, 0, stdout=cargo_message)
         if command[0] == str(binary.resolve()):
             return subprocess.CompletedProcess(command, 0, stdout=
-                f"{module.HEAVY_TEST}: test\n{original_isolated}: test\n"
-                f"{module.INSTRUMENTATION_PROBE_TEST}: test\n")
+                f"{module.HEAVY_TEST}: test\n"
+                + "".join(f"{test}: test\n" for test in original_isolated)
+                + f"{module.INSTRUMENTATION_PROBE_TEST}: test\n")
         raise AssertionError(f"unexpected command: {command}")
 
     module.run = fake_run
     try:
         assert module.select_binary(False) == binary.resolve()
-        module.ISOLATED_TEST = "missing::isolated"
+        module.ISOLATED_TESTS = (*original_isolated[:-1], "missing::isolated")
         try:
             module.select_binary(False)
         except ValueError as error:
             assert "missing or duplicated" in str(error)
         else:
             raise AssertionError("missing isolated test accepted")
-        module.ISOLATED_TEST = original_isolated
+        module.ISOLATED_TESTS = original_isolated
     finally:
-        module.ISOLATED_TEST = original_isolated
+        module.ISOLATED_TESTS = original_isolated
         module.run = original_run
 
     inherited = {"CARGO_LLVM_COV": "1", "CARGO_LLVM_COV_TARGET_DIR": "/stale-target",
@@ -82,8 +83,9 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-workspace-artifacts-") as te
         listed_commands.append(command)
         if command[0] == str(binaries[1].resolve()):
             return subprocess.CompletedProcess(command, 0, stdout=
-                f"{module.HEAVY_TEST}: test\n{module.ISOLATED_TEST}: test\n"
-                f"{module.INSTRUMENTATION_PROBE_TEST}: test\n")
+                f"{module.HEAVY_TEST}: test\n"
+                + "".join(f"{test}: test\n" for test in module.ISOLATED_TESTS)
+                + f"{module.INSTRUMENTATION_PROBE_TEST}: test\n")
         if command[0] in {str(binaries[0].resolve()), str(binaries[2].resolve())}:
             return subprocess.CompletedProcess(command, 0, stdout="unrelated: test\n")
         raise AssertionError(f"unexpected command: {command}")
@@ -144,11 +146,12 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-isolated-profile-") as tempo
         calls.append((command, kwargs.get("env")))
         assert kwargs.get("env") is profile_env
         if command[0] == "cargo":
-            assert command.count("--skip") == 2
-            assert module.HEAVY_TEST in command and module.ISOLATED_TEST in command
+            assert command.count("--skip") == 1 + len(module.ISOLATED_TESTS)
+            assert module.HEAVY_TEST in command
+            assert all(test in command for test in module.ISOLATED_TESTS)
             (raw / "ordinary.profraw").write_bytes(b"ordinary")
         elif command[0] == str(binary):
-            assert command == [str(binary), module.ISOLATED_TEST, "--exact", "--show-output",
+            assert command == [str(binary), *module.ISOLATED_TESTS, "--exact", "--show-output",
                                "--test-threads=1"]
             (raw / "isolated.profraw").write_bytes(b"isolated")
         else:
@@ -159,7 +162,8 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-isolated-profile-") as tempo
     try:
         isolated = module.execute_ordinary_and_isolated(
             "coverage", binary, env=profile_env, raw_dir=raw)
-        assert len(calls) == 2 and isolated["executions"] == 1
+        assert len(calls) == 2 and isolated["executionsPerTest"] == 1
+        assert isolated["names"] == list(module.ISOLATED_TESTS)
         assert isolated["profile"] == "coverage"
         assert isolated["concurrentOrdinaryOrMaskWork"] is False
         assert isolated["rawProfileCount"] == 1
@@ -246,7 +250,10 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
         "#[cfg(test)] mod test_support;\n"
         "#[cfg(test)] mod tests { use super::*;\n"
         "#[test] fn heavy() { assert_eq!(covered(), 1); }\n"
-        "#[test] fn isolated() { assert_eq!(covered(), 1); }\n"
+        "#[test] fn isolated_0() { assert_eq!(covered(), 1); }\n"
+        "#[test] fn isolated_1() { assert_eq!(covered(), 1); }\n"
+        "#[test] fn isolated_2() { assert_eq!(covered(), 1); }\n"
+        "#[test] fn isolated_3() { assert_eq!(covered(), 1); }\n"
         "#[test] fn blank_database_url_disables_postgres() { "
         "assert_eq!(test_support::helper(), 7); } }\n"
     )
@@ -267,11 +274,11 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
 
     original_root = module.ROOT
     original_heavy = module.HEAVY_TEST
-    original_isolated = module.ISOLATED_TEST
+    original_isolated = module.ISOLATED_TESTS
     original_probe = module.INSTRUMENTATION_PROBE_TEST
     module.ROOT = fixture
     module.HEAVY_TEST = "tests::heavy"
-    module.ISOLATED_TEST = "tests::isolated"
+    module.ISOLATED_TESTS = tuple(f"tests::isolated_{index}" for index in range(4))
     module.INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"
     try:
         manifest = str(fixture / "Cargo.toml")
@@ -323,9 +330,11 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
         baseline = fixture_root / "baseline"; baseline.mkdir()
         baseline_env = dict(cov_env)
         baseline_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
-        subprocess.run(["cargo", "test", "--manifest-path", manifest], check=True, cwd=fixture,
-                       env=baseline_env, stdout=subprocess.DEVNULL)
-        assert list(baseline.glob("*.profraw"))
+        cohort = module.execute_ordinary_and_isolated(
+            "coverage", coverage_binary, env=baseline_env, raw_dir=baseline)
+        assert cohort["names"] == list(module.ISOLATED_TESTS)
+        assert cohort["executionsPerTest"] == 1 and cohort["rawProfileCount"] == 1
+        assert len(list(baseline.glob("*.profraw"))) > cohort["rawProfileCount"]
 
         worker = fixture_root / "worker"
         module.verify_instrumented_binary(coverage_binary, cov_env, worker)
@@ -494,6 +503,6 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     finally:
         module.ROOT = original_root
         module.HEAVY_TEST = original_heavy
-        module.ISOLATED_TEST = original_isolated
+        module.ISOLATED_TESTS = original_isolated
         module.INSTRUMENTATION_PROBE_TEST = original_probe
 print("LOCAL_SERVER_PARALLEL_TESTS_PASS")

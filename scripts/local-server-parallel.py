@@ -21,7 +21,12 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parent.parent
 COVERAGE_TARGET = ROOT / "target/grenadiers-local-server-coverage"
 HEAVY_TEST = "game::rooms::replay::settings_tests::expanded_item_masks_and_disabled_preset_replay_deterministically"
-ISOLATED_TEST = "game::rooms::roster_owner::hard_episode_tests::native_hard_v53_seed73_progresses_with_two_workers_at_production_pacing"
+ISOLATED_TESTS = (
+    "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu26_progress_and_scheduling_with_bounded_plans",
+    "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu27_progress_and_scheduling_with_bounded_plans",
+    "game::rooms::roster_owner::hard_episode_tests::native_hard_v53_seed73_progresses_with_two_workers_at_production_pacing",
+    "game::rooms::roster_owner::teleporter_owner_tests::native_worker_completes_collection_stop_and_productive_follow_up",
+)
 INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"
 SUMMARY_PREFIX = "GRENADIERS_SERVER_REPLAY_ITEM_MASK_SUMMARY="
 PLAN_KEYS = {"schemaVersion", "source", "catalog", "capacity", "totalCardinality", "partitionCount", "ranges"}
@@ -165,7 +170,7 @@ def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
     if binary.is_symlink() or not binary.is_file(): raise ValueError("server test binary missing")
     listed = run([str(binary), "--list"], env=env, capture=True).stdout.splitlines()
     if any(sum(line == f"{test}: test" for line in listed) != 1
-           for test in (HEAVY_TEST, ISOLATED_TEST, INSTRUMENTATION_PROBE_TEST)):
+           for test in (HEAVY_TEST, *ISOLATED_TESTS, INSTRUMENTATION_PROBE_TEST)):
         raise ValueError("exact server tests missing or duplicated")
     return binary
 
@@ -175,19 +180,18 @@ def execute_ordinary_and_isolated(profile: str, binary: Path, *, release: bool =
                                   raw_dir: Path | None = None) -> dict[str, Any]:
     ordinary = ["cargo", "test", "--workspace", "--locked"]
     if release: ordinary.insert(3, "--release")
-    run([*ordinary, "--", "--skip", HEAVY_TEST, "--skip", ISOLATED_TEST, "--show-output"],
-        env=env)
+    skips = [value for test in (HEAVY_TEST, *ISOLATED_TESTS) for value in ("--skip", test)]
+    run([*ordinary, "--", *skips, "--show-output"], env=env)
     before = set(raw_dir.glob("*.profraw")) if raw_dir else set()
     if raw_dir and not before:
         raise ValueError("ordinary instrumented coverage produced no raw profiles")
-    run([str(binary), ISOLATED_TEST, "--exact", "--show-output", "--test-threads=1"], env=env)
+    run([str(binary), *ISOLATED_TESTS, "--exact", "--show-output", "--test-threads=1"], env=env)
     created = sorted(set(raw_dir.glob("*.profraw")) - before) if raw_dir else []
     if raw_dir and not created:
         raise ValueError("isolated coverage test produced no raw profile")
-    result = {"name": ISOLATED_TEST, "profile": profile, "result": "completed", "executions": 1,
-              "concurrentOrdinaryOrMaskWork": False}
-    if raw_dir:
-        result["rawProfileCount"] = len(created)
+    result = {"names": list(ISOLATED_TESTS), "profile": profile, "result": "completed",
+              "executionsPerTest": 1, "concurrentOrdinaryOrMaskWork": False,
+              "rawProfileCount": len(created)}
     return result
 
 
@@ -260,10 +264,11 @@ def capture_workspace_executables(env: dict[str, str]) -> tuple[list[dict[str, A
         binary = Path(artifact["path"])
         listed = run([str(binary), "--list"], env=env, capture=True).stdout.splitlines()
         has_heavy = sum(line == f"{HEAVY_TEST}: test" for line in listed)
-        has_isolated = sum(line == f"{ISOLATED_TEST}: test" for line in listed)
+        isolated_counts = [sum(line == f"{test}: test" for line in listed)
+                           for test in ISOLATED_TESTS]
         has_probe = sum(line == f"{INSTRUMENTATION_PROBE_TEST}: test" for line in listed)
-        if has_heavy or has_isolated or has_probe:
-            if has_heavy != 1 or has_isolated != 1 or has_probe != 1:
+        if has_heavy or any(isolated_counts) or has_probe:
+            if has_heavy != 1 or any(count != 1 for count in isolated_counts) or has_probe != 1:
                 raise ValueError("exact server tests missing or duplicated")
             heavy.append(binary)
     if len(heavy) != 1:

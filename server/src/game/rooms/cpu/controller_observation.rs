@@ -48,6 +48,14 @@ impl CpuController {
         self.cadence = super::CadenceState::default();
         self.strategic_blast = None;
         self.refuge_attempt = None;
+        self.publication_sequence = None;
+        self.prepared_continuation = None;
+        self.continuation = None;
+        self.continuation_fence_required = false;
+        #[cfg(test)]
+        {
+            self.continuation_trace = super::continuation_types::ContinuationTrace::default();
+        }
         #[cfg(test)]
         {
             self.admission_trace = super::admission::AdmissionTrace::default();

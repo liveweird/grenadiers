@@ -83,10 +83,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::BLOCKED_BIRTHS_V42_EASY)
+            Some(CpuProfile::CONTINUATION_V44_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD)
+            Some(CpuProfile::CONTINUATION_V44_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -110,7 +110,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V43)
+            Some(CpuProfile::HARD_V45)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -173,6 +173,15 @@ mod contact_topology_owner_support;
 
 #[cfg(test)]
 mod contact_topology_owner_tests;
+
+#[cfg(test)]
+mod continuation_owner_support;
+
+#[cfg(test)]
+mod continuation_owner_tests;
+
+#[cfg(test)]
+mod continuation_perturbation_tests;
 
 #[cfg(test)]
 mod farm_refuge_owner_support;

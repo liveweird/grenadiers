@@ -7,17 +7,10 @@ mod bracelet;
 mod clear_gap;
 mod compatibility;
 mod contact_plant;
-// Explicitly inactive continuation runtime. Remove these narrow allowances
-// when policy/controller callers land, before gameplay activation.
-#[cfg_attr(not(test), allow(dead_code))]
 mod continuation_compatibility;
-#[cfg_attr(not(test), allow(dead_code))]
 mod continuation_execution;
-#[cfg_attr(not(test), allow(dead_code))]
 mod continuation_pending;
-#[cfg_attr(not(test), allow(dead_code))]
 mod continuation_planner;
-#[cfg_attr(not(test), allow(dead_code))]
 mod continuation_selection;
 mod deadline;
 mod execution;
@@ -52,7 +45,7 @@ pub use continuation_execution::{
     PreparedContinuation, PreparedRenewal,
 };
 pub use continuation_pending::PendingContinuation;
-#[allow(unused_imports)] // Inactive proof entry; no policy dispatch in this package.
+#[cfg(test)]
 pub(crate) use continuation_planner::certify_continuation;
 pub use continuation_selection::{
     OriginRecoveryChoice, continuation_recovery_memory, continuation_recovery_stop,

@@ -168,7 +168,7 @@ pub(super) fn respawn_observation() -> Observation {
     .unwrap()
 }
 
-fn spike_observation() -> Observation {
+pub(super) fn spike_observation() -> Observation {
     let mut parts = observation().into_parts();
     parts.rules.version = 10;
     let timers = parts
@@ -233,7 +233,8 @@ fn queued_worker_dispatches_rules10_only_through_dormant_cpu26() {
     assert!(planner.try_submit(job));
     let report = planner.pump_for_test(1);
     assert_eq!((report.delivered, report.failed), (1, 0));
-    let planned = result.recv().unwrap().plan;
+    let result = result.recv().unwrap();
+    let planned = result.ordinary();
     assert!(planned.lease.is_some() || planned.execution.is_some());
 
     let (legacy, legacy_result) = spike_job(grenadiers_core::room::CpuPolicy::UtilityV25);
@@ -249,12 +250,15 @@ fn bounded_worker_returns_a_legal_moving_bomb_plan() {
     let (job, result) = job(Arc::new(AtomicBool::new(true)));
     assert!(planner.try_submit(job));
     let result = result.recv().unwrap();
-    assert_eq!(result.plan.control.intent.manual, Some(ManualIntent::Bomb));
+    assert_eq!(
+        result.ordinary().control.intent.manual,
+        Some(ManualIntent::Bomb)
+    );
     assert_ne!(
-        result.plan.control.intent.movement,
+        result.ordinary().control.intent.movement,
         grenadiers_core::cpu::MovementIntent::Stop
     );
-    assert!((1..=12).contains(&result.plan.control.hold_ticks));
+    assert!((1..=12).contains(&result.ordinary().control.hold_ticks));
 }
 
 #[test]
@@ -384,7 +388,7 @@ fn delivered_job_carries_the_actual_advanced_rng() {
     assert_eq!(report.delivered, 1);
     assert_eq!(report.work, vec![expected_work.spent()]);
     let mut actual = result.recv().unwrap();
-    assert_eq!(actual.plan, expected);
+    assert_eq!(actual.ordinary(), &expected);
     assert_eq!(actual.rng.key(), expected_rng.key());
     assert_eq!(actual.rng.draws(), expected_rng.draws());
     assert_eq!(

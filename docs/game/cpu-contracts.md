@@ -265,6 +265,33 @@ results cannot restore a cleared record. Queue lateness alone does not withdraw 
 provenance. Recovery emits movement or Stop without another manual action. New information can
 still withhold movement, and future enemy actions can invalidate a fresh pulse.
 
+CPU44/45 add an opaque continuation certificate for this same confirmed-origin state. The worker
+proves one complete nominal escape of at most eight legs, including planned Stops, and 96 movement updates, plus a
+safe Stop after every nominal update. If continuation is ineligible or cannot be proved inside the
+shared decision allowance, recovery falls back to the existing checked origin pulse. Non-origin
+decisions delegate to CPU42/43 rather than changing their planner behavior.
+
+For an exact stopped basis `B`, the Driver's actual publication counter supplies observations at
+`B+3` and `B+6`; admission occurs at `B+6` and the first input is for `B+7`. A publication at `P`
+can authorize only `P+1…P+3`, and a new checked publication is required before `P+4`. This phase is
+not derived from a global tick modulus. Missing, duplicate, stale or mismatched publication, command
+epoch, scene or pose withdraws authority. Each admission or renewal has one 8,192-work allowance and
+performs no fresh path search or global forecast.
+
+Renewal checks the expected actor motion and effects, bomb evolution, full footprint, hazards,
+contact, short-window Teleporter obligations, spike pits and storm bounds. It carries residual
+movement, pending turn assistance, reverse state and consumed origin grace across grants. Origin
+grace cannot return after exit, and the first accepted continuation command makes the superseded
+origin record unavailable. The current scene boundary requires completed running updates, visible
+unpaused standard timed bombs, supported effects, and no initial finite flames, Oil, exposed
+Teleporter or Diarrhea. Both lair-disabled and lair-enabled rooms use the corresponding finite
+contact mode; this is not broader item support.
+
+The owner commits each grant only after its physical mailbox submission succeeds. Rejection,
+renewal failure or changed public facts fail closed to an ordinary Stop submitted through the same
+mailbox, followed by a physical observation fence before ordinary planning resumes. A late result
+cannot restore revoked authority, and a lease cannot extend a grant beyond its three updates.
+
 ## Held Wall Pass
 
 One capability check requires rules v5, enabled Wall Pass and a visible living recipient holding
@@ -339,8 +366,8 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU42, including
-certified planting around persistent burning Oil. Hard selects CPU43 with range-aware firing
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU44, including
+certified planting around persistent burning Oil. Hard selects CPU45 with range-aware firing
 positions against visible rivals. Both retain the same 65,536-work budget and full planting,
 route, mob-contact and admission proofs. Hard does not receive hidden positions, concealed loot,
 private seeds or faster physics.
@@ -356,12 +383,12 @@ flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. E
 farming retains its prior support. This changes a Teleporter support precondition, not the
 route proof, public observation facts or work limit; all conservative motion checks remain.
 
-Current CPU42/43 can certify a one-update pickup handoff on rules10 even though ordinary clear
+Current CPU44/45 inherit CPU42/43's one-update pickup handoff on rules10 even though ordinary clear
 navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop and fresh
 observation requirements remain. The longer ordinary pulse still rejects physics-changing
 collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are unchanged.
 
-CPU42/43 retain the refinement of a failed mob-contact envelope for an ordinary plant when public
+CPU44/45 retain CPU42/43's refinement of a failed mob-contact envelope for an ordinary plant when public
 barriers separate every source from the complete certified escape. Potentially destroyed blocks
 are treated as open throughout. The opaque plant-bound certificate retains scene, bomb-presence,
 source and barrier checks at admission and each publication; unsupported changes withdraw it.
@@ -370,5 +397,7 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay21 binds these identities; replay20 retains CPU40/41. Lairs-disabled planning
-delegates unchanged to CPU40/41, and older policy/replay contracts remain isolated.
+Private replay22 binds CPU44/45. CPU42/43 and private replay21 remain archived; replay20 retains
+CPU40/41. Outside an eligible confirmed-origin recovery, CPU44/45 delegate to CPU42/43. During
+continuation, lairs-disabled and lairs-enabled scenes use distinct checked contact modes. Older
+policy/replay contracts remain isolated.

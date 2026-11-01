@@ -1,6 +1,7 @@
 use std::sync::{Arc, atomic::AtomicBool, mpsc::sync_channel};
 
 use grenadiers_core::cpu::{DecisionId, Observation, survival::SurvivalPlan};
+use grenadiers_core::game::{Direction, SeatId, Tick};
 
 use super::{AcceptedPlan, CpuController, Pending};
 use crate::game::rooms::cpu::worker::PlanResult;
@@ -10,6 +11,38 @@ pub(super) fn key_for(controller: &CpuController) -> grenadiers_core::cpu::Memor
         world: controller.world.unwrap(),
         cpu_seat: grenadiers_core::game::SeatId::Two,
     }
+}
+
+pub(super) fn observation_with_pose(
+    tick: Tick,
+    position: grenadiers_core::game::Position,
+    heading_mask: u8,
+) -> Observation {
+    let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
+    parts.tick = tick;
+    let grenadiers_core::cpu::ObservedActor::Visible(cpu) = &mut parts.actors[SeatId::Two.index()]
+    else {
+        unreachable!()
+    };
+    cpu.position = position;
+    cpu.heading = [
+        Direction::North,
+        Direction::East,
+        Direction::South,
+        Direction::West,
+    ]
+    .into_iter()
+    .find(|direction| {
+        let bit = match direction {
+            Direction::North => 1,
+            Direction::East => 2,
+            Direction::South => 4,
+            Direction::West => 8,
+        };
+        heading_mask & bit != 0
+    })
+    .unwrap_or(Direction::West);
+    Observation::new(parts).unwrap()
 }
 
 impl CpuController {
@@ -76,8 +109,10 @@ impl CpuController {
         let (sender, receiver) = sync_channel(1);
         sender
             .send(PlanResult {
-                plan,
-                contact: None,
+                outcome: super::super::worker::WorkerPlan::Ordinary {
+                    plan: Box::new(plan),
+                    contact: None,
+                },
                 basis,
                 rng: self.rng.as_ref().expect("world rng initialized").clone(),
                 escape_origin: None,
@@ -89,7 +124,19 @@ impl CpuController {
             live: Arc::new(AtomicBool::new(true)),
             completed: None,
             refuge_handoff: None,
+            continuation: None,
         });
+    }
+
+    pub(in crate::game::rooms) fn mark_pending_continuation_for_test(
+        &mut self,
+        basis_sequence: u64,
+    ) {
+        let pending = self.pending.as_mut().expect("pending test result");
+        pending.continuation = Some(super::ContinuationClock::new(
+            pending.decision,
+            basis_sequence,
+        ));
     }
 }
 

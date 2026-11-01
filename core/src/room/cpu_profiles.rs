@@ -349,6 +349,23 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Blocked-birth farming with opt-in certified origin continuation.
+    pub const CONTINUATION_V44_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV44,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const CONTINUATION_V44_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV44,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Hard blocked-birth farming with opt-in certified origin continuation.
+    pub const HARD_V45: Self = Self {
+        policy: CpuPolicy::UtilityV45,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

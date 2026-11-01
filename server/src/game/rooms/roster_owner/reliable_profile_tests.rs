@@ -21,24 +21,27 @@ use crate::{
 #[test]
 fn live_spike_owner_accepts_only_exact_current_difficulty() {
     use grenadiers_core::game::SeatId;
-    for (difficulty, accepted, archived, wrong_tier) in [
+    for (difficulty, accepted, archived, wrong_tier, other_archived) in [
         (
             CpuDifficulty::Standard,
+            CpuProfile::CONTINUATION_V44_STANDARD,
             CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
-            CpuProfile::FARM_ORIGINS_V38_STANDARD,
-            CpuProfile::BLOCKED_BIRTHS_V42_EASY,
+            CpuProfile::CONTINUATION_V44_EASY,
+            CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
         ),
         (
             CpuDifficulty::Easy,
+            CpuProfile::CONTINUATION_V44_EASY,
             CpuProfile::BLOCKED_BIRTHS_V42_EASY,
-            CpuProfile::FARM_ORIGINS_V38_EASY,
-            CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
+            CpuProfile::CONTINUATION_V44_STANDARD,
+            CpuProfile::CONTACT_TOPOLOGY_V40_EASY,
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V45,
             CpuProfile::HARD_V43,
-            CpuProfile::HARD_V39,
             CpuProfile::RELIABLE_V27_STANDARD,
+            CpuProfile::HARD_V41,
         ),
     ] {
         let configuration = RoomConfiguration::new(
@@ -76,7 +79,7 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
             )
         };
         assert_eq!(validate_cpus(&runtime, &[controller(accepted)]), Ok(()));
-        for rejected in [archived, wrong_tier] {
+        for rejected in [archived, wrong_tier, other_archived] {
             assert_eq!(
                 validate_cpus(&runtime, &[controller(rejected)]),
                 Err(RosterRuntimeError::UnsupportedConfiguration)

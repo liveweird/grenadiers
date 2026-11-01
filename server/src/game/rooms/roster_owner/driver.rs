@@ -36,6 +36,9 @@ pub(super) struct Driver {
     pub(super) cpu_stop_at: [Option<grenadiers_core::game::Tick>; 4],
     pub(super) cpu_stationary: [bool; 4],
     pub(super) next_cpu: usize,
+    pub(super) publication_sequence: Option<u64>,
+    #[cfg(test)]
+    pub(super) continuation_rejections: [bool; 2],
 }
 
 impl Driver {
@@ -62,6 +65,9 @@ impl Driver {
             cpu_stop_at: [None; 4],
             cpu_stationary: [true; 4],
             next_cpu: 0,
+            publication_sequence: Some(0),
+            #[cfg(test)]
+            continuation_rejections: [false; 2],
         }
     }
 
@@ -306,6 +312,9 @@ impl Driver {
     }
 
     pub(super) fn publish(&mut self, notice: RosterNotice) {
+        self.publication_sequence = self
+            .publication_sequence
+            .and_then(|sequence| sequence.checked_add(1));
         self.observe_cpus(&notice);
         self.last = notice.clone();
         self.notices

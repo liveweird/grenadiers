@@ -9,6 +9,7 @@ use grenadiers_core::cpu::{
     CpuRng, Observation, WorkBudget,
     forecast::ObservedHazardMemory,
     policy::UtilityMemory,
+    routing::ContinuationCertificate,
     survival::{PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE},
 };
 use grenadiers_core::game::Tick;
@@ -37,12 +38,36 @@ pub(in crate::game::rooms) struct PumpReport {
     pub(in crate::game::rooms) planner_times: Vec<std::time::Duration>,
 }
 
+pub(super) enum WorkerPlan {
+    Ordinary {
+        plan: Box<SurvivalPlan>,
+        contact: Option<grenadiers_core::cpu::MobContactLease>,
+    },
+    Continuation(Box<ContinuationCertificate>),
+}
+
 pub(super) struct PlanResult {
-    pub(super) plan: SurvivalPlan,
-    pub(super) contact: Option<grenadiers_core::cpu::MobContactLease>,
+    pub(super) outcome: WorkerPlan,
     pub(super) basis: Observation,
     pub(super) rng: CpuRng,
     pub(super) escape_origin: Option<PlantEscapeOrigin>,
+}
+
+#[cfg(test)]
+impl PlanResult {
+    pub(super) fn ordinary(&self) -> &SurvivalPlan {
+        match &self.outcome {
+            WorkerPlan::Ordinary { plan, .. } => plan.as_ref(),
+            WorkerPlan::Continuation(_) => panic!("expected ordinary worker result"),
+        }
+    }
+
+    pub(super) fn ordinary_mut(&mut self) -> &mut SurvivalPlan {
+        match &mut self.outcome {
+            WorkerPlan::Ordinary { plan, .. } => plan.as_mut(),
+            WorkerPlan::Continuation(_) => panic!("expected ordinary worker result"),
+        }
+    }
 }
 
 pub(super) struct PlanJob {
@@ -247,7 +272,7 @@ fn execute_job(
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
     let planned = plan::plan(&mut job, &mut work);
-    let Ok((plan, contact)) = planned else {
+    let Ok(outcome) = planned else {
         return (
             JobStatus::Failed,
             work.spent(),
@@ -256,21 +281,18 @@ fn execute_job(
         );
     };
     let planner_time = started.map(|value| value.elapsed());
-    let intent = plan.control.intent;
+    let intent = match &outcome {
+        WorkerPlan::Ordinary { plan, .. } => Some(plan.control.intent),
+        WorkerPlan::Continuation(_) => None,
+    };
     let escape_origin = job.escape_origin;
     if !job.live.load(Ordering::Acquire) {
-        return (
-            JobStatus::Cancelled,
-            work.spent(),
-            Some(intent),
-            planner_time,
-        );
+        return (JobStatus::Cancelled, work.spent(), intent, planner_time);
     }
     let status = if job
         .result
         .try_send(PlanResult {
-            plan,
-            contact,
+            outcome,
             basis: job.observation,
             rng: job.rng,
             escape_origin,
@@ -281,7 +303,7 @@ fn execute_job(
     } else {
         JobStatus::Dropped
     };
-    (status, work.spent(), Some(intent), planner_time)
+    (status, work.spent(), intent, planner_time)
 }
 
 #[path = "worker_plan.rs"]

@@ -137,40 +137,48 @@ hidden retries.
 
 The [controlled Short Fuse investigation](../history/cpu-short-fuse-investigation-2026-11-01.md)
 shows that repeated three-update movement pulses with intervening Stops can be too slow after
-simultaneous bombs invalidate an escape. A recovery extension must introduce a distinct conditional
-continuation contract; do not enlarge existing pulse/route authority or infer stationarity from
-bomb ownership.
+simultaneous bombs invalidate an escape. CPU44/45 therefore use a distinct opaque conditional
+continuation certificate for an interrupted confirmed planting escape while the CPU still has its
+own-origin exception. This does not enlarge existing pulse/route authority or infer stationarity
+from bomb ownership. Ineligible or failed continuation attempts retain the existing checked
+short-pulse recovery.
 
-Separate a complete nominal trajectory from renewable movement grants. A fresh publication at
-`P` can authorize only updates `P+1…P+3`. Validation must run before the owner services `P+4`;
+The certificate separates a complete nominal trajectory of at most eight legs, including planned Stops, and 96
+movement updates from renewable movement grants. A fresh publication at `P` authorizes only
+updates `P+1…P+3`. Validation runs before the owner services `P+4`;
 missing, stale, duplicate or mismatched publications withdraw continuation. Admission binds an
-exact stopped basis and publication at `basis+6`, with the first movement at `basis+7`.
-Publication phase follows accumulated reports, so an early publication must revoke the initial
-contract rather than silently assuming a global tick modulo.
+exact stopped basis `B`: the owner observes the actual `B+3` and `B+6` publications, admits at
+`B+6`, and submits the first certified input for `B+7`. Publication phase follows the Driver's
+actual accumulated publication counter, not a global-tick modulus; an unexpected publication
+revokes the contract.
 
-Carry predicted motion, residual distance, pending turn assistance, reverse state and storm
-bounds across valid renewals. Preserve planned geometric-leg stops, consumed origin grace and
-the existing eight-leg limit. Re-entry cannot restore origin grace. Commit each grant only
-after mailbox submission succeeds; TTL cannot extend its authorized updates.
+Valid renewals carry predicted motion, residual distance, pending turn assistance, reverse state,
+pit state and storm bounds. They preserve planned geometric-leg stops and consumed origin grace;
+re-entry cannot restore origin grace. The owner commits a grant only after physical mailbox
+submission succeeds. Rejection or invalidation submits ordinary Stop through that mailbox and
+requires a physical observation fence before normal planning resumes. A lease or TTL cannot extend
+the three authorized updates, and the first accepted continuation command prevents the superseded
+origin record from being resurrected.
 
-Certify Stop branches after each authorized update, including early revocation after the first
-or second move. A regular grant's fallback Stop at `P+4` must cover the existing margin through
+The proof certifies a Stop branch after every nominal update, including early revocation after the
+first or second move. A regular grant's fallback Stop at `P+4` covers the existing margin through
 `P+13` (exclusive horizon `P+14`). Complete nominal escape and every Stop branch need full
-footprint/hazard/contact checks within the unchanged work allowance. Renewal must have an
-explicit measured bound, without new path search or a global forecast on the owner tick.
+footprint, hazard and contact checks within the unchanged planning allowance. Each admission or
+renewal has one fail-closed 8,192-work allowance and rechecks scene, actor/effects, bombs, contact,
+Teleporter, pit and storm facts without new path search or a global forecast on the owner tick.
 
-Retain default item support through fresh short-window Teleporter/contact obligations at every
-grant; a long-lease refusal cannot be bypassed. Initially constrain the extension to visible,
-unpaused standard timed bombs, completed running updates, supported effects and no initial finite
-flames, Oil or exposed Teleporter. Remaining soft blocks may exist. Unknown or changed hazards
-revoke the episode, and a revoked episode cannot resume from a late result.
+Fresh short-window Teleporter/contact obligations are checked at every grant; a long-lease refusal
+cannot be bypassed. The current extension is limited to visible, unpaused standard timed bombs,
+completed running updates, supported effects and no initial finite flames, Oil, exposed Teleporter
+or Diarrhea. Remaining soft blocks may exist. Lairs-off and lairs-on scenes use their respective
+honest contact modes. Unknown or changed hazards revoke the episode, and a late result cannot
+resume a revoked episode.
 
-Before activation, require a separate reviewed Core proof, normal queued-owner integration, both
-Short Fuse CPUs planting and surviving, and negatives for intermediate unsafe Stops, stale
-publications, changed bombs, displacement, origin re-entry and exhausted work. A [scheduling fixture](../history/cpu-recovery-timing-2026-11-01.md)
-using synthetic grants establishes timing only; it is not a safety certificate. Keep
-new policy/replay identities opt-in and every archived contract unchanged. Work sequencing remains
-in the [backlog](../../BACKLOG.md#single-player).
+CPU44 serves Easy/Standard and CPU45 serves Hard. Their non-origin decisions delegate to the
+archived CPU42/43 behavior; CPU42/43 and private replay21 remain closed, while private replay22
+binds the continuation identities. A [scheduling fixture](../history/cpu-recovery-timing-2026-11-01.md)
+using synthetic grants establishes timing only; it is not a safety certificate. Remaining
+improvements and broader scene support stay in the [backlog](../../BACKLOG.md#single-player).
 
 ## Plant-bound contact topology
 

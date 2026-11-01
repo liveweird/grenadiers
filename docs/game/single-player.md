@@ -67,17 +67,23 @@ without another worker. A rejected Bomb action is not retried. Conservative limi
 refuse a useful bomb; the earlier restricted planting fallback remains available.
 
 If another observed bomb interrupts a confirmed planting escape while the CPU still overlaps
-its own origin, it stops the old route and checks fresh short escape movements. The original
+its own origin, it stops the old route and first tries a complete certified continuation toward
+a stable legal exit. The continuation is delivered in fresh three-update grants, with a safe Stop
+proved after every update and the observed scene rechecked between grants. If that complete proof
+is unavailable, the existing checked short-pulse recovery remains available. The original
 placement record lasts only while its bomb, pose and player state remain valid; leaving the origin
-ends that exception. Guidance keeps a stable legal exit target and requires progress toward it.
-Recovery uses ordinary movement without planting another bomb.
+ends that exception, and accepting the first continuation input prevents the old record from being
+restored. Recovery uses ordinary movement without planting another bomb.
 
 Bomb motion remains partially unknown. Short conditional pulses may explicitly assume a bomb
 has stayed stationary; observing it move withdraws that assumption. Complete conditional routes
-retain the same explicit assumptions. Pauses and remote/contact
-triggers cannot use this exception. Unknown bomb visibility, Diarrhea, unsupported collision
-grace or an unavailable safe action produce Stop. New hazards can invalidate an active pulse.
-The normal game still applies automatic curses and other effects.
+retain the same explicit assumptions. Pauses and remote/contact triggers cannot use this
+exception. Continuation is initially limited to visible, unpaused standard timed bombs, completed
+running updates, supported effects and scenes without initial finite flames, Oil, exposed
+Teleporter or Diarrhea. Unknown bomb visibility, unsupported collision grace or an unavailable
+safe action produce Stop. New hazards can invalidate an active grant or pulse. Both lair-disabled
+and lair-enabled rooms use their corresponding checked contact model; this does not extend support
+to broader item scenes. The normal game still applies automatic curses and other effects.
 
 Clear-board pickup collection and the restricted ordinary-bomb escape remain separate from
 hazard pulses. Ordinary clear-board movement retains its accepted hold and can meet new hazards

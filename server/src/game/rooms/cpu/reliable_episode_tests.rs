@@ -39,7 +39,7 @@ impl std::fmt::Debug for RealWorkerOutcome {
     }
 }
 
-fn run(lairs: bool, profile: CpuProfile) -> RealWorkerOutcome {
+fn run(lairs: bool, profile: CpuProfile, pacing_ms: u64) -> RealWorkerOutcome {
     let configuration = RoomConfiguration::new(
         &[
             SeatControl::Human,
@@ -134,9 +134,7 @@ fn run(lairs: bool, profile: CpuProfile) -> RealWorkerOutcome {
     let mut stalled_switches = 0;
     for _ in 0..840 {
         driver.tick(Instant::now()).unwrap();
-        // Production has 16 ms between 60 Hz ticks. Keep this below that while
-        // leaving room for a bounded plan when the suite runs in parallel.
-        std::thread::sleep(std::time::Duration::from_millis(5));
+        std::thread::sleep(std::time::Duration::from_millis(pacing_ms));
         let inspection = driver.runtime.replay_inspection();
         let state = &inspection.simulation.as_ref().unwrap().state;
         let mut owned_bomb_this_tick = [false; 3];
@@ -213,47 +211,8 @@ fn run(lairs: bool, profile: CpuProfile) -> RealWorkerOutcome {
 #[test]
 fn real_workers_record_cpu26_farm_recovery_with_bounded_plans() {
     for lairs in [false, true] {
-        let outcome = run(lairs, CpuProfile::SPIKE_PITS_STANDARD);
-        assert!(outcome.moved.into_iter().all(|moved| moved), "{outcome:?}");
-        assert!(
-            outcome
-                .owned_bomb_births
-                .into_iter()
-                .all(|births| births > 0),
-            "{outcome:?}"
-        );
-        assert!(outcome.trace.delivered > 0, "{outcome:?}");
-        assert_eq!(
-            outcome.trace.delivered, outcome.trace.dequeued,
-            "{outcome:?}"
-        );
-        assert_eq!(
-            (outcome.trace.cancelled, outcome.trace.dropped),
-            (0, 0),
-            "{outcome:?}"
-        );
-        assert_eq!(outcome.trace.failed, 0, "{outcome:?}");
-        assert!(
-            outcome
-                .trace
-                .work
-                .iter()
-                .all(|spent| *spent <= WORK_ALLOWANCE),
-            "{outcome:?}"
-        );
-        assert_eq!(outcome.admissions.len(), 3, "{outcome:?}");
-        assert!(
-            outcome
-                .admissions
-                .iter()
-                .all(|trace| *trace == crate::game::rooms::cpu::AdmissionTrace::default()),
-            "CPU26 had an admission rejection: {outcome:?}"
-        );
-        assert!(outcome.stalled_switches < 840 * 3, "{outcome:?}");
-        assert!(
-            outcome.recovery_seen.into_iter().any(|seen| seen),
-            "{outcome:?}"
-        );
+        let outcome = run(lairs, CpuProfile::SPIKE_PITS_STANDARD, 5);
+        assert_operational(&outcome);
         if lairs {
             // This clock records an attained Farm approach with a free bomb slot,
             // not proof that planting remained certified throughout the interval.
@@ -269,4 +228,57 @@ fn real_workers_record_cpu26_farm_recovery_with_bounded_plans() {
             );
         }
     }
+}
+
+#[test]
+fn real_workers_record_cpu27_farm_recovery_with_bounded_plans() {
+    for lairs in [false, true] {
+        // This opt-in profile is checked at the production 60 Hz interval so
+        // accelerated simulation cannot manufacture stale admissions.
+        let outcome = run(lairs, CpuProfile::RELIABLE_V27_STANDARD, 16);
+        assert_operational(&outcome);
+    }
+}
+
+fn assert_operational(outcome: &RealWorkerOutcome) {
+    assert!(outcome.moved.into_iter().all(|moved| moved), "{outcome:?}");
+    assert!(
+        outcome
+            .owned_bomb_births
+            .into_iter()
+            .all(|births| births > 0),
+        "{outcome:?}"
+    );
+    assert!(outcome.trace.delivered > 0, "{outcome:?}");
+    assert_eq!(
+        outcome.trace.delivered, outcome.trace.dequeued,
+        "{outcome:?}"
+    );
+    assert_eq!(
+        (outcome.trace.cancelled, outcome.trace.dropped),
+        (0, 0),
+        "{outcome:?}"
+    );
+    assert_eq!(outcome.trace.failed, 0, "{outcome:?}");
+    assert!(
+        outcome
+            .trace
+            .work
+            .iter()
+            .all(|spent| *spent <= WORK_ALLOWANCE),
+        "{outcome:?}"
+    );
+    assert_eq!(outcome.admissions.len(), 3, "{outcome:?}");
+    assert!(
+        outcome
+            .admissions
+            .iter()
+            .all(|trace| *trace == crate::game::rooms::cpu::AdmissionTrace::default()),
+        "CPU had an admission rejection: {outcome:?}"
+    );
+    assert!(outcome.stalled_switches < 840 * 3, "{outcome:?}");
+    assert!(
+        outcome.recovery_seen.into_iter().any(|seen| seen),
+        "{outcome:?}"
+    );
 }

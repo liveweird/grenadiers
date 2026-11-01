@@ -10,6 +10,22 @@ use crate::game::{Direction, OilBarrelState, PickupKind, Tick};
 use super::compatibility::actor;
 use super::{ExecutionCertificate, SurvivalPlan};
 
+#[derive(Clone, Copy)]
+pub(super) enum PlantSupport {
+    Strict,
+    PersistentBurningOil,
+}
+
+impl PlantSupport {
+    pub(super) const fn persistent_burning_oil(enabled: bool) -> Self {
+        if enabled {
+            Self::PersistentBurningOil
+        } else {
+            Self::Strict
+        }
+    }
+}
+
 pub(super) fn certified_plant(
     observation: &Observation,
     history: &ObservedHazardMemory,
@@ -17,6 +33,7 @@ pub(super) fn certified_plant(
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
     bounded: bool,
+    support: PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     if bounded {
@@ -30,6 +47,7 @@ pub(super) fn certified_plant(
             settled_stop_tick,
             memory,
             ordinary,
+            support,
             &mut tactic_work,
         );
         work.try_take(tactic_work.spent()).ok()?;
@@ -41,6 +59,7 @@ pub(super) fn certified_plant(
         settled_stop_tick,
         memory,
         ordinary,
+        support,
         work,
     )
 }
@@ -55,6 +74,7 @@ pub(super) fn certified_plant_for_policy(
     bounded: bool,
     candidates: bool,
     strategic: bool,
+    support: PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     if candidates {
@@ -66,6 +86,7 @@ pub(super) fn certified_plant_for_policy(
                 memory,
                 ordinary,
                 strategic,
+                support,
                 work,
             );
         }
@@ -77,6 +98,7 @@ pub(super) fn certified_plant_for_policy(
             memory,
             ordinary,
             strategic,
+            support,
             &mut tactic_work,
         );
         work.try_take(tactic_work.spent()).ok()?;
@@ -89,6 +111,7 @@ pub(super) fn certified_plant_for_policy(
             memory,
             ordinary,
             bounded,
+            support,
             work,
         )
     }
@@ -104,6 +127,7 @@ pub(super) fn certified_plant_candidates(
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
     strategic: bool,
+    support: PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     let selected = ordinary.next_memory.strategic_intent();
@@ -178,6 +202,7 @@ pub(super) fn certified_plant_candidates(
             settled_stop_tick,
             memory,
             &candidate,
+            support,
             &mut child,
         );
         work.try_take(child.spent()).ok()?;
@@ -198,13 +223,14 @@ fn certified_plant_inner(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
+    support: PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
     if matches!(observation.parts().rules.version, 8..=10)
-        && !teleporter_plant_supported(observation)
+        && !teleporter_plant_supported(observation, support)
     {
         return None;
     }
@@ -217,6 +243,7 @@ fn certified_plant_inner(
         settled_stop_tick,
         memory,
         ordinary,
+        support,
         work,
     )
 }
@@ -227,13 +254,14 @@ fn certified_plant_inner_prefiltered(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
+    support: PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     if ordinary.intent.manual == Some(ManualIntent::Equipment) {
         return None;
     }
     if matches!(observation.parts().rules.version, 8..=10)
-        && !teleporter_plant_supported(observation)
+        && !teleporter_plant_supported(observation, support)
     {
         return None;
     }
@@ -296,7 +324,7 @@ fn certified_plant_inner_prefiltered(
     })
 }
 
-fn teleporter_plant_supported(observation: &Observation) -> bool {
+fn teleporter_plant_supported(observation: &Observation, support: PlantSupport) -> bool {
     let parts = observation.parts();
     !parts.rules.settings.enabled_items().contains_teleporter()
         || (parts
@@ -305,8 +333,9 @@ fn teleporter_plant_supported(observation: &Observation) -> bool {
             .all(|pickup| pickup.kind != PickupKind::Teleporter)
             && parts.flames.is_empty()
             && matches!(&parts.bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
-            && parts
-                .oil
-                .iter()
-                .all(|oil| oil.state != OilBarrelState::Burning))
+            && (matches!(support, PlantSupport::PersistentBurningOil)
+                || parts
+                    .oil
+                    .iter()
+                    .all(|oil| oil.state != OilBarrelState::Burning)))
 }

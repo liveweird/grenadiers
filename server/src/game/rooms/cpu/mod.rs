@@ -12,3 +12,5 @@ pub(in crate::game::rooms) use worker::PumpReport;
 mod controller_reliable_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod worker_v27_tests;

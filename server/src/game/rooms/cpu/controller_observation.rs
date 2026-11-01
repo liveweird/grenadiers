@@ -1,16 +1,13 @@
+use super::{CpuController, StopAdmission, seed::derive_round_seed};
 use grenadiers_core::cpu::{
     CpuMemory, CpuRng, MemoryKey, Observation, ObservedActor, WorldId,
     forecast::ObservedHazardMemory, policy::UtilityMemory,
 };
 use grenadiers_core::game::{SeatId, Tick};
-
-use super::{CpuController, StopAdmission, seed::derive_round_seed};
-
 impl CpuController {
     pub(in crate::game::rooms) const fn seat(&self) -> SeatId {
         self.cpu_seat
     }
-
     pub(in crate::game::rooms) const fn profile(&self) -> grenadiers_core::room::CpuProfile {
         self.profile
     }
@@ -121,6 +118,8 @@ impl CpuController {
                 self.profile,
                 grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD
                     | grenadiers_core::room::CpuProfile::SPIKE_PITS_EASY
+                    | grenadiers_core::room::CpuProfile::RELIABLE_V27_STANDARD
+                    | grenadiers_core::room::CpuProfile::RELIABLE_V27_EASY
             ),
             _ => false,
         }
@@ -357,7 +356,7 @@ mod tests {
     }
 
     #[test]
-    fn only_dormant_cpu26_profiles_accept_rules10_observations() {
+    fn only_explicit_reliable_profiles_accept_rules10_observations() {
         let mut parts = observation_for(SeatId::One).into_parts();
         parts.rules.version = 10;
         let timers = parts
@@ -388,8 +387,13 @@ mod tests {
                 profile,
             )
         };
-        let mut spike = controller(grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD);
-        assert!(spike.accept_observation(&observed));
+        for profile in [
+            grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD,
+            grenadiers_core::room::CpuProfile::RELIABLE_V27_STANDARD,
+            grenadiers_core::room::CpuProfile::RELIABLE_V27_EASY,
+        ] {
+            assert!(controller(profile).accept_observation(&observed));
+        }
         let mut live = controller(grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_STANDARD);
         assert!(!live.accept_observation(&observed));
     }

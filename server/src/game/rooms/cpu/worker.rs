@@ -11,14 +11,13 @@ use grenadiers_core::cpu::{
     policy::UtilityMemory,
     survival::{
         PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE, plan_lairs_with_origin,
-        plan_respawn_v22_with_origin, plan_respawn_v23_with_origin, plan_respawn_v24_with_origin,
-        plan_respawn_v25_with_origin, plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
-        plan_with_origin,
+        plan_reliable_v27_with_origin, plan_respawn_v22_with_origin, plan_respawn_v23_with_origin,
+        plan_respawn_v24_with_origin, plan_respawn_v25_with_origin, plan_respawn_with_origin,
+        plan_spike_pits_v26_with_origin, plan_with_origin,
     },
 };
 use grenadiers_core::game::Tick;
 use grenadiers_core::room::CpuPolicy;
-
 const WORKERS: usize = 2;
 const QUEUE_CAPACITY: usize = 32;
 
@@ -252,85 +251,11 @@ fn execute_job(
     }
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     let started = measure.then(std::time::Instant::now);
-    let planned =
-        if job.observation.parts().rules.version == 10 || job.policy == CpuPolicy::UtilityV26 {
-            let plan = if job.policy == CpuPolicy::UtilityV26 {
-                plan_spike_pits_v26_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else {
-                plan_respawn_v25_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            };
-            plan.map(|plan| (plan.survival, plan.contact))
-        } else if job.observation.parts().rules.version == 9 {
-            let plan = if job.policy == CpuPolicy::UtilityV25 {
-                plan_respawn_v25_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else if job.policy == CpuPolicy::UtilityV24 {
-                plan_respawn_v24_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else if job.policy == CpuPolicy::UtilityV23 {
-                plan_respawn_v23_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else if job.policy == CpuPolicy::UtilityV22 {
-                plan_respawn_v22_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            } else {
-                plan_respawn_with_origin(
-                    &job.observation,
-                    &job.memory,
-                    &job.hazard_memory,
-                    job.settled_stop_tick,
-                    job.escape_origin.as_ref(),
-                    &mut job.rng,
-                    &mut work,
-                )
-            };
-            plan.map(|plan| (plan.survival, plan.contact))
-        } else if job.observation.parts().rules.version == 8 {
-            plan_lairs_with_origin(
+    let planned = if job.observation.parts().rules.version == 10
+        || matches!(job.policy, CpuPolicy::UtilityV26 | CpuPolicy::UtilityV27)
+    {
+        let plan = if job.policy == CpuPolicy::UtilityV27 {
+            plan_reliable_v27_with_origin(
                 &job.observation,
                 &job.memory,
                 &job.hazard_memory,
@@ -339,9 +264,18 @@ fn execute_job(
                 &mut job.rng,
                 &mut work,
             )
-            .map(|plan| (plan.survival, plan.contact))
+        } else if job.policy == CpuPolicy::UtilityV26 {
+            plan_spike_pits_v26_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
         } else {
-            plan_with_origin(
+            plan_respawn_v25_with_origin(
                 &job.observation,
                 &job.memory,
                 &job.hazard_memory,
@@ -350,8 +284,84 @@ fn execute_job(
                 &mut job.rng,
                 &mut work,
             )
-            .map(|plan| (plan, None))
         };
+        plan.map(|plan| (plan.survival, plan.contact))
+    } else if job.observation.parts().rules.version == 9 {
+        let plan = if job.policy == CpuPolicy::UtilityV25 {
+            plan_respawn_v25_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV24 {
+            plan_respawn_v24_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV23 {
+            plan_respawn_v23_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV22 {
+            plan_respawn_v22_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        } else {
+            plan_respawn_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                &mut work,
+            )
+        };
+        plan.map(|plan| (plan.survival, plan.contact))
+    } else if job.observation.parts().rules.version == 8 {
+        plan_lairs_with_origin(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan.survival, plan.contact))
+    } else {
+        plan_with_origin(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut job.rng,
+            &mut work,
+        )
+        .map(|plan| (plan, None))
+    };
     let Ok((plan, contact)) = planned else {
         return (
             JobStatus::Failed,

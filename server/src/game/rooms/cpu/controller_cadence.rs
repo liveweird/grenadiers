@@ -40,6 +40,7 @@ impl CpuController {
                 | CpuProfile::RESPAWN_V22_EASY
                 | CpuProfile::RESPAWN_V21_EASY
                 | CpuProfile::SPIKE_PITS_EASY
+                | CpuProfile::RELIABLE_V27_EASY
         ) || !accepted.ordinary_navigation
             || actual.manual.is_some()
             || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
@@ -66,6 +67,7 @@ impl CpuController {
                 | CpuProfile::RESPAWN_V22_EASY
                 | CpuProfile::RESPAWN_V21_EASY
                 | CpuProfile::SPIKE_PITS_EASY
+                | CpuProfile::RELIABLE_V27_EASY
         ) || !is_clear_for_easy(observation)
         {
             self.cadence = CadenceState::default();

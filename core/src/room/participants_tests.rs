@@ -62,10 +62,16 @@ fn policy_versions_are_independent_of_controller_assignment() {
     assert_eq!(CpuProfile::RESPAWN_V23_EASY.policy.version(), 23);
     assert_eq!(CpuProfile::RESPAWN_V22_EASY.policy.version(), 22);
     assert_eq!(CpuProfile::RESPAWN_V21_EASY.policy.version(), 21);
+    assert_eq!(CpuProfile::SPIKE_PITS_STANDARD.policy.version(), 26);
+    assert_eq!(CpuProfile::SPIKE_PITS_EASY.policy.version(), 26);
+    assert_eq!(CpuProfile::RELIABLE_V27_STANDARD.policy.version(), 27);
+    assert_eq!(CpuProfile::RELIABLE_V27_EASY.policy.version(), 27);
     assert!(CpuProfile::CURRENT.is_current());
     assert!(CpuProfile::CURRENT_EASY.is_current());
     assert!(!CpuProfile::MULTIPLAYER_STANDARD.is_current());
     assert!(!CpuProfile::MULTIPLAYER_EASY.is_current());
+    assert!(!CpuProfile::RELIABLE_V27_STANDARD.is_current());
+    assert!(!CpuProfile::RELIABLE_V27_EASY.is_current());
     assert!(!CpuProfile::EQUIPMENT_GOALS_V15.is_current());
     assert!(
         !CpuProfile {

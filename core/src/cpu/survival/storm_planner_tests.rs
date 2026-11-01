@@ -183,6 +183,7 @@ fn failed_bounded_plant_charges_child_work_and_reserves_half() {
         &memory,
         &ordinary,
         true,
+        super::plant_tactic::PlantSupport::Strict,
         &mut work,
     );
 

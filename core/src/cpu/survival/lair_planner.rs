@@ -34,6 +34,7 @@ pub(super) fn plan_lairs_inner(
     opportunistic_planting: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
+    persistent_burning_oil: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -126,6 +127,8 @@ pub(super) fn plan_lairs_inner(
     );
     let recovering_plant = failed_plant_recovery
         && super::strategic_recovery::attained_firing_position(observation, &ordinary);
+    let plant_support =
+        super::plant_tactic::PlantSupport::persistent_burning_oil(persistent_burning_oil);
     if opportunistic_planting
         && !recovering_plant
         && let Some(plan) = super::lair_v23::opening(
@@ -329,6 +332,7 @@ pub(super) fn plan_lairs_inner(
             memory,
             &ordinary,
             strategic_goals,
+            plant_support,
             work,
         )
     } else {
@@ -339,6 +343,7 @@ pub(super) fn plan_lairs_inner(
             memory,
             &ordinary,
             true,
+            plant_support,
             work,
         )
     };

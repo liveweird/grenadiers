@@ -11,6 +11,8 @@ mod contact_plant;
 // real planner/executor integration, before gameplay activation.
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation_planner;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_selection;
 mod deadline;
 mod execution;
 mod joint_refuge;
@@ -41,6 +43,10 @@ pub use contact_plant::PlantContactCertificate;
 pub(crate) use contact_plant::contact_scene_candidate_for_test;
 #[allow(unused_imports)] // Inactive proof entry; no policy dispatch in this package.
 pub(crate) use continuation_planner::certify_continuation;
+#[allow(unused_imports)] // Inactive selector; policy identity is intentionally deferred.
+pub(crate) use continuation_selection::{
+    OriginRecoveryChoice, plan_lairs as plan_continuation_lairs,
+};
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
 pub use manual_execution::ExecutionCertificate;
@@ -110,7 +116,13 @@ mod continuation_tests;
 mod continuation_test_fixture;
 
 #[cfg(test)]
+mod continuation_scene_fixture;
+
+#[cfg(test)]
 mod continuation_guard_tests;
+
+#[cfg(test)]
+mod continuation_selection_tests;
 
 #[cfg(test)]
 mod pickup_stall_tests;

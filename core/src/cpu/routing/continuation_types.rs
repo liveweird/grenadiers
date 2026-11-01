@@ -6,6 +6,7 @@ use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::{Direction, EntityId, MovementSegment, Tick};
 
 use super::motion::MotionSnapshot;
+use super::pulse::PulseOriginGrace;
 use super::{RouteAssurance, SpikePitGuard};
 
 pub(super) const MAX_CONTINUATION_LEGS: usize = 8;
@@ -76,6 +77,8 @@ pub(crate) struct ContinuationCertificate {
     basis_tick: Tick,
     first_update: Tick,
     survive_until: Tick,
+    origin: PulseOriginGrace,
+    admission_checkpoint: ContinuationCheckpoint,
     legs: Vec<NominalLeg>,
     checkpoints: Vec<ContinuationCheckpoint>,
     stop_branches: Vec<StopBranch>,
@@ -90,6 +93,8 @@ pub(super) struct ContinuationParts {
     pub(super) basis: Observation,
     pub(super) basis_tick: Tick,
     pub(super) request: ContinuationRequest,
+    pub(super) origin: PulseOriginGrace,
+    pub(super) admission_checkpoint: ContinuationCheckpoint,
     pub(super) legs: Vec<NominalLeg>,
     pub(super) checkpoints: Vec<ContinuationCheckpoint>,
     pub(super) stop_branches: Vec<StopBranch>,
@@ -114,6 +119,8 @@ impl ContinuationCertificate {
             basis_tick: parts.basis_tick,
             first_update: parts.request.first_update,
             survive_until: parts.request.survive_until,
+            origin: parts.origin,
+            admission_checkpoint: parts.admission_checkpoint,
             legs: parts.legs,
             checkpoints: parts.checkpoints,
             stop_branches: parts.stop_branches,
@@ -144,7 +151,38 @@ impl ContinuationCertificate {
         self.survive_until
     }
 
+    pub(super) const fn origin(&self) -> PulseOriginGrace {
+        self.origin
+    }
+
+    pub(super) const fn admission_checkpoint(&self) -> &ContinuationCheckpoint {
+        &self.admission_checkpoint
+    }
+
+    #[cfg(test)]
+    pub(crate) const fn origin_for_test(&self) -> (crate::game::CellId, EntityId) {
+        (self.origin.cell, self.origin.bomb_id)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn admission_checkpoint_for_test(&self) -> ContinuationCheckpointView {
+        ContinuationCheckpointView {
+            tick: self.admission_checkpoint.tick,
+            movement: self.admission_checkpoint.movement,
+            position: self.admission_checkpoint.motion.position,
+            heading: self.admission_checkpoint.motion.heading,
+            residual: self.admission_checkpoint.motion.residual,
+            pending: self.admission_checkpoint.motion.pending,
+            reversed: self.admission_checkpoint.motion.reversed,
+        }
+    }
+
     pub(super) fn legs(&self) -> &[NominalLeg] {
+        &self.legs
+    }
+
+    #[cfg(test)]
+    pub(crate) fn legs_for_test(&self) -> &[NominalLeg] {
         &self.legs
     }
 

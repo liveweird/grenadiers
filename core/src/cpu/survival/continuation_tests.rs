@@ -1,114 +1,23 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, forecast};
-use crate::cpu::routing::{
-    ContinuationRequest, NominalLeg, PlantRequest, RouteLimits, plan_lair_ordinary_plant,
-};
-use crate::cpu::{MemoryKey, MovementIntent, WorkBudget};
-use crate::game::{Direction, EntityId, InputAction, Position, SeatId, SeatInput, Tick};
+use crate::cpu::routing::{ContinuationRequest, NominalLeg};
+use crate::cpu::{MovementIntent, WorkBudget};
+use crate::game::{Direction, InputAction, Position, SeatId, SeatInput, Tick};
 
 use super::continuation_guard_tests::assert_guard_negatives;
-use super::continuation_test_fixture::{CPU, observe, observe_for, state, step_until};
-use super::{PlantEscapeOrigin, WORK_ALLOWANCE, certify_continuation};
+use super::continuation_scene_fixture::scene;
+use super::continuation_test_fixture::{CPU, step_until};
+use super::{WORK_ALLOWANCE, certify_continuation};
 
 #[test]
 fn genuine_origin_certifies_and_executes_the_two_bomb_continuation() {
-    let (mut state, settings) = state();
-    state.step(&[]).unwrap();
-    step_until(&mut state, Tick(184));
-    let plant_basis = observe(&state, settings);
-    let key = MemoryKey {
-        world: plant_basis.parts().world,
-        cpu_seat: CPU,
-    };
-    let rival_plant_basis = observe_for(&state, settings, SeatId::One);
-    let rival_key = MemoryKey {
-        world: rival_plant_basis.parts().world,
-        cpu_seat: SeatId::One,
-    };
-    let plant = plan_lair_ordinary_plant(
-        &plant_basis,
-        &ObservedHazardMemory::new(key),
-        PlantRequest {
-            execution_tick: Tick(191),
-            settled_stop_tick: Tick(184),
-            first_movement: MovementIntent::Direction(Direction::South),
-            limits: RouteLimits::default(),
-        },
-        &mut WorkBudget::new(WORK_ALLOWANCE),
-    )
-    .expect("ordinary short-fuse plant proof");
-    let rival_plant = plan_lair_ordinary_plant(
-        &rival_plant_basis,
-        &ObservedHazardMemory::new(rival_key),
-        PlantRequest {
-            execution_tick: Tick(191),
-            settled_stop_tick: Tick(184),
-            first_movement: MovementIntent::Direction(Direction::South),
-            limits: RouteLimits::default(),
-        },
-        &mut WorkBudget::new(WORK_ALLOWANCE),
-    )
-    .expect("mirrored ordinary short-fuse plant proof");
-    assert_eq!(plant.placement().placed_at, Tick(191));
-    assert_eq!(plant.placement().detonates_at, Tick(281));
-
-    step_until(&mut state, Tick(190));
-    state
-        .step(&[
-            SeatInput {
-                seat: SeatId::One,
-                action: InputAction::PlaceBomb,
-            },
-            SeatInput {
-                seat: CPU,
-                action: InputAction::PlaceBomb,
-            },
-        ])
-        .unwrap();
-    step_until(&mut state, Tick(196));
-    let basis = observe(&state, settings);
-    assert_eq!(
-        state.actor(CPU).unwrap().position(),
-        Position { x: 1536, y: 9728 }
-    );
-    assert_eq!(
-        state.actor(SeatId::One).unwrap().position(),
-        Position { x: 13824, y: 9728 }
-    );
-    assert!(
-        state.world().bombs().values().all(|bomb| {
-            bomb.placed_at() == Tick(191) && bomb.detonates_at() == Some(Tick(281))
-        })
-    );
-    let own = state
-        .world()
-        .bombs()
-        .values()
-        .find(|bomb| bomb.owner() == EntityId(2))
-        .unwrap();
-    let rival_bomb = state
-        .world()
-        .bombs()
-        .values()
-        .find(|bomb| bomb.owner() == EntityId(1))
-        .unwrap();
-    assert_eq!(state.world().bombs().len(), 2);
-    let origin = PlantEscapeOrigin::new(plant_basis, plant, own.id(), &basis)
-        .expect("genuine stopped plant origin");
-    let rival_basis = observe_for(&state, settings, SeatId::One);
-    assert_eq!(rival_plant.placement().cell, rival_bomb.cell());
-    assert!(super::compatibility::plant_actor_compatible(
-        &rival_plant_basis,
-        &rival_basis,
-        &rival_plant,
-        crate::cpu::routing::PlantPresence::Present(rival_bomb.id()),
-    ));
-    let rival_origin = PlantEscapeOrigin::new(
-        rival_plant_basis,
-        rival_plant,
-        rival_bomb.id(),
-        &rival_basis,
-    )
-    .expect("genuine mirrored stopped plant origin");
+    let scene = scene();
+    let mut state = scene.state;
+    let basis = scene.basis;
+    let rival_basis = scene.rival_basis;
+    let origin = scene.origin;
+    let rival_origin = scene.rival_origin;
+    let key = scene.key;
+    let rival_key = scene.rival_key;
     let mut origin_work = WorkBudget::new(WORK_ALLOWANCE);
     super::continuation_planner::charge_origin_validation(&origin, &basis, &mut origin_work)
         .unwrap();
@@ -227,6 +136,16 @@ fn genuine_origin_certifies_and_executes_the_two_bomb_continuation() {
     ));
     assert_eq!(certificate.first_update(), Tick(203));
     assert_eq!(certificate.survive_until(), Tick(312));
+    assert_eq!(
+        certificate.origin_for_test(),
+        (origin.cell(), origin.bomb_id())
+    );
+    let admission = certificate.admission_checkpoint_for_test();
+    assert_eq!(admission.tick, Tick(202));
+    assert_eq!(admission.movement, MovementIntent::Stop);
+    assert_eq!(admission.position, Position { x: 1536, y: 9728 });
+    assert_eq!(admission.residual, 0);
+    assert_eq!(admission.pending, None);
     let checkpoints = certificate.checkpoints_for_test();
     assert_eq!(checkpoints.len(), 60);
     assert_eq!(checkpoints[39].tick, Tick(242));

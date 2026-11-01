@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use crate::cpu::forecast::{HazardForecast, TickWindow};
 use crate::cpu::lair_contact::MobContactEnvelope;
-use crate::cpu::{Observation, WorkBudget};
-use crate::game::{EntityId, Tick};
+use crate::cpu::{MovementIntent, Observation, WorkBudget};
+use crate::game::{EntityId, MovementSegment, Tick};
 
 use super::continuation_proof::{
     ProofContext, ProofState, advance_checked, certify_stationary_suffix, certify_stop_branch,
@@ -140,6 +140,24 @@ fn certify_continuation_inner(
         work,
         &mut assumptions,
     )?;
+    let admission_tick = Tick(
+        request
+            .first_update
+            .0
+            .checked_sub(1)
+            .ok_or(RouteFailure::InvalidRequest)?,
+    );
+    let admission_checkpoint = super::continuation_types::ContinuationCheckpoint {
+        tick: admission_tick,
+        movement: MovementIntent::Stop,
+        motion: state.motion.snapshot(),
+        segments: vec![MovementSegment::new(
+            state.motion.position,
+            state.motion.position,
+        )],
+        origin_active: state.origin_active,
+        pit_guard: state.pits.guard()?,
+    };
     let mut checkpoints = Vec::new();
     let mut stop_branches = Vec::new();
     let mut tick = request.first_update;
@@ -174,6 +192,8 @@ fn certify_continuation_inner(
         basis: observation.clone(),
         basis_tick: forecast.basis_tick(),
         request,
+        origin,
+        admission_checkpoint,
         legs: nominal_legs.to_vec(),
         checkpoints,
         stop_branches,

@@ -3,13 +3,13 @@ use grenadiers_core::room::{CpuDifficulty, CpuProfile};
 use super::farm_refuge_owner_support::run;
 
 #[test]
-fn current_farm_origin_profiles_queue_plant_destroy_and_survive() {
+fn current_contact_topology_profiles_queue_plant_destroy_and_survive() {
     for (profile, difficulty) in [
         (
-            CpuProfile::FARM_ORIGINS_V38_STANDARD,
+            CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
             CpuDifficulty::Standard,
         ),
-        (CpuProfile::HARD_V39, CpuDifficulty::Hard),
+        (CpuProfile::HARD_V41, CpuDifficulty::Hard),
     ] {
         let outcome = run(profile, difficulty);
         assert!(

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.7 — 2026-11-01
+
+- Let CPUs certify useful ordinary bomb plants when retained walls keep naturally spawned mobs outside the complete escape, with plant-bound scene and contact renewal checks.
+- Retain existing planning and candidate work limits, preserve archived and no-lair behavior, and bind Easy/Standard40 and Hard41 to private replay20.
+
 ## 1.3.6 — 2026-11-01
 
 - Remember eligible refused farming approaches for a bounded interval in lair-enabled CPU planning, so a different wall target cannot immediately reuse the same failed bomb position.

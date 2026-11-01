@@ -363,6 +363,9 @@ mod tests {
             grenadiers_core::room::CpuProfile::FARM_ORIGINS_V38_STANDARD,
             grenadiers_core::room::CpuProfile::FARM_ORIGINS_V38_EASY,
             grenadiers_core::room::CpuProfile::HARD_V39,
+            grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
+            grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_EASY,
+            grenadiers_core::room::CpuProfile::HARD_V41,
         ] {
             assert!(controller(profile).accept_observation(&observed));
         }

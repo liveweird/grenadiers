@@ -1,6 +1,8 @@
 use crate::cpu::forecast::ForecastEvolution;
 use crate::cpu::routing::{PlantCertificate, PlantPresence};
-use crate::cpu::{BombKnowledge, Observation, ObservedActor, ObservedBombTrigger, VisibleActor};
+use crate::cpu::{
+    BombKnowledge, Observation, ObservedActor, ObservedBombTrigger, VisibleActor, WorkBudget,
+};
 use crate::game::Tick;
 
 pub(super) fn visible_rivals_allow_segment(
@@ -219,6 +221,44 @@ pub(super) fn plant_actor_compatible(
             expected,
             certificate.expected_weapon(presence),
         )
+}
+
+pub(super) fn plant_actor_compatible_charged(
+    basis: &Observation,
+    observation: &Observation,
+    certificate: &PlantCertificate,
+    presence: PlantPresence,
+    work: &mut WorkBudget,
+) -> bool {
+    let old = basis.parts();
+    let new = observation.parts();
+    let (Some(before), Some(after)) = (actor(basis), actor(observation)) else {
+        return false;
+    };
+    let Some(effect_width) = before.effects.len().checked_add(after.effects.len()) else {
+        return false;
+    };
+    let Some(effects) = after
+        .effects
+        .len()
+        .checked_mul(effect_width)
+        .and_then(|nested| nested.checked_add(before.effects.len()))
+        .and_then(|nested| nested.checked_add(after.effects.len()))
+    else {
+        return false;
+    };
+    let charge = old
+        .actors
+        .len()
+        .checked_mul(2)
+        .and_then(|count| count.checked_add(new.actors.len()))
+        .and_then(|count| count.checked_add(effects))
+        .and_then(|count| {
+            count.checked_add(usize::try_from(certificate.contact_actor_work()?).ok()?)
+        })
+        .and_then(|count| u32::try_from(count.checked_add(16)?).ok());
+    charge.is_some_and(|charge| work.try_take(charge).is_ok())
+        && plant_actor_compatible(basis, observation, certificate, presence)
 }
 
 fn effects_match(before: &VisibleActor, after: &VisibleActor, elapsed: u64) -> bool {

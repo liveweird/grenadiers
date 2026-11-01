@@ -5,8 +5,8 @@ use crate::cpu::policy::{StrategicTarget, UtilityMemory};
 use crate::cpu::{
     BombKnowledge, CpuRng, ManualIntent, MemoryKey, MovementIntent, Observation, ObservationParts,
     ObservedActor, ObservedArena, ObservedBomb, ObservedBombTrigger, ObservedEnvironment,
-    ObservedFlame, ObservedOil, ObservedPickup, ObservedRespawnLairs, ObservedRules,
-    UnknownActorFacts, UnknownBombFacts, VisibleActor, WorkBudget, WorldId,
+    ObservedFlame, ObservedOil, ObservedPickup, ObservedRules, UnknownActorFacts, UnknownBombFacts,
+    VisibleActor, WorkBudget, WorldId,
 };
 use crate::game::{
     ActorInit, Arena, BombTrigger, CellId, Direction, EnabledItems, EntityId, InputAction,
@@ -114,6 +114,13 @@ pub(super) fn state(
 }
 
 pub(super) fn observe(state: &State, room_settings: RoomSettings) -> Observation {
+    observe_with_lairs(state, (room_settings, RespawnLairSettings::new(5).unwrap()))
+}
+
+pub(crate) fn observe_with_lairs(
+    state: &State,
+    config: (RoomSettings, RespawnLairSettings),
+) -> Observation {
     let view = state.public_view();
     let actors = view
         .actors
@@ -169,7 +176,7 @@ pub(super) fn observe(state: &State, room_settings: RoomSettings) -> Observation
             tick_rate: 60,
             running_updates: u16::try_from(view.running_updates).unwrap(),
             remaining_ticks: u16::try_from(view.remaining_ticks).unwrap(),
-            settings: room_settings,
+            settings: config.0,
         },
         arena: ObservedArena {
             width: view.arena.width,
@@ -207,13 +214,7 @@ pub(super) fn observe(state: &State, room_settings: RoomSettings) -> Observation
             })
             .collect(),
     };
-    let respawn_lairs = state.lair_statuses().map(|lairs| {
-        ObservedRespawnLairs::new(
-            RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap()),
-            lairs.to_vec(),
-            state.mobs(),
-        )
-    });
+    let respawn_lairs = super::observation_test_adapter::projected_respawn_lairs(state, config.1);
     Observation::new_rules_v10(
         parts,
         ObservedEnvironment::new(

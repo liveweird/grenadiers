@@ -314,6 +314,7 @@ pub(super) fn plan_spike_policy(
         super::steering::RefugeGuidance::default(),
         false,
         false,
+        false,
     )
 }
 
@@ -365,6 +366,7 @@ fn plan_respawn_policy(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
         false,
         false,
     )

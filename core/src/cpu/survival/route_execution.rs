@@ -1,5 +1,5 @@
 use crate::cpu::policy::PolicyError;
-use crate::cpu::routing::{PlantCertificate, PlantPresence, RouteCertificate, RouteStep};
+use crate::cpu::routing::{PlantCertificate, PlantPresence, RouteCertificate};
 use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
 
@@ -19,9 +19,9 @@ pub enum RouteStatus {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RouteCommand {
-    movement: MovementIntent,
-    admission_tick: Tick,
-    step_index: u8,
+    pub(super) movement: MovementIntent,
+    pub(super) admission_tick: Tick,
+    pub(super) step_index: u8,
 }
 
 impl RouteCommand {
@@ -63,9 +63,23 @@ pub struct CommittedRoute {
 pub(super) struct CommittedPlant {
     pub(super) certificate: PlantCertificate,
     pub(super) presence: PlantPresence,
+    pub(super) contact: Option<crate::cpu::lair_contact::PlantContactProof>,
 }
 
 impl CommittedRoute {
+    /// True only after Core admitted the typed topology-bound contact plant.
+    #[must_use]
+    pub fn has_contact_authority(&self) -> bool {
+        self.plant
+            .as_ref()
+            .is_some_and(|plant| plant.contact.is_some())
+    }
+
+    #[cfg(test)]
+    pub(crate) fn plant_presence_for_test(&self) -> Option<PlantPresence> {
+        self.plant.as_ref().map(|plant| plant.presence)
+    }
+
     pub fn admit(
         certificate: RouteCertificate,
         basis: Observation,
@@ -114,6 +128,17 @@ impl CommittedRoute {
         let scene_matches = plant.as_ref().map_or_else(
             || route_compatible(&basis, current, certificate.evolution()),
             |plant| {
+                if let Some(contact) = &plant.contact {
+                    return current.parts().tick == admission_tick
+                        && super::contact_plant::contact_scene_candidate(
+                            &basis,
+                            current,
+                            &plant.certificate,
+                            contact,
+                            PlantPresence::Awaiting,
+                        )
+                        .is_some();
+                }
                 current.parts().tick == admission_tick
                     && plant
                         .certificate
@@ -152,7 +177,7 @@ impl CommittedRoute {
         {
             return Err(PolicyError::InvalidObservation);
         }
-        let transitions = transitions(&certificate, first_update)?;
+        let transitions = super::route_transitions::transitions(&certificate, first_update)?;
         let Some(initial) = transitions.first() else {
             return Err(PolicyError::InvalidObservation);
         };
@@ -188,26 +213,24 @@ impl CommittedRoute {
         if tick <= self.last_observation_tick {
             return RouteStatus::Invalidated;
         }
+        if self.has_contact_authority() && tick >= self.certificate.survive_until() {
+            return self.finish(current);
+        }
         if !self.scene_matches(current) {
             return RouteStatus::Invalidated;
         }
         if tick >= self.certificate.survive_until() {
-            let current_key = MemoryKey {
-                world: current.parts().world,
-                cpu_seat: current.parts().recipient,
-            };
-            let same_actor = actor(&self.basis)
-                .zip(actor(current))
-                .is_some_and(|(before, after)| before.id == after.id && after.alive);
-            if self.next_transition != self.transitions.len()
-                || current_key != self.certificate.key()
-                || !same_actor
-            {
-                return RouteStatus::Invalidated;
-            }
-            self.last_observation_tick = tick;
-            self.last_observation = current.clone();
-            return RouteStatus::Completed;
+            return self.finish(current);
+        }
+        if self.plant.as_ref().is_some_and(|plant| {
+            plant.contact.as_ref().is_some_and(|proof| {
+                tick.0
+                    .checked_add(1)
+                    .map(Tick)
+                    .is_none_or(|next| next >= proof.safe_until())
+            })
+        }) {
+            return RouteStatus::Invalidated;
         }
         let Some(expected) = self
             .certificate
@@ -273,6 +296,17 @@ impl CommittedRoute {
 
     #[must_use]
     pub fn poll_command(&self, current_tick: Tick, settled_stop_tick: Option<Tick>) -> RouteStatus {
+        if self.plant.as_ref().is_some_and(|plant| {
+            plant.contact.as_ref().is_some_and(|proof| {
+                current_tick
+                    .0
+                    .checked_add(1)
+                    .map(Tick)
+                    .is_none_or(|next| next >= proof.safe_until())
+            })
+        }) {
+            return RouteStatus::Invalidated;
+        }
         let Some(transition) = self.transitions.get(self.next_transition) else {
             return if current_tick >= self.certificate.survive_until() {
                 RouteStatus::Completed
@@ -314,87 +348,23 @@ impl CommittedRoute {
             MovementIntent::Direction(_) => RouteStatus::Continue,
         }
     }
-}
 
-fn transitions(
-    certificate: &RouteCertificate,
-    first_update: Tick,
-) -> Result<Vec<Transition>, PolicyError> {
-    let lane = certificate
-        .lane(first_update)
-        .ok_or(PolicyError::InvalidObservation)?;
-    let mut transitions = Vec::with_capacity(certificate.steps().len().saturating_mul(2));
-    let mut previous_stop = None;
-    for (index, step) in certificate.steps().iter().copied().enumerate() {
-        let step_index = u8::try_from(index).map_err(|_| PolicyError::InvalidObservation)?;
-        let start = lane
-            .step_start(index)
-            .ok_or(PolicyError::InvalidObservation)?;
-        match step {
-            RouteStep::Move { direction, .. } => {
-                push_transition(
-                    &mut transitions,
-                    start,
-                    MovementIntent::Direction(direction),
-                    step_index,
-                    previous_stop,
-                )?;
-                let stop = lane
-                    .stop_update(index)
-                    .ok_or(PolicyError::InvalidObservation)?;
-                push_transition(
-                    &mut transitions,
-                    stop,
-                    MovementIntent::Stop,
-                    step_index,
-                    None,
-                )?;
-                previous_stop = Some(stop);
-            }
-            RouteStep::Wait { .. } if index == 0 => {
-                push_transition(
-                    &mut transitions,
-                    start,
-                    MovementIntent::Stop,
-                    step_index,
-                    None,
-                )?;
-                previous_stop = Some(
-                    lane.stop_update(index)
-                        .ok_or(PolicyError::InvalidObservation)?,
-                );
-            }
-            RouteStep::Wait { .. } => {}
+    fn finish(&mut self, current: &Observation) -> RouteStatus {
+        let current_key = MemoryKey {
+            world: current.parts().world,
+            cpu_seat: current.parts().recipient,
+        };
+        let same_actor = actor(&self.basis)
+            .zip(actor(current))
+            .is_some_and(|(before, after)| before.id == after.id && after.alive);
+        if self.next_transition != self.transitions.len()
+            || current_key != self.certificate.key()
+            || !same_actor
+        {
+            return RouteStatus::Invalidated;
         }
+        self.last_observation_tick = current.parts().tick;
+        self.last_observation = current.clone();
+        RouteStatus::Completed
     }
-    Ok(transitions)
-}
-
-fn push_transition(
-    transitions: &mut Vec<Transition>,
-    update: Tick,
-    movement: MovementIntent,
-    step_index: u8,
-    required_stop_snapshot: Option<Tick>,
-) -> Result<(), PolicyError> {
-    let admission_tick = update
-        .0
-        .checked_sub(1)
-        .map(Tick)
-        .ok_or(PolicyError::InvalidObservation)?;
-    if transitions
-        .last()
-        .is_some_and(|previous| previous.command.admission_tick >= admission_tick)
-    {
-        return Err(PolicyError::InvalidObservation);
-    }
-    transitions.push(Transition {
-        command: RouteCommand {
-            movement,
-            admission_tick,
-            step_index,
-        },
-        required_stop_snapshot,
-    });
-    Ok(())
 }

@@ -1,6 +1,7 @@
 use crate::cpu::forecast::{ForecastEvolution, ForecastFailure};
 use crate::cpu::{
     BombKnowledge, MemoryKey, MovementIntent, Observation, ObservedBomb, ObservedBombTrigger,
+    WorkBudget,
 };
 use crate::game::{BlastKind, CellId, EntityId, SpecialWeapon, Tick};
 
@@ -182,6 +183,34 @@ impl PlantCertificate {
                     )
             }
         }
+    }
+
+    pub(crate) fn contact_scene_candidate(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+        established: PlantPresence,
+        work: &mut WorkBudget,
+    ) -> Option<PlantPresence> {
+        let charge = self
+            .absent
+            .contact_scene_work(basis, current)?
+            .max(self.present.contact_scene_work(basis, current)?);
+        work.try_take(charge).ok()?;
+        if established == PlantPresence::Awaiting {
+            self.confirm(basis, current).ok()
+        } else {
+            self.matches_scene(basis, current, established)
+                .then_some(established)
+        }
+    }
+
+    pub(crate) fn contact_actor_work(&self) -> Option<u32> {
+        Some(
+            self.absent
+                .contact_actor_work()?
+                .max(self.present.contact_actor_work()?),
+        )
     }
 
     #[must_use]

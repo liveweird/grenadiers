@@ -4,6 +4,73 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.6 — 2026-11-01
+
+Lair-enabled CPUs remember one eligible refused farming position for 120 ticks and exclude it
+before selecting each wall's best approach. This prevents a different wall target from immediately
+reusing the same failed bomb position. The memory is bounded, local to one CPU/world and expires
+normally. Pickup and opponent-pressure selection keep their existing rules.
+
+A mark requires a stopped adjacent Farm approach, visible bomb knowledge, spare capacity, an
+ordinary bomb and supported planting conditions, followed by failure of every full plant attempt.
+Successful planting, unsupported effects, capacity exhaustion and queue/admission refusal do not
+create a mark. Movement and planting still require all forecast, contact, usefulness and admission
+proofs within the unchanged work allowance.
+
+### Compatibility and limits
+
+Easy/Standard select CPU38 and Hard selects CPU39 with its existing certified second-bomb handoff.
+Private replay19 binds those identities with gameplay19/rules10/navigation3. Private replay18
+retains CPU36/37; this does not introduce another network version. With lairs disabled, the prior
+planner remains unchanged. Earlier policy/replay behavior stays isolated.
+
+The captured (3,9) refusal now records its position and the next guidance selects (3,8) for
+block (3,7). The guidance decision and safe physical planting from (3,8) are separate witnesses;
+they do not establish a continuous restoration of the original match. Short-fuse interrupted
+recovery remains a separate known limitation. No UI, artwork, network schema, physics or external
+dependency changes. Restart ends process-local matches.
+
+### Verification
+
+Accepted image source: `efec286f0ad3046c78a2d288d41967af2b946c00`.
+Independent Core and integration review is clear. Reviewed fixes include atomic block-scan
+charging and explicit visible-bomb, Farm-objective and plantable-phase classifier guards.
+Final documentation-only edits leave application build inputs unchanged.
+
+- Full frozen-source Rust gate passes in 651 seconds: 1,738 passing Core tests and 674 passing
+  ordinary server tests, plus all 4,194,304 item masks separately in debug, release and coverage.
+  Four workers, 32 partitions, no retries. Formatting, strict Clippy, build and repository checks
+  pass. Fresh coverage is 58,980/63,621 lines (92.71%), above the unchanged 90% floor.
+- The captured refused-origin case records its 120-tick deadline before the next per-block
+  ranking selects the alternate approach. Exact/interrupted work, unsupported-state guards,
+  expiry/world reset and unaffected pickup/opponent selection tests pass. Successful alternate
+  physical plants do not create a failure mark and survive their complete flame lifetimes.
+- No-lair result/work/RNG parity, current profile/worker/owner mapping, real queued Hard39
+  handoff admission and private Replay19/retained Replay18 boundaries pass. Normal owner
+  execution from the alternate position passes; the continuous captured trajectory is not claimed.
+- Unique Linux x86_64 workspace debug/release tests and doctests pass on the accepted source
+  ([run 41275595877](https://github.com/liveweird/grenadiers/actions/runs/41275595877)).
+  The same Linux unit coverage is not repeated in a second container suite.
+- Exact-image Compose authentication/keyboard duel and three-Hard-CPU smoke pass, as does the
+  restricted Kubernetes three-CPU smoke. All features are enabled; the owned stacks/namespaces
+  are removed. The 179-second long capture reaches a result without JavaScript errors; all
+  three CPUs move and plant (10/8/15 observed bombs), with Stopwatch, Power and Short Fuse pickups.
+  This is public observational evidence, not a balance comparison or proof that a missed safe
+  action never occurs; one seat continues moving long after its last observed bomb.
+- All five web assets match accepted v1.3.0 byte-for-byte. Unchanged web/contracts/renderer,
+  artwork, external dependencies and toolchain inputs reuse their accepted complete web/native
+  suites. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings in the exact image.
+
+### Operation
+
+Accepted local image:
+`sha256:ef8c1369ba5f05828daa407d5dfd44ee394b061758983f04ceba960b17b47fba`.
+The exact accepted image is promoted to localhost:8085; served-asset/security checks and a
+fresh three-Hard-CPU smoke pass. Version 1.3.5 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.5 — 2026-11-01
 
 CPU wall farming can try two bounded alternate refuges before the general escape search.

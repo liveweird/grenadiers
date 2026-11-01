@@ -8,7 +8,7 @@ use crate::game::Tick;
 
 use super::compatibility::actor;
 use super::steering::RefugeGuidance;
-use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
+use super::{MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
 
 #[derive(Clone, Debug)]
 pub struct LairSurvivalPlan {
@@ -42,6 +42,7 @@ pub(super) fn plan_lairs_inner(
     refuge_guidance: RefugeGuidance,
     joint_refuges: bool,
     farm_origin_recovery: bool,
+    contact_topology: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -342,37 +343,20 @@ pub(super) fn plan_lairs_inner(
         return Ok(stop());
     };
 
-    let plant = if opportunistic_planting {
-        super::plant_tactic::certified_plant_candidates(
-            observation,
-            history,
-            settled_stop_tick,
-            memory,
-            &ordinary,
-            strategic_goals,
-            plant_support,
-            work,
-        )
-    } else {
-        super::plant_tactic::certified_plant(
-            observation,
-            history,
-            settled_stop_tick,
-            memory,
-            &ordinary,
-            true,
-            plant_support,
-            work,
-        )
-    };
-    if let Some(plant) = plant
-        && let Some(ExecutionCertificate::Plant(certificate)) = &plant.execution
-        && let Ok(contact) = MobContactLease::certify_route(observation, certificate.route(), work)
-    {
-        return Ok(LairSurvivalPlan {
-            survival: plant,
-            contact: Some(contact),
-        });
+    let authorized = super::contact_plant::certified_lair_candidate(
+        observation,
+        history,
+        settled_stop_tick,
+        memory,
+        &ordinary,
+        opportunistic_planting,
+        strategic_goals,
+        contact_topology,
+        plant_support,
+        work,
+    );
+    if let Some(authorized) = authorized {
+        return Ok(authorized);
     }
     let mut fallback = fallback;
     if let Some(cell) = failed_farm_approach.flatten() {

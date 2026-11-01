@@ -1,0 +1,300 @@
+//! Test-only milestone for topology-bound mob contact exclusion.
+//!
+//! This is deliberately not a route certificate: openings are explicit inputs,
+//! and no production contact decision consumes this evidence.
+
+use std::collections::{BTreeSet, VecDeque};
+
+use crate::cpu::WorkBudget;
+use crate::game::geometry::MovementSegment;
+use crate::game::types::{HALF_FOOTPRINT, UNITS_PER_CELL};
+use crate::game::{CellId, Position, Terrain, fixed_arena};
+
+const WIDTH: u16 = 15;
+const HEIGHT: u16 = 13;
+const MOB: CellId = CellId::new(7, 6);
+const CPU: CellId = CellId::new(10, 7);
+const NEIGHBOR_TRAVERSALS_PER_CELL: usize = 18;
+
+#[derive(Clone)]
+pub(super) struct IsolationEvidence {
+    retained_blocked: BTreeSet<CellId>,
+    source_component: BTreeSet<CellId>,
+    dilation: BTreeSet<CellId>,
+}
+
+impl IsolationEvidence {
+    pub(super) fn build(
+        blocks: &BTreeSet<CellId>,
+        opened: &BTreeSet<CellId>,
+        sources: &[CellId],
+        work: &mut WorkBudget,
+    ) -> Option<Self> {
+        let charge = usize::from(WIDTH)
+            .checked_mul(usize::from(HEIGHT))?
+            // One visit plus up to eight neighbors in both the component flood
+            // and the separate one-cell dilation traversal.
+            .checked_mul(NEIGHBOR_TRAVERSALS_PER_CELL)?
+            .checked_add(blocks.len())?
+            .checked_add(opened.len())?
+            .checked_add(sources.len())?;
+        work.try_take(u32::try_from(charge).ok()?).ok()?;
+        let retained_blocked = blocks.difference(opened).copied().collect::<BTreeSet<_>>();
+        let mut source_component = BTreeSet::new();
+        for source in sources {
+            if passable(*source, &retained_blocked) {
+                flood(*source, &retained_blocked, &mut source_component);
+            }
+        }
+        let mut dilation = source_component.clone();
+        for cell in &source_component {
+            dilation.extend(neighbors(*cell));
+        }
+        Some(Self {
+            retained_blocked,
+            source_component,
+            dilation,
+        })
+    }
+
+    pub(super) fn still_fits(
+        &self,
+        current_blocks: &BTreeSet<CellId>,
+        work: &mut WorkBudget,
+    ) -> bool {
+        let Some(charge) = self
+            .retained_blocked
+            .len()
+            .checked_add(current_blocks.len())
+            .and_then(|value| u32::try_from(value).ok())
+        else {
+            return false;
+        };
+        if work.try_take(charge).is_err() {
+            return false;
+        }
+        self.retained_blocked.is_subset(current_blocks)
+    }
+
+    pub(super) fn excludes_segment(&self, segment: MovementSegment, work: &mut WorkBudget) -> bool {
+        let Some(charge) = usize::from(WIDTH)
+            .checked_mul(usize::from(HEIGHT))
+            .and_then(|value| u32::try_from(value).ok())
+        else {
+            return false;
+        };
+        if work.try_take(charge).is_err() {
+            return false;
+        }
+        board_cells()
+            .filter(|cell| segment.overlaps_cell(*cell))
+            .all(|cell| !self.dilation.contains(&cell))
+    }
+}
+
+fn flood(origin: CellId, blocked: &BTreeSet<CellId>, found: &mut BTreeSet<CellId>) {
+    let mut queue = VecDeque::from([origin]);
+    while let Some(cell) = queue.pop_front() {
+        if !found.insert(cell) {
+            continue;
+        }
+        queue.extend(
+            neighbors(cell).filter(|next| passable(*next, blocked) && !found.contains(next)),
+        );
+    }
+}
+
+fn neighbors(cell: CellId) -> impl Iterator<Item = CellId> {
+    (-1_i32..=1).flat_map(move |row_delta| {
+        (-1_i32..=1).filter_map(move |column_delta| {
+            if column_delta == 0 && row_delta == 0 {
+                return None;
+            }
+            let column = i32::from(cell.column).checked_add(column_delta)?;
+            let row = i32::from(cell.row).checked_add(row_delta)?;
+            (column >= 0 && column < i32::from(WIDTH) && row >= 0 && row < i32::from(HEIGHT))
+                .then(|| CellId::new(column as u16, row as u16))
+        })
+    })
+}
+
+fn board_cells() -> impl Iterator<Item = CellId> {
+    (0..HEIGHT).flat_map(|row| (0..WIDTH).map(move |column| CellId::new(column, row)))
+}
+
+fn passable(cell: CellId, blocked: &BTreeSet<CellId>) -> bool {
+    fixed_arena().terrain(cell) == Some(Terrain::Floor) && !blocked.contains(&cell)
+}
+
+pub(super) fn captured_blocks() -> BTreeSet<CellId> {
+    serde_json::from_str::<Vec<[u16; 2]>>(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/fixtures/trapped-mob-blocks.json"
+    )))
+    .expect("checked-in trapped-mob fixture must parse")
+    .into_iter()
+    .map(|[column, row]| CellId::new(column, row))
+    .collect()
+}
+
+fn stationary(position: Position) -> MovementSegment {
+    MovementSegment::new(position, position)
+}
+
+#[test]
+fn captured_open_target_keeps_mob_isolated_and_east_footprints_outside_dilation() {
+    let blocks = captured_blocks();
+    let opened = BTreeSet::from([CellId::new(9, 7)]);
+    let mut work = WorkBudget::new(65_536);
+    let evidence = IsolationEvidence::build(&blocks, &opened, &[MOB], &mut work).unwrap();
+    assert_eq!(evidence.source_component, BTreeSet::from([MOB]));
+
+    let current = Position::center(CPU);
+    let east = Position::center(CellId::new(13, 7));
+    // This is a caller-supplied centered representative segment, not the
+    // captured offset pose or an extracted route/turn sweep.
+    assert!(evidence.excludes_segment(MovementSegment::new(current, east), &mut work));
+
+    let cpu_component = {
+        let mut cells = BTreeSet::new();
+        flood(CPU, &evidence.retained_blocked, &mut cells);
+        cells
+    };
+    // Eight-neighbor connectivity deliberately yields 70; cardinal-only is 68.
+    assert_eq!(cpu_component.len(), 70);
+    assert!(cpu_component.is_disjoint(&evidence.source_component));
+}
+
+#[test]
+fn full_footprint_straddles_faces_diagonals_and_corners_fail_closed() {
+    let blocks = captured_blocks();
+    let mut work = WorkBudget::new(65_536);
+    let evidence = IsolationEvidence::build(
+        &blocks,
+        &BTreeSet::from([CellId::new(9, 7)]),
+        &[MOB],
+        &mut work,
+    )
+    .unwrap();
+    let face = Position {
+        x: 9 * UNITS_PER_CELL,
+        y: Position::center(CellId::new(9, 7)).y,
+    };
+    let corner = Position {
+        x: 9 * UNITS_PER_CELL,
+        y: 8 * UNITS_PER_CELL,
+    };
+    assert!(!evidence.excludes_segment(stationary(face), &mut work));
+    assert!(!evidence.excludes_segment(stationary(corner), &mut work));
+    assert!(!evidence.excludes_segment(MovementSegment::new(face, corner), &mut work));
+    const {
+        assert!(2 * HALF_FOOTPRINT == 640);
+        assert!(2 * HALF_FOOTPRINT - 1 < UNITS_PER_CELL);
+    }
+}
+
+#[test]
+fn endpoint_rectangle_conservatively_contains_a_two_axis_corner_sweep() {
+    let start = Position {
+        x: 9 * UNITS_PER_CELL - 100,
+        y: Position::center(CellId::new(8, 7)).y + 192,
+    };
+    let corner = Position {
+        x: start.x + 400,
+        y: start.y,
+    };
+    let end = Position {
+        x: corner.x,
+        y: corner.y + 400,
+    };
+    let bound = MovementSegment::new(start, end);
+    let pieces = [
+        MovementSegment::new(start, corner),
+        MovementSegment::new(corner, end),
+    ];
+    assert!(pieces.iter().any(|piece| {
+        board_cells()
+            .filter(|cell| piece.overlaps_cell(*cell))
+            .count()
+            > 1
+    }));
+    for cell in board_cells().filter(|cell| pieces.iter().any(|piece| piece.overlaps_cell(*cell))) {
+        assert!(bound.overlaps_cell(cell));
+    }
+}
+
+#[test]
+fn removed_separator_or_opened_birth_neighbor_invalidates_retained_evidence() {
+    let blocks = captured_blocks();
+    let target_open = BTreeSet::from([CellId::new(9, 7)]);
+    let mut work = WorkBudget::new(65_536);
+    let evidence = IsolationEvidence::build(&blocks, &target_open, &[MOB], &mut work).unwrap();
+
+    let mut separator_removed = evidence.retained_blocked.clone();
+    separator_removed.remove(&CellId::new(7, 5));
+    assert!(!evidence.still_fits(&separator_removed, &mut work));
+
+    let birth = CellId::new(8, 5);
+    assert!(blocks.contains(&birth));
+    let mut birth_opened = evidence.retained_blocked.clone();
+    birth_opened.remove(&birth);
+    assert!(!evidence.still_fits(&birth_opened, &mut work));
+    let rebuilt = IsolationEvidence::build(
+        &blocks,
+        &BTreeSet::from([CellId::new(9, 7), birth]),
+        &[MOB, birth],
+        &mut WorkBudget::new(65_536),
+    )
+    .unwrap();
+    assert!(rebuilt.source_component.contains(&birth));
+    assert!(!rebuilt.excludes_segment(
+        stationary(Position::center(CellId::new(9, 5))),
+        &mut WorkBudget::new(u32::from(WIDTH) * u32::from(HEIGHT)),
+    ));
+}
+
+#[test]
+fn incomplete_work_never_yields_exclusion_evidence() {
+    let blocks = captured_blocks();
+    let opened = BTreeSet::from([CellId::new(9, 7)]);
+    let required =
+        u32::from(WIDTH) * u32::from(HEIGHT) * u32::try_from(NEIGHBOR_TRAVERSALS_PER_CELL).unwrap()
+            + u32::try_from(blocks.len() + opened.len() + 1).unwrap();
+    for available in [0, required - 1] {
+        let mut work = WorkBudget::new(available);
+        assert!(IsolationEvidence::build(&blocks, &opened, &[MOB], &mut work).is_none());
+        assert_eq!(work.spent(), 0);
+    }
+    let mut exact = WorkBudget::new(required);
+    assert!(IsolationEvidence::build(&blocks, &opened, &[MOB], &mut exact).is_some());
+    assert_eq!(exact.spent(), required);
+}
+
+#[test]
+fn evidence_queries_are_atomically_charged_and_fail_closed() {
+    let blocks = captured_blocks();
+    let opened = BTreeSet::from([CellId::new(9, 7)]);
+    let build_work =
+        u32::from(WIDTH) * u32::from(HEIGHT) * u32::try_from(NEIGHBOR_TRAVERSALS_PER_CELL).unwrap()
+            + u32::try_from(blocks.len() + opened.len() + 1).unwrap();
+    let mut shared = WorkBudget::new(build_work);
+    let evidence = IsolationEvidence::build(&blocks, &opened, &[MOB], &mut shared).unwrap();
+    let segment = stationary(Position::center(CPU));
+    assert!(!evidence.excludes_segment(segment, &mut shared));
+
+    let query_work = u32::from(WIDTH) * u32::from(HEIGHT);
+    let mut short = WorkBudget::new(query_work - 1);
+    assert!(!evidence.excludes_segment(segment, &mut short));
+    assert_eq!(short.spent(), 0);
+    let mut exact = WorkBudget::new(query_work);
+    assert!(evidence.excludes_segment(segment, &mut exact));
+    assert_eq!(exact.spent(), query_work);
+
+    let fit_work = u32::try_from(evidence.retained_blocked.len() * 2).unwrap();
+    let mut fit_short = WorkBudget::new(fit_work - 1);
+    assert!(!evidence.still_fits(&evidence.retained_blocked, &mut fit_short));
+    assert_eq!(fit_short.spent(), 0);
+    let mut fit_exact = WorkBudget::new(fit_work);
+    assert!(evidence.still_fits(&evidence.retained_blocked, &mut fit_exact));
+    assert_eq!(fit_exact.spent(), fit_work);
+}

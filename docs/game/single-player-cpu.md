@@ -172,9 +172,9 @@ using synthetic grants establishes timing only; it is not a safety certificate. 
 new policy/replay identities opt-in and every archived contract unchanged. Work sequencing remains
 in the [backlog](../../BACKLOG.md#single-player).
 
-## Contact topology refinement boundary
+## Plant-bound contact topology
 
-A contact-envelope refinement may use public barriers to exclude unreachable space while
+The contact-envelope refinement uses public barriers to exclude unreachable space while
 retaining the existing distance envelope wherever separation is not proved. Use conservative
 eight-neighbor connectivity and a one-cell eight-neighbor dilation of every source component.
 Compare every cell touched by the complete swept actor footprint, not only its center.
@@ -187,13 +187,27 @@ from the beginning; retain only separators proved intact throughout the whole ho
 birth location may be omitted only when its block is retained; potentially opened birth cells
 contribute from their original earliest birth time.
 
-Clipped authority must retain the plant certificate, presence mapping and separator evidence.
-Check the plant's scene match and retained barriers at admission and every publication: the
-existing contact lease alone does not bind terrain. Unexpected bombs, displaced/replaced bombs,
-separator loss, unsupported observations or exhausted work withdraw the refinement. Do not
-apply this projection to an observed owned bomb merely because it belongs to the CPU.
+An opaque `PlantContactCertificate` binds the full plant certificate to its original contact
+envelope, source components and separator evidence. `ExecutionCertificate::ContactPlant` is
+admitted by Core before the owner can use it instead of the ordinary contact lease. Committed
+execution keeps one bomb-presence mapping; a confirmed bomb cannot silently become absent.
+Expected detonation and predicted block removal are supported without restarting the proof.
 
-Charge construction, birth/source scans, every footprint query and each later validation.
-Unsupported evidence keeps the old conservative result. A geometric experiment does not establish
-a complete route, real spawning behavior, safe physical planting, publication-latency safety or
-production authority. Those witnesses and independent review remain prerequisites to activation.
+Admission and every publication check the plant scene, actor compatibility, original source
+envelope and retained separators before committing updated presence. Unexpected bombs,
+displaced/replaced bombs, early disappearance, separator loss, unsupported observations or
+exhausted work withdraw the refinement. The next simulation update must precede the original
+exclusive horizon, even while stopped or waiting for a queued movement. Do not apply this
+projection to an observed owned bomb merely because it belongs to the CPU.
+
+Try the ordinary contact lease first; only `NoRoute` can request the refinement. Charge
+construction, source scans and footprint queries inside the existing per-candidate child budget,
+then try alternate movements when a candidate fails. Planning retains its 65,536-work ceiling;
+each admission/publication has one shared, fail-closed 8,192-work renewal allowance, with no
+fresh path search. Unsupported evidence keeps the old conservative result.
+
+Policy40/41 introduce this path without changing archived planners; lairs-disabled behavior
+delegates to policy38/39. Safety remains conditional on the plant's observed scene assumptions:
+withdrawal at the first mismatched publication does not predict arbitrary unseen rival actions.
+Physical tests, natural-spawn tests, real queued-owner execution and independent review are
+required alongside geometric separation tests.

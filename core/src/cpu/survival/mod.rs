@@ -6,6 +6,7 @@
 mod bracelet;
 mod clear_gap;
 mod compatibility;
+mod contact_plant;
 mod deadline;
 mod execution;
 mod joint_refuge;
@@ -26,10 +27,14 @@ mod refuge_handoff;
 mod respawn_disabled;
 mod respawn_v22;
 mod route_execution;
+mod route_transitions;
 mod steering;
 mod strategic_recovery;
 
 pub use compatibility::can_admit_ordinary;
+pub use contact_plant::PlantContactCertificate;
+#[cfg(test)]
+pub(crate) use contact_plant::contact_scene_candidate_for_test;
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
 pub use manual_execution::ExecutionCertificate;
@@ -41,11 +46,14 @@ pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
 pub use refuge_guidance::{
-    plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
+    plan_contact_topology_v40_with_origin, plan_farm_origins_v38_with_origin,
+    plan_farm_refuges_v36_with_origin, plan_hard_contact_topology_v41_with_origin,
     plan_hard_farm_origins_v39_with_origin, plan_hard_farm_refuges_v37_with_origin,
     plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
 };
 pub use refuge_handoff::TerminalRefugeHandoff;
+#[cfg(test)]
+pub(crate) use reliable_v27_oil_tests::observe_with_lairs;
 pub use respawn_v22::{
     plan_counter_pressure_v29_with_origin, plan_hard_v28_with_origin,
     plan_reliable_v27_with_origin, plan_respawn, plan_respawn_v22_with_origin,
@@ -75,6 +83,9 @@ mod route_tests;
 
 #[cfg(test)]
 mod reliable_v27_oil_tests;
+
+#[cfg(test)]
+mod observation_test_adapter;
 
 #[cfg(test)]
 mod hard_v28_tactic_tests;

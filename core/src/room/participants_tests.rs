@@ -193,3 +193,27 @@ fn farm_origin_profiles_extend_without_relabeling_prior_policies() {
     assert!(!CpuProfile::FARM_ORIGINS_V38_EASY.is_current());
     assert!(!CpuProfile::HARD_V39.is_current());
 }
+
+#[test]
+fn contact_topology_profiles_extend_without_relabeling_prior_policies() {
+    assert_eq!(
+        CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD.policy.version(),
+        40
+    );
+    assert_eq!(
+        CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(CpuProfile::CONTACT_TOPOLOGY_V40_EASY.policy.version(), 40);
+    assert_eq!(
+        CpuProfile::CONTACT_TOPOLOGY_V40_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V41.policy.version(), 41);
+    assert_eq!(CpuProfile::HARD_V41.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::HARD_V39.policy.version(), 39);
+    assert_eq!(CpuProfile::FARM_ORIGINS_V38_STANDARD.policy.version(), 38);
+    assert!(!CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD.is_current());
+    assert!(!CpuProfile::CONTACT_TOPOLOGY_V40_EASY.is_current());
+    assert!(!CpuProfile::HARD_V41.is_current());
+}

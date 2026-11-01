@@ -75,6 +75,11 @@ impl CommittedRoute {
             .is_some_and(|plant| plant.contact.is_some())
     }
 
+    #[cfg(test)]
+    pub(crate) fn plant_presence_for_test(&self) -> Option<PlantPresence> {
+        self.plant.as_ref().map(|plant| plant.presence)
+    }
+
     pub fn admit(
         certificate: RouteCertificate,
         basis: Observation,

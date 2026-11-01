@@ -215,7 +215,7 @@ fn run(lairs: bool, profile: CpuProfile, pacing_ms: u64) -> RealWorkerOutcome {
 #[test]
 fn real_workers_record_cpu26_progress_and_scheduling_with_bounded_plans() {
     for lairs in [false, true] {
-        let outcome = run(lairs, CpuProfile::SPIKE_PITS_STANDARD, 5);
+        let outcome = run(lairs, CpuProfile::SPIKE_PITS_STANDARD, 16);
         assert_operational(&outcome);
     }
 }

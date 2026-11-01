@@ -24,20 +24,20 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
     for (difficulty, accepted, archived, wrong_tier) in [
         (
             CpuDifficulty::Standard,
+            CpuProfile::REFUGE_V33_STANDARD,
             CpuProfile::PICKUP_V31_STANDARD,
-            CpuProfile::RELIABLE_V27_STANDARD,
-            CpuProfile::PICKUP_V31_EASY,
+            CpuProfile::REFUGE_V33_EASY,
         ),
         (
             CpuDifficulty::Easy,
+            CpuProfile::REFUGE_V33_EASY,
             CpuProfile::PICKUP_V31_EASY,
-            CpuProfile::RELIABLE_V27_EASY,
-            CpuProfile::PICKUP_V31_STANDARD,
+            CpuProfile::REFUGE_V33_STANDARD,
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V34,
             CpuProfile::HARD_V32,
-            CpuProfile::HARD_V29,
             CpuProfile::RELIABLE_V27_STANDARD,
         ),
     ] {

@@ -100,7 +100,11 @@ CPU32 on Hard. Header, body and per-seat provenance must agree. Format14 rejects
 identities even when every forged metadata field agrees. This changes no physics or replay
 execution semantics and does not enable production recording/export.
 
-Formats6/7/8/9/10/11/12/13/14/15 normalize their closed operations into shared executors rather than duplicating
+Format16 retains gameplay19/rules10/navigation3 and binds CPU33 on Easy/Standard (or no CPU),
+CPU34 on Hard. Header, body and per-seat provenance must agree. Format15 retains CPU31/32 and
+rejects future metadata; production recording/export remains disabled.
+
+Formats6/7/8/9/10/11/12/13/14/15/16 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

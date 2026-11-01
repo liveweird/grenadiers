@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.3 — 2026-11-01
+
+- Fix escape guidance at the traversable-cell footprint boundary while retaining all lethal/contact/admission guards.
+- Retain centered full-footprint and ConditionalStationary recovery limits without hidden facts, faster physics or proof waivers.
+- Bind live Easy/Standard33 and Hard34 to private replay16 while retaining replay15's CPU31/32 identities.
+
 ## 1.3.2 — 2026-11-01
 
 - Fix rules10 CPU oscillation just outside pickup collection by allowing a fully certified

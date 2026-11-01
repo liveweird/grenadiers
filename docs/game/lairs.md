@@ -65,7 +65,8 @@ contracts/replay7. Rules9 and rules10 use the separate view. Mob AI has its own 
 constructors and replay8 retain navigation1; replay9/10 retain navigation2. Live construction
 explicitly selects navigation3; private replay11 binds CPU26 and replay12 binds CPU27 under gameplay18. Replay13 binds
 gameplay19 with CPU27 on Easy/Standard and CPU28 on Hard; replay14 retains navigation3
-and advances Hard to CPU29. Replay15 retains navigation3 and binds Easy/Standard31 or Hard32
+and advances Hard to CPU29. Replay15 retains navigation3 and binds Easy/Standard31 or Hard32. Replay16 retains navigation3 and binds
+Easy/Standard33 or Hard34
 with certified one-update pickup handoffs. Settings changes, rounds and rematches
 preserve that selection. These policies share the same speed, collision/contact and recipient
 facts; gameplay18/19 carry no hidden navigation data. Production replay recording remains disabled.

@@ -2,9 +2,40 @@ use std::collections::{BTreeSet, VecDeque};
 
 use crate::cpu::forecast::HazardForecast;
 use crate::cpu::policy::ControlPlan;
-use crate::cpu::{BombKnowledge, Observation, WorkBudget};
+use crate::cpu::{BombKnowledge, MovementIntent, Observation, WorkBudget};
 use crate::game::geometry::position_overlaps_cell;
-use crate::game::{CellId, Position, Terrain};
+use crate::game::{CellId, Direction, Position, Terrain};
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(super) struct RefugeGuidance {
+    center_threatened_root: bool,
+}
+
+impl RefugeGuidance {
+    pub(super) const CENTER_THREATENED_ROOT: Self = Self {
+        center_threatened_root: true,
+    };
+}
+
+pub(super) fn movement_choices(preferred: MovementIntent) -> Vec<MovementIntent> {
+    let mut choices = Vec::with_capacity(5);
+    choices.push(preferred);
+    for direction in [
+        Direction::North,
+        Direction::East,
+        Direction::South,
+        Direction::West,
+    ] {
+        let movement = MovementIntent::Direction(direction);
+        if !choices.contains(&movement) {
+            choices.push(movement);
+        }
+    }
+    if !choices.contains(&MovementIntent::Stop) {
+        choices.push(MovementIntent::Stop);
+    }
+    choices
+}
 
 pub(super) fn certified_pulse_progresses(
     plan: &super::SurvivalPlan,
@@ -26,6 +57,7 @@ pub(super) fn target(
     observation: &Observation,
     forecast: &HazardForecast,
     ordinary: &ControlPlan,
+    guidance: RefugeGuidance,
     work: &mut WorkBudget,
 ) -> Option<CellId> {
     if forecast.dimensions()
@@ -40,11 +72,31 @@ pub(super) fn target(
     let current = position.cell()?;
     work.try_take(u32::try_from(observation.parts().arena.cell_count()).ok()?)
         .ok()?;
-    let threatened = forecast.cells().iter().enumerate().any(|(index, hazards)| {
+    let centered = Position::center(current);
+    let hazard_cell = |index| {
         let width = usize::from(observation.parts().arena.width);
-        let cell = CellId::new((index % width) as u16, (index / width) as u16);
-        position_overlaps_cell(position, cell) && !hazards.lethal.is_empty()
-    });
+        CellId::new((index % width) as u16, (index / width) as u16)
+    };
+    let (threatened, centered_root_safe) = if guidance.center_threatened_root {
+        forecast.cells().iter().enumerate().fold(
+            (false, true),
+            |(threatened, centered_safe), (index, hazards)| {
+                let lethal = !hazards.lethal.is_empty();
+                let cell = hazard_cell(index);
+                (
+                    threatened || (lethal && position_overlaps_cell(position, cell)),
+                    centered_safe && (!lethal || !position_overlaps_cell(centered, cell)),
+                )
+            },
+        )
+    } else {
+        (
+            forecast.cells().iter().enumerate().any(|(index, hazards)| {
+                !hazards.lethal.is_empty() && position_overlaps_cell(position, hazard_cell(index))
+            }),
+            false,
+        )
+    };
     if !threatened {
         return ordinary
             .next_memory
@@ -54,6 +106,9 @@ pub(super) fn target(
             .copied()
             .find(|cell| *cell != current)
             .or(Some(current));
+    }
+    if centered_root_safe && traversable(observation, current) {
+        return Some(current);
     }
     let occupied = if observation.parts().rules.version == 8 {
         let BombKnowledge::Visible(bombs) = &observation.parts().bombs else {
@@ -234,7 +289,13 @@ mod origin_tests {
         let ordinary = ControlPlan::stop(crate::cpu::policy::UtilityMemory::new(key));
 
         assert_eq!(
-            target(&observed, &hazards, &ordinary, &mut WorkBudget::new(128)),
+            target(
+                &observed,
+                &hazards,
+                &ordinary,
+                RefugeGuidance::default(),
+                &mut WorkBudget::new(128),
+            ),
             None
         );
     }

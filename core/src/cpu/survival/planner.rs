@@ -1,5 +1,7 @@
-use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
-use super::{compatibility::actor, punch_tactic::certified_punch};
+use super::{
+    ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan,
+    compatibility::actor, punch_tactic::certified_punch, steering::RefugeGuidance,
+};
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
@@ -7,7 +9,7 @@ use crate::cpu::routing::{
     certify_respawn_pulse, plan_respawn_route, plan_route,
 };
 use crate::cpu::{CpuRng, Intent, MovementIntent, Observation, WorkBudget};
-use crate::game::{Direction, Tick};
+use crate::game::Tick;
 pub fn plan(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -59,6 +61,7 @@ pub fn plan_with_origin(
         false,
         false,
         false,
+        RefugeGuidance::default(),
     )
 }
 #[allow(clippy::too_many_arguments)]
@@ -79,6 +82,7 @@ pub(super) fn plan_inner(
     hard_tactics: bool,
     counter_pressure: bool,
     pickup_progress: bool,
+    refuge_guidance: RefugeGuidance,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -215,25 +219,12 @@ pub(super) fn plan_inner(
     ) else {
         return Ok(stop());
     };
-    let Some(target) = super::steering::target(observation, &forecast, &ordinary, work) else {
+    let Some(target) =
+        super::steering::target(observation, &forecast, &ordinary, refuge_guidance, work)
+    else {
         return Ok(stop());
     };
-    let mut choices = Vec::with_capacity(5);
-    choices.push(ordinary.intent.movement);
-    for direction in [
-        Direction::North,
-        Direction::East,
-        Direction::South,
-        Direction::West,
-    ] {
-        let movement = MovementIntent::Direction(direction);
-        if !choices.contains(&movement) {
-            choices.push(movement);
-        }
-    }
-    if !choices.contains(&MovementIntent::Stop) {
-        choices.push(MovementIntent::Stop);
-    }
+    let choices = super::steering::movement_choices(ordinary.intent.movement);
     let mut fallback = None;
     let mut route_fallback = None;
     for mode in [

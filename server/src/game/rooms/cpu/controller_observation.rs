@@ -352,6 +352,9 @@ mod tests {
             grenadiers_core::room::CpuProfile::PICKUP_V31_STANDARD,
             grenadiers_core::room::CpuProfile::PICKUP_V31_EASY,
             grenadiers_core::room::CpuProfile::HARD_V32,
+            grenadiers_core::room::CpuProfile::REFUGE_V33_STANDARD,
+            grenadiers_core::room::CpuProfile::REFUGE_V33_EASY,
+            grenadiers_core::room::CpuProfile::HARD_V34,
         ] {
             assert!(controller(profile).accept_observation(&observed));
         }

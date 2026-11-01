@@ -97,65 +97,67 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.2 — 2026-11-01
+## v1.3.3 — 2026-11-01
 
-CPU players now finish supported pickup approaches instead of repeatedly stopping outside a
-drop, timing out their goal and turning toward another drop. A longer movement pulse still
-refuses collection that changes actor state. The existing certified one-update pickup handoff
-can now be selected on rules10, followed by Stop and a fresh observation.
+CPU escape guidance now finishes clearing a blast tile when the actor's centre has already
+entered a safe tile but part of its body still overlaps the threatened tile. Previously, the
+refuge search excluded the current tile and could send the bot backwards, producing repeated
+boundary crossings until detonation. Current guidance keeps moving toward the safe tile's centre.
 
-The full forecast, stopped suffix, spike/storm trajectory, static geometry and mob-contact
-checks remain authoritative. Teleporter and Diarrhea remain excluded. This changes a coarse
-navigation precondition, without relaxing those proofs. See
-[pickup progress](game/multiplayer-cpu.md#rules10-pickup-progress).
+The centred full footprint must be traversable and free of definite lethal forecast cells.
+This only changes the target; full pulse, contact, storm, spike, geometry and fresh-admission
+checks remain authoritative. Existing conditional-stationary fallback contracts and origin
+guidance are unchanged. See [recovery guidance](game/multiplayer-cpu.md#footprint-boundary-recovery).
 
 ### Compatibility and limits
 
-Easy/Standard select CPU31; Hard selects CPU32 with its existing pressure/counter-pressure
-behavior. All older policies remain unchanged. Private replay15 binds that exact pair with
-gameplay19/rules10/navigation3, including human-only rooms; replay14 rejects the newer identities.
-Network contracts, simulation physics, artwork, UI and external dependencies are unchanged.
-Restart ends process-local matches. Production replay export remains disabled.
+Easy/Standard select CPU33 and Hard selects CPU34, retaining their pickup progress and Hard
+pressure tactics. Older policies through32 remain unchanged. Private replay16 binds the exact
+33/34 pairing, gameplay19/rules10/navigation3 and human-only rooms. Replay15 retains31/32 and
+rejects consistent future forgeries. Production replay export stays disabled.
 
-The separately reproduced footprint-boundary escape reversal remains under repair. This release
-does not claim to resolve every CPU stall, guarantee survival or establish a difficulty ranking.
+Network contracts, simulation physics, UI, artwork and external dependencies are unchanged.
+Restart ends process-local matches. This fixes a reproduced recovery loop, not every possible
+AI failure or survival against arbitrary future opponent actions.
 
 ### Verification
 
-Accepted image source: `65058755a66e2a2128de0453d4ea5ec6e90282e2`.
+Accepted image source: `18b6faea4bad0d39cdce393fcda05c8a909cbd80`.
 Independent core and activation/replay reviews are clear; later release-record edits do not
-change image build inputs.
+change image build inputs. The post-rebase tree exactly equals the tested candidate.
 
-- Full frozen-source Rust gate passes in 654 seconds: 1,711 core and 639 server tests, plus
+- Full frozen-source Rust gate passes in 633 seconds: 1,716 core and 646 server tests, plus
   all 4,194,304 item masks separately in debug, release and coverage. Four workers, 32 partitions,
-  no retries; formatting, strict Clippy, build and repository checks pass. Fresh coverage is
-  55,723/60,178 lines (92.60%), above the unchanged 90% floor.
-- Exact captured public facts reproduce old27/29 Stop versus new31/32 West with a one-update
-  certified lease. Physical State cases collect capacity/range with Press/Release stops; existing
-  pulse tests separately cover admission and Stop execution. Flame, blocking mob, prohibited
-  pickup and warning/raised pit controls retain refusals for both new policies.
-- Distinct Linux ARM64 release checks pass: 343 CPU, 26 replay10–15, four dispatch and three
-  current Hard episode tests. Human-only replay and consistently forged future-policy rejection
-  are covered; old readers retain their identities.
+  no retries. Formatting, strict Clippy, build and repository checks pass. Fresh coverage is
+  56,410/60,895 lines (92.63%), above the unchanged 90% floor.
+- Captured public observations reproduce the backward guidance. In a controlled authoritative
+  local-blast episode, old CPU32 alternates across the boundary and dies at tick670; CPU34 clears
+  its footprint and survives through701, within the unchanged work allowance. This isolates local
+  physics and does not claim to restore hidden cloud RNG, mob, spike or loot state from the match.
+- Horizontal mirrors, vertical edges, blocked/lethal current cells and full centred-footprint
+  checks pass. Legacy flag defaults, movement ordering, RNG/work forwarding and origin guidance
+  remain unchanged; independent review confirms no forecast or certificate relaxation.
+- Distinct Linux ARM64 release checks pass: 347 CPU, 32 replay10–16, five dispatch and three
+  current Hard episode tests, including no-CPU recording and future-policy forgery rejection.
 - Exact-image Compose authentication/duel passes both scenarios. Three Hard CPUs move and plant
-  with all features enabled, with diagnostics and no browser errors. The same three-CPU smoke
-  passes restricted Kubernetes CPU/memory limits; owned test resources are removed.
-- An additional 77-second all-on round records actual range upgrades for all three bots, a speed
-  upgrade, 25 distinct owned bombs and a natural round result without browser errors. It uses a
-  different generated arena from the original capture, so it is not a balance or causal comparison.
-- All five image web assets are byte-identical to accepted v1.3.0. Web/contracts/renderer inputs
-  are unchanged, so its 7,426-test full web gate and native renderer acceptance are reused.
-  External dependency versions are unchanged. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
+  with every feature enabled and no browser errors. The same three-CPU smoke passes restricted
+  Kubernetes CPU/memory limits; owned test stacks and namespaces are removed.
+- All five image web assets are byte-identical to accepted v1.3.0. Corresponding web/contracts,
+  renderer and external dependency inputs are unchanged, so its full 7,426-test web gate and
+  native renderer acceptance are reused. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
   vulnerabilities in the exact accepted image.
 
 ### Operation
 
 Accepted local image:
-`sha256:5fbadaef1fe190b2832c7c8ea0c782bf0a1a53c637c6c8630a2b73cc7002c913`.
-The exact accepted image is promoted to localhost:8085; v1.3.1 remains available for rollback.
+`sha256:5a5830e4a2c3e59b9a3f5abf057cf887f8c126a689fdf9a9c1b9f5da3f9a7ebe`.
+The exact accepted image is promoted to localhost:8085; v1.3.2 remains available for rollback.
 This is a source/local-runtime release without a hosted service or production registry.
 The unchanged artwork remains in the
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v132--2026-11-01"></a>
+The [v1.3.2 record](history/releases.md#v132--2026-11-01) is preserved in release history.
 
 <a id="v131--2026-11-01"></a>
 The [v1.3.1 record](history/releases.md#v131--2026-11-01) is preserved in release history.

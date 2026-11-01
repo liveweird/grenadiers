@@ -1,32 +1,17 @@
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    sync::Arc,
-};
+use std::collections::{BTreeMap, BTreeSet};
 
 use grenadiers_core::{
     cpu::{WorldId, policy::IntentDebugSummary},
     game::{
-        ActorInit, Arena, CellId, Direction, EnabledItems, EntityId, MobNavigationPolicy,
-        PickupKind, Position, RoundActorInit, SeatId, SimulationSeed, State, StormCloudConfig,
-        Tick, World, fixed_arena,
+        ActorInit, Arena, CellId, Direction, EntityId, PickupKind, Position, RoundActorInit,
+        SeatId, SimulationSeed, State, Tick, World, fixed_arena,
     },
-    protocol::{RoomCode, RoomId},
-    room::{
-        BoardSize, CpuProfile, RespawnLairSettings, RespawnLairTuning, RoomConfiguration,
-        RoomSettings, SeatControl, SpikePitSettings, SpikePitTuning,
-    },
+    room::CpuProfile,
 };
-use tokio::{sync::watch, time::Instant};
+use tokio::time::Instant;
 
-use super::{RosterOwnerNotice, driver::Driver};
-use crate::{
-    game::rooms::{
-        RandomFill,
-        cpu::{AdmissionTrace, CpuController, CpuPlanner, PumpReport},
-        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime},
-    },
-    round_seed::RoundSeedSource,
-};
+use super::driver::Driver;
+use crate::game::rooms::cpu::{AdmissionTrace, CpuPlanner, PumpReport};
 
 // This is a controlled production-owner scene, not a restored match. It
 // preserves sample 88's public roster poses, arena blocks, pickup and fixed
@@ -188,87 +173,14 @@ pub(super) fn scenario_driver_for_cpus(
     departure: Option<SeatId>,
     cpu_seed: [u8; 32],
 ) -> (Driver, CpuPlanner) {
-    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
-    let mut controls = [SeatControl::Human; 4];
-    for &cpu in cpus {
-        controls[cpu.index()] = SeatControl::Cpu;
-    }
-    let configuration = RoomConfiguration::new(
-        &controls,
-        Some(profile.difficulty),
-        BoardSize::FifteenByThirteen,
+    super::queued_scenario_support::driver(
+        profile,
+        cpus,
+        scene,
+        departure,
+        cpu_seed,
+        super::queued_scenario_support::Environment::Active,
     )
-    .unwrap();
-    let mut runtime = RosterRuntime::new_spike_v19_with_navigation(
-        RosterIdentity {
-            id: RoomId::new("0123456789abcdef0123456789ab5461").unwrap(),
-            code: RoomCode::new("ABCDEFGH").unwrap(),
-            registry_serial: INSTANCE,
-            configuration,
-        },
-        settings,
-        StormCloudConfig::Single,
-        RespawnLairTuning::new(true, RespawnLairSettings::DEFAULT),
-        SpikePitTuning::new(true, SpikePitSettings::DEFAULT),
-        RoundSeedSource::with_entropy(|bytes| {
-            bytes.fill(47);
-            Ok(())
-        }),
-        Arc::new(|_| Ok(SimulationSeed::new([47; 32]))),
-        MobNavigationPolicy::TimedEscapeV3,
-    )
-    .unwrap();
-    for seat in SeatId::ALL.into_iter().filter(|seat| !cpus.contains(seat)) {
-        let admission = runtime.prepare_join(seat).unwrap();
-        runtime.commit_admission(admission);
-        runtime
-            .action(
-                seat,
-                1,
-                RosterAction::Ready {
-                    ready: true,
-                    settings_revision: 1,
-                },
-            )
-            .unwrap();
-    }
-    for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
-        runtime.settle_boundary([None; 4]).unwrap();
-    }
-    let basis = runtime.state_for_test().unwrap();
-    let scene = scene(basis);
-    let scene_notice = runtime.install_running_scene_for_test(scene).unwrap();
-    let departures = std::array::from_fn(|index| {
-        (departure.is_some_and(|seat| seat.index() == index))
-            .then_some(grenadiers_core::room::DepartureReason::Explicit)
-    });
-    let notice = if departure.is_some() {
-        runtime.settle_boundary(departures).unwrap().unwrap()
-    } else {
-        scene_notice
-    };
-    let planner = CpuPlanner::without_workers();
-    let controllers = cpus
-        .iter()
-        .map(|&cpu| CpuController::new(planner.clone(), cpu, INSTANCE, cpu_seed, profile))
-        .collect();
-    let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));
-    drop(receiver);
-    let random_fill: Arc<RandomFill> = Arc::new(|bytes| {
-        bytes.fill(47);
-        Ok(())
-    });
-    let mut owner = Driver::new(
-        runtime,
-        notice.clone(),
-        notices,
-        Instant::now() + std::time::Duration::from_secs(300),
-        random_fill,
-        controllers,
-    );
-    owner.reset_teleporter_trace_for_test();
-    owner.publish(notice);
-    (owner, planner)
 }
 
 fn controlled_scene(basis: &State) -> State {

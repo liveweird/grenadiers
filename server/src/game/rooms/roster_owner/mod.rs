@@ -233,6 +233,13 @@ mod foreign_bomb_farming_owner_tests;
 mod corner_farm_owner_tests;
 
 #[cfg(test)]
+mod exit_pressure_owner_support;
+#[cfg(test)]
+mod exit_pressure_owner_tests;
+#[cfg(test)]
+mod queued_scenario_support;
+
+#[cfg(test)]
 mod refuge_handoff_physical_support;
 
 #[cfg(test)]

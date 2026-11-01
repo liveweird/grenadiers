@@ -253,6 +253,10 @@ mod teleporter_execution_environment_tests;
 mod foreign_bomb_farming_fixture;
 
 #[cfg(test)]
+mod exit_pressure_fixture;
+#[cfg(test)]
+mod exit_pressure_witness_tests;
+#[cfg(test)]
 mod foreign_bomb_farming_characterization_tests;
 
 #[cfg(test)]

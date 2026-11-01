@@ -28,6 +28,10 @@ mod route_types;
 mod safety;
 mod spike_pits;
 pub(crate) mod storm;
+mod teleporter_step;
+mod teleporter_step_geometry;
+mod teleporter_step_proof;
+mod teleporter_step_types;
 mod types;
 mod validation;
 
@@ -38,6 +42,8 @@ pub use route_types::{
     RouteStep,
 };
 pub use spike_pits::SpikePitGuard;
+pub use teleporter_step::certify_teleporter_step;
+pub use teleporter_step_types::{TeleporterStep, TeleporterStepPhase, TeleporterStepRequest};
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
 
 pub(crate) use bracelet_guard::BraceletGuard;
@@ -116,3 +122,12 @@ mod storm_tests;
 
 #[cfg(test)]
 mod storm_execution_tests;
+
+#[cfg(test)]
+mod teleporter_step_tests;
+
+#[cfg(test)]
+mod teleporter_step_outcome_tests;
+
+#[cfg(test)]
+mod teleporter_step_hazard_tests;

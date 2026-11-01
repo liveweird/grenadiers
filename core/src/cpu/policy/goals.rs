@@ -16,7 +16,7 @@ mod v23;
 pub(in crate::cpu::policy) use v23::select as select_v23;
 
 #[path = "goals_v24.rs"]
-mod v24;
+pub(in crate::cpu::policy) mod v24;
 #[cfg(test)]
 pub(in crate::cpu::policy) use v24::GuidanceV24;
 pub(in crate::cpu::policy) use v24::{select as select_v24, select_v25, select_v28, select_v38};

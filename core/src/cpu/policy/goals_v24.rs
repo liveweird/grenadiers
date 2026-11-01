@@ -43,8 +43,8 @@ struct Candidate {
     first_step: CellId,
 }
 
-type DistanceMap = [Option<u16>; ARENA_CELL_COUNT];
-type FirstStepMap = [Option<CellId>; ARENA_CELL_COUNT];
+pub(in crate::cpu::policy) type DistanceMap = [Option<u16>; ARENA_CELL_COUNT];
+pub(in crate::cpu::policy) type FirstStepMap = [Option<CellId>; ARENA_CELL_COUNT];
 
 pub(in crate::cpu::policy) fn select(
     observation: &Observation,
@@ -336,7 +336,7 @@ fn select_inner(
     })
 }
 
-fn reachable(
+pub(in crate::cpu::policy) fn reachable(
     observation: &Observation,
     current: CellId,
     map: &super::SearchMap,

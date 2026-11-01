@@ -12,7 +12,8 @@ use super::teleporter_step::{take, usize_to_work};
 use super::teleporter_step_geometry::{
     Region, charge_segment_scans, charge_static_scans, charged_region_cells, contact_failure,
     distance_to_cell, intersects, max_travel, next_tick, one_tick, partial_endpoints,
-    previous_tick, region_around, reject_pits, reject_storm_region, visible_alive,
+    precharge_outcome_storage, previous_tick, push_bounded, region_around, reject_pits,
+    reject_storm_region, visible_alive,
 };
 use super::teleporter_step_types::{OutcomeRegion, TeleporterStepPhase, TeleporterStepRequest};
 use super::validation::Context;
@@ -29,6 +30,8 @@ pub(super) struct ProofInput<'a> {
 }
 
 pub(super) struct ProofOutcome {
+    pub(super) nominal_positions: Vec<Position>,
+    pub(super) collecting_positions: Vec<Position>,
     pub(super) clipped_positions: Vec<Position>,
     pub(super) landing_regions: Vec<OutcomeRegion>,
 }
@@ -38,8 +41,16 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
     reject_contested_target(&mut input)?;
     let contact =
         TeleporterContact::new(input.context.observation, input.work).map_err(contact_failure)?;
-    let mut possible = Vec::new();
-    let mut landing_regions = Vec::new();
+    let (possible_capacity, collecting_capacity, landing_capacity) = precharge_outcome_storage(
+        input.nominal.len(),
+        input.phase == TeleporterStepPhase::Collect,
+        input.work,
+    )?;
+    let mut possible = Vec::with_capacity(possible_capacity);
+    take(input.work, usize_to_work(input.nominal.len())?)?;
+    let mut nominal_positions = Vec::with_capacity(input.nominal.len());
+    let mut collecting_positions = Vec::with_capacity(collecting_capacity);
+    let mut landing_regions = Vec::with_capacity(landing_capacity);
     for (start, motion, segments) in input.nominal {
         take(input.work, 1)?;
         let first_wait = Tick(
@@ -128,8 +139,12 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
                 return Err(RouteFailure::NoRoute);
             }
             reject_pits(input.context, &stopped, input.work)?;
-            take(input.work, 1)?;
-            possible.push(position);
+            if input.phase == TeleporterStepPhase::Collect
+                && position.cell() == Some(input.request.target)
+            {
+                push_bounded(&mut collecting_positions, position)?;
+            }
+            push_bounded(&mut possible, position)?;
         }
         if input.phase == TeleporterStepPhase::Collect {
             prove_teleport_outcomes(
@@ -140,8 +155,11 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
                 &mut landing_regions,
             )?;
         }
+        nominal_positions.push(motion.position);
     }
     Ok(ProofOutcome {
+        nominal_positions,
+        collecting_positions,
         clipped_positions: possible,
         landing_regions,
     })
@@ -275,11 +293,13 @@ fn prove_teleport_outcomes(
         take(input.work, 1)?;
         let landing = region_around(partner.position, max_travel(elapsed)?)?;
         validate_landing_region(input, contact, landing, collect_tick, input.safe_until)?;
-        take(input.work, 1)?;
-        landing_regions.push(OutcomeRegion {
-            min: landing.min,
-            max: landing.max,
-        });
+        push_bounded(
+            landing_regions,
+            OutcomeRegion {
+                min: landing.min,
+                max: landing.max,
+            },
+        )?;
 
         // The partner keeps its held input, but only its collection endpoint can
         // interact with the root before the root's mandatory Stop.

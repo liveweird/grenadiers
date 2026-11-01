@@ -194,6 +194,10 @@ Repeated Approach steps end at a pose where **Collect** enters that cell in one 
 Do not snap positions or infer a stopped residual from a public screenshot.
 
 For a stopped basis `B`, check every start in `[B+1, B+8)` and safety through exclusive `B+18`.
+Keep the controller's actual physical Stop-confirmation tick `S <= B`; continued held Stop supplies
+the stopped-motion premise. Any admitted direction, even one blocked by collision, clears that
+provenance. Admission requires the same retained `S`, not a replacement or a clock inferred from
+unchanged positions; Easy cadence may deliberately wait after confirmation.
 Cover partial or blocked movement, no collection, refused swap, consumed-without-swap and every
 possible live partner without reading private randomness. Swap has two endpoints and no connecting
 sweep; it resets both actors' residual and pending turn, preserves headings and leaves the

@@ -38,7 +38,8 @@ for branch pushes, pull requests, merges, and release tags.
 
 Run independent checks and isolated test groups in parallel. Reuse dependency/build caches and
 verified artifacts, while retaining assertions, coverage floors, source identity and failure
-reporting. Keep latency measurements isolated from competing test workloads.
+reporting. Keep latency measurements isolated from competing test workloads. Retain each running command's
+session ID and log; resume it when execution yields instead of launching another copy.
 
 Record the tested commit, commands, outcomes, environment and deployed image digest concisely.
 Repeat checks for relevant changes, failures or an identified coverage gap. Do not add repeated

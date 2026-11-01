@@ -53,6 +53,23 @@ impl ContinuationContact {
         }
     }
 
+    pub(super) fn contains_with_expected_marker(
+        &self,
+        current: &Observation,
+        valid_until: Tick,
+        expected_marker: Option<Tick>,
+        work: &mut WorkBudget,
+    ) -> Result<bool, ContactEnvelopeError> {
+        match self {
+            Self::Enabled(envelope) => {
+                envelope.contains_with_expected_marker(current, valid_until, expected_marker, work)
+            }
+            Self::Disabled(contact) => {
+                contact.contains_with_expected_marker(current, valid_until, expected_marker, work)
+            }
+        }
+    }
+
     pub(super) fn sweep_is_clear(
         &self,
         tick: Tick,
@@ -109,6 +126,16 @@ impl DisabledContact {
         valid_until: Tick,
         work: &mut WorkBudget,
     ) -> Result<bool, ContactEnvelopeError> {
+        self.contains_with_expected_marker(current, valid_until, self.last_teleport_tick, work)
+    }
+
+    fn contains_with_expected_marker(
+        &self,
+        current: &Observation,
+        valid_until: Tick,
+        expected_marker: Option<Tick>,
+        work: &mut WorkBudget,
+    ) -> Result<bool, ContactEnvelopeError> {
         if current.parts().world != self.world
             || current.parts().recipient != self.cpu_seat
             || current.parts().tick < self.basis_tick
@@ -123,7 +150,7 @@ impl DisabledContact {
         Ok(recipient(current).is_some_and(|actor| {
             actor.seat == self.cpu_seat
                 && actor.id == self.cpu_id
-                && actor.last_teleport_tick == self.last_teleport_tick
+                && actor.last_teleport_tick == expected_marker
         }))
     }
 }
@@ -144,4 +171,31 @@ fn recipient(observation: &Observation) -> Option<&crate::cpu::VisibleActor> {
 fn take(work: &mut WorkBudget, units: usize) -> Result<(), ContactEnvelopeError> {
     work.try_take(u32::try_from(units).map_err(|_| ContactEnvelopeError::Capacity)?)
         .map_err(|_| ContactEnvelopeError::WorkExhausted)
+}
+
+#[cfg(test)]
+mod expected_marker_tests {
+    use crate::cpu::lair_contact::v139_teleporter_fixture::captured_tick_6121;
+
+    use super::*;
+
+    #[test]
+    fn sealed_marker_delegation_preserves_result_and_work() {
+        let observation = captured_tick_6121();
+        let mut construction = WorkBudget::new(65_536);
+        let contact = ContinuationContact::new(&observation, &mut construction).unwrap();
+        let marker = recipient(&observation).unwrap().last_teleport_tick;
+        let mut old_work = WorkBudget::new(65_536);
+        let mut explicit_work = WorkBudget::new(65_536);
+        assert_eq!(
+            contact.contains(&observation, Tick(6_139), &mut old_work),
+            contact.contains_with_expected_marker(
+                &observation,
+                Tick(6_139),
+                marker,
+                &mut explicit_work,
+            )
+        );
+        assert_eq!(old_work.spent(), explicit_work.spent());
+    }
 }

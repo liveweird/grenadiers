@@ -35,6 +35,11 @@ mod route_execution;
 mod route_transitions;
 mod steering;
 mod strategic_recovery;
+mod teleporter_execution;
+mod teleporter_execution_compat;
+mod teleporter_execution_types;
+mod teleporter_recovery;
+mod teleporter_recovery_types;
 
 pub use compatibility::can_admit_ordinary;
 pub use contact_plant::PlantContactCertificate;
@@ -78,6 +83,13 @@ pub use respawn_v22::{
     plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
 };
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
+pub use teleporter_execution::TELEPORTER_ADMISSION_ALLOWANCE;
+pub use teleporter_execution_types::{
+    CommittedTeleporterStep, PreparedTeleporterStep, TeleporterOutcome, TeleporterStepCommand,
+    TeleporterStepStatus,
+};
+pub use teleporter_recovery::{TeleporterRecoveryChoice, select_teleporter_recovery};
+pub use teleporter_recovery_types::TeleporterStepPlan;
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;
 pub const WORK_ALLOWANCE: u32 = 65_536;
@@ -206,3 +218,15 @@ mod spike_pit_execution_tests;
 
 #[cfg(test)]
 mod spike_pit_plant_execution_tests;
+
+#[cfg(test)]
+mod teleporter_execution_tests;
+
+#[cfg(test)]
+mod teleporter_execution_rejection_tests;
+
+#[cfg(test)]
+mod teleporter_execution_timing_tests;
+
+#[cfg(test)]
+mod teleporter_execution_environment_tests;

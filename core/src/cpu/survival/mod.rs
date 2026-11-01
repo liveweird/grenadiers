@@ -245,5 +245,17 @@ mod teleporter_execution_timing_tests;
 mod teleporter_execution_environment_tests;
 
 #[cfg(test)]
+mod foreign_bomb_farming_fixture;
+
+#[cfg(test)]
+mod foreign_bomb_farming_characterization_tests;
+
+#[cfg(test)]
+mod foreign_bomb_farming_clear_fixture;
+
+#[cfg(test)]
+mod foreign_bomb_farming_clear_tests;
+
+#[cfg(test)]
 #[path = "teleporter_execution_dead_roster_tests.rs"]
 mod teleporter_execution_dead_roster_tests;

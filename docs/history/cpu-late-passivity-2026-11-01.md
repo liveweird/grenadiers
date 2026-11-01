@@ -371,3 +371,42 @@ It grants no input while waiting and does not reconstruct unseen pit activity. T
 age limit, start window and exact scene/pose/contact checks still decide whether admission is
 possible. This addresses the identified rejection mechanism without changing coverage clocks
 or relaxing the pit guard; a successful probe alone does not establish that all stalls are fixed.
+
+## Foreign-bomb proof and subsequent clear-window characterization
+
+CPU55 reproduces the archived episode through 600 physical updates (ticks 180–780): Two never
+plants, Three/Four first plant at 205, and all 263 jobs deliver without admission failures.
+The actual 234 basis and Stop remain unchanged. The Core53 planner spends 10,627 work and the
+complete v50-selected worker dispatch spends 10,743, both selecting North without planting.
+The archived Core43 reference remains 10,443; its full dispatch is 10,559. Immutable sidecars
+match the corresponding real job's work and intent, including batches with nonordinary jobs.
+
+A Core fixture transcribes the complete actual 234 scene and utility memory. Two public
+`observe` calls reconstruct the captured bomb-history state, and a server assertion proves
+full equality against the queued clone. The earlier observation is only a carrier of the
+recorded identity/tick/bomb-cell facts, not restoration of its complete historical publication.
+The fixture's RNG is explicitly controlled rather than claimed as the original private stream.
+
+North, East, South, West and Stop each independently exhaust a 65,536 parent allowance during
+raw complete planting-route construction. Usefulness and contact certification are never
+reached. These are separate diagnostic budgets, not an affordable aggregate selection or proof
+that physical escape is impossible. The Teleporter/future-loot support guard remains intact.
+
+The actual later trace contains 39 Two jobs at 417–774; only 417,432 and 651 have both empty bombs
+and no flames. At 417 Two is still approaching its goal. At 432 it occupies approach cell(11,1),
+pose(11327,1536), Stop 432, target block(11,2), with 46 blocks and no bombs/flames. Core53 plus
+selector chooses East without execution authority at 58,153 total work. By 444 foreign bombs
+are present again. These observations distinguish a short clear opportunity from a permanently
+clear scene.
+
+On unchanged 432 public facts, an East plant aimed at refuge(13,3) passes the existing complete
+route, target-usefulness and ordinary mob-contact checks in one parent budget. It places at
+(11,1)/439, detonates 619 and covers flames/contact through 649, spending 3,889 work. Exactly 3,889
+succeeds; 3,888 fails the final atomic eight-unit charge after spending 3,881, leaving seven unused.
+The existing 8,192 hint cap also succeeds. Refuges(13,2) and(13,1) independently return NoRoute
+at 1,345 and 1,208 work.
+
+This proves a useful raw clear-scene route. It does not yet prove that new hint selection fits
+the real allocated child allowance or that natural owner execution plants and survives when
+other CPUs act. Existing away-first hints point to hard-wall row 0 in this geometry; a bounded,
+version-isolated lateral hint is the next comparison. Independent fixture/trace review is clear.

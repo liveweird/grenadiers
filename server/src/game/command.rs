@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::v18::{
+use grenadiers_core::protocol::v19::{
     GameClientMessage, ManualActionKind, ResumeToken, RoomSettings,
 };
 use grenadiers_core::protocol::{
@@ -192,7 +192,7 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v18::parse_client_message;
+    use grenadiers_core::protocol::v19::parse_client_message;
 
     use super::{Command, InboundMessage};
 
@@ -201,6 +201,7 @@ mod tests {
         for (difficulty, expected) in [
             ("easy", grenadiers_core::room::CpuDifficulty::Easy),
             ("standard", grenadiers_core::room::CpuDifficulty::Standard),
+            ("hard", grenadiers_core::room::CpuDifficulty::Hard),
         ] {
             let message = parse_client_message(&format!(
                 r#"{{"type":"createRoom","sequence":1,"configuration":{{"controllers":["human","cpu"],"cpuDifficulty":"{difficulty}","board":{{"width":15,"height":13}},"environment":{{"stormCloud":true,"lairs":{{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1}},"spikePits":{{"enabled":true,"warningTicks":36,"raisedTicks":180}}}}}}}}"#

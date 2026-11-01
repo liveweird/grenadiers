@@ -31,6 +31,7 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v16.schema.json'), join(checkout, 'api', 'gameplay-v16.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v17.schema.json'), join(checkout, 'api', 'gameplay-v17.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v18.schema.json'), join(checkout, 'api', 'gameplay-v18.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v19.schema.json'), join(checkout, 'api', 'gameplay-v19.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
     cp(join(import.meta.dirname, '..', 'src', 'validation', 'validatorOptions.ts'),
@@ -52,7 +53,7 @@ function standaloneCallWithModule(cwd, modulePath, expression, ...arguments_) {
 const result = await (${expression})(generator, ...JSON.parse(process.argv[1]));
 process.stdout.write(JSON.stringify(result));`
   const output = execFileSync(process.execPath, ['--input-type=module', '--eval', source, JSON.stringify(arguments_)], {
-    cwd, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
+    cwd, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024,
   })
   return JSON.parse(output)
 }
@@ -71,10 +72,13 @@ test('checked-in validators and declarations are reproducible and executable', a
   }
 })
 
-test('canonical options optimize only the current gameplay validator', () => {
+test('canonical options optimize only v18 and the dormant v19 validator', () => {
   assert.deepEqual(validatorOptions('gameplay-v17'), { allErrors: true })
   assert.deepEqual(validatorOptions('realtime'), { allErrors: true })
   assert.deepEqual(validatorOptions('gameplay-v18'), {
+    allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
+  })
+  assert.deepEqual(validatorOptions('gameplay-v19'), {
     allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
   })
   assert.notEqual(validatorOptions('gameplay-v18'), validatorOptions('gameplay-v18'))

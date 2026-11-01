@@ -1,7 +1,4 @@
-use super::{
-    CompletedRound, ConnectionStatus, Controller, CountdownKind, MatchResult, RoomPhase, RoomView,
-    Score, SeatStatus,
-};
+use super::{CompletedRound, CountdownKind, MatchResult, RoomPhase, RoomView, Score, SeatStatus};
 use crate::protocol::Tick;
 
 #[derive(Clone, Copy)]
@@ -34,7 +31,7 @@ pub(crate) struct LifecycleRoom<'a> {
     pub wins_to_finish: u8,
     pub scores: &'a [Score],
     pub last_round: Option<CompletedRound>,
-    pub seats: &'a [SeatStatus],
+    pub seats: Vec<LifecycleSeat>,
     pub phase: LifecyclePhase,
 }
 
@@ -47,7 +44,7 @@ impl<'a> LifecycleRoom<'a> {
             wins_to_finish: room.settings.wins_to_finish(),
             scores: &room.scores,
             last_round: room.last_round,
-            seats: &room.seats,
+            seats: room.seats.iter().map(LifecycleSeat::v14).collect(),
             phase: match room.phase {
                 RoomPhase::Waiting => LifecyclePhase::Waiting,
                 RoomPhase::Countdown {
@@ -75,13 +72,49 @@ impl<'a> LifecycleRoom<'a> {
     }
 }
 
-pub(crate) const fn connected(value: ConnectionStatus) -> bool {
-    matches!(
-        value,
-        ConnectionStatus::Connected | ConnectionStatus::ServerControlled
-    )
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum LifecycleConnection {
+    Vacant,
+    Connected,
+    Disconnected { expires_at: Tick },
+    Expired,
+    ServerControlled,
 }
 
-pub(crate) const fn cpu(value: Controller) -> bool {
-    matches!(value, Controller::Cpu { .. })
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct LifecycleSeat {
+    pub seat: super::Seat,
+    pub occupied: bool,
+    pub ready: bool,
+    pub rematch_ready: bool,
+    pub connection: LifecycleConnection,
+    pub is_cpu: bool,
+}
+
+impl LifecycleSeat {
+    pub(crate) const fn v14(value: &SeatStatus) -> Self {
+        Self {
+            seat: value.seat,
+            occupied: value.occupied,
+            ready: value.ready,
+            rematch_ready: value.rematch_ready,
+            connection: match value.connection {
+                super::ConnectionStatus::Vacant => LifecycleConnection::Vacant,
+                super::ConnectionStatus::Connected => LifecycleConnection::Connected,
+                super::ConnectionStatus::Disconnected { expires_at } => {
+                    LifecycleConnection::Disconnected { expires_at }
+                }
+                super::ConnectionStatus::Expired => LifecycleConnection::Expired,
+                super::ConnectionStatus::ServerControlled => LifecycleConnection::ServerControlled,
+            },
+            is_cpu: matches!(value.controller, super::Controller::Cpu { .. }),
+        }
+    }
+}
+
+pub(crate) const fn connected(value: LifecycleConnection) -> bool {
+    matches!(
+        value,
+        LifecycleConnection::Connected | LifecycleConnection::ServerControlled
+    )
 }

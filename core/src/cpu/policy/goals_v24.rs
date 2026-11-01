@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::cpu::{Observation, ObservedActor, VisibleActor, WorkBudget};
+use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, Position, Tick};
 
@@ -12,9 +12,12 @@ use super::super::{
 };
 use super::{cell_index, pickup_value, search_map};
 
+#[path = "goals_v28_pressure.rs"]
+mod pressure;
+
 #[path = "goals_v24_order.rs"]
 mod order;
-use order::{position_distance, target_order};
+use order::{add_ticks, fallback, position_distance, target_order};
 
 #[path = "goals_v24_validation.rs"]
 mod validation;
@@ -47,7 +50,7 @@ pub(in crate::cpu::policy) fn select(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, false)
+    select_inner(observation, actor, current, memory, work, false, false)
 }
 
 pub(in crate::cpu::policy) fn select_v25(
@@ -57,7 +60,17 @@ pub(in crate::cpu::policy) fn select_v25(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, true)
+    select_inner(observation, actor, current, memory, work, true, false)
+}
+
+pub(in crate::cpu::policy) fn select_v28(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+) -> Option<GuidanceV24> {
+    select_inner(observation, actor, current, memory, work, true, true)
 }
 
 fn select_inner(
@@ -67,8 +80,9 @@ fn select_inner(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
     failed_plant_recovery: bool,
+    range_aware_pressure: bool,
 ) -> Option<GuidanceV24> {
-    let map = search_map(observation, actor, current, work)?;
+    let map = search_map(observation, actor, current, !range_aware_pressure, work)?;
     let (distance, first_step) = reachable(observation, current, &map, work)?;
     let mut candidates = Vec::new();
     for pickup in &observation.parts().pickups {
@@ -102,24 +116,17 @@ fn select_inner(
             &mut candidates,
         );
     }
-    for observed in &observation.parts().actors {
-        if let ObservedActor::Visible(rival) = observed
-            && rival.seat != actor.seat
-            && rival.alive
-            && let Some(cell) = rival.position.cell()
-        {
-            add_firing_candidates(
-                observation,
-                cell,
-                StrategicObjectiveKind::Attack,
-                StrategicTarget::Opponent { seat: rival.seat },
-                1,
-                &distance,
-                &first_step,
-                &mut candidates,
-            );
-        }
+    if range_aware_pressure {
+        candidates.extend(pressure::candidates(
+            observation,
+            actor,
+            &distance,
+            &first_step,
+            &map,
+            work,
+        ));
     }
+    pressure::add_legacy_candidates(observation, actor, &distance, &first_step, &mut candidates);
     candidates.sort_unstable_by_key(|candidate| {
         (
             std::cmp::Reverse(candidate.score),
@@ -364,25 +371,6 @@ fn add_firing_candidates(
         }
     }
     candidates.extend(best);
-}
-
-fn fallback(
-    current: CellId,
-    observation: &Observation,
-    map: &super::SearchMap,
-    work: &mut WorkBudget,
-) -> Option<CellId> {
-    STEPS
-        .into_iter()
-        .filter_map(|(_, dc, dr)| {
-            work.try_take(1).ok()?;
-            offset(current, dc, dr).filter(|cell| map.transitable(observation, *cell))
-        })
-        .min_by_key(|cell| (cell.row, cell.column))
-}
-
-fn add_ticks(tick: Tick, amount: u64) -> Tick {
-    Tick(tick.0.saturating_add(amount))
 }
 
 #[cfg(test)]

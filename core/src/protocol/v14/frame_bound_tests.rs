@@ -168,10 +168,17 @@ fn maximize_room(room: &mut RoomView, tick: Tick) {
         crate::room::BoardSize::ThirteenByEleven,
         crate::room::BoardSize::FifteenByThirteen,
     ] {
-        configurations.push(RoomConfiguration::from_domain(
-            crate::room::RoomConfiguration::new(&[crate::room::SeatControl::Human; 4], None, board)
+        configurations.push(
+            RoomConfiguration::from_domain(
+                crate::room::RoomConfiguration::new(
+                    &[crate::room::SeatControl::Human; 4],
+                    None,
+                    board,
+                )
                 .unwrap(),
-        ));
+            )
+            .unwrap(),
+        );
         for cpu_count in 1..=3 {
             let mut controls = vec![crate::room::SeatControl::Human; 4];
             for control in controls.iter_mut().rev().take(cpu_count) {
@@ -181,10 +188,13 @@ fn maximize_room(room: &mut RoomView, tick: Tick) {
                 crate::room::CpuDifficulty::Easy,
                 crate::room::CpuDifficulty::Standard,
             ] {
-                configurations.push(RoomConfiguration::from_domain(
-                    crate::room::RoomConfiguration::new(&controls, Some(difficulty), board)
-                        .unwrap(),
-                ));
+                configurations.push(
+                    RoomConfiguration::from_domain(
+                        crate::room::RoomConfiguration::new(&controls, Some(difficulty), board)
+                            .unwrap(),
+                    )
+                    .unwrap(),
+                );
             }
         }
     }

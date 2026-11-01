@@ -103,7 +103,11 @@ pub fn validate_room_view(room: &RoomView) -> Result<(), ProjectionError> {
             wins_to_finish: room.settings.base.wins_to_finish(),
             scores: &room.scores,
             last_round: room.last_round,
-            seats: &room.seats,
+            seats: room
+                .seats
+                .iter()
+                .map(crate::protocol::v14::projection_lifecycle_facts::LifecycleSeat::v14)
+                .collect(),
             phase,
         },
     )

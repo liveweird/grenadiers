@@ -1,6 +1,6 @@
 use super::{
-    ConnectionStatus, Controller, MatchResult, MatchWinnerReason, ProjectionError, Seat,
-    projection_lifecycle_facts::{LifecyclePhase, LifecycleRoom, connected, cpu},
+    MatchResult, MatchWinnerReason, ProjectionError, Seat,
+    projection_lifecycle_facts::{LifecycleConnection, LifecyclePhase, LifecycleRoom, connected},
 };
 use crate::protocol::Tick;
 
@@ -39,7 +39,7 @@ fn validate_seats(room: &LifecycleRoom<'_>) -> Result<(), ProjectionError> {
         _ => None,
     };
     if room.seats.iter().any(|seat| {
-        let cpu = cpu(seat.controller);
+        let cpu = seat.is_cpu;
         let expected_cpu_ready = cpu
             && matches!(
                 room.phase,
@@ -48,7 +48,7 @@ fn validate_seats(room: &LifecycleRoom<'_>) -> Result<(), ProjectionError> {
                     | LifecyclePhase::CountdownInterRound { .. }
             );
         let expected_cpu_rematch = cpu && rematch_at.is_some_and(|at| room.tick >= at);
-        seat.occupied != !matches!(seat.connection, ConnectionStatus::Vacant)
+        seat.occupied != !matches!(seat.connection, LifecycleConnection::Vacant)
             || if cpu {
                 seat.ready != expected_cpu_ready || seat.rematch_ready != expected_cpu_rematch
             } else {
@@ -200,7 +200,7 @@ fn match_result(
                 .any(|status| {
                     !matches!(
                         status.connection,
-                        ConnectionStatus::Vacant | ConnectionStatus::Expired
+                        LifecycleConnection::Vacant | LifecycleConnection::Expired
                     )
                 })
             {
@@ -239,10 +239,10 @@ fn non_score_terminal(room: &LifecycleRoom<'_>, abandoned: bool) -> Result<(), P
     if !scores_below(room)
         || abandoned
             && room.seats.iter().any(|seat| {
-                matches!(seat.controller, Controller::Human)
+                !seat.is_cpu
                     && !matches!(
                         seat.connection,
-                        ConnectionStatus::Vacant | ConnectionStatus::Expired
+                        LifecycleConnection::Vacant | LifecycleConnection::Expired
                     )
             })
     {
@@ -297,7 +297,7 @@ fn nonfinal_reservations(room: &LifecycleRoom<'_>) -> bool {
         && room
             .seats
             .iter()
-            .filter(|seat| !matches!(seat.connection, ConnectionStatus::Expired))
+            .filter(|seat| !matches!(seat.connection, LifecycleConnection::Expired))
             .count()
             >= 2
 }
@@ -305,13 +305,13 @@ fn readiness_consensus(room: &LifecycleRoom<'_>) -> bool {
     let mut eligible = 0;
     let mut connected_human = false;
     let complete = room.seats.iter().all(|seat| match seat.connection {
-        ConnectionStatus::Connected | ConnectionStatus::ServerControlled => {
+        LifecycleConnection::Connected | LifecycleConnection::ServerControlled => {
             eligible += 1;
-            connected_human |= seat.controller == Controller::Human;
+            connected_human |= !seat.is_cpu;
             seat.ready
         }
-        ConnectionStatus::Expired => true,
-        ConnectionStatus::Vacant | ConnectionStatus::Disconnected { .. } => false,
+        LifecycleConnection::Expired => true,
+        LifecycleConnection::Vacant | LifecycleConnection::Disconnected { .. } => false,
     });
     complete && eligible >= 2 && connected_human
 }
@@ -324,17 +324,15 @@ fn countdown_participants(room: &LifecycleRoom<'_>) -> bool {
     let connected_human = room
         .seats
         .iter()
-        .any(|seat| seat.controller == Controller::Human && connected(seat.connection));
+        .any(|seat| !seat.is_cpu && connected(seat.connection));
     eligible >= 2
         && connected_human
         && room.seats.iter().all(|seat| {
-            connected(seat.connection) || matches!(seat.connection, ConnectionStatus::Expired)
+            connected(seat.connection) || matches!(seat.connection, LifecycleConnection::Expired)
         })
 }
 fn any_human_ready(room: &LifecycleRoom<'_>) -> bool {
-    room.seats
-        .iter()
-        .any(|seat| seat.controller == Controller::Human && seat.ready)
+    room.seats.iter().any(|seat| !seat.is_cpu && seat.ready)
 }
 fn rematch_consensus(room: &LifecycleRoom<'_>) -> bool {
     if !matches!(room.phase, LifecyclePhase::MatchResult { .. }) {
@@ -343,18 +341,18 @@ fn rematch_consensus(room: &LifecycleRoom<'_>) -> bool {
     let mut eligible = 0;
     let mut connected_human = false;
     let complete = room.seats.iter().all(|seat| match seat.connection {
-        ConnectionStatus::Connected | ConnectionStatus::ServerControlled => {
+        LifecycleConnection::Connected | LifecycleConnection::ServerControlled => {
             eligible += 1;
-            connected_human |= seat.controller == Controller::Human;
+            connected_human |= !seat.is_cpu;
             seat.rematch_ready
         }
-        ConnectionStatus::Expired => true,
-        ConnectionStatus::Vacant | ConnectionStatus::Disconnected { .. } => false,
+        LifecycleConnection::Expired => true,
+        LifecycleConnection::Vacant | LifecycleConnection::Disconnected { .. } => false,
     });
     complete && eligible >= 2 && connected_human
 }
-fn valid_disconnect(room: &LifecycleRoom<'_>, value: ConnectionStatus) -> bool {
-    let ConnectionStatus::Disconnected { expires_at } = value else {
+fn valid_disconnect(room: &LifecycleRoom<'_>, value: LifecycleConnection) -> bool {
+    let LifecycleConnection::Disconnected { expires_at } = value else {
         return true;
     };
     future_within(room.tick, expires_at, 600)

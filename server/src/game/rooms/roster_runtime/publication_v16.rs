@@ -37,7 +37,8 @@ pub(super) fn room_view(
             identity.configuration,
             cloud,
             tuning,
-        )),
+        ))
+        .map_err(|_| RosterRuntimeError::UnsupportedConfiguration)?,
         room_id: identity.id.clone(),
         room_code: identity.code.clone(),
         round_id: publication::counter64(lifecycle.round_attempt())?,

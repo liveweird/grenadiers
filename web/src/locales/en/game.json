@@ -346,9 +346,11 @@
     "difficultyLabel": "CPU difficulty",
     "easy": "Easy",
     "standard": "Standard",
+    "hard": "Hard",
     "roomDifficulty": {
       "easy": "Private solo match · Easy CPU",
-      "standard": "Private solo match · Standard CPU"
+      "standard": "Private solo match · Standard CPU",
+      "hard": "Private solo match · Hard CPU"
     }
   }
 }

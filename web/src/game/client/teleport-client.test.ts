@@ -74,7 +74,7 @@ describe('v12 teleport position epochs', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 18 })
+    resumed.message({ type: 'authenticated', protocolVersion: 19 })
     resumed.message(mark(admitted(2), null))
     expect(value.client.getState().failure).toBe('invalidServerMessage')
 

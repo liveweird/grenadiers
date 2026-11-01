@@ -85,3 +85,13 @@ fn policy_versions_are_independent_of_controller_assignment() {
         Some(ControllerKind::Cpu(CpuProfile::CURRENT))
     );
 }
+
+#[test]
+fn hard28_is_distinct_from_current_and_archived_cpu_profiles() {
+    assert_eq!(CpuProfile::HARD_V28.policy.version(), 28);
+    assert_eq!(CpuProfile::HARD_V28.difficulty, CpuDifficulty::Hard);
+    assert!(!CpuProfile::HARD_V28.is_current());
+    assert_eq!(CpuProfile::RELIABLE_V27_STANDARD.policy.version(), 27);
+    assert_eq!(CpuProfile::SPIKE_PITS_STANDARD.policy.version(), 26);
+    assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
+}

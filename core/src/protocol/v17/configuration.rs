@@ -87,8 +87,12 @@ impl RoomConfiguration {
     pub const fn domain(&self) -> &DomainConfiguration {
         &self.domain
     }
-    pub fn from_domain(domain: DomainConfiguration) -> Result<Self, LairSettingsError> {
-        RespawnLairTuning::try_from(domain.lairs())?;
+    pub fn from_domain(
+        domain: DomainConfiguration,
+    ) -> Result<Self, crate::protocol::v14::ArchivedConfigurationError> {
+        RespawnLairTuning::try_from(domain.lairs())
+            .map_err(|_| crate::protocol::v14::ArchivedConfigurationError::InvalidLairs)?;
+        crate::protocol::v14::RoomConfiguration::from_domain(*domain.base())?;
         Ok(Self { domain })
     }
 }
@@ -124,7 +128,8 @@ impl Serialize for RoomConfiguration {
             environment: Environment,
         }
         Borrowed {
-            base: crate::protocol::v14::RoomConfiguration::from_domain(*self.domain.base()),
+            base: crate::protocol::v14::RoomConfiguration::from_domain(*self.domain.base())
+                .map_err(serde::ser::Error::custom)?,
             environment: Environment::from_domain(
                 self.domain.storm_cloud(),
                 RespawnLairTuning::try_from(self.domain.lairs())

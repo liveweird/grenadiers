@@ -1,6 +1,6 @@
 import type { ErrorObject } from 'ajv'
 import validateServer from '../../validation/generated/gameplay-v17.mjs'
-import { baseSemanticError, type BaseSemanticError } from './baseSemantics'
+import { baseSemanticError, type BaseSemanticError } from '../validation/baseSemantics'
 import type { GameServerMessage, GameState, RoomView } from './schema'
 
 type SemanticError = BaseSemanticError

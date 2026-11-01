@@ -115,7 +115,7 @@ pub(super) const fn environment(
     }
 }
 
-fn phase(value: MatchPhase) -> Result<v18::RoomPhase, RosterRuntimeError> {
+pub(super) fn phase(value: MatchPhase) -> Result<v18::RoomPhase, RosterRuntimeError> {
     let legacy = publication::phase(value)?;
     Ok(match legacy {
         grenadiers_core::protocol::v14::RoomPhase::Waiting => v18::RoomPhase::Waiting,

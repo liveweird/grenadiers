@@ -31,8 +31,8 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. All live two-to-four-seat matches use CPU policy26, rules10
-physics and mob navigation2; cloud, lair and spike-pit settings may be enabled or disabled per room.
+ceiling, not a connection limit. Live two-to-four-seat matches use CPU27 on Easy/Standard and CPU28 on Hard, rules10
+physics and mob navigation3; cloud, lair and spike-pit settings may be enabled or disabled per room.
 Archived profiles retain their historical policies and rules. The board
 choice is immutable, defaults to 15×13 and is documented in [board geometry](game/board-sizes.md).
 Match configuration, rather than global connections, determines the participant roster.
@@ -105,15 +105,15 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `roster_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v18 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v19 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v18 client/panel shares the Three.js presentation boundary, validates v18 messages, keeps
+The active v19 client/panel shares the Three.js presentation boundary, validates v19 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v18 on `/api/v1/game/ws`; versions 1 through 17 are
+authoritative facts. Production routing uses v19 on `/api/v1/game/ws`; versions 1 through 18 are
 rejected before credential claim. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v18](game/protocol-v18.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v19](game/protocol-v19.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

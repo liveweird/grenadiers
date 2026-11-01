@@ -25,7 +25,7 @@ validation; tests exercise accepted actions through the existing runtime and rep
 
 ## Information boundary
 
-The current-protocol adapter converts the already filtered v18 recipient projection. It must
+The current-protocol adapter converts the already filtered v19 recipient projection. It must
 never feed the policy `State::public_view` or reconstruct an authoritative `State`. A cloaked
 rival exposes only identity, seat and alive status. Invisible Bombs makes all bomb knowledge
 unavailable, including the observer's bombs; unavailable differs from an empty visible list.
@@ -326,7 +326,7 @@ than accepting an unproved route. Archived observations and slot accounting rema
 
 ## Rules10 spike-pit profile
 
-CPU26 receives checked gameplay18 facts through `new_rules_v10`. The live
+Archived CPU26 receives checked gameplay18 facts through `new_rules_v10`. Its
 `SPIKE_PITS_STANDARD` and `SPIKE_PITS_EASY` profiles model every public pit as a path-dependent
 clock: a route can trigger an idle pit, leave it and encounter its later warning or raised phase.
 Forecasts use the same contact geometry and checked phase transitions as simulation.
@@ -336,3 +336,17 @@ and every expected phase/countdown. A changed pit state withdraws authority and 
 observation. Raised contact is rejected unless the recipient's published damage grace or active Shield
 still covers it. This does not introduce a separate immunity or expand the existing work,
 movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains archived unchanged.
+
+## Live difficulty profiles
+
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU27, including
+certified planting around persistent burning Oil. Hard selects CPU28 with range-aware firing
+positions against visible rivals. Both retain the same 65,536-work budget and full planting,
+route, mob-contact and admission proofs. Hard does not receive hidden positions, concealed loot,
+private seeds or faster physics.
+
+Hard pressure uses an optional shared allowance of at most 4,096 work units and one eighth of
+remaining work, with at most 32 origins per rival. Failure falls back to existing collect/farm
+guidance. Strong useful pickups retain their values; attack pressure outranks routine farming.
+Retained goals keep commitment/progress deadlines. Admission rechecks the exact target: a rival
+moving out of the certified blast withdraws planting usefulness.

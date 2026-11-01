@@ -53,7 +53,7 @@ struct Episode {
 }
 
 impl Episode {
-    fn new(case: Case) -> Self {
+    fn new(case: Case) -> Result<Self, crate::game::rooms::roster_runtime::RosterRuntimeError> {
         let controls = std::iter::once(SeatControl::Human)
             .chain(std::iter::repeat_n(SeatControl::Cpu, case.count - 1))
             .collect::<Vec<_>>();
@@ -95,6 +95,9 @@ impl Episode {
         let profile = match case.difficulty {
             CpuDifficulty::Easy => CpuProfile::ENVIRONMENT_EASY,
             CpuDifficulty::Standard => CpuProfile::ENVIRONMENT_STANDARD,
+            CpuDifficulty::Hard => return Err(
+                crate::game::rooms::roster_runtime::RosterRuntimeError::UnsupportedConfiguration,
+            ),
         };
         assert_eq!(profile.policy.version(), 18);
         let cpu_seats = configuration.cpu_seats().collect::<Vec<_>>();
@@ -135,7 +138,7 @@ impl Episode {
             .map(|seat| state.actors()[seat.index()].position())
             .collect::<Vec<_>>();
         let cpu_count = cpu_seats.len();
-        Self {
+        Ok(Self {
             driver,
             planner,
             cpu_seats,
@@ -154,7 +157,7 @@ impl Episode {
             planned_movement: 0,
             planned_manual: 0,
             min_cloud_actor_distance: i32::MAX,
-        }
+        })
     }
 
     fn tick(&mut self, pump: bool) {
@@ -263,7 +266,7 @@ fn cpu18_real_driver_moves_on_the_compact_environment_matrix_with_bounded_work()
     }
     assert_eq!(cases.len(), 18);
     for case in cases {
-        let mut episode = Episode::new(case);
+        let mut episode = Episode::new(case).unwrap();
         episode.run(240);
         assert!(
             episode.moved.iter().all(|moved| *moved),
@@ -288,7 +291,8 @@ fn single_cloud_cpu18_plants_and_escapes_its_own_detonation() {
         environment: StormCloudConfig::Single,
         arena_seed: 73,
         cpu_seed: 151,
-    });
+    })
+    .unwrap();
     episode.run(2_400);
     assert!(
         episode.planted,
@@ -315,7 +319,8 @@ fn single_cloud_real_contact_refreshes_or_expires_in_a_bounded_idle_round() {
         environment: StormCloudConfig::Single,
         arena_seed: 73,
         cpu_seed: 151,
-    });
+    })
+    .unwrap();
     episode
         .driver
         .runtime
@@ -345,7 +350,8 @@ fn queued_stale_plan_is_cancelled_then_fresh_work_still_reaches_physics() {
         environment: StormCloudConfig::Single,
         arena_seed: 37,
         cpu_seed: 17,
-    });
+    })
+    .unwrap();
     for _ in 0..12 {
         episode.tick(false);
     }

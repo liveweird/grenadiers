@@ -1,9 +1,8 @@
 # Gameplay v18: paired spike pits
 
-Gameplay18 is the live contract on `/api/v1/game/ws`. Its sources are
+Gameplay18 is an archived contract. Its sources are
 [`api/gameplay-v18.schema.json`](../../api/gameplay-v18.schema.json), Rust `protocol::v18` and
-generated `web/src/game/v18/schema.ts`. Authentication accepts protocol 18; older gameplay clients receive
-`incompatibleProtocol` and must refresh the paired web/server application. Session and realtime
+generated `web/src/game/v18/schema.ts`. Live authentication rejects protocol18; use the paired [gameplay19 client](protocol-v19.md). Session and realtime
 API versions are independent.
 
 ## Closed live profile

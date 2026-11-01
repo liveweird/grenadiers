@@ -19,23 +19,23 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — validate remaining CPU liveness.** Reproduce remaining long-match
+- [todo] **CPU-RELIABILITY — validate remaining CPU liveness.** Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Use action-refusal and queue diagnostics plus exact productive-action witnesses; elapsed time
   or a free bomb slot alone does not establish a missed safe action. Preserve safety certificates,
   bounded scheduling, replay/privacy and sustained per-seat progress regressions.
 
-- [todo] **CPU-PRESSURE — improve purposeful, safe aggression.** Build on reliable execution:
-  pursue useful drops, farm destructible blocks and choose productive bombing approaches. Preserve
-  escape certification and try alternative firing positions before abandoning a useful target.
-- [todo] **HARD-CPU — add a fair Hard tier.** Use the same architecture with stronger exit prediction,
-  pickup contention and bomb combinations. Use only permitted observations; preserve deterministic
-  replay and bounded planning/queue latency. Introduce a new current contract without widening
-  archived difficulty enums. Validate every tier through complete seeded episodes, including stalls,
-  avoidable deaths, useful pickups and productive bomb placements.
+- [next] **CPU-PRESSURE — certified counter-pressure in clear arenas.** Permit useful Hard
+  planting against visible unpaused timed bombs after a completed running update, with no soft
+  blocks, finite flames or exposed Teleporter. Preserve all escape/contact/usefulness proofs,
+  old policies and exact replay bindings; keep conservative motion refusals explicit.
+- [todo] **HARD-CPU — deepen fair tactics.** Extend terminal-refuge handoffs, productive farming,
+  pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
+  observations, bounded planning and unchanged physics. Require authoritative before/after
+  witnesses and independent review; preserve archived policies and complete seeded episodes.
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
-  [private Solo opponent](docs/game/single-player.md) on Easy and Standard with all items enabled.
+  [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
   - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,
     stalls, fairness, unexpected item/death behavior and the difference between levels. Turn

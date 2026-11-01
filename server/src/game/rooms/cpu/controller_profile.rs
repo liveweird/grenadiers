@@ -1,0 +1,95 @@
+use super::CpuController;
+
+impl CpuController {
+    pub(super) fn profile_supports(&self, rules_version: u16) -> bool {
+        if self.profile.difficulty == grenadiers_core::room::CpuDifficulty::Hard {
+            return rules_version == 10
+                && self.profile == grenadiers_core::room::CpuProfile::HARD_V28;
+        }
+        match rules_version {
+            5 => self.profile.policy.version() <= 16,
+            6 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD
+                    | grenadiers_core::room::CpuProfile::MULTIPLAYER_EASY
+            ),
+            7 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::ENVIRONMENT_STANDARD
+                    | grenadiers_core::room::CpuProfile::ENVIRONMENT_EASY
+            ),
+            8 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::LAIRS_STANDARD
+                    | grenadiers_core::room::CpuProfile::LAIRS_EASY
+            ),
+            9 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_EASY
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V22_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V22_EASY
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V24_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V24_EASY
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V23_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V23_EASY
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V21_STANDARD
+                    | grenadiers_core::room::CpuProfile::RESPAWN_V21_EASY
+            ),
+            10 => matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD
+                    | grenadiers_core::room::CpuProfile::SPIKE_PITS_EASY
+                    | grenadiers_core::room::CpuProfile::RELIABLE_V27_STANDARD
+                    | grenadiers_core::room::CpuProfile::RELIABLE_V27_EASY
+            ),
+            _ => false,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::rooms::cpu::CpuPlanner;
+    use grenadiers_core::{
+        game::SeatId,
+        room::{CpuDifficulty, CpuPolicy, CpuProfile},
+    };
+
+    #[test]
+    fn hard_requires_exact_policy28_and_rules10() {
+        let controller = |profile| {
+            CpuController::new(
+                CpuPlanner::without_workers(),
+                SeatId::Two,
+                7,
+                [28; 32],
+                profile,
+            )
+        };
+        let hard = controller(CpuProfile::HARD_V28);
+        assert!(hard.profile_supports(10));
+        for rules in 5..10 {
+            assert!(!hard.profile_supports(rules));
+        }
+        for policy in [
+            CpuPolicy::UtilityV1,
+            CpuPolicy::UtilityV16,
+            CpuPolicy::UtilityV27,
+        ] {
+            let forged = controller(CpuProfile {
+                policy,
+                difficulty: CpuDifficulty::Hard,
+            });
+            for rules in 5..=10 {
+                assert!(!forged.profile_supports(rules));
+            }
+        }
+        let forged = controller(CpuProfile {
+            policy: CpuPolicy::UtilityV28,
+            difficulty: CpuDifficulty::Standard,
+        });
+        assert!(!forged.profile_supports(10));
+    }
+}

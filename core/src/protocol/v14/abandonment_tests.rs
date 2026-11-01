@@ -23,7 +23,8 @@ fn abandoned(cpu_count: usize, completed: bool) -> RoomView {
             crate::room::BoardSize::FifteenByThirteen,
         )
         .unwrap(),
-    );
+    )
+    .unwrap();
     room.settings_editor = None;
     for (status, control) in room.seats.iter_mut().zip(controls) {
         match control {

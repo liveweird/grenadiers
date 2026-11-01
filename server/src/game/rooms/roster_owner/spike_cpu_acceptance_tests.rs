@@ -16,7 +16,7 @@ use crate::{
     game::rooms::{
         RandomFill,
         cpu::{CpuController, CpuPlanner},
-        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime},
+        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, RosterRuntimeError},
     },
     round_seed::RoundSeedSource,
 };
@@ -66,7 +66,12 @@ struct Episode {
 }
 
 impl Episode {
-    fn new(case: Case) -> Self {
+    fn new(case: Case) -> Result<Self, RosterRuntimeError> {
+        let profile = match case.difficulty {
+            CpuDifficulty::Easy => CpuProfile::SPIKE_PITS_EASY,
+            CpuDifficulty::Standard => CpuProfile::SPIKE_PITS_STANDARD,
+            CpuDifficulty::Hard => return Err(RosterRuntimeError::UnsupportedConfiguration),
+        };
         let configuration = RoomConfiguration::new(
             &[SeatControl::Human, SeatControl::Cpu],
             Some(case.difficulty),
@@ -117,10 +122,6 @@ impl Episode {
         }
         assert_eq!(runtime.lifecycle().phase(), MatchPhase::Running);
         let planner = CpuPlanner::without_workers();
-        let profile = match case.difficulty {
-            CpuDifficulty::Easy => CpuProfile::SPIKE_PITS_EASY,
-            CpuDifficulty::Standard => CpuProfile::SPIKE_PITS_STANDARD,
-        };
         let cpu = CpuController::new(planner.clone(), SeatId::Two, 4010, [case.seed; 32], profile);
         let notice = runtime.current_notice().unwrap();
         assert!(notice.spike_cpu_publication().is_some());
@@ -155,7 +156,7 @@ impl Episode {
                 .ok()
             })
             .map_or(0, |projected| projected.state.physical_tick.get());
-        Self {
+        Ok(Self {
             driver,
             planner,
             last_position: position,
@@ -183,7 +184,7 @@ impl Episode {
                 publications: 0,
                 publication_motion: 0,
             },
-        }
+        })
     }
 
     fn tick(&mut self) {
@@ -288,6 +289,7 @@ fn queued_cpu26_intentionally_avoids_idle_pits_without_publication_stall() {
         seed: 41,
         arena_seed: None,
     })
+    .unwrap()
     .run(840);
     assert!(outcome.alive, "{outcome:?}");
     assert!(outcome.delivered > 0, "{outcome:?}");
@@ -312,6 +314,7 @@ fn easy_cpu26_progresses_with_storm_and_maximum_raised_duration() {
         seed: 53,
         arena_seed: None,
     })
+    .unwrap()
     .run(840);
     assert!(outcome.alive, "{outcome:?}");
     assert!(outcome.delivered > 0, "{outcome:?}");
@@ -330,8 +333,8 @@ fn disabled_pits_are_deterministic_and_keep_queued_navigation_playable() {
         seed: 67,
         arena_seed: None,
     };
-    let first = Episode::new(case).run(360);
-    let second = Episode::new(case).run(360);
+    let first = Episode::new(case).unwrap().run(360);
+    let second = Episode::new(case).unwrap().run(360);
     assert_eq!(first, second);
     assert!(first.alive && first.accepted_motion_ticks > 0, "{first:?}");
     assert!(!first.saw_warning && !first.saw_raised, "{first:?}");
@@ -352,6 +355,7 @@ fn compact_easy_cpu26_plants_with_default_all_on_rules() {
             seed
         }),
     })
+    .unwrap()
     .run(720);
     assert!(outcome.accepted_motion_ticks > 0, "{outcome:?}");
     assert!(outcome.planned_bombs > 0, "{outcome:?}");

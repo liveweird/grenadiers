@@ -172,7 +172,7 @@ fn cpu_ready_is_derived_for_eligible_countdown_pair() {
         crate::room::BoardSize::FifteenByThirteen,
     )
     .unwrap();
-    room.configuration = RoomConfiguration::from_domain(configuration);
+    room.configuration = RoomConfiguration::from_domain(configuration).unwrap();
     room.seats[1].controller = Controller::Cpu {
         difficulty: Difficulty::Standard,
     };
@@ -309,7 +309,7 @@ fn cpu_terminal_room(two_cpus: bool) -> RoomView {
         crate::room::BoardSize::FifteenByThirteen,
     )
     .unwrap();
-    room.configuration = RoomConfiguration::from_domain(configuration);
+    room.configuration = RoomConfiguration::from_domain(configuration).unwrap();
     room.settings_editor = None;
     room.seats[0].connection = ConnectionStatus::Expired;
     for index in 1..=(if two_cpus { 2 } else { 1 }) {

@@ -37,7 +37,9 @@ pub use crate::protocol::v11::{
     WeaponId, Wins, validate_effects,
 };
 pub use client::{GameClientMessage, ManualActionKind};
-pub use configuration::{BoardSize, ConfigurationController, Difficulty, RoomConfiguration};
+pub use configuration::{
+    ArchivedConfigurationError, BoardSize, ConfigurationController, Difficulty, RoomConfiguration,
+};
 pub use cpu_observation::observe_cpu_recipient;
 pub(crate) use cpu_observation::{observation_error, observation_parts};
 pub use events::{

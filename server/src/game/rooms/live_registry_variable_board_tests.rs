@@ -44,7 +44,8 @@ async fn all_board_and_count_profiles_dispatch_to_the_required_owner() {
 }
 
 #[tokio::test]
-async fn every_cpu_board_and_count_uses_spike_policy_for_both_environments() {
+async fn every_cpu_board_and_count_uses_spike_policy_for_both_environments() -> Result<(), RoomError>
+{
     let now = std::time::Instant::now();
     let mut index = 0_u64;
     for board in [
@@ -76,15 +77,21 @@ async fn every_cpu_board_and_count_uses_spike_policy_for_both_environments() {
                     assert_eq!(personal(&admission)["room"]["rulesVersion"], 10);
                     assert_eq!(
                         personal(&admission)["room"]["configuration"]["cpuDifficulty"],
-                        match difficulty {
-                            CpuDifficulty::Easy => "easy",
-                            CpuDifficulty::Standard => "standard",
-                        }
+                        archived_difficulty_name(difficulty)?
                     );
                     index += 1;
                 }
             }
         }
+    }
+    Ok(())
+}
+
+fn archived_difficulty_name(difficulty: CpuDifficulty) -> Result<&'static str, RoomError> {
+    match difficulty {
+        CpuDifficulty::Easy => Ok("easy"),
+        CpuDifficulty::Standard => Ok("standard"),
+        CpuDifficulty::Hard => Err(RoomError::UnsupportedConfiguration),
     }
 }
 

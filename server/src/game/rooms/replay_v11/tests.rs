@@ -176,3 +176,39 @@ fn replay11_rejects_cross_profile_headers_provenance_and_incomplete_records() {
     incomplete.body.status = replay_v8::ReplayStatus::IncompleteRoundConstruction;
     assert_eq!(replay(&incomplete), Err(ReplayError::Incomplete));
 }
+
+#[test]
+fn replay11_rejects_consistent_hard_header_and_cpu_provenance() {
+    let (_, mut journal) = recorder(SpikePitTuning::DEFAULT).into_parts();
+    let old = &journal.header.configuration;
+    let hard = SpikeRoomConfiguration::new(
+        LairRoomConfiguration::new(
+            RoomConfiguration::new(
+                &[SeatControl::Human, SeatControl::Cpu],
+                Some(CpuDifficulty::Hard),
+                old.base().base().board(),
+            )
+            .unwrap(),
+            old.base().storm_cloud(),
+            old.base().lairs(),
+        ),
+        old.spike_pits(),
+    );
+    journal.header.configuration = hard.clone();
+    journal.body.header.configuration = hard.base().clone();
+    journal.header.cpus[0].difficulty = CpuDifficulty::Hard;
+    journal.body.header.cpus[0].difficulty = CpuDifficulty::Hard;
+    assert_eq!(replay(&journal), Err(ReplayError::InvalidHeader));
+    assert!(
+        RecordingRosterRuntime::new(
+            hard,
+            RoomSettings::DEFAULT,
+            RoundSeedSource::with_entropy(|bytes| {
+                bytes.fill(11);
+                Ok(())
+            }),
+            vec![(SeatId::Two, CpuDifficulty::Hard, [11; 32])],
+        )
+        .is_err()
+    );
+}

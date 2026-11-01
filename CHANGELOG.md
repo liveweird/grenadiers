@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## 1.3.0 — 2026-11-01
+
+- Add a room-wide Hard CPU tier to Solo and custom matches, keeping Standard as the default
+  and Easy's existing decision cadence.
+- Give Hard bounded range-aware firing goals, stronger opponent pressure and persistent
+  distant-rival pursuit while preserving full escape, contact and target-usefulness proofs.
+- Pair gameplay19 server/web upgrades with checked Hard metadata, immutable archived contracts
+  and private replay13 bindings for CPU27 Easy/Standard or CPU28 Hard.
+- Verify current profiles through deterministic all-board/lair episodes and real-worker
+  scheduling diagnostics without treating legitimate safety refusals as test failures.
+
 ## 1.2.5 — 2026-11-01
 
 - Let CPU players certify useful bomb placement with persistent burning Oil, while retaining

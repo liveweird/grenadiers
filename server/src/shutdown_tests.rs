@@ -107,7 +107,7 @@ async fn next(socket: &mut ClientSocket) -> Message {
 async fn authenticate(socket: &mut ClientSocket, token: &str) {
     send(
         socket,
-        json!({"type":"authenticate", "protocolVersion":18, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":19, "token":token}),
     )
     .await;
     let Message::Text(text) = next(socket).await else {

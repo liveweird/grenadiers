@@ -4,6 +4,61 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.2.5 — 2026-11-01
+
+CPU players can certify useful bomb placement while an Oil barrel keeps burning. The previous
+Teleporter support guard could prohibit planting globally for the rest of the round. CPU27
+models static Oil through the existing persistent lethal-cell forecast instead. With Teleporter
+enabled it still requires visible empty bomb knowledge, no finite flames and no exposed
+Teleporter. Full escape, selected-target usefulness, mob-contact and bounded-work proofs remain
+required. See [CPU support boundaries](../game/multiplayer-cpu.md#persistent-burning-oil).
+
+Easy and Standard select CPU27 with their existing cadence. Historical CPU26 behavior and
+navigation policies remain immutable. Private replay12 binds rules10/CPU27/navigation3 and
+rejects mixed provenance; production recording/export remains disabled. Wire18 is unchanged.
+
+### Verification
+
+Accepted image source: `6e322f2fce8208e7e03e75c0c9a0b8a27cea057c`.
+Independent core and cross-component activation reviews are clear. Later release-record edits
+do not change image build inputs.
+
+- Actual State-derived lairs-enabled/disabled fixtures show CPU26 refusing and CPU27 certifying
+  a useful bomb in the identical scene. Authoritative execution destroys the selected block
+  and survives the complete escape interval. Guard-isolation, lethal escape Oil, visible bombs,
+  finite flames, unavailable bomb knowledge, exposed Teleporter, scene invalidation and hidden
+  item-reveal controls pass. Per-job work remains at most 65,536.
+- A production-paced three-CPU episode records each seat moving and placing its own bomb,
+  with worker delivery/admission accounting; cancellation and guarded admission refusals remain
+  diagnostic scheduling outcomes, rather than prohibited events. It is operational evidence, not a guarantee that
+  productive planting is always available. An earlier accelerated-tick farming-stall hypothesis
+  was rejected after identical-input plant proofs showed no omitted productive certificate.
+- Native Rust debug/release suites pass: 1,678 core and 609 server tests, plus the separately
+  partitioned exhaustive catalogue test. After test-only scheduling corrections, both native
+  worker tests and the complete fresh instrumented workspace are rerun. Line coverage is
+  53,089/57,336 (92.59%), above the unchanged 90% floor. All 4,194,304 masks run in debug,
+  release and coverage with four workers, 32 partitions and no retries. Clippy, formatting,
+  build and repository checks pass.
+- Distinct Linux ARM64 release checks pass: six Oil proofs, one worker-dispatch test, two
+  exact-profile tests and nine replay10–12 tests. The final image retains the exact same
+  filesystem layers as that Linux-accepted candidate; only test scheduling and provenance
+  labels changed.
+- Exact-image Compose authentication/duel: two passed; an all-features three-CPU match moves
+  all CPUs and plants bombs without browser errors. Exact-image Kubernetes authentication/duel
+  and restricted runtime pass. Owned acceptance stacks and namespaces are removed.
+- Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities. All five image web files
+  equal the accepted v1.2.3 production build. Reuse that full web/native camera acceptance and
+  v1.2.2 artwork/audio acceptance; these inputs and dependencies did not change.
+
+### Operation
+
+Accepted local image:
+`sha256:fbca836651065065bcd9222ec6333efb1e36a8b33f9938ab5c0f44db1169735b`.
+The exact accepted image is promoted to localhost:8085; v1.2.4 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.2.4 — 2026-11-01
 
 Mobs can escape corridors whose first few cells remain inside a future timed blast. Live

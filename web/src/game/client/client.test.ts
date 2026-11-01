@@ -52,7 +52,7 @@ describe('v12 admission and authoritative baselines', () => {
     const value = harness()
     const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 18, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 19, token: sessionToken },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     socket.message(admitted())
@@ -77,7 +77,7 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 18 })
+    resumed.message({ type: 'authenticated', protocolVersion: 19 })
     const baseline = multiplayerAdmission(seat, 2)
     baseline.room.settings.enabledItems = ['teleporter']
     if (!baseline.state) throw new Error('resume fixture must contain state')
@@ -164,9 +164,9 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 18 })
+    resumed.message({ type: 'authenticated', protocolVersion: 19 })
     expect(messages(resumed)).toEqual([
-      { type: 'authenticate', protocolVersion: 18, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 19, token: sessionToken },
       { type: 'resumeRoom', sequence: 1, roomId, resumeToken },
     ])
     expect(messages(resumed).some((message) => message.type === 'manualAction')).toBe(false)
@@ -183,7 +183,7 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 18 })
+    resumed.message({ type: 'authenticated', protocolVersion: 19 })
     resumed.message({ type: 'roomState', room: room(6, { type: 'running' }) })
     resumed.message(snapshot(7))
     expect(value.client.getState().snapshot).toBe(retained)
@@ -269,7 +269,7 @@ describe('v12 recovery lifecycle', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 18 })
+    resumed.message({ type: 'authenticated', protocolVersion: 19 })
     stop(resumed)
     expect(value.client.getState()).toMatchObject({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,

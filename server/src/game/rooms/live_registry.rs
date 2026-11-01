@@ -180,7 +180,7 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_spike_with_navigation(
+        let runtime = RosterRuntime::new_spike_v19_with_navigation(
             identity,
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             cloud,
@@ -194,6 +194,7 @@ impl GameRooms {
         let profile = match base.cpu_difficulty() {
             Some(CpuDifficulty::Easy) => CpuProfile::RELIABLE_V27_EASY,
             Some(CpuDifficulty::Standard) => CpuProfile::RELIABLE_V27_STANDARD,
+            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V28,
             None => CpuProfile::RELIABLE_V27_STANDARD,
         };
         let mut cpus = Vec::new();

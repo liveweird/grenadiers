@@ -17,10 +17,10 @@ server-provided Easy difficulty label.
 The human starts the rematch before reconnecting to its original running seat, then leaves;
 the private room is removed. A transport loss before the first start is not resumable.
 
-## Scenario: Polish solo controls default to Standard and stay keyboard accessible without horizontal overflow at 320 pixels
+## Scenario: Polish solo controls default to Standard and create Hard through the keyboard at 320 pixels
 
 At a 320-pixel viewport the Polish lobby has no horizontal overflow, defaults to Standard,
-allows keyboard difficulty selection, and starts a real Standard solo room.
+allows keyboard difficulty selection across Easy, Standard and Hard, and starts a real Hard solo room.
 The private-match difficulty,
 Komputer player label, and Gotowy action remain visible while the invitation code stays hidden.
 The waiting room has no horizontal overflow and passes the Axe accessibility audit.

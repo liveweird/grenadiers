@@ -43,7 +43,7 @@ generation path or RNG progress.
 
 Every new round resets the selected pits to idle. The authoritative snapshot publishes their
 sorted `cell`, `phase` and `remainingTicks`; it never publishes an activator, seed, hidden
-position, target or route. See the [gameplay18 contract](protocol-v18.md).
+position, target or route. See the [gameplay19 contract](protocol-v19.md).
 
 ## CPU, mobs and presentation
 

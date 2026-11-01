@@ -17,8 +17,9 @@ pub(in crate::cpu::policy) use v23::select as select_v23;
 
 #[path = "goals_v24.rs"]
 mod v24;
-pub(in crate::cpu::policy) use v24::select as select_v24;
-pub(in crate::cpu::policy) use v24::select_v25;
+#[cfg(test)]
+pub(in crate::cpu::policy) use v24::GuidanceV24;
+pub(in crate::cpu::policy) use v24::{select as select_v24, select_v25, select_v28};
 
 #[path = "goal_pressure.rs"]
 mod pressure;
@@ -62,7 +63,7 @@ pub(super) fn select(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
 ) -> Option<Guidance> {
-    let map = search_map(observation, actor, current, work)?;
+    let map = search_map(observation, actor, current, true, work)?;
     if map.highest_value == 0 {
         return fallback_step(observation, current, &map, rng, work);
     }
@@ -142,6 +143,7 @@ pub(super) fn search_map(
     observation: &Observation,
     actor: &VisibleActor,
     current: CellId,
+    pressure: bool,
     work: &mut WorkBudget,
 ) -> Option<SearchMap> {
     let parts = observation.parts();
@@ -203,7 +205,7 @@ pub(super) fn search_map(
             }
         }
     }
-    if matches!(parts.rules.version, 9 | 10) {
+    if pressure && matches!(parts.rules.version, 9 | 10) {
         for observed in &parts.actors {
             if let ObservedActor::Visible(rival) = observed
                 && rival.seat != parts.recipient

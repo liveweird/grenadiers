@@ -47,16 +47,9 @@ impl Driver {
         random_fill: Arc<RandomFill>,
         cpus: Vec<CpuController>,
     ) -> Self {
+        let room_id = runtime.identity().id.clone();
         Self {
-            room_id: initial
-                .legacy_room()
-                .map(|room| &room.room_id)
-                .or_else(|| initial.environment_room().map(|room| &room.room_id))
-                .or_else(|| initial.lair_room().map(|room| &room.room_id))
-                .or_else(|| initial.respawn_room().map(|room| &room.room_id))
-                .or_else(|| initial.spike_room().map(|room| &room.room_id))
-                .expect("owner requires a checked room publication")
-                .clone(),
+            room_id,
             runtime,
             notices,
             last: initial,

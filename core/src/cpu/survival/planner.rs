@@ -1,20 +1,14 @@
 use super::compatibility::actor;
 use super::punch_tactic::certified_punch;
-use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin};
+use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
-    PulseLease, PulseRequest, RouteLimits, RouteMode, RouteRequest, RouteStep, certify_pulse,
+    PulseRequest, RouteLimits, RouteMode, RouteRequest, RouteStep, certify_pulse,
     certify_respawn_pulse, plan_respawn_route, plan_route,
 };
 use crate::cpu::{CpuRng, Intent, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, Tick};
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SurvivalPlan {
-    pub control: ControlPlan,
-    pub lease: Option<PulseLease>,
-    pub execution: Option<ExecutionCertificate>,
-}
 pub fn plan(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -63,6 +57,7 @@ pub fn plan_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 #[allow(clippy::too_many_arguments)]
@@ -80,6 +75,7 @@ pub(super) fn plan_inner(
     strategic_goals: bool,
     failed_plant_recovery: bool,
     persistent_burning_oil: bool,
+    hard_tactics: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -131,6 +127,7 @@ pub(super) fn plan_inner(
         opportunistic_planting,
         strategic_goals,
         failed_plant_recovery,
+        hard_tactics,
     )?;
     let storm_enabled = observation.environment().is_some_and(|environment| {
         environment.storm_cloud_config() == crate::game::StormCloudConfig::Single

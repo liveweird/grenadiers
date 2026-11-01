@@ -395,3 +395,6 @@ mod multiplayer_tests;
 #[cfg(test)]
 #[path = "controller_respawn_tests.rs"]
 mod respawn_tests;
+
+#[path = "controller_profile.rs"]
+mod profile;

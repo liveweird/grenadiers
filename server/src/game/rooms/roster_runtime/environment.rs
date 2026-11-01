@@ -362,23 +362,36 @@ impl RosterRuntime {
                 self.settings_authority_locked(),
             )
             .map(publication_v17::view_notice),
-            Some(EnvironmentProfile::SpikeV10 {
-                cloud,
-                lairs,
-                spike_pits,
-            }) => publication_v18::room_view(
-                &self.identity,
-                &self.lifecycle,
-                EnvironmentProfile::SpikeV10 {
+            Some(
+                profile @ EnvironmentProfile::SpikeV10 {
                     cloud,
                     lairs,
                     spike_pits,
                 },
-                self.revision,
-                self.settings_revision,
-                self.settings_authority_locked(),
-            )
-            .map(publication_v18::view_notice),
+            ) => {
+                let _ = (cloud, lairs, spike_pits);
+                if self.spike_publication == super::runtime::SpikePublicationVersion::V19 {
+                    super::publication_v19::room_view(
+                        &self.identity,
+                        &self.lifecycle,
+                        profile,
+                        self.revision,
+                        self.settings_revision,
+                        self.settings_authority_locked(),
+                    )
+                    .map(super::publication_v19::view_notice)
+                } else {
+                    publication_v18::room_view(
+                        &self.identity,
+                        &self.lifecycle,
+                        profile,
+                        self.revision,
+                        self.settings_revision,
+                        self.settings_authority_locked(),
+                    )
+                    .map(publication_v18::view_notice)
+                }
+            }
             None => Err(RosterRuntimeError::UnsupportedConfiguration),
         }
     }

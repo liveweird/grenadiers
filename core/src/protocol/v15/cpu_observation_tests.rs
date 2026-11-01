@@ -61,7 +61,8 @@ fn room(environment: StormCloudConfig, items: ItemSet, tick: crate::protocol::Ti
         configuration: super::RoomConfiguration::from_domain(EnvironmentRoomConfiguration::new(
             base,
             environment,
-        )),
+        ))
+        .unwrap(),
         room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
         room_code: RoomCode::new("ABCDEFGH").unwrap(),
         round_id: Counter::new(1).unwrap(),

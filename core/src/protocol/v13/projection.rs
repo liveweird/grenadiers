@@ -198,6 +198,7 @@ fn room_from_common(
                 difficulty: match profile.difficulty {
                     CpuDifficulty::Easy => Difficulty::Easy,
                     CpuDifficulty::Standard => Difficulty::Standard,
+                    CpuDifficulty::Hard => return Err(ProjectionError::InvalidExpandedBinding),
                 },
             },
             None => return Err(ProjectionError::InvalidExpandedBinding),

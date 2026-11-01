@@ -15,7 +15,8 @@ use crate::{
 };
 
 #[test]
-fn small_two_player_cpus_use_policy_seventeen_and_reject_legacy_profile() {
+fn small_two_player_cpus_use_policy_seventeen_and_reject_legacy_profile()
+-> Result<(), RosterRuntimeError> {
     for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
         let configuration = RoomConfiguration::new(
             &[SeatControl::Human, SeatControl::Cpu],
@@ -38,10 +39,7 @@ fn small_two_player_cpus_use_policy_seventeen_and_reject_legacy_profile() {
             Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
         )
         .unwrap();
-        let profile = match difficulty {
-            CpuDifficulty::Easy => CpuProfile::MULTIPLAYER_EASY,
-            CpuDifficulty::Standard => CpuProfile::MULTIPLAYER_STANDARD,
-        };
+        let (profile, legacy) = archived_profiles(difficulty)?;
         let controller = |profile| {
             CpuController::new(
                 CpuPlanner::without_workers(),
@@ -57,13 +55,20 @@ fn small_two_player_cpus_use_policy_seventeen_and_reject_legacy_profile() {
             super::super::validate_cpus(&runtime, &[controller(profile)]),
             Ok(())
         );
-        let legacy = match difficulty {
-            CpuDifficulty::Easy => CpuProfile::CURRENT_EASY,
-            CpuDifficulty::Standard => CpuProfile::CURRENT,
-        };
         assert_eq!(
             super::super::validate_cpus(&runtime, &[controller(legacy)]),
             Err(RosterRuntimeError::UnsupportedConfiguration)
         );
+    }
+    Ok(())
+}
+
+fn archived_profiles(
+    difficulty: CpuDifficulty,
+) -> Result<(CpuProfile, CpuProfile), RosterRuntimeError> {
+    match difficulty {
+        CpuDifficulty::Easy => Ok((CpuProfile::MULTIPLAYER_EASY, CpuProfile::CURRENT_EASY)),
+        CpuDifficulty::Standard => Ok((CpuProfile::MULTIPLAYER_STANDARD, CpuProfile::CURRENT)),
+        CpuDifficulty::Hard => Err(RosterRuntimeError::UnsupportedConfiguration),
     }
 }

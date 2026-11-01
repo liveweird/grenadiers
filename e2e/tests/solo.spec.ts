@@ -137,7 +137,7 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
   }
 })
 
-test('Polish solo controls default to Standard and stay keyboard accessible without horizontal overflow at 320 pixels', async ({ page }) => {
+test('Polish solo controls default to Standard and create Hard through the keyboard at 320 pixels', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 844 })
   await page.goto('/')
   await page.getByText('Polski', { exact: true }).click()
@@ -148,6 +148,8 @@ test('Polish solo controls default to Standard and stay keyboard accessible with
   await expect(difficulty).toHaveValue('easy')
   await difficulty.selectOption('standard')
   await expect(difficulty).toHaveValue('standard')
+  await difficulty.selectOption('hard')
+  await expect(difficulty).toHaveValue('hard')
   await difficulty.focus()
   await page.keyboard.press('Tab')
   const playSolo = page.getByRole('button', { name: 'Zagraj solo z komputerem', exact: true })
@@ -157,7 +159,7 @@ test('Polish solo controls default to Standard and stay keyboard accessible with
   await page.keyboard.press('Tab')
   await page.keyboard.press('Enter')
 
-  await expect(page.getByText('Prywatny mecz solo · Standardowy komputer', { exact: true })).toBeVisible()
+  await expect(page.getByText('Prywatny mecz solo · Trudny komputer', { exact: true })).toBeVisible()
   await expect(page.getByRole('list', { name: 'Gracze' })).toContainText('Komputer')
   await expect(page.getByRole('button', { name: 'Gotowy', exact: true })).toBeVisible()
   await expect(page.getByLabel('Kod zaproszenia do pokoju', { exact: true })).toHaveCount(0)

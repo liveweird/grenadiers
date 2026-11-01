@@ -1,8 +1,24 @@
 import { effectSemanticError, expandedProfileSemanticErrorFor, itemSetSemanticError,
-  type GameplayProfileSemanticError } from '../validation/profileSemantics'
-import { roomLifecycleSemanticError } from '../validation/roomLifecycleSemantics'
-import { ITEM_IDS, type GameServerMessage, type GameState, type RoomView, type Seat,
-  type WireEvent } from './schema'
+  type GameplayProfileSemanticError } from './profileSemantics'
+import { roomLifecycleSemanticError } from './roomLifecycleSemantics'
+import type { GameServerMessage as V17GameServerMessage, GameState as V17GameState,
+  RoomView as V17RoomView, Seat, WireEvent as V17WireEvent } from '../v17/schema'
+import type { GameServerMessage as V18GameServerMessage, GameState as V18GameState,
+  RoomView as V18RoomView, WireEvent as V18WireEvent } from '../v18/schema'
+import type { GameServerMessage as V19GameServerMessage, GameState as V19GameState,
+  RoomView as V19RoomView, WireEvent as V19WireEvent } from '../v19/schema'
+
+type GameServerMessage = V17GameServerMessage | V18GameServerMessage | V19GameServerMessage
+type GameState = V17GameState | V18GameState | V19GameState
+type RoomView = V17RoomView | V18RoomView | V19RoomView
+type WireEvent = V17WireEvent | V18WireEvent | V19WireEvent
+
+const ITEM_IDS = [
+  'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb',
+  'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame',
+  'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls',
+  'invisibleBombs', 'oilBarrel', 'teleporter',
+] as const
 
 export type BaseSemanticError = GameplayProfileSemanticError
   | 'invalidConfiguration' | 'invalidControllerMetadata' | 'invalidFrozenState'
@@ -172,7 +188,7 @@ function actorError(state: GameState, room: RoomView): BaseSemanticError | null 
   return state.bombs.some(({ owner }) => !ids.has(owner)) ? 'invalidWorldState' : null
 }
 
-function eventError(state: GameState, events: WireEvent[]): BaseSemanticError | null {
+function eventError(state: GameState, events: readonly WireEvent[]): BaseSemanticError | null {
   for (const { kind } of events) {
     if ('id' in kind && 'seat' in kind) {
       const actor = state.actors.find(({ id }) => id === kind.id)
@@ -209,7 +225,9 @@ function stormError(state: GameState, room: RoomView): BaseSemanticError | null 
   return consistent ? null : 'invalidStormEnvironment'
 }
 
-function worldError(state: GameState, room: RoomView, events: WireEvent[]): BaseSemanticError | null {
+function worldError(
+  state: GameState, room: RoomView, events: readonly WireEvent[],
+): BaseSemanticError | null {
   const seats = room.seats.map(({ seat }) => seat)
   if (state.arena.width !== room.configuration.board.width
     || state.arena.height !== room.configuration.board.height

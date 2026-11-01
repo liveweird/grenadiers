@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v18::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::v19::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, RoomId};
 use tokio::time::Instant;
 
@@ -198,7 +198,7 @@ pub(super) async fn dispatch(
                         grenadiers_core::room::RespawnLairSettings::new(
                             settings.environment.lairs.spawn_seconds,
                         )
-                        .expect("v18 parser validates lair settings"),
+                        .expect("v19 parser validates lair settings"),
                     ),
                     spike_pits: grenadiers_core::room::SpikePitTuning::new(
                         settings.environment.spike_pits.enabled,
@@ -206,7 +206,7 @@ pub(super) async fn dispatch(
                             settings.environment.spike_pits.warning_ticks.into(),
                             settings.environment.spike_pits.raised_ticks.into(),
                         )
-                        .expect("v18 parser validates spike-pit settings"),
+                        .expect("v19 parser validates spike-pit settings"),
                     ),
                 },
                 state,

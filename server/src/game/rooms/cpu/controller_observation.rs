@@ -83,48 +83,6 @@ impl CpuController {
         true
     }
 
-    fn profile_supports(&self, rules_version: u16) -> bool {
-        match rules_version {
-            5 => self.profile.policy.version() <= 16,
-            6 => matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::MULTIPLAYER_STANDARD
-                    | grenadiers_core::room::CpuProfile::MULTIPLAYER_EASY
-            ),
-            7 => matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::ENVIRONMENT_STANDARD
-                    | grenadiers_core::room::CpuProfile::ENVIRONMENT_EASY
-            ),
-            8 => matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::LAIRS_STANDARD
-                    | grenadiers_core::room::CpuProfile::LAIRS_EASY
-            ),
-            9 => matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_STANDARD
-                    | grenadiers_core::room::CpuProfile::RESPAWN_LAIRS_EASY
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V22_STANDARD
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V22_EASY
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V24_STANDARD
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V24_EASY
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V23_STANDARD
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V23_EASY
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V21_STANDARD
-                    | grenadiers_core::room::CpuProfile::RESPAWN_V21_EASY
-            ),
-            10 => matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::SPIKE_PITS_STANDARD
-                    | grenadiers_core::room::CpuProfile::SPIKE_PITS_EASY
-                    | grenadiers_core::room::CpuProfile::RELIABLE_V27_STANDARD
-                    | grenadiers_core::room::CpuProfile::RELIABLE_V27_EASY
-            ),
-            _ => false,
-        }
-    }
-
     pub(in crate::game::rooms) const fn needs_stop_confirmation(&self) -> bool {
         self.stop_admission.is_none() && self.settled_stop_tick.is_none()
     }

@@ -6,6 +6,7 @@ import type { GameClientState } from './client'
 import { initialGameClientState } from './client'
 import { GamePanelView, type GameActions } from './GamePanel'
 import { room } from './testSupport'
+import type { Difficulty } from '../v19/schema'
 
 vi.mock('../arena/GameArena', () => ({ GameArena: () => <div /> }))
 
@@ -15,7 +16,7 @@ const actions = (): GameActions => ({
   useEquipment: vi.fn(() => true), leave: vi.fn(() => true),
 })
 
-function soloState(difficulty: 'easy' | 'standard' = 'standard'): GameClientState {
+function soloState(difficulty: Difficulty = 'standard'): GameClientState {
   const current = room(200, {
     type: 'matchResult', endedAt: 20, rematchAt: 200,
     result: { type: 'winner', seat: 'two', reason: 'roundWins' },
@@ -37,7 +38,7 @@ function soloState(difficulty: 'easy' | 'standard' = 'standard'): GameClientStat
 beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 afterEach(cleanup)
 
-it('defaults solo admission to Standard, accepts Easy, and disables the selector while busy', () => {
+it('defaults solo admission to Standard, offers every v19 tier, and disables the selector while busy', () => {
   const controls = actions()
   const state = initialGameClientState()
   const view = render(<MantineProvider env="test"><GamePanelView state={state} actions={controls} /></MantineProvider>)
@@ -48,6 +49,9 @@ it('defaults solo admission to Standard, accepts Easy, and disables the selector
   fireEvent.change(difficulty, { target: { value: 'easy' } })
   fireEvent.click(screen.getByRole('button', { name: 'Play solo against CPU' }))
   expect(controls.admit).toHaveBeenLastCalledWith({ type: 'create', mode: { type: 'solo', difficulty: 'easy' } })
+  fireEvent.change(difficulty, { target: { value: 'hard' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Play solo against CPU' }))
+  expect(controls.admit).toHaveBeenLastCalledWith({ type: 'create', mode: { type: 'solo', difficulty: 'hard' } })
   for (const pending of [
     { admissionPending: true },
     { connection: 'connecting' as const },
@@ -61,14 +65,17 @@ it('defaults solo admission to Standard, accepts Easy, and disables the selector
 })
 
 it.each([
-  ['en', 'easy', 'Private solo match · Easy CPU'],
-  ['en', 'standard', 'Private solo match · Standard CPU'],
-  ['pl', 'easy', 'Prywatny mecz solo · Łatwy komputer'],
-  ['pl', 'standard', 'Prywatny mecz solo · Standardowy komputer'],
-] as const)('renders the server-provided %s %s difficulty', async (language, difficulty, label) => {
+  ['en', 'easy', 'Private solo match · Easy CPU', 'CPU opponent'],
+  ['en', 'standard', 'Private solo match · Standard CPU', 'CPU opponent'],
+  ['en', 'hard', 'Private solo match · Hard CPU', 'CPU opponent'],
+  ['pl', 'easy', 'Prywatny mecz solo · Łatwy komputer', 'Komputer'],
+  ['pl', 'standard', 'Prywatny mecz solo · Standardowy komputer', 'Komputer'],
+  ['pl', 'hard', 'Prywatny mecz solo · Trudny komputer', 'Komputer'],
+] as const)('renders the server-provided %s %s difficulty', async (language, difficulty, label, cpu) => {
   await i18n.changeLanguage(language)
   render(<MantineProvider env="test"><GamePanelView state={soloState(difficulty)} actions={actions()} /></MantineProvider>)
   expect(screen.getByText(label)).toBeVisible()
+  expect(screen.getByRole('list', { name: language === 'en' ? 'Players' : 'Gracze' })).toHaveTextContent(cpu)
 })
 
 it.each([

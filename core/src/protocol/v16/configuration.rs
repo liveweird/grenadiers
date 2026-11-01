@@ -83,9 +83,11 @@ impl RoomConfiguration {
     pub const fn domain(&self) -> &DomainConfiguration {
         &self.domain
     }
-    #[must_use]
-    pub const fn from_domain(domain: DomainConfiguration) -> Self {
-        Self { domain }
+    pub fn from_domain(
+        domain: DomainConfiguration,
+    ) -> Result<Self, crate::protocol::v14::ArchivedConfigurationError> {
+        crate::protocol::v14::RoomConfiguration::from_domain(*domain.base())?;
+        Ok(Self { domain })
     }
 }
 
@@ -120,7 +122,8 @@ impl Serialize for RoomConfiguration {
             environment: Environment,
         }
         Borrowed {
-            base: crate::protocol::v14::RoomConfiguration::from_domain(*self.domain.base()),
+            base: crate::protocol::v14::RoomConfiguration::from_domain(*self.domain.base())
+                .map_err(serde::ser::Error::custom)?,
             environment: Environment::from_domain(self.domain.storm_cloud(), self.domain.lairs()),
         }
         .serialize(serializer)

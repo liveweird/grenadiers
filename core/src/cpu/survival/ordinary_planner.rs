@@ -11,8 +11,11 @@ pub(super) fn plan(
     opportunistic_planting: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
+    hard_tactics: bool,
 ) -> Result<ControlPlan, PolicyError> {
-    if observation.parts().rules.version == 10 {
+    if hard_tactics {
+        crate::cpu::policy::plan_hard_v28(observation, memory, rng, work)
+    } else if observation.parts().rules.version == 10 {
         crate::cpu::policy::plan_spike_pits_v26(observation, memory, rng, work)
     } else if failed_plant_recovery {
         crate::cpu::policy::plan_respawn_v25(observation, memory, rng, work)

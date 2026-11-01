@@ -1,6 +1,6 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v18/schema'
-import { validateGameplayV18ServerMessage } from '../v18/validation'
+  RoomView, Seat, V14ErrorCode } from '../v19/schema'
+import { validateGameplayV19ServerMessage } from '../v19/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -85,7 +85,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV18ServerMessage(value)
+  const result = validateGameplayV19ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 

@@ -218,7 +218,7 @@ fn failed_admission_encoding_and_failed_publication_leave_runtime_unchanged() {
     let mut runtime = runtime(4);
     let mut prepared = runtime.prepare_join(SeatId::Four).unwrap();
     prepared.legacy_room_mut().unwrap().configuration =
-        v14::RoomConfiguration::from_domain(configuration(3));
+        v14::RoomConfiguration::from_domain(configuration(3)).unwrap();
     assert_eq!(
         prepared
             .encode(

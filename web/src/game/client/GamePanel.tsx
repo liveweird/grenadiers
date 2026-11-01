@@ -9,7 +9,7 @@ import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
   Seat, VisibleActorView,
-} from '../v18/schema'
+} from '../v19/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -23,6 +23,7 @@ import { controllersAvailable, isLegacySolo, roomCopy } from './roomControllers'
 import { CpuDebugPanel } from './CpuDebugPanel'
 import { useCpuDebug } from './useCpuDebug'
 import { cpuDebugOptedIn } from './cpuDebugOptIn'
+import { DifficultySelector } from '../v19/DifficultySelector'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 const BOARD_PRESETS = [
@@ -149,9 +150,6 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
   const [controllers, setControllers] = useState<Array<'human' | 'cpu'>>(['human', 'human'])
   const busy = state.admissionPending
     || ['connecting', 'authenticating', 'reconnecting'].includes(state.connection)
-  const selectDifficulty = (value: string): void => {
-    if (value === 'easy' || value === 'standard') setDifficulty(value)
-  }
   const resizeControllers = (count: number): void => {
     if (count < 2 || count > 4) return
     setPlayerCount(count)
@@ -178,11 +176,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
       <Title order={2}>{copy.lobby.title}</Title>
       <Text>{copy.lobby.explanation}</Text>
       <Button size="lg" onClick={() => actions.admit({ type: 'create' })} loading={busy}>{copy.lobby.create}</Button>
-      <NativeSelect label={copy.solo.difficultyLabel} value={difficulty} disabled={busy}
-        onChange={(event) => selectDifficulty(event.currentTarget.value)} data={[
-          { value: 'easy', label: copy.solo.easy },
-          { value: 'standard', label: copy.solo.standard },
-        ]} />
+      <DifficultySelector copy={copy} value={difficulty} disabled={busy} onChange={setDifficulty} />
       <Button size="lg" variant="light" disabled={busy}
         onClick={() => actions.admit({ type: 'create', mode: { type: 'solo', difficulty } })}>
         {copy.solo.play}
@@ -202,10 +196,8 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
           key={index + 1} label={format(copy.multiplayer.controller, { player: index + 2 })}
           value={controller} disabled={busy} onChange={(event) => setController(index + 1, event.currentTarget.value)}
           data={[{ value: 'human', label: copy.multiplayer.human }, { value: 'cpu', label: copy.multiplayer.cpu }]} />)}
-        {controllers.includes('cpu') && <NativeSelect label={copy.solo.difficultyLabel} value={difficulty}
-          disabled={busy} onChange={(event) => selectDifficulty(event.currentTarget.value)} data={[
-            { value: 'easy', label: copy.solo.easy }, { value: 'standard', label: copy.solo.standard },
-          ]} />}
+        {controllers.includes('cpu') && <DifficultySelector copy={copy} value={difficulty}
+          disabled={busy} onChange={setDifficulty} />}
         <Button size="lg" variant="light" disabled={busy}
           onClick={() => actions.admit({ type: 'create', configuration: customConfiguration() })}>
           {copy.multiplayer.create}

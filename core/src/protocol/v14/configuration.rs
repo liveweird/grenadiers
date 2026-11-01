@@ -19,6 +19,20 @@ pub enum Difficulty {
     Standard,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ArchivedConfigurationError {
+    UnsupportedDifficulty,
+    InvalidLairs,
+}
+
+impl std::fmt::Display for ArchivedConfigurationError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(formatter, "{self:?}")
+    }
+}
+
+impl std::error::Error for ArchivedConfigurationError {}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct BoardSize {
@@ -27,11 +41,11 @@ pub struct BoardSize {
 }
 
 impl BoardSize {
-    fn domain(self) -> Result<DomainBoardSize, ()> {
+    pub(crate) fn domain(self) -> Result<DomainBoardSize, ()> {
         DomainBoardSize::try_from((self.width, self.height))
     }
 
-    fn from_domain(value: DomainBoardSize) -> Self {
+    pub(crate) fn from_domain(value: DomainBoardSize) -> Self {
         let (width, height) = value.dimensions();
         Self { width, height }
     }
@@ -57,9 +71,11 @@ impl RoomConfiguration {
         &self.domain
     }
 
-    #[must_use]
-    pub fn from_domain(domain: DomainConfiguration) -> Self {
-        Self { domain }
+    pub fn from_domain(domain: DomainConfiguration) -> Result<Self, ArchivedConfigurationError> {
+        if domain.cpu_difficulty() == Some(DomainDifficulty::Hard) {
+            return Err(ArchivedConfigurationError::UnsupportedDifficulty);
+        }
+        Ok(Self { domain })
     }
 }
 
@@ -109,13 +125,16 @@ impl Serialize for RoomConfiguration {
                 DomainControl::Cpu => ConfigurationController::Cpu,
             })
             .collect();
-        let cpu_difficulty = self
-            .domain
-            .cpu_difficulty()
-            .map(|difficulty| match difficulty {
-                DomainDifficulty::Easy => Difficulty::Easy,
-                DomainDifficulty::Standard => Difficulty::Standard,
-            });
+        let cpu_difficulty = match self.domain.cpu_difficulty() {
+            None => None,
+            Some(DomainDifficulty::Easy) => Some(Difficulty::Easy),
+            Some(DomainDifficulty::Standard) => Some(Difficulty::Standard),
+            Some(DomainDifficulty::Hard) => {
+                return Err(serde::ser::Error::custom(
+                    "Hard is not supported by gameplay v14",
+                ));
+            }
+        };
         BorrowedFields {
             controllers,
             cpu_difficulty,

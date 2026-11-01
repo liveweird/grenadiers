@@ -33,6 +33,7 @@ pub fn plan_refuge_guidance_v33_with_origin(
         false,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -62,6 +63,7 @@ pub fn plan_refuge_guidance_v34_with_origin(
         false,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -91,6 +93,7 @@ pub fn plan_farm_refuges_v36_with_origin(
         true,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -120,6 +123,7 @@ pub fn plan_hard_farm_refuges_v37_with_origin(
         true,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -149,6 +153,7 @@ pub fn plan_farm_origins_v38_with_origin(
         true,
         true,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -178,6 +183,7 @@ pub fn plan_contact_topology_v40_with_origin(
         true,
         true,
         ContactTopology::ExistingSources,
+        false,
     )
 }
 
@@ -207,6 +213,7 @@ pub fn plan_hard_contact_topology_v41_with_origin(
         true,
         true,
         ContactTopology::ExistingSources,
+        false,
     )
 }
 
@@ -236,6 +243,7 @@ pub fn plan_blocked_births_v42_with_origin(
         true,
         true,
         ContactTopology::BlockedBirths,
+        false,
     )
 }
 
@@ -265,6 +273,7 @@ pub fn plan_hard_blocked_births_v43_with_origin(
         true,
         true,
         ContactTopology::BlockedBirths,
+        false,
     )
 }
 
@@ -294,6 +303,7 @@ pub fn plan_hard_farm_origins_v39_with_origin(
         true,
         true,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -314,6 +324,7 @@ pub(super) fn plan_policy(
     joint_refuges: bool,
     farm_origin_recovery: bool,
     contact_topology: ContactTopology,
+    avoid_pits: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     if observation.parts().rules.version != 10 {
         return Err(PolicyError::InvalidObservation);
@@ -337,6 +348,7 @@ pub(super) fn plan_policy(
             counter_pressure,
             pickup_progress,
             refuge_guidance,
+            avoid_pits,
         )
         .map(|survival| LairSurvivalPlan {
             survival,
@@ -364,5 +376,6 @@ pub(super) fn plan_policy(
         joint_refuges,
         farm_origin_recovery,
         contact_topology,
+        avoid_pits,
     )
 }

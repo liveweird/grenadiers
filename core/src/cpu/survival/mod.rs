@@ -23,6 +23,7 @@ mod origin;
 mod origin_planner;
 mod pickup_handoff;
 mod pickup_progress;
+mod pit_avoidance;
 mod planner;
 mod plant_tactic;
 mod plant_value;
@@ -55,6 +56,7 @@ pub(crate) use continuation_planner::certify_continuation;
 pub use continuation_selection::{
     OriginRecoveryChoice, continuation_recovery_memory, continuation_recovery_stop,
     plan_lairs as plan_continuation_lairs,
+    plan_lairs_avoiding_pits as plan_continuation_lairs_avoiding_pits,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
@@ -62,6 +64,9 @@ pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use pickup_progress::{
     plan_hard_pickup_progress_v32_with_origin, plan_pickup_progress_v31_with_origin,
+};
+pub use pit_avoidance::{
+    plan_hard_pit_avoidance_v53_with_origin, plan_pit_avoidance_v52_with_origin,
 };
 pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
@@ -220,6 +225,9 @@ mod spike_pit_execution_tests;
 
 #[cfg(test)]
 mod spike_pit_plant_execution_tests;
+
+#[cfg(test)]
+mod pit_avoidance_tests;
 
 #[cfg(test)]
 mod teleporter_execution_tests;

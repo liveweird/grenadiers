@@ -347,19 +347,14 @@ async fn shutdown_during_a_real_pending_send_obeys_the_shared_deadline() {
     assert!(WriteObservations::load(&fixture.server.observations[0].calls) > 0);
     assert!(WriteObservations::load(&fixture.server.observations[0].syscall_would_block) > 0);
 
+    let mut shutdown_observed = fixture.server.state.game_rooms.shutdown();
     tokio::time::pause();
     let signal_instant = Instant::now();
     fixture.server.signal.send(()).unwrap();
-    tokio::task::yield_now().await;
+    shutdown_observed.changed().await.unwrap();
+    assert!(*shutdown_observed.borrow_and_update());
+    assert_eq!(Instant::now(), signal_instant);
     tokio::time::advance(Duration::from_secs(5)).await;
-    tokio::task::yield_now().await;
-    for _ in 0..10_000 {
-        if fixture.server.task.is_finished() {
-            break;
-        }
-        tokio::task::yield_now().await;
-    }
-    assert!(fixture.server.task.is_finished());
     let (completed_at, outcome) = fixture.server.task.await.unwrap();
     let outcome = outcome.unwrap();
     assert!(completed_at <= signal_instant + Duration::from_secs(5));

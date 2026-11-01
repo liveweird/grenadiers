@@ -21,6 +21,12 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parent.parent
 COVERAGE_TARGET = ROOT / "target/grenadiers-local-server-coverage"
 HEAVY_TEST = "game::rooms::replay::settings_tests::expanded_item_masks_and_disabled_preset_replay_deterministically"
+ISOLATED_TESTS = (
+    "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu26_progress_and_scheduling_with_bounded_plans",
+    "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu27_progress_and_scheduling_with_bounded_plans",
+    "game::rooms::roster_owner::hard_episode_tests::native_hard_v53_seed73_progresses_with_two_workers_at_production_pacing",
+    "game::rooms::roster_owner::teleporter_owner_tests::native_worker_completes_collection_stop_and_productive_follow_up",
+)
 INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"
 SUMMARY_PREFIX = "GRENADIERS_SERVER_REPLAY_ITEM_MASK_SUMMARY="
 PLAN_KEYS = {"schemaVersion", "source", "catalog", "capacity", "totalCardinality", "partitionCount", "ranges"}
@@ -163,10 +169,30 @@ def select_binary(release: bool, env: dict[str, str] | None = None) -> Path:
     binary = Path(selected).resolve()
     if binary.is_symlink() or not binary.is_file(): raise ValueError("server test binary missing")
     listed = run([str(binary), "--list"], env=env, capture=True).stdout.splitlines()
-    if sum(line == f"{HEAVY_TEST}: test" for line in listed) != 1 \
-            or sum(line == f"{INSTRUMENTATION_PROBE_TEST}: test" for line in listed) != 1:
+    if any(sum(line == f"{test}: test" for line in listed) != 1
+           for test in (HEAVY_TEST, *ISOLATED_TESTS, INSTRUMENTATION_PROBE_TEST)):
         raise ValueError("exact server tests missing or duplicated")
     return binary
+
+
+def execute_ordinary_and_isolated(profile: str, binary: Path, *, release: bool = False,
+                                  env: dict[str, str] | None = None,
+                                  raw_dir: Path | None = None) -> dict[str, Any]:
+    ordinary = ["cargo", "test", "--workspace", "--locked"]
+    if release: ordinary.insert(3, "--release")
+    skips = [value for test in (HEAVY_TEST, *ISOLATED_TESTS) for value in ("--skip", test)]
+    run([*ordinary, "--", *skips, "--show-output"], env=env)
+    before = set(raw_dir.glob("*.profraw")) if raw_dir else set()
+    if raw_dir and not before:
+        raise ValueError("ordinary instrumented coverage produced no raw profiles")
+    run([str(binary), *ISOLATED_TESTS, "--exact", "--show-output", "--test-threads=1"], env=env)
+    created = sorted(set(raw_dir.glob("*.profraw")) - before) if raw_dir else []
+    if raw_dir and not created:
+        raise ValueError("isolated coverage test produced no raw profile")
+    result = {"names": list(ISOLATED_TESTS), "profile": profile, "result": "completed",
+              "executionsPerTest": 1, "concurrentOrdinaryOrMaskWork": False,
+              "rawProfileCount": len(created)}
+    return result
 
 
 def file_sha256(path: Path) -> str:
@@ -238,9 +264,11 @@ def capture_workspace_executables(env: dict[str, str]) -> tuple[list[dict[str, A
         binary = Path(artifact["path"])
         listed = run([str(binary), "--list"], env=env, capture=True).stdout.splitlines()
         has_heavy = sum(line == f"{HEAVY_TEST}: test" for line in listed)
+        isolated_counts = [sum(line == f"{test}: test" for line in listed)
+                           for test in ISOLATED_TESTS]
         has_probe = sum(line == f"{INSTRUMENTATION_PROBE_TEST}: test" for line in listed)
-        if has_heavy or has_probe:
-            if has_heavy != 1 or has_probe != 1:
+        if has_heavy or any(isolated_counts) or has_probe:
+            if has_heavy != 1 or any(count != 1 for count in isolated_counts) or has_probe != 1:
                 raise ValueError("exact server tests missing or duplicated")
             heavy.append(binary)
     if len(heavy) != 1:
@@ -453,22 +481,21 @@ def execute_profiles(source: str, tree: str, compiler: dict[str, str], workers: 
     run(["node", "scripts/local-server-mask-plan.mjs", str(ROOT), source, str(plan_path)])
     plan = validate_plan(json.loads(plan_path.read_text()), source); profiles = {}
     for profile, release in (("debug", False), ("release", True)):
-        ordinary = ["cargo", "test", "--workspace", "--locked"]
-        if release: ordinary.insert(3, "--release")
-        run([*ordinary, "--", "--skip", HEAVY_TEST, "--show-output"])
-        profiles[profile] = execute_profile(profile, select_binary(release), plan, workers)
+        binary = select_binary(release)
+        isolated = execute_ordinary_and_isolated(profile, binary, release=release)
+        profiles[profile] = execute_profile(profile, binary, plan, workers)
+        profiles[profile]["isolatedTest"] = isolated
     cov_env = coverage_environment()
     artifacts, coverage_binary = capture_workspace_executables(cov_env)
     baseline = temp / "coverage-baseline"; baseline.mkdir()
     cov_env["LLVM_PROFILE_FILE"] = str(baseline / "%p-%18m.profraw")
-    run(["cargo", "test", "--workspace", "--locked", "--", "--skip", HEAVY_TEST,
-         "--show-output"], env=cov_env)
-    if not list(baseline.glob("*.profraw")):
-        raise ValueError("ordinary instrumented coverage produced no raw profiles")
+    isolated = execute_ordinary_and_isolated("coverage", coverage_binary, env=cov_env,
+                                             raw_dir=baseline)
     verify_instrumented_binary(coverage_binary, cov_env, temp / "coverage-probe")
     coverage_raw = temp / "coverage-workers"; coverage_raw.mkdir()
     profiles["coverage"] = execute_profile("coverage", coverage_binary, plan, workers,
                                             cov_env, coverage_raw)
+    profiles["coverage"]["isolatedTest"] = isolated
     worker_dirs = [Path(path) for path in profiles["coverage"].pop("rawDirectories")]
     verify_file_identities(artifacts)
     report_raw_dirs = [baseline, *worker_dirs]

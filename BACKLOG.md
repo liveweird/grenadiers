@@ -19,20 +19,20 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — prevent pit traps and improve concurrent play.** Releases
-  1.3.11/1.3.12 repair Teleporter admission/Stop recovery and support multiple distant pickups.
-  Retain their actual-owner collection, useful bombing, survival and budget regressions.
-  The [investigation](docs/history/cpu-late-passivity-2026-11-01.md) now identifies two next cases:
-  quiet CPU51 play enters warning pits and dies on them; reproduce the pre-entry controller
-  sequence, then avoid voluntary pit approaches/contact in ordinary short-pulse navigation
-  while preserving complete plant-route proofs and checked forced-placement behavior.
-  The paired farming witness also captures actual queued support suppression with foreign
-  bombs, soft blocks and Teleporter enabled. Prove a useful complete plant under the unchanged
-  observation, contact and future-loot obligations before relaxing that guard. Keep seed/history
-  assumptions explicit; no public snapshot reconstructs the original private match.
-  Preserve worker/refusal/admission evidence, full escape/contact proofs, shared work limits,
-  scheduling, archived replay/privacy and per-seat progress. Broader stalls and deeper tactics
-  remain subject to original-pose before/after witnesses, not elapsed-time or reachability claims.
+- [next] **CPU-RELIABILITY — complete concurrent timed-bomb recovery.** Release 1.3.13
+  prevents voluntary pit traps; 1.3.11/1.3.12 repair Teleporter admission/Stop recovery and
+  multiple distant pickups. Preserve their actual-owner bombing, survival and budget regressions.
+  A controlled CPU53 seed47 owner episode now reproduces three synchronized range-three plants:
+  all CPUs retain real origins, but common forecast preparation exceeds its 32,768 sub-budget.
+  Recovery arrives late and all three die at detonation in both Oil/no-Oil worlds. Implement
+  shared preparation within the unchanged 65,536 total limit, then require complete physical
+  escape and flame survival before claiming a repair. Keep natural inputs, actual queued
+  Stop/history, contact/pit proofs, scheduling and archived behavior intact.
+  The [investigation](docs/history/cpu-late-passivity-2026-11-01.md) also retains the exact
+  foreign-bomb farming-support suppression. Prove a useful complete plant, including future
+  loot and arbitrary partner swaps, before relaxing that separate guard. Private seed/history
+  assumptions remain explicit; public captures do not restore the original private match.
+  Broader stalls and tactics require concrete before/after owner outcomes.
 
 - [todo] **HARD-CPU — deepen fair tactics.** Improve productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted

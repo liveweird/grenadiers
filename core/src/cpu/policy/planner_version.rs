@@ -1,5 +1,5 @@
 #[derive(Clone, Copy)]
-pub(super) enum PlannerVersion {
+pub(in crate::cpu::policy) enum PlannerVersion {
     Legacy,
     Lairs,
     Respawn,
@@ -10,6 +10,10 @@ pub(super) enum PlannerVersion {
     HardV28,
     FarmV38,
     HardFarmV39,
+    FarmPitsV52,
+    HardFarmPitsV53,
+    SpikePitsCautiousV52,
+    HardPitsCautiousV53,
 }
 
 impl PlannerVersion {
@@ -27,6 +31,10 @@ impl PlannerVersion {
                 | Self::HardV28
                 | Self::FarmV38
                 | Self::HardFarmV39
+                | Self::FarmPitsV52
+                | Self::HardFarmPitsV53
+                | Self::SpikePitsCautiousV52
+                | Self::HardPitsCautiousV53
         )
     }
 
@@ -39,6 +47,10 @@ impl PlannerVersion {
                 | Self::HardV28
                 | Self::FarmV38
                 | Self::HardFarmV39
+                | Self::FarmPitsV52
+                | Self::HardFarmPitsV53
+                | Self::SpikePitsCautiousV52
+                | Self::HardPitsCautiousV53
         )
     }
 
@@ -50,14 +62,34 @@ impl PlannerVersion {
                 | Self::HardV28
                 | Self::FarmV38
                 | Self::HardFarmV39
+                | Self::FarmPitsV52
+                | Self::HardFarmPitsV53
+                | Self::SpikePitsCautiousV52
+                | Self::HardPitsCautiousV53
         )
     }
 
     pub(super) const fn hard_tactics(self) -> bool {
-        matches!(self, Self::HardV28 | Self::HardFarmV39)
+        matches!(
+            self,
+            Self::HardV28 | Self::HardFarmV39 | Self::HardFarmPitsV53 | Self::HardPitsCautiousV53
+        )
     }
 
     pub(super) const fn farm_origin_recovery(self) -> bool {
-        matches!(self, Self::FarmV38 | Self::HardFarmV39)
+        matches!(
+            self,
+            Self::FarmV38 | Self::HardFarmV39 | Self::FarmPitsV52 | Self::HardFarmPitsV53
+        )
+    }
+
+    pub(super) const fn avoid_pits(self) -> bool {
+        matches!(
+            self,
+            Self::FarmPitsV52
+                | Self::HardFarmPitsV53
+                | Self::SpikePitsCautiousV52
+                | Self::HardPitsCautiousV53
+        )
     }
 }

@@ -13,8 +13,17 @@ pub(super) fn plan(
     failed_plant_recovery: bool,
     hard_tactics: bool,
     farm_origin_recovery: bool,
+    avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
-    if farm_origin_recovery && hard_tactics {
+    if avoid_pits && farm_origin_recovery && hard_tactics {
+        crate::cpu::policy::plan_hard_farm_pits_v53(observation, memory, rng, work)
+    } else if avoid_pits && farm_origin_recovery {
+        crate::cpu::policy::plan_farm_pits_v52(observation, memory, rng, work)
+    } else if avoid_pits && hard_tactics {
+        crate::cpu::policy::plan_hard_pits_cautious_v53(observation, memory, rng, work)
+    } else if avoid_pits {
+        crate::cpu::policy::plan_spike_pits_cautious_v52(observation, memory, rng, work)
+    } else if farm_origin_recovery && hard_tactics {
         crate::cpu::policy::plan_hard_farm_v39(observation, memory, rng, work)
     } else if farm_origin_recovery {
         crate::cpu::policy::plan_farm_v38(observation, memory, rng, work)

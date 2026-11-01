@@ -174,6 +174,14 @@ clean committed worktree and retains the same assertions, complete mask catalog 
 floor. The separate `server` and `coverage` commands remain available as the serial fallback.
 Do not run latency acceptance alongside these CPU-intensive checks.
 
+The native worker production-pacing cohort is latency-sensitive under host contention. The
+parallel runner owns its complete explicit test-name catalog, verifies every member exists once,
+excludes the cohort only from each concurrent ordinary invocation, and runs one unchanged serial
+exact-filter batch before replay-mask work in debug, release, and instrumented coverage profiles.
+The batch's instrumented raw profile remains in the ordinary baseline used by the official report
+and execution proof. Do not overlap this cohort with ordinary or mask workers, retry it, relax its
+assertions, or raise its timing limits.
+
 The parallel runner checks Cargo-owned coverage-cache cleanup before expensive execution and
 fails immediately if Cargo rejects an existing cache. Preserve the complete cache metadata when
 restoring a cache; do not bypass an invalid ownership marker. Instrumented workspace executables

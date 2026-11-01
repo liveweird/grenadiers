@@ -43,6 +43,7 @@ pub(super) fn plan_lairs_inner(
     joint_refuges: bool,
     farm_origin_recovery: bool,
     contact_topology: super::contact_plant::ContactTopology,
+    avoid_pits: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -86,6 +87,7 @@ pub(super) fn plan_lairs_inner(
             settled_stop_tick,
             memory,
             origin,
+            avoid_pits,
             work,
         )
         .unwrap_or_else(stop);
@@ -110,6 +112,7 @@ pub(super) fn plan_lairs_inner(
             failed_plant_recovery,
             hard_tactics,
             farm_origin_recovery,
+            avoid_pits,
         )?
     };
     let Ok(hazards) = forecast(observation, history, None, ForecastLimits::default(), work) else {
@@ -175,6 +178,7 @@ pub(super) fn plan_lairs_inner(
             end,
             strategic_goals,
             pickup_progress,
+            avoid_pits,
             work,
         )
     {
@@ -198,6 +202,8 @@ pub(super) fn plan_lairs_inner(
             },
             work,
         )
+        && (!avoid_pits
+            || crate::cpu::routing::pit_clear(observation, &lease, work).unwrap_or(false))
     {
         return Ok(LairSurvivalPlan {
             survival: SurvivalPlan {
@@ -223,12 +229,14 @@ pub(super) fn plan_lairs_inner(
             end,
             settled_stop_tick,
             pickup_progress,
+            avoid_pits,
             work,
         )
     {
         return Ok(plan);
     }
     if !pickup_handoff
+        && !avoid_pits
         && ordinary.intent.manual.is_none()
         && ordinary_clear
         && !parts.pickups.is_empty()
@@ -293,6 +301,11 @@ pub(super) fn plan_lairs_inner(
             else {
                 continue;
             };
+            if avoid_pits
+                && !crate::cpu::routing::pit_clear(observation, &lease, work).unwrap_or(false)
+            {
+                continue;
+            }
             let score = target.map_or(0, |target| super::steering::score(&lease, target));
             let candidate = LairSurvivalPlan {
                 survival: SurvivalPlan {

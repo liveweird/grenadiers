@@ -16,6 +16,7 @@ pub(super) fn lair(
     end: u64,
     settled_stop_tick: Tick,
     pickup_progress: bool,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let (survival, contact) = certify(
@@ -28,6 +29,7 @@ pub(super) fn lair(
         settled_stop_tick,
         true,
         pickup_progress,
+        avoid_pits,
         work,
     )?;
     Some(LairSurvivalPlan { survival, contact })
@@ -43,6 +45,7 @@ pub(super) fn disabled(
     end: u64,
     settled_stop_tick: Tick,
     pickup_progress: bool,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     certify(
@@ -55,6 +58,7 @@ pub(super) fn disabled(
         settled_stop_tick,
         false,
         pickup_progress,
+        avoid_pits,
         work,
     )
     .map(|(plan, _)| plan)
@@ -71,6 +75,7 @@ fn certify(
     settled_stop_tick: Tick,
     with_contact: bool,
     pickup_progress: bool,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<(SurvivalPlan, Option<crate::cpu::MobContactLease>)> {
     if ordinary.intent.manual.is_some()
@@ -95,6 +100,9 @@ fn certify(
         work,
     )
     .ok()?;
+    if avoid_pits && !crate::cpu::routing::pit_clear(observation, &lease, work).ok()? {
+        return None;
+    }
     Some((
         SurvivalPlan {
             control: ControlPlan {

@@ -315,6 +315,7 @@ pub(super) fn plan_spike_policy(
         false,
         false,
         super::contact_plant::ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -369,5 +370,6 @@ fn plan_respawn_policy(
         false,
         false,
         super::contact_plant::ContactTopology::Disabled,
+        false,
     )
 }

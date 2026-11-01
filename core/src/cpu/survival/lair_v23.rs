@@ -19,6 +19,7 @@ pub(super) fn opening(
     end: u64,
     strategic: bool,
     pickup_progress: bool,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     if ordinary.intent.manual.is_some() {
@@ -39,7 +40,9 @@ pub(super) fn opening(
         },
         work,
     );
-    let fallback = if let Ok((lease, contact)) = certified {
+    let fallback = if let Ok((lease, contact)) = certified
+        && (!avoid_pits || crate::cpu::routing::pit_clear(observation, &lease, work).ok()?)
+    {
         LairSurvivalPlan {
             survival: SurvivalPlan {
                 control: ControlPlan {
@@ -62,6 +65,7 @@ pub(super) fn opening(
             end,
             settled_stop_tick,
             pickup_progress,
+            avoid_pits,
             work,
         )?
     };

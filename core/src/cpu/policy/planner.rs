@@ -19,7 +19,7 @@ mod escape;
 use escape::{escape_before_fuse, escape_route};
 
 #[path = "planner_version.rs"]
-mod version;
+pub(super) mod version;
 use version::PlannerVersion;
 
 pub fn plan(
@@ -142,7 +142,7 @@ pub(crate) fn plan_hard_farm_v39(
     plan_inner(observation, memory, rng, work, PlannerVersion::HardFarmV39)
 }
 
-fn plan_inner(
+pub(super) fn plan_inner(
     observation: &Observation,
     memory: &UtilityMemory,
     rng: &mut CpuRng,
@@ -151,10 +151,7 @@ fn plan_inner(
 ) -> Result<ControlPlan, PolicyError> {
     let follow_committed = version.follow_committed();
     let persistent_goals = version.persistent_goals();
-    let strategic_goals = version.strategic_goals();
-    let failed_plant_recovery = version.failed_plant_recovery();
-    let hard_tactics = version.hard_tactics();
-    let farm_origin_recovery = version.farm_origin_recovery();
+    let avoid_pits = version.avoid_pits();
     let parts = observation.parts();
     let key = MemoryKey {
         world: parts.world,
@@ -193,6 +190,7 @@ fn plan_inner(
         && let Some((next, advanced)) = memory.next(current, actor.position)
         && immediately_safe(observation, next)
         && transit_allowed(observation, actor, next)
+        && (!avoid_pits || super::pit_avoidance::retained_step_allowed(observation, next, work))
     {
         return Ok(movement_plan(
             actor,
@@ -249,10 +247,11 @@ fn plan_inner(
         rng,
         work,
         persistent_goals,
-        strategic_goals,
-        failed_plant_recovery,
-        hard_tactics,
-        farm_origin_recovery,
+        version.strategic_goals(),
+        version.failed_plant_recovery(),
+        version.hard_tactics(),
+        version.farm_origin_recovery(),
+        avoid_pits,
     )
 }
 
@@ -269,10 +268,21 @@ fn navigate(
     failed_plant_recovery: bool,
     hard_tactics: bool,
     farm_origin_recovery: bool,
+    avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let key = memory.key();
     if strategic_goals {
-        let guidance = if farm_origin_recovery {
+        let guidance = if avoid_pits {
+            super::pit_planner::select_guidance(
+                observation,
+                actor,
+                current,
+                memory,
+                work,
+                hard_tactics,
+                farm_origin_recovery,
+            )
+        } else if farm_origin_recovery {
             super::goals::select_v38(observation, actor, current, memory, work, hard_tactics)
         } else if hard_tactics {
             super::goals::select_v28(observation, actor, current, memory, work)

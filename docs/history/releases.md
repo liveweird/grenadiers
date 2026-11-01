@@ -4,6 +4,56 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.12 — 2026-11-01
+
+CPUs can deliberately collect one selected Teleporter while other exposed Teleporters remain
+outside every living actor’s full proof-window reach. The all-origin check includes the root’s
+former position, so a swapped partner cannot activate another pickup unnoticed. The old
+exact-one support boundary could otherwise halt farming after two simultaneous drops.
+
+Easy/Standard select CPU50, Hard selects CPU51 and private replay25 binds those identities.
+CPU48/49 and replay24 retain their contracts. Recording/validation implementation is shared
+through format-local module instantiation; two reviewed declaration-level Clippy expectations
+state that deliberate reuse. No blanket suppression or lowered floor is introduced.
+
+Guidance reuses one map/BFS and forecast, keeps a valid target, freezes one target and two
+candidates, and retains the existing 32,768 recovery/65,536 shared work limits. An owner episode
+clears two pickups on separate updates without fences. Hard then wins with a bomb;
+Standard/Easy destroy a wall and survive flame expiry. A preserved four-player public scene
+selects a certified, productive South Approach at 26,168 total planning work.
+
+This remains bounded support. Other reachable pickups, contested collection and unsafe swap
+landings still reject recovery. Earlier farming and interrupted-escape cases remain in BACKLOG.md.
+No UI, artwork, transport, physics, dependency or database changes; restart ends in-memory games.
+
+### Verification
+
+Accepted application source: `02cfd7e729e2bf85f3aee07081ac61d65f305f0e`.
+Accepted image: `sha256:56369daf35feb6124dc7a63dfe75bd8e242efe9f362ebb477923987ff98f717c`.
+
+- Independent proof, selector, owner and compatibility review clear. Exact/one-short work,
+  distance boundary, unselected-pickup/root-origin reach, unsafe landings, legacy isolation,
+  stable target, cadence, dispatch and private replay25 tests pass.
+- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes pass.
+- Dependency security checks pass at the configured threshold with the existing moderate
+  npm tooling advisories; pinned Trivy 0.74.0 reports zero fixable high/critical image findings.
+- All five web assets are byte-identical to accepted v1.3.11/v1.3.0; unchanged frontend/native
+  inputs reuse accepted checks.
+- Unique Linux x86_64 debug/release workspace units and doctests pass
+  ([run 41333203493](https://github.com/liveweird/grenadiers/actions/runs/41333203493)).
+- Frozen local Rust gate passes in 985 seconds: 1,858 Core and 738 ordinary server tests pass
+  in debug/release, and all 4,194,304 item masks pass independently in debug, release and
+  coverage (32 partitions, four workers, zero retries in the accepted run). Coverage is
+  68,643/73,792 lines (93.02%), above the unchanged 90% floor. Formatting, strict Clippy,
+  build and repository checks pass. The initial preflight lint failure is retained separately.
+
+### Operation
+
+The accepted image is promoted to localhost:8085 with health/readiness, security headers,
+CSP/cache, all five served assets and a fresh three-Hard-CPU smoke check. The immutable
+v1.3.11 image/override remain available for rollback. This is a source/local-runtime release;
+no hosted service or production registry is configured. The artist bundle remains unchanged.
+
 ## v1.3.11 — 2026-11-01
 
 Fix two CPU Teleporter recovery failures: already-dead roster members no longer cause repeated

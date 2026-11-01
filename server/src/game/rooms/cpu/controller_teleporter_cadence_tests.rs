@@ -22,6 +22,11 @@ fn multiple_teleporter_easy_retains_the_real_stop_through_the_same_twelve_tick_p
     assert_teleporter_easy_cadence(CpuProfile::TELEPORTER_V50_EASY);
 }
 
+#[test]
+fn pit_avoidance_easy_retains_the_real_stop_through_the_same_twelve_tick_pause() {
+    assert_teleporter_easy_cadence(CpuProfile::PIT_AVOIDANCE_V52_EASY);
+}
+
 fn assert_teleporter_easy_cadence(profile: CpuProfile) {
     let basis = at_tick(teleporter_observation(), Tick(20));
     let mut controller = CpuController::new(

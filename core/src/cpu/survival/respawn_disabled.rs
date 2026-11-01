@@ -37,6 +37,7 @@ pub(super) fn plan(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
     )
 }
 
@@ -71,6 +72,7 @@ pub(super) fn plan_v23(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
     )
 }
 
@@ -105,6 +107,7 @@ pub(super) fn plan_v24(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
     )
 }
 
@@ -139,5 +142,6 @@ pub(super) fn plan_v25(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
     )
 }

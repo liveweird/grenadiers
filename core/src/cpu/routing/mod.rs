@@ -9,6 +9,7 @@ mod continuation_renewal;
 mod continuation_types;
 mod motion;
 mod pickup_pulse;
+mod pit_avoidance;
 mod plant;
 mod plant_types;
 mod pulse;
@@ -58,6 +59,7 @@ pub(crate) use continuation_types::{ContinuationRequest, NominalLeg};
 pub(crate) use teleporter_step_geometry::max_travel as teleporter_max_travel;
 
 pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};
+pub(crate) use pit_avoidance::avoids_new_pit_contact as pit_clear;
 pub(crate) use plant::{
     derive_bomb_modifiers, plan_lair_ordinary_plant, plan_lair_ordinary_plant_to_refuge,
     plan_lair_timed_weapon_plant,

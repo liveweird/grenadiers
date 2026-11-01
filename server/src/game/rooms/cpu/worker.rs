@@ -38,6 +38,17 @@ pub(in crate::game::rooms) struct PumpReport {
     pub(in crate::game::rooms) planner_times: Vec<std::time::Duration>,
 }
 
+#[cfg(test)]
+pub(in crate::game::rooms) struct PlanningBasis<'a> {
+    pub policy: &'a CpuPolicy,
+    pub observation: &'a Observation,
+    pub memory: &'a UtilityMemory,
+    pub hazard_memory: &'a ObservedHazardMemory,
+    pub settled_stop_tick: Tick,
+    pub rng: &'a CpuRng,
+    pub escape_origin: Option<&'a PlantEscapeOrigin>,
+}
+
 pub(super) enum WorkerPlan {
     Ordinary {
         plan: Box<SurvivalPlan>,
@@ -168,6 +179,15 @@ impl CpuPlanner {
 
     #[cfg(test)]
     pub(in crate::game::rooms) fn pump_for_test(&self, limit: usize) -> PumpReport {
+        self.pump_for_test_inspecting(limit, |_| {})
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn pump_for_test_inspecting(
+        &self,
+        limit: usize,
+        mut inspect: impl FnMut(PlanningBasis<'_>),
+    ) -> PumpReport {
         assert!(
             self.inner
                 .workers
@@ -191,6 +211,15 @@ impl CpuPlanner {
                     | std::sync::mpsc::TryRecvError::Disconnected,
                 ) => break,
             };
+            inspect(PlanningBasis {
+                policy: &job.policy,
+                observation: &job.observation,
+                memory: &job.memory,
+                hazard_memory: &job.hazard_memory,
+                settled_stop_tick: job.settled_stop_tick,
+                rng: &job.rng,
+                escape_origin: job.escape_origin.as_ref(),
+            });
             record(&mut report, execute_job(job, true));
         }
         report

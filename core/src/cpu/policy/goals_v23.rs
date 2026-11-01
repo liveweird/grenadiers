@@ -25,7 +25,7 @@ pub(in crate::cpu::policy) fn select(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<Guidance> {
-    let map = search_map(observation, actor, current, work)?;
+    let map = search_map(observation, actor, current, true, work)?;
     if map.highest_value == 0 {
         return fallback_step(observation, current, &map, memory, work);
     }

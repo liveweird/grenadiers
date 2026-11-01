@@ -69,6 +69,29 @@ pub fn plan_respawn_v22_with_origin(
 }
 
 #[allow(clippy::too_many_arguments)]
+pub fn plan_hard_v28_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_spike_policy(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        true,
+        true,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 pub fn plan_respawn_v23_with_origin(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -204,6 +227,7 @@ pub fn plan_spike_pits_v26_with_origin(
         rng,
         work,
         false,
+        false,
     )
 }
 
@@ -226,6 +250,7 @@ pub fn plan_reliable_v27_with_origin(
         rng,
         work,
         true,
+        false,
     )
 }
 
@@ -239,6 +264,7 @@ fn plan_spike_policy(
     rng: &mut CpuRng,
     work: &mut WorkBudget,
     persistent_burning_oil: bool,
+    hard_tactics: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     if observation.parts().rules.version != 10 {
         return Err(PolicyError::InvalidObservation);
@@ -258,6 +284,7 @@ fn plan_spike_policy(
             true,
             true,
             persistent_burning_oil,
+            hard_tactics,
         )
         .map(|survival| LairSurvivalPlan {
             survival,
@@ -278,6 +305,7 @@ fn plan_spike_policy(
         true,
         true,
         persistent_burning_oil,
+        hard_tactics,
     )
 }
 
@@ -321,6 +349,7 @@ fn plan_respawn_policy(
         work,
         9,
         pickup_handoff,
+        false,
         false,
         false,
         false,

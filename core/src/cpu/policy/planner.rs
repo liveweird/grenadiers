@@ -1,31 +1,26 @@
-use std::collections::VecDeque;
-
 use crate::cpu::{
     BombKnowledge, CpuRng, Intent, ManualIntent, MemoryKey, Observation, ObservedActor, WorkBudget,
 };
 use crate::game::CellId;
-use crate::game::types::UNITS_PER_CELL;
 
 use super::execution::follow_committed_escape;
 use super::goals::{select, select_v23, transit_allowed};
 use super::hazards::{immediately_safe, planting_supported, unsupported_control_effect};
-use super::movement::{
-    STEPS, bounded_alignment_hold_ticks, direction, hold_ticks, input_direction, offset,
-    pulse_minimum_distance,
-};
+use super::movement::{bounded_alignment_hold_ticks, direction, hold_ticks, input_direction};
 pub(super) use super::placement::alignment_direction;
 use super::placement::{
     TurnAlignment, adjacent_block, centered_for_placement, ordinary_turn_alignment,
     placement_center_threshold,
 };
-use super::{ControlPlan, MAX_HOLD_TICKS, MAX_ROUTE_CELLS, PolicyError, UtilityMemory};
+use super::{ControlPlan, PolicyError, UtilityMemory};
+
+#[path = "planner_escape.rs"]
+mod escape;
+use escape::{escape_before_fuse, escape_route};
 
 #[path = "planner_version.rs"]
 mod version;
 use version::PlannerVersion;
-
-const PER_PULSE_IDLE_TICKS: u64 = 10;
-const CENTER_TOLERANCE: u64 = 64;
 
 pub fn plan(
     observation: &Observation,
@@ -111,6 +106,18 @@ pub(crate) fn plan_spike_pits_v26(
     plan_inner(observation, memory, rng, work, PlannerVersion::SpikePitsV26)
 }
 
+pub(crate) fn plan_hard_v28(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 10 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, PlannerVersion::HardV28)
+}
+
 fn plan_inner(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -122,6 +129,7 @@ fn plan_inner(
     let persistent_goals = version.persistent_goals();
     let strategic_goals = version.strategic_goals();
     let failed_plant_recovery = version.failed_plant_recovery();
+    let hard_tactics = version.hard_tactics();
     let parts = observation.parts();
     let key = MemoryKey {
         world: parts.world,
@@ -218,6 +226,7 @@ fn plan_inner(
         persistent_goals,
         strategic_goals,
         failed_plant_recovery,
+        hard_tactics,
     )
 }
 
@@ -232,10 +241,13 @@ fn navigate(
     persistent_goals: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
+    hard_tactics: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let key = memory.key();
     if strategic_goals {
-        let guidance = if failed_plant_recovery {
+        let guidance = if hard_tactics {
+            super::goals::select_v28(observation, actor, current, memory, work)
+        } else if failed_plant_recovery {
             super::goals::select_v25(observation, actor, current, memory, work)
         } else {
             super::goals::select_v24(observation, actor, current, memory, work)
@@ -317,57 +329,6 @@ fn navigate(
         next_memory,
         observation.parts().rules.settings.turn_assist_units() as u32,
     ))
-}
-
-fn escape_route(
-    observation: &Observation,
-    origin: CellId,
-    work: &mut WorkBudget,
-) -> Option<Vec<CellId>> {
-    let mut queue = VecDeque::from([vec![origin]]);
-    while let Some(path) = queue.pop_front() {
-        if work.try_take(1).is_err() {
-            return None;
-        }
-        let cell = *path.last()?;
-        if path.len() >= 3 && cell.column != origin.column && cell.row != origin.row {
-            return Some(path);
-        }
-        if path.len() == MAX_ROUTE_CELLS {
-            continue;
-        }
-        for (_, dc, dr) in STEPS {
-            let Some(next) = offset(cell, dc, dr) else {
-                continue;
-            };
-            if !path.contains(&next)
-                && next != origin
-                && immediately_safe(observation, next)
-                && !observation
-                    .parts()
-                    .pickups
-                    .iter()
-                    .any(|pickup| pickup.cell == next)
-            {
-                let mut extended = path.clone();
-                extended.push(next);
-                queue.push_back(extended);
-            }
-        }
-    }
-    None
-}
-
-fn escape_before_fuse(actor: &crate::cpu::VisibleActor, steps: usize, fuse: u64) -> bool {
-    let per_pulse = pulse_minimum_distance(actor, MAX_HOLD_TICKS).max(1);
-    // The actor may be stationary anywhere in its containing cell. Reserve a
-    // half-cell approach plus the complete next-cell traversal and center window.
-    let first =
-        u64::try_from(UNITS_PER_CELL + UNITS_PER_CELL / 2).unwrap_or(u64::MAX) + CENTER_TOLERANCE;
-    let later = u64::try_from(UNITS_PER_CELL).unwrap_or(u64::MAX) + CENTER_TOLERANCE;
-    let distance = first.saturating_add(later.saturating_mul(steps.saturating_sub(1) as u64));
-    let pulses = distance.div_ceil(per_pulse);
-    pulses.saturating_mul(u64::from(MAX_HOLD_TICKS) + PER_PULSE_IDLE_TICKS) < fuse
 }
 
 fn movement_plan(

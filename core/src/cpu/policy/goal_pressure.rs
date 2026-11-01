@@ -35,7 +35,10 @@ pub(super) fn add(
     Some(())
 }
 
-fn weapon_geometry(observation: &Observation, actor: &VisibleActor) -> Option<(BlastKind, u16)> {
+pub(super) fn weapon_geometry(
+    observation: &Observation,
+    actor: &VisibleActor,
+) -> Option<(BlastKind, u16)> {
     let enabled = observation.parts().rules.settings.enabled_items();
     let kind = match actor.weapon {
         None => BlastKind::Standard,

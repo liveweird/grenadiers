@@ -35,6 +35,7 @@ pub(super) fn plan_lairs_inner(
     strategic_goals: bool,
     failed_plant_recovery: bool,
     persistent_burning_oil: bool,
+    hard_tactics: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -100,6 +101,7 @@ pub(super) fn plan_lairs_inner(
             opportunistic_planting,
             strategic_goals,
             failed_plant_recovery,
+            hard_tactics,
         )?
     };
     let Ok(hazards) = forecast(observation, history, None, ForecastLimits::default(), work) else {

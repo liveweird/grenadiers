@@ -97,58 +97,68 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.1 — 2026-11-01
+## v1.3.2 — 2026-11-01
 
-Hard CPUs can now attempt useful counter-pressure while visible timed bombs remain in a clear
-arena. With Teleporter enabled, this requires a completed running update, no soft blocks,
-finite flames or exposed Teleporter, and complete bomb knowledge with every fuse unpaused.
-Empty-bomb farming around soft blocks and persistent Burning Oil remains available.
+CPU players now finish supported pickup approaches instead of repeatedly stopping outside a
+drop, timing out their goal and turning toward another drop. A longer movement pulse still
+refuses collection that changes actor state. The existing certified one-update pickup handoff
+can now be selected on rules10, followed by Stop and a fresh observation.
 
-All existing escape, mob-contact, selected-target usefulness and 65,536-work limits remain.
-Observed bomb motion stays conservative; a nearby or same-axis scene may still refuse a plant.
-This does not release an active own-bomb escape hold. See
-[Hard counter-pressure](game/multiplayer-cpu.md#clear-arena-counter-pressure).
+The full forecast, stopped suffix, spike/storm trajectory, static geometry and mob-contact
+checks remain authoritative. Teleporter and Diarrhea remain excluded. This changes a coarse
+navigation precondition, without relaxing those proofs. See
+[pickup progress](game/multiplayer-cpu.md#rules10-pickup-progress).
 
-### Compatibility and upgrade
+### Compatibility and limits
 
-Hard selects policy29; Easy/Standard retain27. Private replay14 binds that exact pairing with
-gameplay19/rules10/navigation3. Replay13 retains Hard28 and earlier readers remain unchanged.
-Network contracts, physics, UI, artwork and dependencies are unchanged. Reload after the paired
-image update; restart ends process-local matches. Replay export remains disabled.
+Easy/Standard select CPU31; Hard selects CPU32 with its existing pressure/counter-pressure
+behavior. All older policies remain unchanged. Private replay15 binds that exact pair with
+gameplay19/rules10/navigation3, including human-only rooms; replay14 rejects the newer identities.
+Network contracts, simulation physics, artwork, UI and external dependencies are unchanged.
+Restart ends process-local matches. Production replay export remains disabled.
+
+The separately reproduced footprint-boundary escape reversal remains under repair. This release
+does not claim to resolve every CPU stall, guarantee survival or establish a difficulty ranking.
 
 ### Verification
 
-Accepted image source: `9805c3b1e461e60c171ead3a33d16c720804d727`.
-Independent core and activation/replay reviews are clear. Later release-record edits do not
+Accepted image source: `65058755a66e2a2128de0453d4ea5ec6e90282e2`.
+Independent core and activation/replay reviews are clear; later release-record edits do not
 change image build inputs.
 
-- Full frozen-source parallel Rust gate passes in 684 seconds: 1,705 core and 632 server
-  tests, plus every 4,194,304 catalogue mask in debug, release and coverage. Four workers,
-  32 partitions, no retries. Formatting, strict Clippy, build and repository checks pass.
-  Fresh coverage is 55,380/59,819 lines (92.58%) against the unchanged 90% floor.
-- Authoritative fixtures execute useful counter-planting and survival with lairs enabled/disabled,
-  including early Power-bomb chaining. Negatives retain motion uncertainty, hidden/paused or
-  unsupported triggers, unsafe scenes, pending hidden Teleporter and zero completed updates.
-  Empty-bomb farming with blocks/Burning Oil is retained through real execution.
-- Distinct Linux ARM64 release checks pass: six counter-pressure, 20 replay10–14, three
-  worker-dispatch and three current Hard episode tests. Old replay13 rejects future policy29.
+- Full frozen-source Rust gate passes in 654 seconds: 1,711 core and 639 server tests, plus
+  all 4,194,304 item masks separately in debug, release and coverage. Four workers, 32 partitions,
+  no retries; formatting, strict Clippy, build and repository checks pass. Fresh coverage is
+  55,723/60,178 lines (92.60%), above the unchanged 90% floor.
+- Exact captured public facts reproduce old27/29 Stop versus new31/32 West with a one-update
+  certified lease. Physical State cases collect capacity/range with Press/Release stops; existing
+  pulse tests separately cover admission and Stop execution. Flame, blocking mob, prohibited
+  pickup and warning/raised pit controls retain refusals for both new policies.
+- Distinct Linux ARM64 release checks pass: 343 CPU, 26 replay10–15, four dispatch and three
+  current Hard episode tests. Human-only replay and consistently forged future-policy rejection
+  are covered; old readers retain their identities.
 - Exact-image Compose authentication/duel passes both scenarios. Three Hard CPUs move and plant
-  with all features enabled, with rendered diagnostics and no browser errors. The same three-CPU
-  match passes under restricted Kubernetes CPU/memory limits; owned test resources are removed.
-- All five image web assets are byte-identical to accepted v1.3.0. Corresponding production
-  source, contracts, dependencies and browser/renderer check inputs are unchanged, so its full
-  7,426-test web gate, native renderer and security/dependency acceptance are reused.
-- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL vulnerabilities. Correcting an abbreviated
-  OCI source label changes metadata only: all five final filesystem layers equal the scanned
-  Linux-tested candidate. Exact-image runtime checks use the corrected full-source image.
+  with all features enabled, with diagnostics and no browser errors. The same three-CPU smoke
+  passes restricted Kubernetes CPU/memory limits; owned test resources are removed.
+- An additional 77-second all-on round records actual range upgrades for all three bots, a speed
+  upgrade, 25 distinct owned bombs and a natural round result without browser errors. It uses a
+  different generated arena from the original capture, so it is not a balance or causal comparison.
+- All five image web assets are byte-identical to accepted v1.3.0. Web/contracts/renderer inputs
+  are unchanged, so its 7,426-test full web gate and native renderer acceptance are reused.
+  External dependency versions are unchanged. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
+  vulnerabilities in the exact accepted image.
 
 ### Operation
 
-Accepted local image: `sha256:29e1daead9cfa65653ccab1396d016e4f373a4d8178c4d93b536b4659134a8d1`.
-The exact accepted image is promoted to localhost:8085; v1.3.0 remains available for rollback.
+Accepted local image:
+`sha256:5fbadaef1fe190b2832c7c8ea0c782bf0a1a53c637c6c8630a2b73cc7002c913`.
+The exact accepted image is promoted to localhost:8085; v1.3.1 remains available for rollback.
 This is a source/local-runtime release without a hosted service or production registry.
 The unchanged artwork remains in the
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v131--2026-11-01"></a>
+The [v1.3.1 record](history/releases.md#v131--2026-11-01) is preserved in release history.
 
 <a id="v130--2026-11-01"></a>
 The [v1.3.0 record](history/releases.md#v130--2026-11-01) is preserved in release history.

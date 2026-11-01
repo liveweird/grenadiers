@@ -4,6 +4,59 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.1 — 2026-11-01
+
+Hard CPUs can now attempt useful counter-pressure while visible timed bombs remain in a clear
+arena. With Teleporter enabled, this requires a completed running update, no soft blocks,
+finite flames or exposed Teleporter, and complete bomb knowledge with every fuse unpaused.
+Empty-bomb farming around soft blocks and persistent Burning Oil remains available.
+
+All existing escape, mob-contact, selected-target usefulness and 65,536-work limits remain.
+Observed bomb motion stays conservative; a nearby or same-axis scene may still refuse a plant.
+This does not release an active own-bomb escape hold. See
+[Hard counter-pressure](../game/multiplayer-cpu.md#clear-arena-counter-pressure).
+
+### Compatibility and upgrade
+
+Hard selects policy29; Easy/Standard retain27. Private replay14 binds that exact pairing with
+gameplay19/rules10/navigation3. Replay13 retains Hard28 and earlier readers remain unchanged.
+Network contracts, physics, UI, artwork and dependencies are unchanged. Reload after the paired
+image update; restart ends process-local matches. Replay export remains disabled.
+
+### Verification
+
+Accepted image source: `9805c3b1e461e60c171ead3a33d16c720804d727`.
+Independent core and activation/replay reviews are clear. Later release-record edits do not
+change image build inputs.
+
+- Full frozen-source parallel Rust gate passes in 684 seconds: 1,705 core and 632 server
+  tests, plus every 4,194,304 catalogue mask in debug, release and coverage. Four workers,
+  32 partitions, no retries. Formatting, strict Clippy, build and repository checks pass.
+  Fresh coverage is 55,380/59,819 lines (92.58%) against the unchanged 90% floor.
+- Authoritative fixtures execute useful counter-planting and survival with lairs enabled/disabled,
+  including early Power-bomb chaining. Negatives retain motion uncertainty, hidden/paused or
+  unsupported triggers, unsafe scenes, pending hidden Teleporter and zero completed updates.
+  Empty-bomb farming with blocks/Burning Oil is retained through real execution.
+- Distinct Linux ARM64 release checks pass: six counter-pressure, 20 replay10–14, three
+  worker-dispatch and three current Hard episode tests. Old replay13 rejects future policy29.
+- Exact-image Compose authentication/duel passes both scenarios. Three Hard CPUs move and plant
+  with all features enabled, with rendered diagnostics and no browser errors. The same three-CPU
+  match passes under restricted Kubernetes CPU/memory limits; owned test resources are removed.
+- All five image web assets are byte-identical to accepted v1.3.0. Corresponding production
+  source, contracts, dependencies and browser/renderer check inputs are unchanged, so its full
+  7,426-test web gate, native renderer and security/dependency acceptance are reused.
+- Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL vulnerabilities. Correcting an abbreviated
+  OCI source label changes metadata only: all five final filesystem layers equal the scanned
+  Linux-tested candidate. Exact-image runtime checks use the corrected full-source image.
+
+### Operation
+
+Accepted local image: `sha256:29e1daead9cfa65653ccab1396d016e4f373a4d8178c4d93b536b4659134a8d1`.
+The exact accepted image is promoted to localhost:8085; v1.3.0 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.0 — 2026-11-01
 
 Solo and custom rooms now offer Easy, Standard and Hard, with Standard as the default and one

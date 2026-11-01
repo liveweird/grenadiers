@@ -19,10 +19,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — repair reproduced pickup and escape loops.** A longer all-on match
-  exposed uncollected-drop oscillation and blast-boundary escape reversal. Preserve exact public
-  observations and authoritative before/after witnesses; finish these before terminal-refuge
-  combinations. Then reproduce remaining long-match
+- [next] **CPU-RELIABILITY — repair reproduced escape reversal.** Finish the blast-boundary recovery
+  correction before terminal-refuge combinations. Preserve exact public
+  observations and authoritative before/after witnesses. Then reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Use action-refusal and queue diagnostics plus exact productive-action witnesses; elapsed time
   or a free bomb slot alone does not establish a missed safe action. Preserve safety certificates,

@@ -91,7 +91,7 @@ fn token(admission: &LiveAdmission) -> v14::ResumeToken {
 }
 
 #[tokio::test]
-async fn two_player_live_rooms_use_v18_spike_roster_for_duel_and_solo() {
+async fn two_player_live_rooms_use_v19_spike_roster_for_duel_and_solo() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let duel = rooms
@@ -366,3 +366,6 @@ mod variable_board_tests;
 
 #[path = "live_registry_capacity_tests.rs"]
 mod capacity_tests;
+
+#[path = "live_registry_difficulty_tests.rs"]
+mod difficulty_tests;

@@ -18,6 +18,14 @@ impl RosterRuntime {
         &self.identity
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(in crate::game::rooms) const fn uses_gameplay19(&self) -> bool {
+        matches!(
+            self.spike_publication,
+            super::runtime::SpikePublicationVersion::V19
+        )
+    }
+
     pub(in crate::game::rooms) fn submit_cpu_intent(
         &mut self,
         seat: SeatId,

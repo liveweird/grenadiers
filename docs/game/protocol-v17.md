@@ -3,7 +3,7 @@
 Gameplay17 is the retained historical respawn-lair contract. Its source is
 [`api/gameplay-v17.schema.json`](../../api/gameplay-v17.schema.json), Rust
 `protocol::v17` and generated `web/src/game/v17/schema.ts`. The live server now accepts
-[gameplay18](protocol-v18.md); v17 is rejected before credential claim and remains available for
+[gameplay19](protocol-v19.md); v17 is rejected before credential claim and remains available for
 compatibility tests and archived replay identities. Realtime/session API versions are independent.
 
 ## Profile and settings

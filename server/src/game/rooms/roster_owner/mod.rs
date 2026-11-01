@@ -99,6 +99,9 @@ fn validate_cpus(
             Some(CpuProfile::MULTIPLAYER_STANDARD)
         }
         (_, _, _, _, None) => None,
+        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
+            Some(CpuProfile::HARD_V28)
+        }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
         }
@@ -157,3 +160,7 @@ mod cpu_farm_progress_tests;
 
 #[cfg(test)]
 mod reliable_profile_tests;
+
+#[cfg(test)]
+#[path = "../cpu/hard_episode_tests.rs"]
+mod hard_episode_tests;

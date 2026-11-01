@@ -1,9 +1,8 @@
-# Gameplay v19: dormant Hard CPU contract
+# Gameplay v19: room-wide CPU difficulty
 
-Gameplay19 is a dormant scaffold and is not accepted on `/api/v1/game/ws`. Its sources are
+Gameplay19 is the live paired contract on `/api/v1/game/ws`. Its sources are
 [`api/gameplay-v19.schema.json`](../../api/gameplay-v19.schema.json), the generated
-`web/src/game/v19/schema.ts`, and the standalone v19 server-frame validator. Production remains
-on gameplay18 until the Rust protocol adapter and Hard decision policy land together.
+`web/src/game/v19/schema.ts`, and the standalone v19 server-frame validator. Authentication requires protocol19; older clients must reload the paired application.
 
 ## Identity-only extension
 
@@ -16,11 +15,18 @@ There is no fallback from Hard to Standard.
 it is required, and every published CPU `SeatStatus.controller.difficulty` must equal the room
 value. Mixed CPU difficulties and private planner data are rejected.
 
-## Activation boundary
+## Runtime and compatibility
 
-The dormant web selector has three localized choices and defaults to Standard, but no live UI
-imports it. The Rust v19 adapter, Rust-validated client corpus and Rust-produced server proof are
-checked in; the typed server corpus covers Hard room state, admission, snapshot, mixed difficulty, null,
-unknown-field and recipient-privacy boundaries. Activation still requires Hard policy integration,
-authentication negotiation for 19, and replacement of the v18 generated validator import. The
-production bundle must replace v18 with v19 rather than shipping both validators.
+The lobby offers three localized choices and defaults to Standard. Every CPU in a room uses
+the selected tier. Easy/Standard select CPU27; Hard selects CPU28. Rules10, generator3/4,
+navigation3 and all movement/damage settings remain shared.
+
+Runtime publication identity is explicit and immutable. Every newly created live room uses19,
+including human-only rooms. Archived constructors and replay10–12 retain18; no Hard room is
+projected through an Easy/Standard shadow. Retained v14–18 wire types and replay readers reject
+Hard rather than downgrading it. Private replay13 binds gameplay19 and the exact tier/policy pair.
+Production recording/export remains disabled.
+
+The browser ships only the v19 generated runtime validator and retains the same semantic,
+privacy, lifecycle, world, lair and spike-pit checks. Shared archived types are compile-time
+references; they do not load an additional generated validator into the production bundle.

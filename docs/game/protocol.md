@@ -2,8 +2,8 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
-`api/gameplay-v18.schema.json`, Rust `core::protocol::v18`, and generated
-`web/src/game/v18/schema.ts` define active socket messages. V2 through v17 remain historical
+`api/gameplay-v19.schema.json`, Rust `core::protocol::v19`, and generated
+`web/src/game/v19/schema.ts` define active socket messages. V2 through v18 remain historical
 or archived compatibility contracts.
 V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
 configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
@@ -32,7 +32,8 @@ The browser validates these messages and drives the playable generated-map match
 | v15 | [Environment contract](protocol-v15.md) | Archived compatibility contract |
 | v16 | [Lair contract](protocol-v16.md) | Historical contract |
 | v17 | [Respawn contract](protocol-v17.md) | Historical contract |
-| v18 | [Paired spike-pit contract](protocol-v18.md) | Live multiplayer contract |
+| v18 | [Paired spike-pit contract](protocol-v18.md) | Archived compatibility contract |
+| v19 | [Room-wide difficulty](protocol-v19.md) | Live multiplayer contract |
 
 ## Authentication and compatibility
 
@@ -76,7 +77,7 @@ sending `resumeRoom`; the stable seat capability is not an authentication-sessio
 Authentication has an absolute five-second deadline; Ping/Pong cannot extend it. Upgrades use
 a global 32-token burst with eight-per-second refill. Each socket admits a burst of 30 inbound
 messages with 60-per-second refill, including control frames. Client frames/messages are at
-most 4 KiB; encoded v18 server messages are at most 192 KiB with finite write buffering. Sends have
+most 4 KiB; encoded v19 server messages are at most 192 KiB with finite write buffering. Sends have
 a five-second deadline. Server Ping runs every ten seconds, no inbound activity for 30 seconds
 closes the socket, and unseated authentication expires after an absolute five minutes.
 
@@ -168,7 +169,7 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v18::capture_expanded` to observe the complete State and reports, then
+Use `core::protocol::v19::capture_expanded` to observe the complete State and reports, then
 `bind_expanded` to certify the room profile, configuration, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
@@ -214,7 +215,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v18
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v19
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
@@ -249,11 +250,11 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
 rejects state whose checked rules version disagrees with that profile. Every live two-to-four-seat
-room uses rules10 and CPU26, with generator3 on 15×13 and generator4 on 11×9/13×11; see
+room uses rules10 and CPU27 on Easy/Standard or CPU28 on Hard, with generator3 on 15×13 and generator4 on 11×9/13×11; see
 [board geometry](board-sizes.md). Snapshot pickup arrays begin empty because contents remain
 concealed until exposed. Fixed-classic and earlier expanded profiles remain retained fixtures.
 
-Gameplay18 requires paired server/client upgrades. Versions1–17 and future versions are rejected
+Gameplay19 requires paired server/client upgrades. Versions1–18 and future versions are rejected
 before credential lookup, so rejection cannot claim or revoke a token. `supportedVersion`
 accepts the bounded input range, allowing a new client to understand an older server's response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
@@ -265,7 +266,7 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. Conservative v18 schema-recursive proofs keep Snapshot and Admitted at
+frame-size enforcement. Conservative v18 physical schema bounds retained by v19 keep Snapshot and Admitted at
 or below the inclusive 196,608-byte ceiling. Separate
 schema-valid representatives and oversize rejection tests remain. These are structural bounds,
 not reachable gameplay claims. TypeScript types do not enforce string patterns

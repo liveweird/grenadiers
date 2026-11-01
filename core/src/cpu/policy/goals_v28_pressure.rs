@@ -1,11 +1,21 @@
 use crate::cpu::{Observation, ObservedActor, VisibleActor, WorkBudget};
-use crate::game::{CellId, SeatId};
+use crate::game::geometry::position_overlaps_cell;
+use crate::game::{BlastKind, CellId, SeatId};
 
 use super::super::{SearchMap, cell_index};
 use super::{Candidate, DistanceMap, FirstStepMap};
 
-const MIN_PRESSURE_WORK: u32 = 4_096;
+const MAX_PRESSURE_WORK: u32 = 4_096;
 const MAX_ORIGIN_PROBES: usize = 32;
+
+const fn pressure_allowance(remaining: u32) -> u32 {
+    let share = remaining / 8;
+    if share < MAX_PRESSURE_WORK {
+        share
+    } else {
+        MAX_PRESSURE_WORK
+    }
+}
 
 pub(super) fn candidates(
     observation: &Observation,
@@ -15,10 +25,7 @@ pub(super) fn candidates(
     map: &SearchMap,
     work: &mut WorkBudget,
 ) -> Vec<Candidate> {
-    let allowance = work.remaining() / 8;
-    if allowance < MIN_PRESSURE_WORK {
-        return Vec::new();
-    }
+    let allowance = pressure_allowance(work.remaining());
     let mut pressure_work = WorkBudget::new(allowance);
     let Some((kind, range)) = super::super::pressure::weapon_geometry(observation, actor) else {
         return Vec::new();
@@ -63,6 +70,33 @@ pub(super) fn candidates(
     result
 }
 
+pub(super) fn add_legacy_candidates(
+    observation: &Observation,
+    actor: &VisibleActor,
+    distance: &DistanceMap,
+    first_step: &FirstStepMap,
+    candidates: &mut Vec<Candidate>,
+) {
+    for observed in &observation.parts().actors {
+        if let ObservedActor::Visible(rival) = observed
+            && rival.seat != actor.seat
+            && rival.alive
+            && let Some(cell) = rival.position.cell()
+        {
+            super::add_firing_candidates(
+                observation,
+                cell,
+                crate::cpu::policy::StrategicObjectiveKind::Attack,
+                crate::cpu::policy::StrategicTarget::Opponent { seat: rival.seat },
+                1,
+                distance,
+                first_step,
+                candidates,
+            );
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn nearest(
     observation: &Observation,
@@ -76,6 +110,16 @@ fn nearest(
     geometry: &crate::cpu::survival::ObservedBlastGeometry<'_>,
     work: &mut WorkBudget,
 ) -> Option<Candidate> {
+    let mut target_cells = Vec::new();
+    for row in 0..observation.parts().arena.height {
+        for column in 0..observation.parts().arena.width {
+            work.try_take(1).ok()?;
+            let cell = CellId::new(column, row);
+            if position_overlaps_cell(position, cell) {
+                target_cells.push(cell);
+            }
+        }
+    }
     let mut origins = Vec::new();
     for row in 0..observation.parts().arena.height {
         for column in 0..observation.parts().arena.width {
@@ -87,6 +131,7 @@ fn nearest(
             if let (Some(distance), Some(first_step)) =
                 (distance[cell_index], first_step[cell_index])
                 && map.transitable(observation, cell)
+                && plausibly_threatens(cell, range, kind, &target_cells)
             {
                 origins.push((distance, cell, first_step));
             }
@@ -106,4 +151,33 @@ fn nearest(
         }
     }
     None
+}
+
+fn plausibly_threatens(
+    origin: CellId,
+    range: u16,
+    kind: BlastKind,
+    target_cells: &[CellId],
+) -> bool {
+    target_cells.iter().any(|target| {
+        let columns = origin.column.abs_diff(target.column);
+        let rows = origin.row.abs_diff(target.row);
+        if kind == BlastKind::Power {
+            columns.saturating_add(rows) <= range
+        } else {
+            (columns == 0 && rows <= range) || (rows == 0 && columns <= range)
+        }
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::pressure_allowance;
+
+    #[test]
+    fn pressure_share_is_capped_but_smaller_budgets_remain_available() {
+        assert_eq!(pressure_allowance(65_536), 4_096);
+        assert_eq!(pressure_allowance(32_000), 4_000);
+        assert_eq!(pressure_allowance(3_000), 375);
+    }
 }

@@ -87,10 +87,10 @@ pub(super) fn validate_configuration(
 pub(in crate::game::rooms) fn validate_archived_difficulty(
     difficulty: Option<grenadiers_core::room::CpuDifficulty>,
 ) -> Result<(), ()> {
-    if difficulty == Some(grenadiers_core::room::CpuDifficulty::Hard) {
-        Err(())
-    } else {
-        Ok(())
+    use grenadiers_core::room::CpuDifficulty;
+    match difficulty {
+        None | Some(CpuDifficulty::Easy | CpuDifficulty::Standard) => Ok(()),
+        Some(CpuDifficulty::Hard) => Err(()),
     }
 }
 

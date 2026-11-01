@@ -119,6 +119,7 @@ impl RosterRuntime {
         self.lair_cpu_publication = None;
         self.respawn_cpu_publication = None;
         self.spike_cpu_publication = None;
+        self.spike_v19_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

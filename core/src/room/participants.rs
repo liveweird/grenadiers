@@ -34,6 +34,7 @@ pub enum CpuPolicy {
     UtilityV25,
     UtilityV26,
     UtilityV27,
+    UtilityV28,
 }
 
 impl CpuPolicy {
@@ -67,6 +68,7 @@ impl CpuPolicy {
             Self::UtilityV25 => 25,
             Self::UtilityV26 => 26,
             Self::UtilityV27 => 27,
+            Self::UtilityV28 => 28,
         }
     }
 }
@@ -303,7 +305,7 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
-    /// Opt-in rules-v10 reliability profile; live and archived profiles are unchanged.
+    /// Rules-v10 Easy/Standard reliability profile; archived constants remain unchanged.
     pub const RELIABLE_V27_STANDARD: Self = Self {
         policy: CpuPolicy::UtilityV27,
         difficulty: CpuDifficulty::Standard,
@@ -314,7 +316,13 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Easy,
     };
 
-    /// Only the two current profiles may be selected for a new live controller.
+    /// Rules-v10 Hard tactics use the same public observation and safety proofs.
+    pub const HARD_V28: Self = Self {
+        policy: CpuPolicy::UtilityV28,
+        difficulty: CpuDifficulty::Hard,
+    };
+
+    /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {
         matches!(self, Self::CURRENT | Self::CURRENT_EASY)

@@ -77,7 +77,7 @@ async fn next_json(socket: &mut Client) -> Value {
 async fn authenticate(socket: &mut Client, token: &str) {
     send(
         socket,
-        json!({"type":"authenticate", "protocolVersion":18, "token":token}),
+        json!({"type":"authenticate", "protocolVersion":19, "token":token}),
     )
     .await;
     assert_eq!(next_json(socket).await["type"], "authenticated");

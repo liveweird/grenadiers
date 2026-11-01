@@ -115,6 +115,46 @@ fn v28_alone_values_exact_range_pressure_above_farming() {
 }
 
 #[test]
+fn far_rival_pressure_probes_firing_origins_instead_of_nearby_floors() {
+    let mut parts = scene(&[CellId::new(13, 11)]).into_parts();
+    let ObservedActor::Visible(cpu) = &mut parts.actors[1] else {
+        unreachable!()
+    };
+    cpu.position = Position::center(CellId::new(1, 1));
+    cpu.bomb_range = 2;
+    let environment = ObservedEnvironment::new(StormCloudConfig::Disabled, None, vec![Some(0); 2]);
+
+    for farm in [false, true] {
+        parts.arena.blocks = if farm {
+            vec![CellId::new(3, 3)]
+        } else {
+            Vec::new()
+        };
+        let observed =
+            Observation::new_rules_v10(parts.clone(), environment.clone(), None, None).unwrap();
+        let (legacy, _) = select(&observed, 24, UtilityMemory::new(key()), 65_536);
+        assert_eq!(
+            legacy.intent.objective,
+            if farm {
+                StrategicObjectiveKind::Farm
+            } else {
+                StrategicObjectiveKind::Attack
+            }
+        );
+
+        let (hard, spent) = select(&observed, 28, UtilityMemory::new(key()), 65_536);
+        assert_eq!(hard.intent.objective, StrategicObjectiveKind::Attack);
+        assert_eq!(
+            hard.intent.target,
+            StrategicTarget::Opponent { seat: SeatId::One }
+        );
+        let origin = hard.intent.approach_cell.unwrap();
+        assert!(origin.column.abs_diff(13) + origin.row.abs_diff(11) <= 2);
+        assert!(spent <= 65_536);
+    }
+}
+
+#[test]
 fn pickup_and_exact_obstructions_still_beat_or_reject_pressure() {
     let mut parts = scene(&[CellId::new(10, 7)]).into_parts();
     parts.pickups.push(ObservedPickup {

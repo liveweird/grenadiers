@@ -1,6 +1,6 @@
 # Lair and mob simulation
 
-Live rules10/gameplay18 gives each lair exactly one living mob. A lair waits for its mob to die,
+Live rules10/gameplay19 gives each lair exactly one living mob. A lair waits for its mob to die,
 then starts a fresh respawn delay. See [the wire contract](protocol-v18.md) and
 [CPU boundaries](multiplayer-cpu.md#lair-profile-boundaries).
 
@@ -56,16 +56,17 @@ Checked timer/ID failures restore the complete tick, including simulation random
 ## Observations and compatibility
 
 `State::lair_statuses()` exposes rules10 cells, living counts and optional absolute deadlines:
-`None` while occupied, `Some(deadline)` while waiting. Gameplay18 publishes the corresponding
+`None` while occupied, `Some(deadline)` while waiting. Gameplay18/19 publish the corresponding
 `spawnRemainingTicks`: null while occupied, otherwise 0–delay. Zero means eligible but possibly
 obstructed. `State::mobs()` omits pursuit targets, paths and private thaw deadlines.
 
 Rules8 retains its periodic 1–8-mob lifecycle and finite `State::lairs()` view for historical
 contracts/replay7. Rules9 and rules10 use the separate view. Mob AI has its own immutable identity: all existing rules
 constructors and replay8 retain navigation1; replay9/10 retain navigation2. Live construction
-explicitly selects navigation3; private replay11 binds CPU26 and replay12 binds live CPU27. Settings changes, rounds and rematches
+explicitly selects navigation3; private replay11 binds CPU26 and replay12 binds CPU27 under gameplay18. Replay13 binds
+gameplay19 with CPU27 on Easy/Standard and CPU28 on Hard. Settings changes, rounds and rematches
 preserve that selection. These policies share the same speed, collision/contact and recipient
-facts; gameplay18 carries no hidden navigation data. Production replay recording remains disabled.
+facts; gameplay18/19 carry no hidden navigation data. Production replay recording remains disabled.
 
 The 3D arena retains the dedicated `terrain.lair` doorway sprite upright on the front of a
 taller stone lair, with `material.lair.top` and `material.lair.side` supplying its surface maps.

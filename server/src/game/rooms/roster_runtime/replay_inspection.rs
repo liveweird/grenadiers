@@ -16,6 +16,7 @@ pub(in crate::game::rooms) struct RosterRuntimeInspection {
     pub(in crate::game::rooms) creator_settings_revoked: bool,
     pub(in crate::game::rooms) environment: Option<StormCloudConfig>,
     pub(in crate::game::rooms) mob_navigation: grenadiers_core::game::MobNavigationPolicy,
+    pub(in crate::game::rooms) spike_publication: super::runtime::SpikePublicationVersion,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,6 +42,7 @@ impl RosterRuntime {
             creator_settings_revoked: self.creator_settings_revoked,
             environment: self.environment(),
             mob_navigation: self.mob_navigation,
+            spike_publication: self.spike_publication,
         }
     }
 }

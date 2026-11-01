@@ -1,6 +1,6 @@
 # CPU intent and developer diagnostics
 
-CPU26 retains CPU25's persistent objective model while adding checked spike-pit execution. A
+Live CPU27/28 retain CPU26's persistent objective model and checked spike-pit execution. A
 subject is an exact exposed
 pickup (cell and kind), destructible block, or visible opponent seat. Firing/approach cells can
 change without changing that subject. When no productive subject is available, the CPU explicitly
@@ -25,7 +25,7 @@ placement must still threaten the selected exact subject and pass the existing e
 proofs. Admission rechecks the target against fresh visible facts. Easy retains its slower cadence.
 
 Reaching an approach tile does not imply a safe bomb is available. If planting is refused,
-CPU26 attempts a certified movement pulse and temporarily defers that exact subject instead
+These policies attempt a certified movement pulse and temporarily defers that exact subject instead
 of repeatedly stopping beside it. Safety and contact proofs remain mandatory; a genuinely
 trapped CPU may still have to stop. CPU25 and CPU24 retain their archived decision behavior.
 
@@ -44,7 +44,7 @@ make no diagnostic requests. Changing the server flag requires a restart, ending
 
 The flag defaults to false, including Compose and Kubernetes. It grants the read-only view to
 connected human room participants; it does not introduce developer accounts or a spectator mode.
-The authenticated `POST /api/v1/game/cpu-debug` contract is separate from gameplay18 and the
+The authenticated `POST /api/v1/game/cpu-debug` contract is separate from gameplay19 and the
 anonymous diagnostic socket. Its [schema](../../api/cpu-debug.schema.json) and
 [OpenAPI](../../api/openapi.json) are authoritative.
 

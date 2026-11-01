@@ -7,7 +7,7 @@ use grenadiers_core::{
         },
     },
     game::SeatId,
-    protocol::{Cell, v14::ResumeToken, v18},
+    protocol::{Cell, v14::ResumeToken, v18, v19},
     room::RosterParticipant,
 };
 
@@ -42,14 +42,20 @@ impl Driver {
 
         let room = self
             .last
-            .spike_room()
+            .spike_v19_room()
+            .map(|room| (&room.room_id, room.round_id, room.tick, room.revision))
+            .or_else(|| {
+                self.last
+                    .spike_room()
+                    .map(|room| (&room.room_id, room.round_id, room.tick, room.revision))
+            })
             .ok_or(CpuDebugQueryError::Unavailable)?;
         let unavailable_response = || CpuDebugResponse {
             protocol_version: 1,
-            room_id: room.room_id.clone(),
-            round_id: u64::from(room.round_id.get()),
-            tick: room.tick.get(),
-            revision: room.revision.get(),
+            room_id: room.0.clone(),
+            round_id: u64::from(room.1.get()),
+            tick: room.2.get(),
+            revision: room.3.get(),
             you_seat: debug_seat(seat),
             cpus: self
                 .cpus
@@ -60,14 +66,19 @@ impl Driver {
                 })
                 .collect(),
         };
-        let Some(publication) = self.last.spike_cpu_publication() else {
+        let recipient = wire_seat(seat);
+        let state = if let Some(publication) = self.last.spike_v19_cpu_publication() {
+            v19::project_recipient(publication, recipient)
+                .map_err(|_| CpuDebugQueryError::Unavailable)?
+                .state
+        } else if let Some(publication) = self.last.spike_cpu_publication() {
+            v18::project_recipient(publication, recipient)
+                .map_err(|_| CpuDebugQueryError::Unavailable)?
+                .state
+        } else {
             return Ok(unavailable_response());
         };
-        let recipient = wire_seat(seat);
-        let projected = v18::project_recipient(publication, recipient)
-            .map_err(|_| CpuDebugQueryError::Unavailable)?;
-        let bomb_blind = projected
-            .state
+        let bomb_blind = state
             .actors
             .get(seat.index())
             .is_none_or(recipient_bomb_blind);
@@ -83,21 +94,21 @@ impl Driver {
                 let unavailable = || CpuDebugRow::Unavailable {
                     seat: debug_seat(cpu.seat()),
                 };
-                if bomb_blind || !actor_visible(&projected.state, cpu.seat()) {
+                if bomb_blind || !actor_visible(&state, cpu.seat()) {
                     return unavailable();
                 }
                 let Some(summary) = cpu.intent_debug_summary_for(world) else {
                     return unavailable();
                 };
-                available_row(summary, &projected.state).unwrap_or_else(unavailable)
+                available_row(summary, &state).unwrap_or_else(unavailable)
             })
             .collect();
         Ok(CpuDebugResponse {
             protocol_version: 1,
-            room_id: room.room_id.clone(),
-            round_id: u64::from(room.round_id.get()),
-            tick: room.tick.get(),
-            revision: room.revision.get(),
+            room_id: room.0.clone(),
+            round_id: u64::from(room.1.get()),
+            tick: room.2.get(),
+            revision: room.3.get(),
             you_seat: debug_seat(seat),
             cpus,
         })

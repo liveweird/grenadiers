@@ -19,7 +19,7 @@ use crate::{
 };
 
 #[test]
-fn live_spike_owner_accepts_only_exact_cpu27_difficulty() {
+fn live_spike_owner_accepts_only_exact_current_difficulty() {
     use grenadiers_core::game::SeatId;
     for (difficulty, accepted, archived, wrong_tier) in [
         (
@@ -34,6 +34,12 @@ fn live_spike_owner_accepts_only_exact_cpu27_difficulty() {
             CpuProfile::SPIKE_PITS_EASY,
             CpuProfile::RELIABLE_V27_STANDARD,
         ),
+        (
+            CpuDifficulty::Hard,
+            CpuProfile::HARD_V28,
+            CpuProfile::SPIKE_PITS_STANDARD,
+            CpuProfile::RELIABLE_V27_STANDARD,
+        ),
     ] {
         let configuration = RoomConfiguration::new(
             &[SeatControl::Human, SeatControl::Cpu],
@@ -41,7 +47,7 @@ fn live_spike_owner_accepts_only_exact_cpu27_difficulty() {
             BoardSize::FifteenByThirteen,
         )
         .unwrap();
-        let runtime = RosterRuntime::new_spike_with_navigation(
+        let runtime = RosterRuntime::new_spike_v19_with_navigation(
             RosterIdentity {
                 id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
                 code: RoomCode::new("ABCDEFGH").unwrap(),

@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::cpu::{Observation, ObservedActor, VisibleActor, WorkBudget};
+use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, Position, Tick};
 
@@ -125,26 +125,8 @@ fn select_inner(
             &map,
             work,
         ));
-    } else {
-        for observed in &observation.parts().actors {
-            if let ObservedActor::Visible(rival) = observed
-                && rival.seat != actor.seat
-                && rival.alive
-                && let Some(cell) = rival.position.cell()
-            {
-                add_firing_candidates(
-                    observation,
-                    cell,
-                    StrategicObjectiveKind::Attack,
-                    StrategicTarget::Opponent { seat: rival.seat },
-                    1,
-                    &distance,
-                    &first_step,
-                    &mut candidates,
-                );
-            }
-        }
     }
+    pressure::add_legacy_candidates(observation, actor, &distance, &first_step, &mut candidates);
     candidates.sort_unstable_by_key(|candidate| {
         (
             std::cmp::Reverse(candidate.score),

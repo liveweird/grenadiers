@@ -1,7 +1,7 @@
 # Solo match against the CPU
 
-Choose **Play solo against CPU** in the lobby to create a private Standard match. You occupy
-seat One and the server controls seat Two. Select Standard (the default) or Easy before creation;
+Choose **Play solo against CPU** in the lobby to create a private match (Standard by default). You occupy
+seat One and the server controls seat Two. Select Easy, Standard (the default) or Hard before creation;
 the chosen difficulty stays fixed through reconnect and rematch. Solo uses the same arena, movement, bombs, item rules,
 round target and damage as a human duel. All available items start enabled.
 
@@ -10,8 +10,9 @@ round target and damage as a human duel. All available items start enabled.
 Standard retains the existing decision cadence. Easy adds a provisional 12-tick pause after the
 confirmed Stop ending ordinary clear-board navigation. Initial decisions remain immediate.
 The pause does not delay committed escapes, Stops or manual confirmation; newly observed danger
-or unavailable bomb knowledge bypasses it. Both levels share observations, physics, hazard
-checks, tactics and planning limits. The labels describe these settings, not a measured
+or unavailable bomb knowledge bypasses it. All levels share permitted observations, physics, hazard
+checks and planning limits. Hard uses range-aware firing positions and prioritizes certified
+opponent pressure over routine wall farming; valuable pickups can still take priority. The labels describe these settings, not a measured
 strength ranking; balance still needs human playtesting.
 
 ## Settings, start and rematch
@@ -44,7 +45,7 @@ avoids deliberate travel through known curses or unsupported weapons. Capped upg
 harmless duplicates can still be crossed; held Heart is protected against equipment replacement. It
 avoids known hazards and plants an ordinary bomb only when its restricted observation supports
 a checked escape. Accepted movement and manual actions use the same validation as humans.
-Both levels remain conservative opponents with provisional difficulty tuning.
+Difficulty tuning remains provisional; human playtesting should assess pressure and fairness.
 
 Around observed hazards, the CPU forecasts timed blasts, chains, flame expiry and persistent
 Oil fire. It can plan several movement pulses and waits through a clear interval, including

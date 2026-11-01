@@ -41,6 +41,9 @@ mod replay_v11;
 #[allow(dead_code)] // Private accepted-input replay facade; production export remains disabled.
 mod replay_v12;
 #[cfg(test)]
+#[allow(dead_code)] // Private accepted-input executor; production export remains disabled.
+mod replay_v13;
+#[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]

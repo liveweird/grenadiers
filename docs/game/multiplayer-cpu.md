@@ -1,7 +1,7 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy27 on rules10 for every live two-to-four-seat
-room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
+The live environment CPU implementation uses policy27 on Easy/Standard and policy28 on Hard for every live
+two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
@@ -12,14 +12,15 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v18::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v19::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::RELIABLE_V27_STANDARD` and `RELIABLE_V27_EASY` select Utility27 for live rules10 rooms.
+`CpuProfile::RELIABLE_V27_STANDARD` and `RELIABLE_V27_EASY` select Utility27 for live rules10 Easy/Standard rooms.
+`CpuProfile::HARD_V28` selects Utility28 for Hard rooms with the same observation boundary.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
 `RESPAWN_V23_STANDARD`/`RESPAWN_V23_EASY` retain Utility23 with goal-cell persistence.
@@ -53,6 +54,20 @@ This removes a global planting prohibition after an Oil barrel burns; it does no
 bombing in every Teleporter scene or guarantee safety against arbitrary later rival actions.
 Changed hazards invalidate a committed route. Newly revealed items require fresh observation.
 Private replay12 binds CPU27/navigation3; earlier readers retain their original identities.
+
+## Hard pressure
+
+Hard examines bounded, reachable firing origins using its current range and supported weapon.
+A position earns opponent pressure only when its exact blast reaches a living, visible rival.
+It prefers that pressure to routine wall farming; valuable drops retain their existing priority.
+Targets keep their existing commitment and progress deadlines instead of switching every update.
+
+This is tactical guidance, not permission to plant. Full escape, contact and target-usefulness
+proofs remain required, and admission rechecks a rival that moved or disappeared. Optional
+pressure analysis shares a small bounded allowance across rivals; exhausted or unsupported
+analysis falls back to collect/farm guidance. Hard has no hidden information, faster movement,
+larger bomb inventory, extra planning workers or immunity. Easy keeps its navigation pause and
+Standard remains the default. See [Solo difficulty](single-player.md#difficulty).
 
 ## Retained storm profile
 
@@ -152,7 +167,7 @@ delayed start; a neighboring pickup touched only by the footprint does not block
 Teleporter and Diarrhea collection remain outside this handoff because they can relocate the
 actor or spawn a bomb during the stopped suffix. Other hazard/contact checks and moving-plan
 admission requirements remain unchanged. Archived CPU21 retains its original entry points;
-replay8 executes matching CPU21–25 inputs with archived mob navigation; current replay9
+replay8 executes matching CPU21–25 inputs with archived mob navigation; archived replay9
 binds CPU23/24/25 and mob navigation2. Neither reruns the planner.
 
 ## Persistent strategic intent
@@ -169,7 +184,7 @@ CPU21–24 retain their historical selection and memory-reset paths.
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
-The v18 adapter tests compare CPU facts with human recipient projections. Additional cases
-cover forecast capacity, rival interference, both difficulties, independent controllers and
+The v18/v19 adapter tests compare CPU facts with human recipient projections. Additional cases
+cover forecast capacity, rival interference, all three difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.

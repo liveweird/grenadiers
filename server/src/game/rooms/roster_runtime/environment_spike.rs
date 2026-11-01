@@ -9,7 +9,9 @@ use crate::round_seed::RoundSeedSource;
 
 use super::{
     error::RosterRuntimeError,
-    runtime::{EnvironmentProfile, RosterRuntime, SimulationSeedDerivation},
+    runtime::{
+        EnvironmentProfile, RosterRuntime, SimulationSeedDerivation, SpikePublicationVersion,
+    },
     types::{RosterIdentity, RosterNotice},
 };
 
@@ -53,6 +55,32 @@ impl RosterRuntime {
             simulation_seed,
         )?;
         runtime.mob_navigation = navigation;
+        Ok(runtime)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(in crate::game::rooms) fn new_spike_v19_with_navigation(
+        identity: RosterIdentity,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        lairs: RespawnLairTuning,
+        spike_pits: SpikePitTuning,
+        round_seed_source: RoundSeedSource,
+        simulation_seed: Arc<SimulationSeedDerivation>,
+        navigation: MobNavigationPolicy,
+    ) -> Result<Self, RosterRuntimeError> {
+        let mut runtime = Self::new_spike_with_navigation(
+            identity,
+            settings,
+            cloud,
+            lairs,
+            spike_pits,
+            round_seed_source,
+            simulation_seed,
+            navigation,
+        )?;
+        runtime.spike_publication = SpikePublicationVersion::V19;
         Ok(runtime)
     }
 

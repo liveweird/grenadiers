@@ -388,6 +388,6 @@ mod tests {
         assert_eq!(rivals[1].baseline.unwrap().approach, NORTH_ORIGIN);
     }
 
-    #[path = "../goals_v58_exit_pressure/gate_tests.rs"]
+    #[path = "exit_pressure_gate_tests.rs"]
     mod gate_tests;
 }

@@ -218,8 +218,10 @@ fn full_footprint_straddles_faces_diagonals_and_corners_fail_closed() {
     assert!(!evidence.excludes_segment(stationary(face), &mut work));
     assert!(!evidence.excludes_segment(stationary(corner), &mut work));
     assert!(!evidence.excludes_segment(MovementSegment::new(face, corner), &mut work));
-    assert_eq!(2 * HALF_FOOTPRINT, 640);
-    assert!(2 * HALF_FOOTPRINT - 1 < UNITS_PER_CELL);
+    const {
+        assert!(2 * HALF_FOOTPRINT == 640);
+        assert!(2 * HALF_FOOTPRINT - 1 < UNITS_PER_CELL);
+    }
 }
 
 #[test]

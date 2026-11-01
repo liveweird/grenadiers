@@ -161,6 +161,10 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
         &mut work,
     )
     .expect("unchanged route proof should certify the controlled east escape");
+    assert_eq!(certificate.placement().cell, ORIGIN);
+    assert_eq!(certificate.placement().placed_at, Tick(607));
+    assert_eq!(certificate.placement().blast, BlastKind::Standard);
+    assert_eq!(certificate.route().survive_until(), Tick(817));
     assert_eq!(
         MobContactLease::certify_route(&observed, certificate.route(), &mut work),
         Err(RouteFailure::NoRoute)
@@ -249,6 +253,7 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
 
     let first = certificate.route().start_window().start;
     let lane = certificate.route().lane(first).unwrap();
+    let mut saw_placement = false;
     while state.tick().0 + 1 < first.0 {
         state.step(&[]).unwrap();
     }
@@ -274,8 +279,31 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
                 update == certificate.placement().placed_at,
             ))
             .unwrap();
-        assert!(state.actor(CPU).unwrap().alive());
+        let actor = state.actor(CPU).unwrap();
+        assert!(actor.alive());
+        if state.tick() < certificate.route().survive_until() {
+            let (expected_position, expected_heading) = lane.pose_at(state.tick()).unwrap();
+            assert_eq!(actor.position(), expected_position);
+            assert_eq!(actor.heading(), expected_heading);
+        }
+        if state.tick() >= certificate.placement().placed_at
+            && state.tick() < certificate.placement().detonates_at
+        {
+            let actual = state
+                .public_view()
+                .bombs
+                .into_iter()
+                .find(|bomb| bomb.owner == certificate.placement().owner)
+                .expect("planned bomb must be visible throughout its live interval");
+            assert_eq!(actual.cell, certificate.placement().cell);
+            assert_eq!(actual.placed_at, certificate.placement().placed_at);
+            assert_eq!(actual.owner, certificate.placement().owner);
+            assert_eq!(actual.range, certificate.placement().range);
+            assert_eq!(actual.blast, certificate.placement().blast);
+            saw_placement = true;
+        }
     }
+    assert!(saw_placement);
     assert!(!state.world().arena.blocks().contains(&TARGET));
     assert_eq!(state.live_bomb_count(CPU), 0);
     assert!(state.world().hazards().is_empty());

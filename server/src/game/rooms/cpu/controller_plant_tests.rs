@@ -306,6 +306,7 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
         receiver,
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = 1;
 }

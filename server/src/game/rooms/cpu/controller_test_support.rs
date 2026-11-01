@@ -36,6 +36,7 @@ impl CpuController {
             receiver,
             live: Arc::new(AtomicBool::new(true)),
             completed: None,
+            refuge_handoff: None,
         });
     }
 }

@@ -131,6 +131,7 @@ fn a_cross_seat_completion_is_rejected_without_committing_rng() {
         receiver,
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = 1;
     assert!(controller.poll(Tick(20), 4).is_none());
@@ -224,6 +225,7 @@ fn seat_four_accepts_both_v17_levels_and_rejects_two_and_three_results() {
             receiver,
             live: Arc::new(AtomicBool::new(true)),
             completed: None,
+            refuge_handoff: None,
         });
         controller.request_serial = 1;
         assert!(controller.poll(Tick(20), 4).is_none());

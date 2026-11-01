@@ -97,6 +97,7 @@ fn inject_plan(
         receiver,
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = decision.checked_request_serial;
 }
@@ -178,6 +179,7 @@ fn expired_empty_request_is_canceled_and_does_not_block_retry() {
         receiver,
         live: Arc::clone(&live),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = 1;
 
@@ -221,6 +223,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         certified_manual: None,
         escape_origin: false,
         ordinary_navigation: false,
+        refuge_handoff: false,
     };
 
     controller.commit(

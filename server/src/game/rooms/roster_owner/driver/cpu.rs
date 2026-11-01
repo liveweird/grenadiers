@@ -47,6 +47,9 @@ impl Driver {
     }
 
     fn apply_plan(&mut self, index: usize, plan: AcceptedPlan) -> Result<(), RosterRuntimeError> {
+        if plan.is_refuge_handoff() {
+            return self.apply_refuge_handoff(index, plan);
+        }
         let seat = self.cpus[index].seat();
         let tick = self.runtime.lifecycle().tick();
         let epoch = self.runtime.lifecycle().round_attempt();
@@ -86,6 +89,34 @@ impl Driver {
                 manual,
             },
         );
+        Ok(())
+    }
+
+    fn apply_refuge_handoff(
+        &mut self,
+        index: usize,
+        plan: AcceptedPlan,
+    ) -> Result<(), RosterRuntimeError> {
+        debug_assert_eq!(plan.intent.movement, MovementIntent::Stop);
+        debug_assert_eq!(plan.intent.manual, Some(ManualIntent::Bomb));
+        let seat = self.cpus[index].seat();
+        let tick = self.runtime.lifecycle().tick();
+        let epoch = self.runtime.lifecycle().round_attempt();
+        match self
+            .runtime
+            .submit_cpu_intent(seat, epoch, RosterAction::Movement(None))
+        {
+            Ok(_) => {}
+            Err(error) if fatal(error) => return Err(error),
+            Err(_) => return Ok(()),
+        }
+        if self.apply_manual(index, Some(ManualIntent::Bomb))? != Some(ManualIntent::Bomb) {
+            return Ok(());
+        }
+        self.cpu_stationary[seat.index()] = true;
+        self.cpu_stop_at[seat.index()] = None;
+        self.cpus[index].on_stop_admitted(tick);
+        self.cpus[index].commit(plan, Intent::STOP.with_manual(ManualIntent::Bomb));
         Ok(())
     }
 
@@ -276,6 +307,7 @@ impl Driver {
             return;
         };
         let epoch = self.runtime.lifecycle().round_attempt();
+        let mut refuge_candidates = vec![false; observations.len()];
         for (index, observation) in observations.iter().enumerate() {
             let seat = self.cpus[index].seat();
             self.cpus[index].validate_escape_epoch(epoch);
@@ -297,6 +329,9 @@ impl Driver {
                 route,
                 Some(RouteStatus::Continue | RouteStatus::Wait | RouteStatus::Submit(_))
             ) {
+                refuge_candidates[index] = route == Some(RouteStatus::Wait)
+                    && self.cpu_stationary[seat.index()]
+                    && !self.cpus[index].has_pending();
                 continue;
             }
             let pulse = self.cpus[index].validate_pulse(observation, observation.parts().tick);
@@ -327,6 +362,13 @@ impl Driver {
                 self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
             } else if self.cpu_stationary[seat.index()] && !self.cpus[index].has_pending() {
                 let _ = self.cpus[index].submit(observation.clone(), epoch);
+            }
+        }
+        // Refuge replacement is opportunistic. Every seat's ordinary/urgent
+        // work gets first access to the bounded shared queue.
+        for (index, observation) in observations.iter().enumerate() {
+            if refuge_candidates[index] {
+                let _ = self.cpus[index].submit_refuge_handoff(observation.clone(), epoch);
             }
         }
     }

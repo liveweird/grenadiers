@@ -227,6 +227,7 @@ fn inject(
         receiver,
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = 1;
 }

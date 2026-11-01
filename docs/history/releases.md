@@ -4,6 +4,73 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.10 — 2026-11-01
+
+CPUs can deliberately clear one exposed Teleporter when it prevents otherwise useful farming.
+Previously an exposed Teleporter remained a global planting support limit. The new typed recovery
+keeps ordinary planting, pulse and pickup guards intact: it approaches a stable neighboring center,
+certifies one directional update, unconditionally Stops on the next physical update and waits for
+a fresh physical stopped observation before continuing. Every possible living swap partner is
+checked without inspecting private randomness.
+
+### Compatibility and limits
+
+Easy/Standard select CPU46 and Hard selects CPU47 with private replay23. Gameplay19, rules10,
+navigation3 and the shared 65,536 planning allowance remain unchanged. Ordinary CPU44/45 fallback
+is computed first and preserves its result, memory and RNG on decline. Confirmed-origin
+continuation is unchanged. Earlier policies and replay formats retain their contracts.
+
+Recovery requires exactly one exposed Teleporter, the complete visible living roster, visible
+empty bombs, no flames or Oil, and supported effects/equipment/pickups. Both lair modes are checked.
+Pit sites are excluded from movement and landings. The guarantee is conditional on supported
+observed facts; it does not predict future rival actions or guarantee the partner's future survival.
+Broader farm/contact stalls and deeper Hard tactics remain in BACKLOG.md. No UI, artwork, transport
+schema, physics or external dependency changes. Restart ends in-memory matches.
+
+### Verification
+
+Accepted application/image source: `c89dae052688801a403dcc07a8b0737c24ef4eef`.
+Independent proof, runtime, server integration, activation and storage-fix reviews are clear.
+Three focused engineering PRs share this combined product acceptance; both inactive intermediate
+Core tips pass isolated clean all-target workspace compilation.
+
+- Real queued-owner witnesses start at an ordinary cell center, collect through the actual worker,
+  driver and mailbox, verify both teleport markers and swapped endpoints, plant a useful bomb,
+  destroy a named block and survive full flame expiry. Standard/lairs off-on, Easy, Hard and native
+  two-worker 60 Hz cases pass. Actual boundary traces independently assert admission, movement,
+  next-update Stop submission, physical Stop and fresh completion; no injected certificate is used.
+- Rejected movement, rejected Stop and withheld publications perform real input fencing, prevent
+  a second movement and cannot resurrect expired authority. Exact/one-short budgets, all seven
+  start lanes, partial/no-move/no-swap cases, partner movement, contact births/deaths, pit binding,
+  retained Stop provenance, Easy cadence, selector expiry/alternate and replay23 boundaries pass.
+- Frozen Rust gate passes in 733 seconds: 1,831 Core tests and 725 ordinary server tests in
+  debug and release, plus all 4,194,304 item masks independently in debug, release and coverage.
+  Four workers, 32 partitions and zero retries. Formatting, strict Clippy, build and repository
+  checks pass. Coverage is 67,291/72,396 lines (92.95%), above the unchanged 90% floor.
+- Unique Linux x86_64 debug/release workspace tests and doctests pass
+  ([run 41319512956](https://github.com/liveweird/grenadiers/actions/runs/41319512956)).
+  Duplicate intermediate and superseded-source runs are canceled; no duplicate final full gate
+  is required for branch, merge or tag.
+- Exact-image Compose authentication/keyboard duel and three-Hard-CPU smoke pass. Restricted
+  Kubernetes three-CPU smoke passes; owned short-lived stacks and namespace are removed.
+- One 180-second all-items public capture reaches a result without JavaScript errors and records
+  24 CPU bombs (3/10/11 by seat). Late passivity remains: one surviving seat has the same exact
+  pose in every retained sample for about 95 seconds. This is a fresh uncontrolled round, not a matched balance comparison or proof
+  of a missed safe action; the broader investigation remains open.
+- All five bundled web assets are byte-identical to accepted v1.3.9/v1.3.0; unchanged browser/native
+  inputs reuse accepted suites. Fresh dependency security checks pass with the existing moderate
+  tooling advisories. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL image findings.
+
+### Operation
+
+Accepted local image:
+`sha256:9412d8cfef61357a0dc92a35cc41f3a8cf7fed3d51af6506dac3f44f1efdf7e4`.
+The exact accepted image is promoted to localhost:8085. Health, readiness, security headers,
+CSP/cache, all five served-asset hashes and a fresh three-Hard-CPU smoke pass.
+Version 1.3.9 remains available for rollback. This is a source/local-runtime release without a
+hosted service or production registry. Artwork remains in the unchanged
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.9 — 2026-11-01
 
 CPUs can continue a complete certified escape when simultaneous rival bombs interrupt a confirmed

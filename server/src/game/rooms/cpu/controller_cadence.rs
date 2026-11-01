@@ -48,6 +48,7 @@ const fn is_easy_profile(profile: CpuProfile) -> bool {
             | CpuProfile::BLOCKED_BIRTHS_V42_EASY
             | CpuProfile::CONTINUATION_V44_EASY
             | CpuProfile::TELEPORTER_V46_EASY
+            | CpuProfile::TELEPORTER_V48_EASY
     )
 }
 

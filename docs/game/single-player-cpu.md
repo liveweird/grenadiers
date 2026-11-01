@@ -182,7 +182,7 @@ improvements and broader scene support stay in the [backlog](../../BACKLOG.md#si
 
 ## Intentional Teleporter collection boundary
 
-CPU46 serves Easy/Standard and CPU47 serves Hard under private replay23. Their ordinary fallback
+CPU48 serves Easy/Standard and CPU49 serves Hard under private replay24. Their ordinary fallback
 is exactly CPU44/45's result, memory and RNG; only the additional selector work is charged. An
 active confirmed-origin record bypasses the new selector and retains CPU44/45 continuation
 behavior. The existing planting, pulse and contact-topology guards still reject exposed
@@ -203,6 +203,10 @@ Keep the controller's actual physical Stop-confirmation tick `S <= B`; continued
 the stopped-motion premise. Any admitted direction, even one blocked by collision, clears that
 provenance. Admission requires the same retained `S`, not a replacement or a clock inferred from
 unchanged positions; Easy cadence may deliberately wait after confirmation.
+For CPU48/49, an unchanged visible dead player remains an inert roster member. The sealed Stop
+still takes effect at admission `A+2`; its confirmation may arrive in a later snapshot before
+the original safety deadline. Only then does strategic progress commit. Archived CPU46/47 and
+replay23 retain their original admission/confirmation behavior.
 Cover partial or blocked movement, no collection, refused swap, consumed-without-swap and every
 possible living partner, including humans and bounded moving-partner outcomes, without reading
 private randomness. Swap has two endpoints and no connecting sweep; the same public markers and

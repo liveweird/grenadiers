@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.11 — 2026-11-01
+
+- Fix repeated Teleporter recovery refusals after a player dies; unchanged dead roster members no longer block admitted movement.
+- Complete the mandatory Stop handoff when its confirming snapshot arrives later, preserving physical deadlines, safety bounds and strategic progress.
+- Select Easy/Standard48 and Hard49 with private replay24 while retaining archived CPU46/47 behavior.
+
 ## 1.3.10 — 2026-11-01
 
 - Recover from exposed-Teleporter farming stalls through certified one-update Approach/Collect actions, all-partner swap checks and mandatory physical Stop confirmation.

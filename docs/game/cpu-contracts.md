@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `TELEPORTER_V46_STANDARD` or `TELEPORTER_V46_EASY` and `HARD_V47`;
-private replay23 binds those identities. Named archive constants preserve historical replay
+Two. Live selection uses `TELEPORTER_V48_STANDARD` or `TELEPORTER_V48_EASY` and `HARD_V49`;
+private replay24 binds those identities. Named archive constants preserve historical replay
 identities. Policy identity describes decision semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
@@ -366,8 +366,8 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU46 and Hard
-selects CPU47. Their ordinary fallback is computed first and preserves exactly CPU44/45's result,
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU48 and Hard
+selects CPU49. Their ordinary fallback is computed first and preserves exactly CPU44/45's result,
 memory and RNG; only the typed Teleporter selector consumes additional remaining work. Confirmed-
 origin continuation delegates unchanged to CPU44/45. The selected profiles retain the same shared
 65,536-work budget and full planting, route, mob-contact and admission proofs. Hard keeps CPU45's
@@ -385,13 +385,13 @@ flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. E
 farming retains its prior support. This changes a Teleporter support precondition, not the
 route proof, public observation facts or work limit; all conservative motion checks remain.
 
-CPU46/47 inherit CPU44/45 and CPU42/43's one-update pickup handoff on rules10 even though
+CPU48/49 inherit CPU44/45 and CPU42/43's one-update pickup handoff on rules10 even though
 ordinary clear navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop
 and fresh observation requirements remain. The longer ordinary pulse still rejects physics-
 changing collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are
 unchanged.
 
-CPU46/47 retain CPU44/45 and CPU42/43's refinement of a failed mob-contact envelope for an
+CPU48/49 retain CPU44/45 and CPU42/43's refinement of a failed mob-contact envelope for an
 ordinary plant when public barriers separate every source from the complete certified escape.
 Potentially destroyed blocks are treated as open throughout. The opaque plant-bound certificate
 retains scene, bomb-presence, source and barrier checks at admission and each publication;
@@ -401,8 +401,8 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay23 binds CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
-private replay21; replay20 retains CPU40/41. CPU46/47 ordinary fallback delegates exactly to
+Private replay24 binds CPU48/49; archived replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
+private replay21; replay20 retains CPU40/41. CPU48/49 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
 contact modes. Older policy/replay contracts remain isolated.
@@ -410,7 +410,7 @@ contact modes. Older policy/replay contracts remain isolated.
 ## Typed Teleporter recovery
 
 Planting, ordinary pulse and contact-topology guards continue to reject exposed Teleporters.
-CPU46/47 may instead remove exactly one exposed Teleporter with a separate `TeleporterStep` after
+CPU48/49 may instead remove exactly one exposed Teleporter with a separate `TeleporterStep` after
 the ordinary CPU44/45 fallback has already been computed. Existing `SearchMap`/BFS navigation
 approaches a stable neighboring center without giving curses positive global value or using a
 Teleporter as ordinary transit. Target-specific Approach steps permit footprint overlap only with
@@ -421,6 +421,13 @@ and a fresh physical stopped observation before any further movement or planning
 basis `B`, every start in `[B+1, B+8)` is proved through exclusive `B+18` using the retained
 physical Stop tick `S <= B`; a direction admission clears `S` even if collision blocks movement.
 The executor never synthesizes stopped provenance from unchanged positions or a global clock.
+
+An already-dead visible roster member must retain identical public actor facts; resurrection or
+any changed facts reject the step. A recorded physical Stop still occurs at admission `A+2`.
+Its fresh confirmation may be observed later: the retained confirmation tick must lie between
+`A+2` and the current observation, within the original exclusive safety deadline. This commits
+strategic progress without an unnecessary invalidation fence. CPU46/47 retain their older
+all-alive admission and exact Stop-confirmation timestamp checks.
 
 The proof covers every possible living swap partner, including humans, plus blocked, partial,
 no-move, no-swap, consumed and bounded moving-partner outcomes. A swap binds unchanged public

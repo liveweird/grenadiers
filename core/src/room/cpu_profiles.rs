@@ -384,6 +384,14 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    pub const TELEPORTER_V48_STANDARD: Self =
+        Self::profile(CpuPolicy::UtilityV48, CpuDifficulty::Standard);
+    pub const TELEPORTER_V48_EASY: Self = Self::profile(CpuPolicy::UtilityV48, CpuDifficulty::Easy);
+    pub const HARD_V49: Self = Self::profile(CpuPolicy::UtilityV49, CpuDifficulty::Hard);
+    const fn profile(policy: CpuPolicy, difficulty: CpuDifficulty) -> Self {
+        Self { policy, difficulty }
+    }
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

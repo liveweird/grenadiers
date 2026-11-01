@@ -97,72 +97,53 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.10 — 2026-11-01
+## v1.3.11 — 2026-11-01
 
-CPUs can deliberately clear one exposed Teleporter when it prevents otherwise useful farming.
-Previously an exposed Teleporter remained a global planting support limit. The new typed recovery
-keeps ordinary planting, pulse and pickup guards intact: it approaches a stable neighboring center,
-certifies one directional update, unconditionally Stops on the next physical update and waits for
-a fresh physical stopped observation before continuing. Every possible living swap partner is
-checked without inspecting private randomness.
+Fix two CPU Teleporter recovery failures: already-dead roster members no longer cause repeated
+admission refusal, and a snapshot arriving after the physical Stop can confirm the handoff
+without discarding strategic progress. Easy/Standard use CPU48, Hard uses CPU49 and private
+replay24 binds those identities. CPU46/47 and replay23 retain their original contracts.
 
-### Compatibility and limits
+An actual queued-owner regression preserves the captured public pose and arena with declared
+controlled private history. Hard47 reproduces the refusal; Hard49 completes 74 movement/Stop
+pairs without fences, commits collection intent, collects, plants, destroys a block and survives.
+Physical deadlines, scene/contact checks, ordinary planning, RNG and work limits remain unchanged.
 
-Easy/Standard select CPU46 and Hard selects CPU47 with private replay23. Gameplay19, rules10,
-navigation3 and the shared 65,536 planning allowance remain unchanged. Ordinary CPU44/45 fallback
-is computed first and preserves its result, memory and RNG on decline. Confirmed-origin
-continuation is unchanged. Earlier policies and replay formats retain their contracts.
-
-Recovery requires exactly one exposed Teleporter, the complete visible living roster, visible
-empty bombs, no flames or Oil, and supported effects/equipment/pickups. Both lair modes are checked.
-Pit sites are excluded from movement and landings. The guarantee is conditional on supported
-observed facts; it does not predict future rival actions or guarantee the partner's future survival.
-Broader farm/contact stalls and deeper Hard tactics remain in BACKLOG.md. No UI, artwork, transport
-schema, physics or external dependency changes. Restart ends in-memory matches.
+No UI, artwork, transport, physics, dependency or database changes. Restart ends in-memory games.
+Multiple exposed Teleporters remain unsupported by recovery; broader farming and difficulty
+improvements remain in BACKLOG.md. A fresh 180-second all-items round completed without browser
+errors and exposed that separate support limit; it is not a matched difficulty comparison.
 
 ### Verification
 
-Accepted application/image source: `c89dae052688801a403dcc07a8b0737c24ef4eef`.
-Independent proof, runtime, server integration, activation and storage-fix reviews are clear.
-Three focused engineering PRs share this combined product acceptance; both inactive intermediate
-Core tips pass isolated clean all-target workspace compilation.
+Accepted application source: `303e104a70e02fcac4917cf9cfd93739c6b46e51`.
+Accepted exact image: `sha256:3195bd3453df4aac560594acb9ef535542d820f950290aa11d88e26b2101f8eb`.
 
-- Real queued-owner witnesses start at an ordinary cell center, collect through the actual worker,
-  driver and mailbox, verify both teleport markers and swapped endpoints, plant a useful bomb,
-  destroy a named block and survive full flame expiry. Standard/lairs off-on, Easy, Hard and native
-  two-worker 60 Hz cases pass. Actual boundary traces independently assert admission, movement,
-  next-update Stop submission, physical Stop and fresh completion; no injected certificate is used.
-- Rejected movement, rejected Stop and withheld publications perform real input fencing, prevent
-  a second movement and cannot resurrect expired authority. Exact/one-short budgets, all seven
-  start lanes, partial/no-move/no-swap cases, partner movement, contact births/deaths, pit binding,
-  retained Stop provenance, Easy cadence, selector expiry/alternate and replay23 boundaries pass.
-- Frozen Rust gate passes in 733 seconds: 1,831 Core tests and 725 ordinary server tests in
-  debug and release, plus all 4,194,304 item masks independently in debug, release and coverage.
-  Four workers, 32 partitions and zero retries. Formatting, strict Clippy, build and repository
-  checks pass. Coverage is 67,291/72,396 lines (92.95%), above the unchanged 90% floor.
-- Unique Linux x86_64 debug/release workspace tests and doctests pass
-  ([run 41319512956](https://github.com/liveweird/grenadiers/actions/runs/41319512956)).
-  Duplicate intermediate and superseded-source runs are canceled; no duplicate final full gate
-  is required for branch, merge or tag.
-- Exact-image Compose authentication/keyboard duel and three-Hard-CPU smoke pass. Restricted
-  Kubernetes three-CPU smoke passes; owned short-lived stacks and namespace are removed.
-- One 180-second all-items public capture reaches a result without JavaScript errors and records
-  24 CPU bombs (3/10/11 by seat). Late passivity remains: one surviving seat has the same exact
-  pose in every retained sample for about 95 seconds. This is a fresh uncontrolled round, not a matched balance comparison or proof
-  of a missed safe action; the broader investigation remains open.
-- All five bundled web assets are byte-identical to accepted v1.3.9/v1.3.0; unchanged browser/native
-  inputs reuse accepted suites. Fresh dependency security checks pass with the existing moderate
-  tooling advisories. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL image findings.
+- Independent review clear; focused Core admission/completion and legacy rejection tests pass.
+- Current/archived policy gates, cadence, worker dispatch/fallback, owner witnesses and replay24 pass.
+- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes pass.
+- Dependency policy/audits pass at the configured threshold; 12 existing moderate npm tooling
+  advisories remain. Pinned Trivy 0.74.0 reports zero fixable high/critical image vulnerabilities.
+- All five frontend assets are byte-identical to accepted v1.3.10; unchanged frontend/native
+  inputs reuse their accepted checks. No duplicate full web or remote suite is required.
+- Unique Linux x86_64 debug/release workspace units and doctests pass ([run 41329394822](https://github.com/liveweird/grenadiers/actions/runs/41329394822)).
+- Frozen Rust gate passes in 762 seconds: 1,839 Core and 732 ordinary server tests pass in
+  debug and release, with all 4,194,304 item masks independently checked in debug, release and
+  coverage (32 partitions, four workers, zero retries in the accepted run). Coverage is
+  68,051/73,177 lines (93.00%), above the unchanged 90% floor. Formatting, strict Clippy,
+  build and repository checks pass. The first sandboxed attempt could not bind loopback
+  listeners; the accepted run used the required access.
 
 ### Operation
 
-Accepted local image:
-`sha256:9412d8cfef61357a0dc92a35cc41f3a8cf7fed3d51af6506dac3f44f1efdf7e4`.
-The exact accepted image is promoted to localhost:8085. Health, readiness, security headers,
-CSP/cache, all five served-asset hashes and a fresh three-Hard-CPU smoke pass.
-Version 1.3.9 remains available for rollback. This is a source/local-runtime release without a
-hosted service or production registry. Artwork remains in the unchanged
+The exact accepted image runs on localhost:8085. Health/readiness, security headers, CSP/cache,
+all five served assets and a fresh three-Hard-CPU smoke pass. The v1.3.10 immutable image and
+local override remain available for rollback. This is a source/local-runtime release; no hosted
+service or production registry is configured. Artwork remains in the unchanged
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v1310--2026-11-01"></a>
+The [v1.3.10 record](history/releases.md#v1310--2026-11-01) is preserved in release history.
 
 <a id="v139--2026-11-01"></a>
 The [v1.3.9 record](history/releases.md#v139--2026-11-01) is preserved in release history.

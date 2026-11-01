@@ -230,3 +230,7 @@ mod teleporter_execution_timing_tests;
 
 #[cfg(test)]
 mod teleporter_execution_environment_tests;
+
+#[cfg(test)]
+#[path = "teleporter_execution_dead_roster_tests.rs"]
+mod teleporter_execution_dead_roster_tests;

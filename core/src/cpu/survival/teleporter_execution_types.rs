@@ -68,6 +68,7 @@ pub struct PreparedTeleporterStep {
     pub(super) decision: DecisionId,
     pub(super) admission_tick: Tick,
     pub(super) command_issued: bool,
+    pub(super) roster_v48: bool,
 }
 
 pub struct CommittedTeleporterStep {
@@ -80,6 +81,7 @@ pub struct CommittedTeleporterStep {
     pub(super) stop_recorded: bool,
     pub(super) completed: Option<TeleporterOutcome>,
     pub(super) revoked: bool,
+    pub(super) roster_v48: bool,
 }
 
 pub(super) fn command(

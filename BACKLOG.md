@@ -19,33 +19,21 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — repair interrupted escapes and validate liveness.** Address
-  recovery after simultaneous rival bombs invalidate committed routes; the
-  [controlled investigation](docs/history/cpu-short-fuse-investigation-2026-11-01.md) defines the
-  observation-gated continuation boundary and required owner witnesses. The
-  [timing experiment](docs/history/cpu-recovery-timing-2026-11-01.md) establishes
-  scheduling facts; certified continuation and actual queued-owner Short Fuse survival now cover
-  the controlled interrupted-escape case. Validate sustained farming
-  from the original captured conditions: alternate-route proof and refused-origin guidance have
-  separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
-  proofs and the existing work allowance. The [fresh late-match investigation](docs/history/cpu-late-passivity-2026-11-01.md)
-  identified exposed Teleporter as a global planting support limit. The
-  [typed one-update handoff](docs/game/single-player-cpu.md#intentional-teleporter-collection-boundary)
-  now covers Approach/Collect, all possible swap partners, mandatory physical Stop and a
-  subsequent productive-action witness. A fresh CPU47 round records two real Teleporter swaps
-  followed by renewed bombing, then a third persistent Teleporter. Characterize sample 88/tick 5461
-  and its preceding queue/intent transition through a continuous owner witness: seat Four is
-  observed at an unchanged sampled pose with unavailable diagnostics, while seat Two keeps
-  cycling farming approaches.
-  Preserve real Stop provenance, worker/refusal/admission evidence and full useful-action
-  execution; static reachability alone is insufficient. Conditional Core characterization already
-  selects a northward typed step with fresh memory/Stop provenance at 14,176 work; this does not
-  recover the captured controller history or explain unavailable intent. Reproduce remaining long-match
-  stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
-  Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
-  and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone
-  does not establish a missed safe action. Preserve safety certificates, bounded scheduling,
-  replay/privacy and sustained per-seat progress regressions.
+- [next] **CPU-RELIABILITY — validate sustained progress after recovery.** The
+  [late-match investigation](docs/history/cpu-late-passivity-2026-11-01.md) now reproduces and
+  repairs dead-roster admission refusal and delayed Stop-confirmation invalidation through a
+  continuous queued-owner episode. Keep its complete movement, real Stop, committed intent,
+  collection, useful bombing and survival regressions. A fresh CPU49 round exposes two persistent
+  Teleporters, beyond the current exact-one support boundary. Next characterize bounded collection
+  with multiple exposed targets: select one, preserve every unselected pickup and exclude its
+  activation throughout the proof, including swapped-partner movement. Require full queued
+  execution before claiming this resolves the captured scene. Separately reproduce seat Two's
+  early farming cycle before either pickup appears, plus remaining passive pickups or lethal waits.
+  Preserve exact public observations plus worker/refusal/admission evidence. Unchanged sampled
+  poses, static reachability or a free bomb slot alone do not establish a missed safe action.
+  The earlier CPU43 farming alternatives still lack a complete original-pose physical trajectory;
+  reproduce them under current behavior before adding a further planner refinement. Preserve
+  safety certificates, shared work limits, scheduling, replay/privacy and per-seat progress.
 
 - [todo] **HARD-CPU — deepen fair tactics.** Improve productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted

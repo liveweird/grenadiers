@@ -58,9 +58,9 @@ pub(super) struct Outcome {
 
 pub(super) const fn current_profile(difficulty: CpuDifficulty) -> CpuProfile {
     match difficulty {
-        CpuDifficulty::Easy => CpuProfile::CONTACT_TOPOLOGY_V40_EASY,
-        CpuDifficulty::Standard => CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
-        CpuDifficulty::Hard => CpuProfile::HARD_V41,
+        CpuDifficulty::Easy => CpuProfile::BLOCKED_BIRTHS_V42_EASY,
+        CpuDifficulty::Standard => CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
+        CpuDifficulty::Hard => CpuProfile::HARD_V43,
     }
 }
 

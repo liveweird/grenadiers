@@ -126,6 +126,26 @@ fn hard41_queues_and_admits_a_real_refuge_replacement() {
 }
 
 #[test]
+fn hard43_queues_and_admits_a_real_refuge_replacement() {
+    let mut fixture = queued_refuge_for(CpuProfile::HARD_V43);
+    assert!(fixture.controller.has_pending());
+    assert_eq!(fixture.planner.pump_for_test(1).delivered, 1);
+
+    let mut accepted = None;
+    for _ in 0..=grenadiers_core::cpu::survival::MAX_PLAN_AGE_TICKS {
+        accepted = fixture.controller.poll(fixture.state.tick(), EPOCH);
+        if accepted.is_some() {
+            break;
+        }
+        fixture.advance_publication();
+    }
+    assert!(
+        accepted.is_some_and(|plan| plan.is_refuge_handoff()),
+        "Hard43 worker result did not reach ordinary handoff admission"
+    );
+}
+
+#[test]
 fn cancellation_and_epoch_staleness_preserve_the_old_route_memory_and_rng() {
     for cancel in [true, false] {
         let mut fixture = queued_refuge();

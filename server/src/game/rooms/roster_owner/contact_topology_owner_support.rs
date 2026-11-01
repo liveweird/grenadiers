@@ -36,6 +36,7 @@ pub(super) struct Outcome {
     pub target_destroyed: bool,
     pub survived: bool,
     pub observed_typed_contact: bool,
+    pub observed_blocked_birth_contact: bool,
     pub max_work: u32,
 }
 
@@ -48,6 +49,7 @@ pub(super) fn run(profile: CpuProfile, difficulty: CpuDifficulty) -> Outcome {
     let mut finish_at = None;
     let mut max_work = 0;
     let mut observed_typed_contact = false;
+    let mut observed_blocked_birth_contact = false;
 
     for _ in 0..1_200 {
         let report = planner.pump_for_test(usize::MAX);
@@ -55,6 +57,7 @@ pub(super) fn run(profile: CpuProfile, difficulty: CpuDifficulty) -> Outcome {
         max_work = max_work.max(report.work.into_iter().max().unwrap_or(0));
         owner.tick(Instant::now()).unwrap();
         observed_typed_contact |= owner.cpus[0].has_committed_topology_contact();
+        observed_blocked_birth_contact |= owner.cpus[0].has_committed_blocked_birth_contact();
         let state = owner.runtime.state_for_test().unwrap();
         if planted_at.is_none()
             && let Some(bomb) = state
@@ -81,6 +84,7 @@ pub(super) fn run(profile: CpuProfile, difficulty: CpuDifficulty) -> Outcome {
         survived: finish_at.is_some_and(|tick| state.tick() >= tick)
             && state.actor(CPU).unwrap().alive(),
         observed_typed_contact,
+        observed_blocked_birth_contact,
         max_work,
     }
 }

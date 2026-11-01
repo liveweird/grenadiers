@@ -14,6 +14,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V37
                         | grenadiers_core::room::CpuProfile::HARD_V39
                         | grenadiers_core::room::CpuProfile::HARD_V41
+                        | grenadiers_core::room::CpuProfile::HARD_V43
                 );
         }
         match rules_version {
@@ -62,6 +63,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::FARM_ORIGINS_V38_EASY
                     | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD
                     | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_EASY
+                    | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_STANDARD
+                    | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_EASY
             ),
             _ => false,
         }
@@ -74,6 +77,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V37
                 | grenadiers_core::room::CpuProfile::HARD_V39
                 | grenadiers_core::room::CpuProfile::HARD_V41
+                | grenadiers_core::room::CpuProfile::HARD_V43
         )
     }
 
@@ -83,6 +87,18 @@ impl CpuController {
             grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_TOPOLOGY_V40_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V41
+                | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_STANDARD
+                | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V43
+        )
+    }
+
+    pub(super) const fn supports_blocked_birth_contact(&self) -> bool {
+        matches!(
+            self.profile,
+            grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_STANDARD
+                | grenadiers_core::room::CpuProfile::BLOCKED_BIRTHS_V42_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V43
         )
     }
 }
@@ -107,7 +123,7 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V41);
+        let hard = controller(CpuProfile::HARD_V43);
         assert!(hard.profile_supports(10));
         assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
@@ -116,6 +132,8 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V35).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V37).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V39).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V41).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V43).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -128,6 +146,7 @@ mod tests {
             CpuPolicy::UtilityV36,
             CpuPolicy::UtilityV38,
             CpuPolicy::UtilityV40,
+            CpuPolicy::UtilityV42,
         ] {
             let forged = controller(CpuProfile {
                 policy,
@@ -146,6 +165,7 @@ mod tests {
             CpuPolicy::UtilityV37,
             CpuPolicy::UtilityV39,
             CpuPolicy::UtilityV41,
+            CpuPolicy::UtilityV43,
         ] {
             for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
                 let forged = controller(CpuProfile { policy, difficulty });
@@ -163,6 +183,8 @@ mod tests {
             CpuProfile::FARM_ORIGINS_V38_STANDARD,
             CpuProfile::CONTACT_TOPOLOGY_V40_EASY,
             CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
+            CpuProfile::BLOCKED_BIRTHS_V42_EASY,
+            CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
         ] {
             assert!(controller(profile).profile_supports(10));
             assert!(!controller(profile).profile_supports(9));
@@ -171,10 +193,18 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V37).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V39).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V41).supports_refuge_handoff());
+        assert!(controller(CpuProfile::HARD_V43).supports_refuge_handoff());
         assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
         assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD).supports_contact_topology());
         assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_EASY).supports_contact_topology());
         assert!(controller(CpuProfile::HARD_V41).supports_contact_topology());
+        assert!(controller(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD).supports_contact_topology());
+        assert!(controller(CpuProfile::HARD_V43).supports_contact_topology());
+        assert!(
+            controller(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD).supports_blocked_birth_contact()
+        );
+        assert!(controller(CpuProfile::HARD_V43).supports_blocked_birth_contact());
+        assert!(!controller(CpuProfile::HARD_V41).supports_blocked_birth_contact());
         assert!(!controller(CpuProfile::FARM_ORIGINS_V38_STANDARD).supports_contact_topology());
         assert!(!controller(CpuProfile::HARD_V39).supports_contact_topology());
     }

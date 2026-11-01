@@ -27,6 +27,13 @@ impl CpuController {
     }
 
     #[cfg(test)]
+    pub(in crate::game::rooms) fn has_committed_blocked_birth_contact(&self) -> bool {
+        self.committed_route.as_ref().is_some_and(
+            grenadiers_core::cpu::survival::CommittedRoute::has_blocked_birth_contact_authority,
+        )
+    }
+
+    #[cfg(test)]
     pub(in crate::game::rooms) fn latest_observation_for_test(&self) -> Option<Observation> {
         self.latest_observation.clone()
     }

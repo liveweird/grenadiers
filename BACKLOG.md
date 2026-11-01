@@ -29,9 +29,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
   proofs and the existing work allowance. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
-  Investigate the late-match Farm approach oscillation in the
-  [v1.3.7 observation capture](docs/releases.md#v137--2026-11-01); establish the exact refusal
-  before tuning its target selection or planting.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone
   does not establish a missed safe action. Preserve safety certificates, bounded scheduling,

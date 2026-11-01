@@ -1,0 +1,360 @@
+diff --git a/server/src/game/rooms/roster_owner/mod.rs b/server/src/game/rooms/roster_owner/mod.rs
+index fdaecdd1..7d4b1c0f 100644
+--- a/server/src/game/rooms/roster_owner/mod.rs
++++ b/server/src/game/rooms/roster_owner/mod.rs
+@@ -173,6 +173,12 @@ mod farm_refuge_owner_tests;
+ #[cfg(test)]
+ mod reliable_profile_tests;
+ 
++#[cfg(test)]
++mod recovery_checkpoint_timing_support;
++
++#[cfg(test)]
++mod recovery_checkpoint_timing_tests;
++
+ #[cfg(test)]
+ mod refuge_handoff_physical_support;
+ 
+diff --git a/server/src/game/rooms/roster_owner/recovery_checkpoint_timing_support.rs b/server/src/game/rooms/roster_owner/recovery_checkpoint_timing_support.rs
+new file mode 100644
+index 00000000..33066b40
+--- /dev/null
++++ b/server/src/game/rooms/roster_owner/recovery_checkpoint_timing_support.rs
+@@ -0,0 +1,190 @@
++use std::sync::Arc;
++
++use grenadiers_core::game::{Direction, Position, SeatId, Tick};
++use tokio::{sync::watch, time::Instant};
++
++use super::{RosterOwnerNotice, driver::Driver, refuge_handoff_physical_support};
++use crate::game::rooms::{RandomFill, roster_runtime::RosterAction};
++
++pub(super) const CPU: SeatId = SeatId::Two;
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum Admission {
++    Held,
++    Accepted,
++    Refused,
++}
++
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(super) enum Renewal {
++    Accepted,
++    EarlyRevoked,
++    InvalidRevoked,
++}
++
++/// Test-only timing model for the proposed recovery checkpoint contract.
++///
++/// A grant here is synthetic scheduling authority, never a Core safety
++/// certificate. The tracker deliberately has no mailbox-TTL fallback.
++pub(super) struct GrantTracker {
++    basis: Tick,
++    direction: Direction,
++    active: bool,
++    report_due: Option<Tick>,
++    valid_through: Option<Tick>,
++}
++
++impl GrantTracker {
++    pub(super) const fn new(basis: Tick, direction: Direction) -> Self {
++        Self {
++            basis,
++            direction,
++            active: false,
++            report_due: None,
++            valid_through: None,
++        }
++    }
++
++    pub(super) fn admit(&mut self, episode: &mut Episode) -> Admission {
++        let publication = episode.publication_tick();
++        let exact = Tick(self.basis.0 + 6);
++        if publication < exact {
++            return Admission::Held;
++        }
++        if publication > exact || self.active {
++            return Admission::Refused;
++        }
++        self.active = true;
++        self.report_due = Some(Tick(self.basis.0 + 9));
++        self.valid_through = Some(Tick(self.basis.0 + 9));
++        episode.submit(Some(self.direction));
++        Admission::Accepted
++    }
++
++    pub(super) fn renew(&mut self, episode: &mut Episode, direction: Direction) -> Renewal {
++        let publication = episode.publication_tick();
++        let due = self.report_due.expect("admitted grant has a report phase");
++        if publication < due {
++            self.revoke(episode);
++            self.report_due = Some(Tick(publication.0 + 3));
++            return Renewal::EarlyRevoked;
++        }
++        if publication != due || direction != self.direction {
++            self.revoke(episode);
++            return Renewal::InvalidRevoked;
++        }
++        self.report_due = Some(Tick(publication.0 + 3));
++        self.valid_through = Some(Tick(publication.0 + 3));
++        episode.submit(Some(direction));
++        Renewal::Accepted
++    }
++
++    pub(super) fn stop_if_unrenewed(&mut self, episode: &mut Episode) {
++        if self.active && self.report_due == Some(episode.publication_tick()) {
++            self.revoke(episode);
++        }
++    }
++
++    fn revoke(&mut self, episode: &mut Episode) {
++        self.active = false;
++        self.valid_through = None;
++        episode.submit(None);
++    }
++
++    pub(super) const fn report_due(&self) -> Option<Tick> {
++        self.report_due
++    }
++
++    pub(super) const fn valid_through(&self) -> Option<Tick> {
++        self.valid_through
++    }
++}
++
++pub(super) struct Episode {
++    driver: Driver,
++}
++
++impl Episode {
++    pub(super) fn new() -> Self {
++        let (mut runtime, state) = refuge_handoff_physical_support::running_runtime_and_scene();
++        let notice = runtime.install_running_scene_for_test(state).unwrap();
++        let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));
++        drop(receiver);
++        let random_fill: Arc<RandomFill> = Arc::new(|bytes| {
++            bytes.fill(42);
++            Ok(())
++        });
++        let mut driver = Driver::new(
++            runtime,
++            notice.clone(),
++            notices,
++            Instant::now() + std::time::Duration::from_secs(300),
++            random_fill,
++            Vec::new(),
++        );
++        driver.publish(notice);
++        Self { driver }
++    }
++
++    pub(super) fn publication_tick(&self) -> Tick {
++        let wire = self.driver.last.spike_v19_room().unwrap().tick.get();
++        Tick(wire)
++    }
++
++    pub(super) fn boundary_tick(&self) -> Tick {
++        self.driver.runtime.lifecycle().tick()
++    }
++
++    pub(super) fn tick(&mut self) {
++        self.driver.tick(Instant::now()).unwrap();
++    }
++
++    pub(super) fn advance_boundary_to(&mut self, target: Tick) {
++        while self.boundary_tick() < target {
++            self.tick();
++        }
++        assert_eq!(self.boundary_tick(), target);
++    }
++
++    pub(super) fn publish_current_early(&mut self) {
++        let notice = self.driver.runtime.current_notice().unwrap();
++        self.driver.publish(notice);
++        assert_eq!(self.publication_tick(), self.boundary_tick());
++    }
++
++    pub(super) fn pending_reports(&self) -> usize {
++        self.driver.runtime.pending_report_count_for_test()
++    }
++
++    pub(super) fn submit(&mut self, direction: Option<Direction>) {
++        self.driver
++            .runtime
++            .submit_cpu_intent(
++                CPU,
++                self.driver.runtime.lifecycle().round_attempt(),
++                RosterAction::Movement(direction),
++            )
++            .unwrap();
++    }
++
++    pub(super) fn position(&self) -> Position {
++        self.driver
++            .runtime
++            .state_for_test()
++            .unwrap()
++            .actor(CPU)
++            .unwrap()
++            .position()
++    }
++
++    pub(super) fn motion(&self) -> (Position, Direction) {
++        let actor = self
++            .driver
++            .runtime
++            .state_for_test()
++            .unwrap()
++            .actor(CPU)
++            .unwrap();
++        (actor.position(), actor.heading())
++    }
++}
+diff --git a/server/src/game/rooms/roster_owner/recovery_checkpoint_timing_tests.rs b/server/src/game/rooms/roster_owner/recovery_checkpoint_timing_tests.rs
+new file mode 100644
+index 00000000..69cea128
+--- /dev/null
++++ b/server/src/game/rooms/roster_owner/recovery_checkpoint_timing_tests.rs
+@@ -0,0 +1,141 @@
++use grenadiers_core::game::{Direction, Tick};
++
++use super::recovery_checkpoint_timing_support::{Admission, Episode, GrantTracker, Renewal};
++
++fn tick_after(basis: Tick, offset: u64) -> Tick {
++    Tick(basis.0 + offset)
++}
++
++fn admitted() -> (Episode, GrantTracker, Tick) {
++    let mut episode = Episode::new();
++    let basis = episode.publication_tick();
++    let mut tracker = GrantTracker::new(basis, Direction::East);
++    episode.advance_boundary_to(tick_after(basis, 6));
++    assert_eq!(episode.publication_tick(), tick_after(basis, 6));
++    assert_eq!(tracker.admit(&mut episode), Admission::Accepted);
++    assert_eq!(tracker.valid_through(), Some(tick_after(basis, 9)));
++    (episode, tracker, basis)
++}
++
++#[test]
++fn admission_is_held_before_b_plus_six_and_refused_after_it() {
++    let mut exact = Episode::new();
++    let basis = exact.publication_tick();
++    let mut tracker = GrantTracker::new(basis, Direction::East);
++    exact.advance_boundary_to(tick_after(basis, 3));
++    assert_eq!(exact.publication_tick(), tick_after(basis, 3));
++    assert_eq!(tracker.admit(&mut exact), Admission::Held);
++    assert_eq!(exact.position(), Episode::new().position());
++    exact.advance_boundary_to(tick_after(basis, 6));
++    assert_eq!(exact.publication_tick(), tick_after(basis, 6));
++    assert_eq!(tracker.admit(&mut exact), Admission::Accepted);
++
++    let mut late = Episode::new();
++    let late_basis = late.publication_tick();
++    let mut late_tracker = GrantTracker::new(late_basis, Direction::East);
++    late.advance_boundary_to(tick_after(late_basis, 9));
++    assert_eq!(late.publication_tick(), tick_after(late_basis, 9));
++    assert_eq!(late_tracker.admit(&mut late), Admission::Refused);
++}
++
++#[test]
++fn exact_grant_moves_b_plus_seven_through_nine() {
++    let (mut episode, _tracker, basis) = admitted();
++    let mut prior = episode.position();
++    for offset in 7..=9 {
++        episode.tick();
++        assert_eq!(episode.boundary_tick(), tick_after(basis, offset));
++        let current = episode.position();
++        assert_ne!(current, prior, "grant did not move on update b+{offset}");
++        prior = current;
++    }
++    assert_eq!(episode.publication_tick(), tick_after(basis, 9));
++}
++
++#[test]
++fn b_plus_nine_refresh_is_observed_before_service_and_preserves_motion() {
++    let (mut renewed, mut tracker, basis) = admitted();
++    let mut baseline = Episode::new();
++    baseline.advance_boundary_to(tick_after(basis, 6));
++    baseline.submit(Some(Direction::East));
++
++    for offset in 7..=9 {
++        renewed.tick();
++        baseline.tick();
++        assert_eq!(
++            renewed.motion(),
++            baseline.motion(),
++            "diverged at b+{offset}"
++        );
++    }
++    assert_eq!(renewed.publication_tick(), tick_after(basis, 9));
++    let at_nine = renewed.position();
++    assert_eq!(
++        tracker.renew(&mut renewed, Direction::East),
++        Renewal::Accepted
++    );
++    assert_eq!(tracker.valid_through(), Some(tick_after(basis, 12)));
++
++    // The unchanged-direction refresh is submitted after observing publication
++    // b+9 and before Driver::tick services physical update b+10.
++    renewed.tick();
++    baseline.tick();
++    assert_eq!(renewed.boundary_tick(), tick_after(basis, 10));
++    assert_eq!(renewed.publication_tick(), tick_after(basis, 9));
++    assert_ne!(renewed.position(), at_nine);
++    assert_eq!(renewed.motion(), baseline.motion());
++}
++
++#[test]
++fn missing_or_invalid_renewal_stops_the_first_unauthorized_update() {
++    let (mut missing, mut missing_tracker, basis) = admitted();
++    missing.advance_boundary_to(tick_after(basis, 9));
++    let missing_last = missing.position();
++    missing_tracker.stop_if_unrenewed(&mut missing);
++    missing.tick();
++    assert_eq!(missing.boundary_tick(), tick_after(basis, 10));
++    assert_eq!(missing.publication_tick(), tick_after(basis, 9));
++    assert_eq!(missing.position(), missing_last);
++
++    let (mut invalid, mut invalid_tracker, invalid_basis) = admitted();
++    invalid.advance_boundary_to(tick_after(invalid_basis, 9));
++    let invalid_last = invalid.position();
++    assert_eq!(
++        invalid_tracker.renew(&mut invalid, Direction::North),
++        Renewal::InvalidRevoked
++    );
++    invalid.tick();
++    assert_eq!(invalid.boundary_tick(), tick_after(invalid_basis, 10));
++    assert_eq!(invalid.publication_tick(), tick_after(invalid_basis, 9));
++    assert_eq!(invalid.position(), invalid_last);
++}
++
++#[test]
++fn actual_early_publication_resets_report_phase_and_revokes() {
++    for moves in [1, 2] {
++        let (mut episode, mut tracker, basis) = admitted();
++        let at_admission = episode.position();
++        episode.advance_boundary_to(tick_after(basis, 6 + moves));
++        assert_ne!(episode.position(), at_admission);
++        assert_eq!(episode.publication_tick(), tick_after(basis, 6));
++        assert_eq!(episode.pending_reports(), moves as usize);
++        episode.publish_current_early();
++        assert_eq!(episode.pending_reports(), 0);
++        let early = episode.publication_tick();
++        assert_eq!(early, tick_after(basis, 6 + moves));
++        assert_eq!(
++            tracker.renew(&mut episode, Direction::East),
++            Renewal::EarlyRevoked
++        );
++        assert_eq!(tracker.report_due(), Some(Tick(early.0 + 3)));
++        assert_eq!(tracker.valid_through(), None);
++        let stopped = episode.position();
++        episode.tick();
++        assert_eq!(episode.position(), stopped);
++    }
++}
++
++// These tests exercise only real owner/runtime publication order and physical
++// input persistence. Synthetic grants are not safety certificates. They do not
++// prove conditional trajectories, safe Stop suffixes, teleport/contact handling,
++// pending-turn assistance, or integration with a production CPU recovery path.

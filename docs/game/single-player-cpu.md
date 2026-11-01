@@ -168,7 +168,7 @@ revoke the episode, and a revoked episode cannot resume from a late result.
 
 Before activation, require a separate reviewed Core proof, normal queued-owner integration, both
 Short Fuse CPUs planting and surviving, and negatives for intermediate unsafe Stops, stale
-publications, changed bombs, displacement, origin re-entry and exhausted work. A scheduling
-fixture using synthetic grants establishes timing only; it is not a safety certificate. Keep
+publications, changed bombs, displacement, origin re-entry and exhausted work. A [scheduling fixture](../history/cpu-recovery-timing-2026-11-01.md)
+using synthetic grants establishes timing only; it is not a safety certificate. Keep
 new policy/replay identities opt-in and every archived contract unchanged. Work sequencing remains
 in the [backlog](../../BACKLOG.md#single-player).

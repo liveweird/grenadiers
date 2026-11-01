@@ -1,10 +1,18 @@
 //! Private format25 envelope for the multiple-Teleporter CPU policy pairing.
 //! Production recording and export intentionally remain disabled.
 #[path = "../replay_v24/recording.rs"]
+#[expect(
+    clippy::duplicate_mod,
+    reason = "Each replay format binds this shared implementation to its own closed header and policy pair"
+)]
 mod recording;
 #[cfg(test)]
 mod tests;
 #[path = "../replay_v24/validation.rs"]
+#[expect(
+    clippy::duplicate_mod,
+    reason = "Each replay format binds this shared implementation to its own closed header and policy pair"
+)]
 mod validation;
 
 use grenadiers_core::{

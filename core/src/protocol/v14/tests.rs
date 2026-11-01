@@ -229,7 +229,7 @@ pub(super) fn running_room(
             ItemId::Teleporter,
         ])
         .unwrap(),
-        configuration: RoomConfiguration::from_domain(configuration),
+        configuration: RoomConfiguration::from_domain(configuration).unwrap(),
         room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
         room_code: RoomCode::new("ABCDEFGH").unwrap(),
         round_id: Counter::new(1).unwrap(),

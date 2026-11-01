@@ -1,5 +1,5 @@
 {
-  "producer": "hand-authored web contract scaffold; Rust producer proof pending",
+  "producer": "hand-authored closed client corpus; checked by the Rust v19 parser",
   "validMessages": [
     {
       "caseId": "hard-cpu-room",

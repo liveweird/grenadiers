@@ -139,7 +139,8 @@ pub(super) fn room_view_with_tuning(
             lifecycle.configuration(),
             cloud,
             tuning,
-        )),
+        ))
+        .unwrap(),
         room_id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
         room_code: RoomCode::new("ABCDEFGH").unwrap(),
         round_id: counter64(lifecycle.round_attempt()),
@@ -178,7 +179,8 @@ pub(super) fn room_view_with_tuning(
             .iter()
             .enumerate()
             .map(|(index, &participant)| status(lifecycle, SeatId::ALL[index], participant))
-            .collect(),
+            .collect::<Result<Vec<_>, ()>>()
+            .unwrap(),
         phase: phase(lifecycle.phase()),
     };
     super::room_validation::validate_room_view(&room).unwrap();
@@ -189,13 +191,14 @@ fn status(
     lifecycle: &RosterMatchLifecycle,
     domain_seat: SeatId,
     participant: RosterParticipant,
-) -> SeatStatus {
+) -> Result<SeatStatus, ()> {
     let controller = match lifecycle.configuration().controller(domain_seat).unwrap() {
         SeatControl::Human => Controller::Human,
         SeatControl::Cpu => Controller::Cpu {
             difficulty: match lifecycle.configuration().cpu_difficulty().unwrap() {
                 CpuDifficulty::Easy => Difficulty::Easy,
                 CpuDifficulty::Standard => Difficulty::Standard,
+                CpuDifficulty::Hard => return Err(()),
             },
         },
     };
@@ -208,14 +211,14 @@ fn status(
         RosterParticipant::Departed => ConnectionStatus::Expired,
         RosterParticipant::Cpu => ConnectionStatus::ServerControlled,
     };
-    SeatStatus {
+    Ok(SeatStatus {
         seat: seat(domain_seat),
         occupied: participant != RosterParticipant::NeverAdmitted,
         ready: lifecycle.ready(domain_seat).unwrap(),
         rematch_ready: lifecycle.rematch_vote(domain_seat).unwrap(),
         controller,
         connection,
-    }
+    })
 }
 
 fn phase(value: MatchPhase) -> RoomPhase {

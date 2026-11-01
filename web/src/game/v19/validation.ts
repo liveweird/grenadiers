@@ -1,11 +1,12 @@
 import type { ErrorObject } from 'ajv'
 import validateServer from '../../validation/generated/gameplay-v19.mjs'
+import { rules10SemanticError, type Rules10SemanticError } from '../validation/rules10Semantics'
 import type { GameServerMessage, RoomView } from './schema'
 
 export type GameplayV19ValidationResult =
   | { valid: true; value: GameServerMessage }
   | { valid: false; source: 'schema'; errors: ErrorObject[] }
-  | { valid: false; source: 'semantics'; error: 'invalidCpuDifficulty' }
+  | { valid: false; source: 'semantics'; error: Rules10SemanticError | 'invalidCpuDifficulty' }
 
 function cpuDifficultyInvalid(room: RoomView): boolean {
   const { controllers, cpuDifficulty } = room.configuration
@@ -26,7 +27,9 @@ export function validateGameplayV19ServerMessage(value: unknown): GameplayV19Val
   if (value.type !== 'admitted' && value.type !== 'snapshot' && value.type !== 'roomState') {
     return { valid: true, value }
   }
-  return cpuDifficultyInvalid(value.room)
-    ? { valid: false, source: 'semantics', error: 'invalidCpuDifficulty' }
-    : { valid: true, value }
+  if (cpuDifficultyInvalid(value.room)) {
+    return { valid: false, source: 'semantics', error: 'invalidCpuDifficulty' }
+  }
+  const error = rules10SemanticError(value)
+  return error ? { valid: false, source: 'semantics', error } : { valid: true, value }
 }

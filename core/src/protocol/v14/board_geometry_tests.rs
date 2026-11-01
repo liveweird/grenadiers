@@ -61,7 +61,8 @@ fn room(
     room.configuration = RoomConfiguration::from_domain(
         crate::room::RoomConfiguration::new(&vec![SeatControl::Human; count.get()], None, board)
             .unwrap(),
-    );
+    )
+    .unwrap();
     assert!(matches!(enabled, EnabledItems::EMPTY | EnabledItems::ALL));
     room.settings = GameSettings::new(
         0,

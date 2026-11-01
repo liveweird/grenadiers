@@ -1,33 +1,17 @@
 {
-  "producer": "hand-authored web contract scaffold derived from the v18 lobby shape; Rust producer proof pending",
+  "producer": "Rust gameplay v19 typed projection; policy execution remains dormant",
   "validMessages": [
     {
-      "caseId": "hard-cpu-room-state",
+      "caseId": "v19-authenticated",
       "value": {
-        "type": "roomState",
+        "protocolVersion": 19,
+        "type": "authenticated"
+      }
+    },
+    {
+      "caseId": "hard-room-state",
+      "value": {
         "room": {
-          "settings": {
-            "startingSpeedLevel": 0,
-            "turnAssistUnits": 256,
-            "winsToFinish": 3,
-            "bombFuseTicks": 180,
-            "enabledItems": [],
-            "environment": {
-              "stormCloud": false,
-              "lairs": {
-                "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
-              },
-              "spikePits": {
-                "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
-            }
-          },
-          "settingsRevision": 1,
-          "settingsEditor": "one",
           "availableItems": [
             "kick",
             "punch",
@@ -53,37 +37,40 @@
             "teleporter"
           ],
           "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
             "controllers": [
               "human",
               "cpu"
             ],
             "cpuDifficulty": "hard",
-            "board": {
-              "width": 15,
-              "height": 13
-            },
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
             }
           },
-          "roomId": "0123456789abcdef0123456789abcdef",
-          "roomCode": "ABCDEFGH",
-          "roundId": 1,
-          "revision": 1,
-          "tick": 0,
-          "rulesVersion": 10,
+          "lastRound": null,
           "mapId": "generated_v2",
+          "phase": {
+            "type": "waiting"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
           "roundNumber": 0,
+          "rulesVersion": 10,
           "scores": [
             {
               "seat": "one",
@@ -94,67 +81,66 @@
               "wins": 0
             }
           ],
-          "lastRound": null,
           "seats": [
             {
-              "seat": "one",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
+              "connection": {
+                "type": "connected"
+              },
               "controller": {
                 "type": "human"
               },
-              "connection": {
-                "type": "connected"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
             },
             {
-              "seat": "two",
+              "connection": {
+                "type": "serverControlled"
+              },
+              "controller": {
+                "difficulty": "hard",
+                "type": "cpu"
+              },
               "occupied": true,
               "ready": true,
               "rematchReady": false,
-              "controller": {
-                "type": "cpu",
-                "difficulty": "hard"
-              },
-              "connection": {
-                "type": "serverControlled"
-              }
+              "seat": "two"
             }
           ],
-          "phase": {
-            "type": "waiting"
-          }
-        }
-      }
-    },
-    {
-      "caseId": "human-room-null-difficulty",
-      "value": {
-        "type": "roomState",
-        "room": {
           "settings": {
-            "startingSpeedLevel": 0,
-            "turnAssistUnits": 256,
-            "winsToFinish": 3,
             "bombFuseTicks": 180,
             "enabledItems": [],
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
-            }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
           },
-          "settingsRevision": 1,
           "settingsEditor": "one",
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "type": "roomState"
+      }
+    },
+    {
+      "caseId": "hard-admission",
+      "value": {
+        "lastActionId": null,
+        "resumeToken": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "room": {
           "availableItems": [
             "kick",
             "punch",
@@ -180,37 +166,40 @@
             "teleporter"
           ],
           "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
             "controllers": [
               "human",
-              "human"
+              "cpu"
             ],
-            "cpuDifficulty": null,
-            "board": {
-              "width": 15,
-              "height": 13
-            },
+            "cpuDifficulty": "hard",
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
             }
           },
-          "roomId": "0123456789abcdef0123456789abcdef",
-          "roomCode": "ABCDEFGH",
-          "roundId": 1,
-          "revision": 1,
-          "tick": 0,
-          "rulesVersion": 10,
+          "lastRound": null,
           "mapId": "generated_v2",
+          "phase": {
+            "type": "waiting"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
           "roundNumber": 0,
+          "rulesVersion": 10,
           "scores": [
             {
               "seat": "one",
@@ -221,44 +210,772 @@
               "wins": 0
             }
           ],
-          "lastRound": null,
           "seats": [
             {
-              "seat": "one",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
+              "connection": {
+                "type": "connected"
+              },
               "controller": {
                 "type": "human"
               },
-              "connection": {
-                "type": "connected"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
             },
             {
-              "seat": "two",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
-              "controller": {
-                "type": "human"
-              },
               "connection": {
-                "type": "connected"
-              }
+                "type": "serverControlled"
+              },
+              "controller": {
+                "difficulty": "hard",
+                "type": "cpu"
+              },
+              "occupied": true,
+              "ready": true,
+              "rematchReady": false,
+              "seat": "two"
             }
           ],
-          "phase": {
-            "type": "waiting"
-          }
-        }
+          "settings": {
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
+          },
+          "settingsEditor": "one",
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "sequence": 1,
+        "state": null,
+        "type": "admitted",
+        "youSeat": "one"
       }
     },
     {
-      "caseId": "v19-authenticated",
+      "caseId": "hard-snapshot",
       "value": {
-        "type": "authenticated",
-        "protocolVersion": 19
+        "events": [],
+        "room": {
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
+            "controllers": [
+              "human",
+              "cpu"
+            ],
+            "cpuDifficulty": "hard",
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            }
+          },
+          "lastRound": null,
+          "mapId": "generated_v2",
+          "phase": {
+            "type": "running"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
+          "roundNumber": 1,
+          "rulesVersion": 10,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "seats": [
+            {
+              "connection": {
+                "type": "connected"
+              },
+              "controller": {
+                "type": "human"
+              },
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
+            },
+            {
+              "connection": {
+                "type": "serverControlled"
+              },
+              "controller": {
+                "difficulty": "hard",
+                "type": "cpu"
+              },
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "two"
+            }
+          ],
+          "settings": {
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
+          },
+          "settingsEditor": null,
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "state": {
+          "actors": [
+            {
+              "alive": true,
+              "bombCapacity": 1,
+              "bombRange": 2,
+              "damageGraceRemainingTicks": 0,
+              "effects": [],
+              "heading": "east",
+              "id": 10,
+              "inventory": {
+                "equipment": null,
+                "weapon": null
+              },
+              "lastTeleportTick": null,
+              "liveBombCount": 0,
+              "position": {
+                "x": 1536,
+                "y": 1536
+              },
+              "seat": "one",
+              "speedLevel": 0,
+              "stormSlowRemainingTicks": 0,
+              "type": "visible",
+              "voluntaryActionsFrozen": false
+            },
+            {
+              "alive": true,
+              "bombCapacity": 1,
+              "bombRange": 2,
+              "damageGraceRemainingTicks": 0,
+              "effects": [],
+              "heading": "east",
+              "id": 11,
+              "inventory": {
+                "equipment": null,
+                "weapon": null
+              },
+              "lastTeleportTick": null,
+              "liveBombCount": 0,
+              "position": {
+                "x": 13824,
+                "y": 11776
+              },
+              "seat": "two",
+              "speedLevel": 0,
+              "stormSlowRemainingTicks": 0,
+              "type": "visible",
+              "voluntaryActionsFrozen": false
+            }
+          ],
+          "arena": {
+            "blocks": [
+              {
+                "column": 3,
+                "row": 1
+              },
+              {
+                "column": 4,
+                "row": 1
+              },
+              {
+                "column": 5,
+                "row": 1
+              },
+              {
+                "column": 7,
+                "row": 1
+              },
+              {
+                "column": 9,
+                "row": 1
+              },
+              {
+                "column": 10,
+                "row": 1
+              },
+              {
+                "column": 11,
+                "row": 1
+              },
+              {
+                "column": 3,
+                "row": 2
+              },
+              {
+                "column": 5,
+                "row": 2
+              },
+              {
+                "column": 9,
+                "row": 2
+              },
+              {
+                "column": 11,
+                "row": 2
+              },
+              {
+                "column": 1,
+                "row": 3
+              },
+              {
+                "column": 2,
+                "row": 3
+              },
+              {
+                "column": 3,
+                "row": 3
+              },
+              {
+                "column": 5,
+                "row": 3
+              },
+              {
+                "column": 6,
+                "row": 3
+              },
+              {
+                "column": 7,
+                "row": 3
+              },
+              {
+                "column": 8,
+                "row": 3
+              },
+              {
+                "column": 9,
+                "row": 3
+              },
+              {
+                "column": 11,
+                "row": 3
+              },
+              {
+                "column": 12,
+                "row": 3
+              },
+              {
+                "column": 13,
+                "row": 3
+              },
+              {
+                "column": 3,
+                "row": 4
+              },
+              {
+                "column": 5,
+                "row": 4
+              },
+              {
+                "column": 9,
+                "row": 4
+              },
+              {
+                "column": 11,
+                "row": 4
+              },
+              {
+                "column": 1,
+                "row": 5
+              },
+              {
+                "column": 2,
+                "row": 5
+              },
+              {
+                "column": 5,
+                "row": 5
+              },
+              {
+                "column": 6,
+                "row": 5
+              },
+              {
+                "column": 8,
+                "row": 5
+              },
+              {
+                "column": 9,
+                "row": 5
+              },
+              {
+                "column": 12,
+                "row": 5
+              },
+              {
+                "column": 13,
+                "row": 5
+              },
+              {
+                "column": 1,
+                "row": 6
+              },
+              {
+                "column": 7,
+                "row": 6
+              },
+              {
+                "column": 13,
+                "row": 6
+              },
+              {
+                "column": 1,
+                "row": 7
+              },
+              {
+                "column": 2,
+                "row": 7
+              },
+              {
+                "column": 5,
+                "row": 7
+              },
+              {
+                "column": 6,
+                "row": 7
+              },
+              {
+                "column": 8,
+                "row": 7
+              },
+              {
+                "column": 9,
+                "row": 7
+              },
+              {
+                "column": 12,
+                "row": 7
+              },
+              {
+                "column": 13,
+                "row": 7
+              },
+              {
+                "column": 3,
+                "row": 8
+              },
+              {
+                "column": 5,
+                "row": 8
+              },
+              {
+                "column": 9,
+                "row": 8
+              },
+              {
+                "column": 11,
+                "row": 8
+              },
+              {
+                "column": 1,
+                "row": 9
+              },
+              {
+                "column": 2,
+                "row": 9
+              },
+              {
+                "column": 3,
+                "row": 9
+              },
+              {
+                "column": 5,
+                "row": 9
+              },
+              {
+                "column": 6,
+                "row": 9
+              },
+              {
+                "column": 7,
+                "row": 9
+              },
+              {
+                "column": 8,
+                "row": 9
+              },
+              {
+                "column": 9,
+                "row": 9
+              },
+              {
+                "column": 11,
+                "row": 9
+              },
+              {
+                "column": 12,
+                "row": 9
+              },
+              {
+                "column": 13,
+                "row": 9
+              },
+              {
+                "column": 3,
+                "row": 10
+              },
+              {
+                "column": 5,
+                "row": 10
+              },
+              {
+                "column": 9,
+                "row": 10
+              },
+              {
+                "column": 11,
+                "row": 10
+              },
+              {
+                "column": 3,
+                "row": 11
+              },
+              {
+                "column": 4,
+                "row": 11
+              },
+              {
+                "column": 5,
+                "row": 11
+              },
+              {
+                "column": 7,
+                "row": 11
+              },
+              {
+                "column": 9,
+                "row": 11
+              },
+              {
+                "column": 10,
+                "row": 11
+              },
+              {
+                "column": 11,
+                "row": 11
+              }
+            ],
+            "height": 13,
+            "terrain": [
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall"
+            ],
+            "width": 15
+          },
+          "bombs": [],
+          "flames": [],
+          "lairs": [],
+          "mobs": [],
+          "oilBarrels": [],
+          "physicalTick": 0,
+          "pickups": [],
+          "remainingTicks": 10800,
+          "runningUpdates": 0,
+          "spikePits": [
+            {
+              "cell": {
+                "column": 4,
+                "row": 5
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            },
+            {
+              "cell": {
+                "column": 10,
+                "row": 5
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            },
+            {
+              "cell": {
+                "column": 4,
+                "row": 7
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            },
+            {
+              "cell": {
+                "column": 10,
+                "row": 7
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            }
+          ],
+          "stormCloud": null
+        },
+        "type": "snapshot"
       }
     }
   ],
@@ -266,30 +983,7 @@
     {
       "caseId": "mixed-cpu-difficulties",
       "value": {
-        "type": "roomState",
         "room": {
-          "settings": {
-            "startingSpeedLevel": 0,
-            "turnAssistUnits": 256,
-            "winsToFinish": 3,
-            "bombFuseTicks": 180,
-            "enabledItems": [],
-            "environment": {
-              "stormCloud": false,
-              "lairs": {
-                "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
-              },
-              "spikePits": {
-                "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
-            }
-          },
-          "settingsRevision": 1,
-          "settingsEditor": "one",
           "availableItems": [
             "kick",
             "punch",
@@ -315,37 +1009,40 @@
             "teleporter"
           ],
           "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
             "controllers": [
               "human",
               "cpu"
             ],
             "cpuDifficulty": "hard",
-            "board": {
-              "width": 15,
-              "height": 13
-            },
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
             }
           },
-          "roomId": "0123456789abcdef0123456789abcdef",
-          "roomCode": "ABCDEFGH",
-          "roundId": 1,
-          "revision": 1,
-          "tick": 0,
-          "rulesVersion": 10,
+          "lastRound": null,
           "mapId": "generated_v2",
+          "phase": {
+            "type": "waiting"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
           "roundNumber": 0,
+          "rulesVersion": 10,
           "scores": [
             {
               "seat": "one",
@@ -356,67 +1053,64 @@
               "wins": 0
             }
           ],
-          "lastRound": null,
           "seats": [
             {
-              "seat": "one",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
+              "connection": {
+                "type": "connected"
+              },
               "controller": {
                 "type": "human"
               },
-              "connection": {
-                "type": "connected"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
             },
             {
-              "seat": "two",
+              "connection": {
+                "type": "serverControlled"
+              },
+              "controller": {
+                "difficulty": "standard",
+                "type": "cpu"
+              },
               "occupied": true,
               "ready": true,
               "rematchReady": false,
-              "controller": {
-                "type": "cpu",
-                "difficulty": "standard"
-              },
-              "connection": {
-                "type": "serverControlled"
-              }
+              "seat": "two"
             }
           ],
-          "phase": {
-            "type": "waiting"
-          }
-        }
+          "settings": {
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
+          },
+          "settingsEditor": "one",
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "type": "roomState"
       }
     },
     {
       "caseId": "cpu-room-null-difficulty",
       "value": {
-        "type": "roomState",
         "room": {
-          "settings": {
-            "startingSpeedLevel": 0,
-            "turnAssistUnits": 256,
-            "winsToFinish": 3,
-            "bombFuseTicks": 180,
-            "enabledItems": [],
-            "environment": {
-              "stormCloud": false,
-              "lairs": {
-                "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
-              },
-              "spikePits": {
-                "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
-            }
-          },
-          "settingsRevision": 1,
-          "settingsEditor": "one",
           "availableItems": [
             "kick",
             "punch",
@@ -442,37 +1136,40 @@
             "teleporter"
           ],
           "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
             "controllers": [
               "human",
               "cpu"
             ],
             "cpuDifficulty": null,
-            "board": {
-              "width": 15,
-              "height": 13
-            },
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
             }
           },
-          "roomId": "0123456789abcdef0123456789abcdef",
-          "roomCode": "ABCDEFGH",
-          "roundId": 1,
-          "revision": 1,
-          "tick": 0,
-          "rulesVersion": 10,
+          "lastRound": null,
           "mapId": "generated_v2",
+          "phase": {
+            "type": "waiting"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
           "roundNumber": 0,
+          "rulesVersion": 10,
           "scores": [
             {
               "seat": "one",
@@ -483,67 +1180,64 @@
               "wins": 0
             }
           ],
-          "lastRound": null,
           "seats": [
             {
-              "seat": "one",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
+              "connection": {
+                "type": "connected"
+              },
               "controller": {
                 "type": "human"
               },
-              "connection": {
-                "type": "connected"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
             },
             {
-              "seat": "two",
+              "connection": {
+                "type": "serverControlled"
+              },
+              "controller": {
+                "difficulty": "hard",
+                "type": "cpu"
+              },
               "occupied": true,
               "ready": true,
               "rematchReady": false,
-              "controller": {
-                "type": "cpu",
-                "difficulty": "hard"
-              },
-              "connection": {
-                "type": "serverControlled"
-              }
+              "seat": "two"
             }
           ],
-          "phase": {
-            "type": "waiting"
-          }
-        }
+          "settings": {
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
+          },
+          "settingsEditor": "one",
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "type": "roomState"
       }
     },
     {
       "caseId": "extra-room-planner-field",
       "value": {
-        "type": "roomState",
         "room": {
-          "settings": {
-            "startingSpeedLevel": 0,
-            "turnAssistUnits": 256,
-            "winsToFinish": 3,
-            "bombFuseTicks": 180,
-            "enabledItems": [],
-            "environment": {
-              "stormCloud": false,
-              "lairs": {
-                "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
-              },
-              "spikePits": {
-                "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
-            }
-          },
-          "settingsRevision": 1,
-          "settingsEditor": "one",
           "availableItems": [
             "kick",
             "punch",
@@ -569,38 +1263,41 @@
             "teleporter"
           ],
           "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
             "controllers": [
               "human",
               "cpu"
             ],
             "cpuDifficulty": "hard",
-            "board": {
-              "width": 15,
-              "height": 13
-            },
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
             },
             "planner": "aggressive"
           },
-          "roomId": "0123456789abcdef0123456789abcdef",
-          "roomCode": "ABCDEFGH",
-          "roundId": 1,
-          "revision": 1,
-          "tick": 0,
-          "rulesVersion": 10,
+          "lastRound": null,
           "mapId": "generated_v2",
+          "phase": {
+            "type": "waiting"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
           "roundNumber": 0,
+          "rulesVersion": 10,
           "scores": [
             {
               "seat": "one",
@@ -611,67 +1308,65 @@
               "wins": 0
             }
           ],
-          "lastRound": null,
           "seats": [
             {
-              "seat": "one",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
+              "connection": {
+                "type": "connected"
+              },
               "controller": {
                 "type": "human"
               },
-              "connection": {
-                "type": "connected"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
             },
             {
-              "seat": "two",
+              "connection": {
+                "type": "serverControlled"
+              },
+              "controller": {
+                "difficulty": "hard",
+                "type": "cpu"
+              },
               "occupied": true,
               "ready": true,
               "rematchReady": false,
-              "controller": {
-                "type": "cpu",
-                "difficulty": "hard"
-              },
-              "connection": {
-                "type": "serverControlled"
-              }
+              "seat": "two"
             }
           ],
-          "phase": {
-            "type": "waiting"
-          }
-        }
+          "settings": {
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
+          },
+          "settingsEditor": "one",
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "type": "roomState"
       }
     },
     {
       "caseId": "private-cpu-route",
       "value": {
-        "type": "roomState",
+        "events": [],
         "room": {
-          "settings": {
-            "startingSpeedLevel": 0,
-            "turnAssistUnits": 256,
-            "winsToFinish": 3,
-            "bombFuseTicks": 180,
-            "enabledItems": [],
-            "environment": {
-              "stormCloud": false,
-              "lairs": {
-                "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
-              },
-              "spikePits": {
-                "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
-            }
-          },
-          "settingsRevision": 1,
-          "settingsEditor": "one",
           "availableItems": [
             "kick",
             "punch",
@@ -697,37 +1392,40 @@
             "teleporter"
           ],
           "configuration": {
+            "board": {
+              "height": 13,
+              "width": 15
+            },
             "controllers": [
               "human",
               "cpu"
             ],
             "cpuDifficulty": "hard",
-            "board": {
-              "width": 15,
-              "height": 13
-            },
             "environment": {
-              "stormCloud": false,
               "lairs": {
                 "enabled": false,
-                "spawnSeconds": 10,
-                "maxLivingMobs": 1
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
               },
               "spikePits": {
                 "enabled": true,
-                "warningTicks": 6,
-                "raisedTicks": 60
-              }
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
             }
           },
-          "roomId": "0123456789abcdef0123456789abcdef",
-          "roomCode": "ABCDEFGH",
-          "roundId": 1,
-          "revision": 1,
-          "tick": 0,
-          "rulesVersion": 10,
+          "lastRound": null,
           "mapId": "generated_v2",
-          "roundNumber": 0,
+          "phase": {
+            "type": "running"
+          },
+          "revision": 1,
+          "roomCode": "ABCDEFGH",
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roundId": 1,
+          "roundNumber": 1,
+          "rulesVersion": 10,
           "scores": [
             {
               "seat": "one",
@@ -738,51 +1436,654 @@
               "wins": 0
             }
           ],
-          "lastRound": null,
           "seats": [
             {
-              "seat": "one",
-              "occupied": true,
-              "ready": false,
-              "rematchReady": false,
+              "connection": {
+                "type": "connected"
+              },
               "controller": {
                 "type": "human"
               },
-              "connection": {
-                "type": "connected"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "one"
             },
             {
-              "seat": "two",
-              "occupied": true,
-              "ready": true,
-              "rematchReady": false,
+              "connection": {
+                "type": "serverControlled"
+              },
               "controller": {
-                "type": "cpu",
                 "difficulty": "hard",
                 "route": [
                   {
                     "column": 2,
                     "row": 1
                   }
-                ]
+                ],
+                "type": "cpu"
               },
-              "connection": {
-                "type": "serverControlled"
-              }
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "seat": "two"
             }
           ],
-          "phase": {
-            "type": "waiting"
-          }
-        }
+          "settings": {
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "lairs": {
+                "enabled": false,
+                "maxLivingMobs": 1,
+                "spawnSeconds": 10
+              },
+              "spikePits": {
+                "enabled": true,
+                "raisedTicks": 60,
+                "warningTicks": 6
+              },
+              "stormCloud": false
+            },
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3
+          },
+          "settingsEditor": null,
+          "settingsRevision": 1,
+          "tick": 0
+        },
+        "state": {
+          "actors": [
+            {
+              "alive": true,
+              "bombCapacity": 1,
+              "bombRange": 2,
+              "damageGraceRemainingTicks": 0,
+              "effects": [],
+              "heading": "east",
+              "id": 10,
+              "inventory": {
+                "equipment": null,
+                "weapon": null
+              },
+              "lastTeleportTick": null,
+              "liveBombCount": 0,
+              "position": {
+                "x": 1536,
+                "y": 1536
+              },
+              "seat": "one",
+              "speedLevel": 0,
+              "stormSlowRemainingTicks": 0,
+              "type": "visible",
+              "voluntaryActionsFrozen": false
+            },
+            {
+              "alive": true,
+              "bombCapacity": 1,
+              "bombRange": 2,
+              "damageGraceRemainingTicks": 0,
+              "effects": [],
+              "heading": "east",
+              "id": 11,
+              "inventory": {
+                "equipment": null,
+                "weapon": null
+              },
+              "lastTeleportTick": null,
+              "liveBombCount": 0,
+              "position": {
+                "x": 13824,
+                "y": 11776
+              },
+              "seat": "two",
+              "speedLevel": 0,
+              "stormSlowRemainingTicks": 0,
+              "type": "visible",
+              "voluntaryActionsFrozen": false
+            }
+          ],
+          "arena": {
+            "blocks": [
+              {
+                "column": 3,
+                "row": 1
+              },
+              {
+                "column": 4,
+                "row": 1
+              },
+              {
+                "column": 5,
+                "row": 1
+              },
+              {
+                "column": 7,
+                "row": 1
+              },
+              {
+                "column": 9,
+                "row": 1
+              },
+              {
+                "column": 10,
+                "row": 1
+              },
+              {
+                "column": 11,
+                "row": 1
+              },
+              {
+                "column": 3,
+                "row": 2
+              },
+              {
+                "column": 5,
+                "row": 2
+              },
+              {
+                "column": 9,
+                "row": 2
+              },
+              {
+                "column": 11,
+                "row": 2
+              },
+              {
+                "column": 1,
+                "row": 3
+              },
+              {
+                "column": 2,
+                "row": 3
+              },
+              {
+                "column": 3,
+                "row": 3
+              },
+              {
+                "column": 5,
+                "row": 3
+              },
+              {
+                "column": 6,
+                "row": 3
+              },
+              {
+                "column": 7,
+                "row": 3
+              },
+              {
+                "column": 8,
+                "row": 3
+              },
+              {
+                "column": 9,
+                "row": 3
+              },
+              {
+                "column": 11,
+                "row": 3
+              },
+              {
+                "column": 12,
+                "row": 3
+              },
+              {
+                "column": 13,
+                "row": 3
+              },
+              {
+                "column": 3,
+                "row": 4
+              },
+              {
+                "column": 5,
+                "row": 4
+              },
+              {
+                "column": 9,
+                "row": 4
+              },
+              {
+                "column": 11,
+                "row": 4
+              },
+              {
+                "column": 1,
+                "row": 5
+              },
+              {
+                "column": 2,
+                "row": 5
+              },
+              {
+                "column": 5,
+                "row": 5
+              },
+              {
+                "column": 6,
+                "row": 5
+              },
+              {
+                "column": 8,
+                "row": 5
+              },
+              {
+                "column": 9,
+                "row": 5
+              },
+              {
+                "column": 12,
+                "row": 5
+              },
+              {
+                "column": 13,
+                "row": 5
+              },
+              {
+                "column": 1,
+                "row": 6
+              },
+              {
+                "column": 7,
+                "row": 6
+              },
+              {
+                "column": 13,
+                "row": 6
+              },
+              {
+                "column": 1,
+                "row": 7
+              },
+              {
+                "column": 2,
+                "row": 7
+              },
+              {
+                "column": 5,
+                "row": 7
+              },
+              {
+                "column": 6,
+                "row": 7
+              },
+              {
+                "column": 8,
+                "row": 7
+              },
+              {
+                "column": 9,
+                "row": 7
+              },
+              {
+                "column": 12,
+                "row": 7
+              },
+              {
+                "column": 13,
+                "row": 7
+              },
+              {
+                "column": 3,
+                "row": 8
+              },
+              {
+                "column": 5,
+                "row": 8
+              },
+              {
+                "column": 9,
+                "row": 8
+              },
+              {
+                "column": 11,
+                "row": 8
+              },
+              {
+                "column": 1,
+                "row": 9
+              },
+              {
+                "column": 2,
+                "row": 9
+              },
+              {
+                "column": 3,
+                "row": 9
+              },
+              {
+                "column": 5,
+                "row": 9
+              },
+              {
+                "column": 6,
+                "row": 9
+              },
+              {
+                "column": 7,
+                "row": 9
+              },
+              {
+                "column": 8,
+                "row": 9
+              },
+              {
+                "column": 9,
+                "row": 9
+              },
+              {
+                "column": 11,
+                "row": 9
+              },
+              {
+                "column": 12,
+                "row": 9
+              },
+              {
+                "column": 13,
+                "row": 9
+              },
+              {
+                "column": 3,
+                "row": 10
+              },
+              {
+                "column": 5,
+                "row": 10
+              },
+              {
+                "column": 9,
+                "row": 10
+              },
+              {
+                "column": 11,
+                "row": 10
+              },
+              {
+                "column": 3,
+                "row": 11
+              },
+              {
+                "column": 4,
+                "row": 11
+              },
+              {
+                "column": 5,
+                "row": 11
+              },
+              {
+                "column": 7,
+                "row": 11
+              },
+              {
+                "column": 9,
+                "row": 11
+              },
+              {
+                "column": 10,
+                "row": 11
+              },
+              {
+                "column": 11,
+                "row": 11
+              }
+            ],
+            "height": 13,
+            "terrain": [
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "floor",
+              "wall",
+              "wall",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "floor",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall",
+              "wall"
+            ],
+            "width": 15
+          },
+          "bombs": [],
+          "flames": [],
+          "lairs": [],
+          "mobs": [],
+          "oilBarrels": [],
+          "physicalTick": 0,
+          "pickups": [],
+          "remainingTicks": 10800,
+          "runningUpdates": 0,
+          "spikePits": [
+            {
+              "cell": {
+                "column": 4,
+                "row": 5
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            },
+            {
+              "cell": {
+                "column": 10,
+                "row": 5
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            },
+            {
+              "cell": {
+                "column": 4,
+                "row": 7
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            },
+            {
+              "cell": {
+                "column": 10,
+                "row": 7
+              },
+              "phase": "idle",
+              "remainingTicks": 0
+            }
+          ],
+          "stormCloud": null
+        },
+        "type": "snapshot"
       }
     },
     {
       "caseId": "v18-identity",
       "value": {
-        "type": "authenticated",
-        "protocolVersion": 18
+        "protocolVersion": 18,
+        "type": "authenticated"
       }
     }
   ]

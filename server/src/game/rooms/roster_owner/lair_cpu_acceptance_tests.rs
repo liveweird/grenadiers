@@ -44,7 +44,7 @@ struct Episode {
 }
 
 impl Episode {
-    fn new(case: Case) -> Self {
+    fn new(case: Case) -> Result<Self, crate::game::rooms::roster_runtime::RosterRuntimeError> {
         let controls = std::iter::once(SeatControl::Human)
             .chain(std::iter::repeat_n(SeatControl::Cpu, case.count - 1))
             .collect::<Vec<_>>();
@@ -88,6 +88,9 @@ impl Episode {
         let profile = match case.difficulty {
             CpuDifficulty::Easy => CpuProfile::LAIRS_EASY,
             CpuDifficulty::Standard => CpuProfile::LAIRS_STANDARD,
+            CpuDifficulty::Hard => return Err(
+                crate::game::rooms::roster_runtime::RosterRuntimeError::UnsupportedConfiguration,
+            ),
         };
         let seats = configuration.cpu_seats().collect::<Vec<_>>();
         let cpus = seats
@@ -118,7 +121,7 @@ impl Episode {
             .map(|seat| state.actors()[seat.index()].position())
             .collect::<Vec<_>>();
         let cpu_count = seats.len();
-        Self {
+        Ok(Self {
             driver,
             planner,
             seats,
@@ -129,7 +132,7 @@ impl Episode {
             max_work: 0,
             planted: false,
             survived_detonation: false,
-        }
+        })
     }
 
     fn tick(&mut self) {
@@ -222,7 +225,7 @@ fn queued_cpu19_moves_on_every_rules8_board_count_difficulty_and_environment() {
                             cloud,
                             lairs,
                         };
-                        let mut episode = Episode::new(case);
+                        let mut episode = Episode::new(case).unwrap();
                         episode.run(300);
                         assert!(episode.moved.iter().all(|moved| *moved), "{case:?}");
                         assert!(episode.delivered > 0, "{case:?}");
@@ -243,7 +246,8 @@ fn clear_rules8_scene_plants_and_exits_its_own_blast() {
         difficulty: CpuDifficulty::Standard,
         cloud: StormCloudConfig::Disabled,
         lairs: true,
-    });
+    })
+    .unwrap();
     episode.run(2_400);
     assert!(episode.planted);
     assert!(episode.survived_detonation);
@@ -269,7 +273,7 @@ fn queued_cpu19_keeps_progressing_after_real_mobs_spawn() {
                 cloud: StormCloudConfig::Disabled,
                 lairs: true,
             };
-            let mut episode = Episode::new(case);
+            let mut episode = Episode::new(case).unwrap();
             for _ in 0..900 {
                 episode.advance_without_worker(1);
                 if episode.mob_count() > 0 {
@@ -310,7 +314,8 @@ fn invalid_contact_on_a_stopped_waiting_route_holds_stop_and_cannot_submit_a_leg
         difficulty: CpuDifficulty::Standard,
         cloud: StormCloudConfig::Disabled,
         lairs: true,
-    });
+    })
+    .unwrap();
     let mut found = None;
     for _ in 0..2_400 {
         episode.tick();
@@ -342,7 +347,8 @@ fn scheduled_route_stop_confirmation_retains_its_contact_lease() {
         difficulty: CpuDifficulty::Standard,
         cloud: StormCloudConfig::Disabled,
         lairs: true,
-    });
+    })
+    .unwrap();
     let mut confirmed = false;
     let mut awaiting_confirmation = None;
     for _ in 0..2_400 {

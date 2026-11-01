@@ -36,7 +36,7 @@ pub(super) fn owner(
         bytes.fill(entropy.fetch_add(1, Ordering::Relaxed));
         Ok(())
     });
-    let (handle, owner, shutdown) = owner_with_entropy(controls, difficulty, random_fill);
+    let (handle, owner, shutdown) = owner_with_entropy(controls, difficulty, random_fill).unwrap();
     std::mem::forget(shutdown);
     (handle, owner)
 }
@@ -45,11 +45,14 @@ fn owner_with_entropy(
     controls: &[SeatControl],
     difficulty: Option<CpuDifficulty>,
     random_fill: Arc<RandomFill>,
-) -> (
-    super::RosterOwnerHandle,
-    PreparedRosterOwner,
-    watch::Sender<bool>,
-) {
+) -> Result<
+    (
+        super::RosterOwnerHandle,
+        PreparedRosterOwner,
+        watch::Sender<bool>,
+    ),
+    crate::game::rooms::roster_runtime::RosterRuntimeError,
+> {
     let configuration =
         RoomConfiguration::new(controls, difficulty, BoardSize::FifteenByThirteen).unwrap();
     let identity = RosterIdentity {
@@ -71,6 +74,11 @@ fn owner_with_entropy(
     let profile = match difficulty {
         Some(CpuDifficulty::Easy) => CpuProfile::MULTIPLAYER_EASY,
         Some(CpuDifficulty::Standard) => CpuProfile::MULTIPLAYER_STANDARD,
+        Some(CpuDifficulty::Hard) => {
+            return Err(
+                crate::game::rooms::roster_runtime::RosterRuntimeError::UnsupportedConfiguration,
+            );
+        }
         None => CpuProfile::MULTIPLAYER_STANDARD,
     };
     let cpus = configuration
@@ -89,7 +97,7 @@ fn owner_with_entropy(
     let (shutdown, receiver) = watch::channel(false);
     let (handle, owner) =
         PreparedRosterOwner::new(runtime, cpus, Instant::now(), random_fill, receiver).unwrap();
-    (handle, owner, shutdown)
+    Ok((handle, owner, shutdown))
 }
 
 pub(super) async fn advance_tick() {
@@ -188,7 +196,8 @@ async fn departed_token_is_a_tombstone_and_cannot_alias_a_later_human() {
         bytes.fill([11, 22, 11, 33][draw]);
         Ok(())
     });
-    let (handle, prepared, _shutdown) = owner_with_entropy(&[SeatControl::Human; 3], None, fill);
+    let (handle, prepared, _shutdown) =
+        owner_with_entropy(&[SeatControl::Human; 3], None, fill).unwrap();
     let task = prepared.start(|| {});
     let first_binding = binding(1);
     let first = handle
@@ -280,7 +289,8 @@ async fn abort_before_first_poll_and_normal_shutdown_each_run_cleanup_once() {
             bytes.fill(1);
             Ok(())
         }),
-    );
+    )
+    .unwrap();
     drop(handle);
     let aborted = Arc::new(AtomicUsize::new(0));
     let count = Arc::clone(&aborted);
@@ -299,7 +309,8 @@ async fn abort_before_first_poll_and_normal_shutdown_each_run_cleanup_once() {
             bytes.fill(2);
             Ok(())
         }),
-    );
+    )
+    .unwrap();
     let cleaned = Arc::new(AtomicUsize::new(0));
     let count = Arc::clone(&cleaned);
     let task = prepared.start(move || {

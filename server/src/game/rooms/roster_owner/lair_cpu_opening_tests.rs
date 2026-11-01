@@ -59,7 +59,7 @@ impl OpeningEpisode {
         cloud: bool,
         arena_seed: u8,
         cpu_seed: u8,
-    ) -> Self {
+    ) -> Result<Self, crate::game::rooms::roster_runtime::RosterRuntimeError> {
         let configuration = RoomConfiguration::new(
             &[
                 SeatControl::Human,
@@ -114,6 +114,9 @@ impl OpeningEpisode {
         let profile = match difficulty {
             CpuDifficulty::Easy => CpuProfile::LAIRS_EASY,
             CpuDifficulty::Standard => CpuProfile::LAIRS_STANDARD,
+            CpuDifficulty::Hard => return Err(
+                crate::game::rooms::roster_runtime::RosterRuntimeError::UnsupportedConfiguration,
+            ),
         };
         let cpus = seats
             .into_iter()
@@ -139,7 +142,7 @@ impl OpeningEpisode {
         let state = &inspection.simulation.unwrap().state;
         let ids = seats.map(|seat| state.actors()[seat.index()].id());
         let last_positions = seats.map(|seat| state.actors()[seat.index()].position());
-        Self {
+        Ok(Self {
             driver,
             planner,
             seats,
@@ -148,7 +151,7 @@ impl OpeningEpisode {
             position_changes: [0; 3],
             bombs: Vec::new(),
             eliminated: Vec::new(),
-        }
+        })
     }
 
     fn tick(&mut self) {
@@ -244,6 +247,7 @@ fn default_four_seat_cpu_opening_recovers_from_simultaneous_route_invalidation()
             arena_seed,
             53,
         )
+        .unwrap()
         .run(390);
         assert!(
             result.bombs.len() >= 3,
@@ -310,7 +314,9 @@ fn every_board_and_difficulty_survives_each_cpu_first_owned_detonation() {
         for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
             // Running starts at physical tick 180. Tick 420 is beyond the
             // opening bombs' flames but before the first default lair spawn.
-            let result = OpeningEpisode::new(board, difficulty, true, 0, 53).run(240);
+            let result = OpeningEpisode::new(board, difficulty, true, 0, 53)
+                .unwrap()
+                .run(240);
             for seat in [SeatId::Two, SeatId::Three, SeatId::Four] {
                 let Some(first) = result
                     .bombs

@@ -3,7 +3,7 @@ mod profile;
 pub(super) mod record;
 mod recording;
 pub(super) mod runner;
-mod validation;
+pub(in crate::game::rooms) mod validation;
 
 #[allow(unused_imports)]
 pub(in crate::game::rooms) use record::{

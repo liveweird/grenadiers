@@ -99,6 +99,9 @@ fn validate_cpus(
             Some(CpuProfile::MULTIPLAYER_STANDARD)
         }
         (_, _, _, _, None) => None,
+        (_, _, _, _, Some(CpuDifficulty::Hard)) => {
+            return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
+        }
     };
     for (index, cpu) in cpus.iter().enumerate() {
         if cpu.seat() != configured[index]

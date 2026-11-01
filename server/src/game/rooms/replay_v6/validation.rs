@@ -31,6 +31,7 @@ pub(super) fn validate_header(header: &ReplayHeader) -> Result<(), ()> {
 fn validate_configuration(header: &ReplayHeader) -> Result<(), ()> {
     let base = header.configuration.base();
     let expected_difficulty = base.cpu_difficulty();
+    super::super::replay_v4::validation::validate_archived_difficulty(expected_difficulty)?;
     let mut provenance = header.cpus.iter();
     for &seat in base.player_count().seats() {
         match base.controller(seat) {

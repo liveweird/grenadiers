@@ -194,6 +194,7 @@ impl GameRooms {
         let profile = match base.cpu_difficulty() {
             Some(CpuDifficulty::Easy) => CpuProfile::RELIABLE_V27_EASY,
             Some(CpuDifficulty::Standard) => CpuProfile::RELIABLE_V27_STANDARD,
+            Some(CpuDifficulty::Hard) => return Err(RoomError::UnsupportedConfiguration),
             None => CpuProfile::RELIABLE_V27_STANDARD,
         };
         let mut cpus = Vec::new();

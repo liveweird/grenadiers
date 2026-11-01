@@ -76,6 +76,7 @@ impl CpuPolicy {
 pub enum CpuDifficulty {
     Easy,
     Standard,
+    Hard,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

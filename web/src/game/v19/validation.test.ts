@@ -72,6 +72,49 @@ describe('gameplay v19 contract validation', () => {
     })
   })
 
+  it.each([
+    ['extra seat status', 'invalidConfiguration', (frame: Snapshot) => {
+      frame.room.seats.push({
+        seat: 'three', occupied: false, ready: false, rematchReady: false,
+        controller: { type: 'human' }, connection: { type: 'vacant' },
+      })
+    }],
+    ['duplicate score seat', 'invalidConfiguration', (frame: Snapshot) => {
+      frame.room.scores[1]!.seat = 'one'
+    }],
+    ['misordered score seats', 'invalidConfiguration', (frame: Snapshot) => {
+      frame.room.scores.reverse()
+    }],
+    ['misordered actors', 'invalidRoster', (frame: Snapshot) => {
+      frame.state.actors.reverse()
+    }],
+    ['invalid lifecycle', 'invalidLifecycle', (frame: Snapshot) => {
+      frame.room.roundNumber = 2
+    }],
+    ['invalid world binding', 'invalidStateBinding', (frame: Snapshot) => {
+      frame.state.physicalTick += 1
+    }],
+    ['leaked bomb count', 'invalidWorldState', (frame: Snapshot) => {
+      const actor = frame.state.actors[0]
+      if (actor?.type === 'visible') actor.liveBombCount = 1
+    }],
+    ['invalid lair facts', 'invalidLairState', (frame: Snapshot) => {
+      frame.state.lairs[0]!.livingMobs = 1
+    }],
+    ['invalid pit cardinality', 'invalidSpikePitState', (frame: Snapshot) => {
+      frame.state.spikePits.push({
+        cell: { column: 3, row: 3 }, phase: 'idle', remainingTicks: 0,
+      })
+    }],
+  ])('rejects schema-valid rules-10 semantics: %s', (_name, error, mutate) => {
+    const frame = hardSnapshot()
+    mutate(frame)
+    expect(validateServer(frame)).toBe(true)
+    expect(validateGameplayV19ServerMessage(frame)).toEqual({
+      valid: false, source: 'semantics', error,
+    })
+  })
+
   it('rejects private CPU planning data at the closed schema boundary', () => {
     const frame: unknown = JSON.parse(JSON.stringify(hardSnapshot()))
     const record = frame as { room: { seats: Array<{ controller: Record<string, unknown> }> } }

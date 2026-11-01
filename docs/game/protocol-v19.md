@@ -19,8 +19,8 @@ value. Mixed CPU difficulties and private planner data are rejected.
 ## Activation boundary
 
 The dormant web selector has three localized choices and defaults to Standard, but no live UI
-imports it. Activation requires a Rust v19 adapter, Hard policy integration, Rust-produced
-client/server conformance corpora, authentication negotiation for 19, and replacement of the
-v18 generated validator import. The production bundle must replace v18 with v19 rather than
-shipping both validators. Current fixtures exercise the closed web boundary only; Rust producer
-proof remains pending.
+imports it. The Rust v19 adapter, Rust-validated client corpus and Rust-produced server proof are
+checked in; the typed server corpus covers Hard room state, admission, snapshot, mixed difficulty, null,
+unknown-field and recipient-privacy boundaries. Activation still requires Hard policy integration,
+authentication negotiation for 19, and replacement of the v18 generated validator import. The
+production bundle must replace v18 with v19 rather than shipping both validators.

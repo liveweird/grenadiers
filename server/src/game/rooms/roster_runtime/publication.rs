@@ -24,7 +24,8 @@ pub(super) fn room_view(
         settings_revision: counter(settings_revision)?,
         settings_editor: lifecycle.settings_editor().map(wire_seat),
         available_items: available_items()?,
-        configuration: v14::RoomConfiguration::from_domain(identity.configuration),
+        configuration: v14::RoomConfiguration::from_domain(identity.configuration)
+            .map_err(|_| RosterRuntimeError::UnsupportedConfiguration)?,
         room_id: identity.id.clone(),
         room_code: identity.code.clone(),
         round_id: counter64(lifecycle.round_attempt())?,
@@ -168,6 +169,9 @@ pub(super) fn seats(
                     difficulty: match lifecycle.configuration().cpu_difficulty().unwrap() {
                         grenadiers_core::room::CpuDifficulty::Easy => v14::Difficulty::Easy,
                         grenadiers_core::room::CpuDifficulty::Standard => v14::Difficulty::Standard,
+                        grenadiers_core::room::CpuDifficulty::Hard => {
+                            return Err(RosterRuntimeError::UnsupportedConfiguration);
+                        }
                     },
                 },
             };

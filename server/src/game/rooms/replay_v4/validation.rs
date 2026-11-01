@@ -48,6 +48,7 @@ pub(super) fn validate_configuration(
         return Err(());
     }
     let expected_difficulty = configuration.cpu_difficulty();
+    validate_archived_difficulty(expected_difficulty)?;
     let mut provenance = cpus.iter();
     for &seat in configuration.player_count().seats() {
         match configuration.controller(seat) {
@@ -81,4 +82,28 @@ pub(super) fn validate_configuration(
         }
     }
     Ok(())
+}
+
+pub(in crate::game::rooms) fn validate_archived_difficulty(
+    difficulty: Option<grenadiers_core::room::CpuDifficulty>,
+) -> Result<(), ()> {
+    if difficulty == Some(grenadiers_core::room::CpuDifficulty::Hard) {
+        Err(())
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod hard_tests {
+    use super::validate_archived_difficulty;
+    use grenadiers_core::room::CpuDifficulty;
+
+    #[test]
+    fn archived_replays_reject_hard_without_a_standard_fallback() {
+        assert!(validate_archived_difficulty(Some(CpuDifficulty::Hard)).is_err());
+        assert!(validate_archived_difficulty(Some(CpuDifficulty::Easy)).is_ok());
+        assert!(validate_archived_difficulty(Some(CpuDifficulty::Standard)).is_ok());
+        assert!(validate_archived_difficulty(None).is_ok());
+    }
 }

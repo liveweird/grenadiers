@@ -16,7 +16,7 @@ pub(super) fn project(legacy: &v13::RoomView) -> Result<v14::RoomView, v14::Proj
         settings_revision: legacy.settings_revision,
         settings_editor: legacy.settings_editor.map(seat),
         available_items: legacy.available_items,
-        configuration: configuration(legacy.mode),
+        configuration: configuration(legacy.mode)?,
         room_id: legacy.room_id.clone(),
         room_code: legacy.room_code.clone(),
         round_id: legacy.round_id,
@@ -77,7 +77,7 @@ fn normalized(legacy: &v13::RoomView) -> v13::RoomView {
     room
 }
 
-fn configuration(mode: v13::RoomMode) -> v14::RoomConfiguration {
+fn configuration(mode: v13::RoomMode) -> Result<v14::RoomConfiguration, v14::ProjectionError> {
     let domain = match mode {
         v13::RoomMode::HumanDuel => RoomConfiguration::human_duel(),
         v13::RoomMode::Solo {
@@ -88,6 +88,7 @@ fn configuration(mode: v13::RoomMode) -> v14::RoomConfiguration {
         } => RoomConfiguration::solo(CpuDifficulty::Standard),
     };
     v14::RoomConfiguration::from_domain(domain)
+        .map_err(|_| v14::ProjectionError::InvalidExpandedBinding)
 }
 
 const fn map(value: v13::MapId) -> v14::MapId {

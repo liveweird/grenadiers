@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy31 on Easy/Standard and policy32 on Hard for every live
+The live environment CPU implementation uses policy33 on Easy/Standard and policy34 on Hard for every live
 two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,8 +19,8 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::PICKUP_V31_STANDARD` and `PICKUP_V31_EASY` select Utility31 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V32` selects Utility32 for Hard rooms with the same observation boundary.
+`CpuProfile::REFUGE_V33_STANDARD` and `REFUGE_V33_EASY` select Utility33 for live rules10 Easy/Standard rooms.
+`CpuProfile::HARD_V34` selects Utility34 for Hard rooms with the same observation boundary.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
@@ -90,8 +90,17 @@ Stop and a fresh observation before further movement. This prevents oscillation 
 when an ordinary longer movement pulse must stop before collection. The short handoff uses the
 complete hazard forecast, spike/storm checks and mob-contact proof; it does not enable ordinary
 uncertified movement on rules10. Teleporter and Diarrhea retain their existing exclusions.
-Easy keeps its normal clear-navigation cadence. Old policies27–29 remain unchanged; replay15
-binds Easy/Standard31 and Hard32.
+Easy keeps its normal clear-navigation cadence. Old policies27–32 remain unchanged; replay15
+retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34.
+
+## Footprint-boundary recovery
+
+Escape guidance targets the centre of the current safe traversable cell while the actor's full footprint
+still overlaps a threat from an adjacent cell. This prevents reversal when only the centre has crossed the
+boundary. Guidance requires a centred full-footprint position with no definite lethal forecast; it does not
+change pulse, contact, storm, pit, static-obstacle or admission proofs. ConditionalStationary remains the
+existing fallback. This is guidance only: it grants no hidden facts, faster physics or proof waiver, and
+`origin_target` is unchanged.
 
 ## Retained storm profile
 

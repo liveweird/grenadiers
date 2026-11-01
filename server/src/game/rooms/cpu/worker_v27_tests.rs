@@ -107,3 +107,40 @@ fn queued_worker_dispatches_pickup_profiles_with_identical_core_control_rng_and_
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }
+
+#[test]
+fn queued_worker_dispatches_refuge_profiles_with_identical_core_control_rng_and_work() {
+    use grenadiers_core::cpu::{
+        WorkBudget,
+        survival::{plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin},
+    };
+    for policy in [CpuPolicy::UtilityV33, CpuPolicy::UtilityV34] {
+        let planner_fn = if policy == CpuPolicy::UtilityV33 {
+            plan_refuge_guidance_v33_with_origin
+        } else {
+            plan_refuge_guidance_v34_with_origin
+        };
+        let planner = CpuPlanner::without_workers();
+        let (job, result) = spike_job(policy);
+        let mut rng = job.rng.clone();
+        let mut work = WorkBudget::new(WORK_ALLOWANCE);
+        let direct = planner_fn(
+            &job.observation,
+            &job.memory,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            job.escape_origin.as_ref(),
+            &mut rng,
+            &mut work,
+        )
+        .unwrap();
+        assert!(planner.try_submit(job));
+        let report = planner.pump_for_test(1);
+        assert_eq!((report.delivered, report.failed), (1, 0));
+        assert_eq!(report.work, vec![work.spent()]);
+        assert!(report.work[0] <= WORK_ALLOWANCE);
+        let queued = result.recv().unwrap();
+        assert_eq!(queued.plan.control, direct.survival.control);
+        assert_eq!(queued.rng.draws(), rng.draws());
+    }
+}

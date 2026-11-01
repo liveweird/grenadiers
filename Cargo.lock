@@ -471,7 +471,7 @@ dependencies = [
 
 [[package]]
 name = "grenadiers-core"
-version = "1.3.2"
+version = "1.3.3"
 dependencies = [
  "jsonschema",
  "rand_chacha 0.9.0",
@@ -481,7 +481,7 @@ dependencies = [
 
 [[package]]
 name = "grenadiers-server"
-version = "1.3.2"
+version = "1.3.3"
 dependencies = [
  "axum",
  "futures-util",

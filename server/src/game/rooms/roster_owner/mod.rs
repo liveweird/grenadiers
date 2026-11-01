@@ -79,10 +79,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::PICKUP_V31_EASY)
+            Some(CpuProfile::REFUGE_V33_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::PICKUP_V31_STANDARD)
+            Some(CpuProfile::REFUGE_V33_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -106,7 +106,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V32)
+            Some(CpuProfile::HARD_V34)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);

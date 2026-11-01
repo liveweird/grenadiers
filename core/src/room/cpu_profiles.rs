@@ -258,6 +258,23 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Pickup progress plus full-footprint refuge centering.
+    pub const REFUGE_V33_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV33,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const REFUGE_V33_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV33,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Hard tactics plus full-footprint refuge centering.
+    pub const HARD_V34: Self = Self {
+        policy: CpuPolicy::UtilityV34,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

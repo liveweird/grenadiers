@@ -50,6 +50,9 @@ mod replay_v14;
 #[allow(dead_code)] // Exact accepted-input policy binding; production export remains disabled.
 mod replay_v15;
 #[cfg(test)]
+#[allow(dead_code)] // Closed current policy binding; production export remains disabled.
+mod replay_v16;
+#[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]

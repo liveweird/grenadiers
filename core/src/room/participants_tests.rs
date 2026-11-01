@@ -123,3 +123,21 @@ fn pickup_profiles_preserve_retained_policy_and_difficulty_identities() {
     assert!(!CpuProfile::PICKUP_V31_EASY.is_current());
     assert!(!CpuProfile::HARD_V32.is_current());
 }
+
+#[test]
+fn refuge_profiles_keep_prior_pickup_policy_identities() {
+    assert_eq!(CpuProfile::REFUGE_V33_STANDARD.policy.version(), 33);
+    assert_eq!(
+        CpuProfile::REFUGE_V33_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(CpuProfile::REFUGE_V33_EASY.policy.version(), 33);
+    assert_eq!(CpuProfile::REFUGE_V33_EASY.difficulty, CpuDifficulty::Easy);
+    assert_eq!(CpuProfile::HARD_V34.policy.version(), 34);
+    assert_eq!(CpuProfile::HARD_V34.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::PICKUP_V31_STANDARD.policy.version(), 31);
+    assert_eq!(CpuProfile::HARD_V32.policy.version(), 32);
+    assert!(!CpuProfile::REFUGE_V33_STANDARD.is_current());
+    assert!(!CpuProfile::REFUGE_V33_EASY.is_current());
+    assert!(!CpuProfile::HARD_V34.is_current());
+}

@@ -299,34 +299,7 @@ pub(super) fn plan_spike_policy(
     counter_pressure: bool,
     pickup_progress: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
-    if observation.parts().rules.version != 10 {
-        return Err(PolicyError::InvalidObservation);
-    }
-    if observation.respawn_lairs().is_none() {
-        return super::planner::plan_inner(
-            observation,
-            memory,
-            history,
-            settled_stop_tick,
-            origin,
-            rng,
-            work,
-            true,
-            true,
-            true,
-            true,
-            true,
-            persistent_burning_oil,
-            hard_tactics,
-            counter_pressure,
-            pickup_progress,
-        )
-        .map(|survival| LairSurvivalPlan {
-            survival,
-            contact: None,
-        });
-    }
-    super::lair_planner::plan_lairs_inner(
+    super::refuge_guidance::plan_policy(
         observation,
         memory,
         history,
@@ -334,15 +307,11 @@ pub(super) fn plan_spike_policy(
         origin,
         rng,
         work,
-        10,
-        true,
-        true,
-        true,
-        true,
         persistent_burning_oil,
         hard_tactics,
         counter_pressure,
         pickup_progress,
+        super::steering::RefugeGuidance::default(),
     )
 }
 
@@ -393,5 +362,6 @@ fn plan_respawn_policy(
         false,
         false,
         false,
+        super::steering::RefugeGuidance::default(),
     )
 }

@@ -4,9 +4,10 @@ use crate::cpu::routing::{
     PulseRequest, RouteMode, certify_lair_contact_pulse, certify_lair_pulse,
 };
 use crate::cpu::{CpuRng, Intent, MobContactLease, MovementIntent, Observation, WorkBudget};
-use crate::game::{Direction, Tick};
+use crate::game::Tick;
 
 use super::compatibility::actor;
+use super::steering::RefugeGuidance;
 use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
 
 #[derive(Clone, Debug)]
@@ -38,6 +39,7 @@ pub(super) fn plan_lairs_inner(
     hard_tactics: bool,
     counter_pressure: bool,
     pickup_progress: bool,
+    refuge_guidance: RefugeGuidance,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -233,24 +235,9 @@ pub(super) fn plan_lairs_inner(
             contact: Some(contact),
         });
     }
-    let target = super::steering::target(observation, &hazards, &ordinary, work)
+    let target = super::steering::target(observation, &hazards, &ordinary, refuge_guidance, work)
         .or_else(|| actor.position.cell());
-    let mut choices = Vec::with_capacity(5);
-    choices.push(ordinary.intent.movement);
-    for direction in [
-        Direction::North,
-        Direction::East,
-        Direction::South,
-        Direction::West,
-    ] {
-        let movement = MovementIntent::Direction(direction);
-        if !choices.contains(&movement) {
-            choices.push(movement);
-        }
-    }
-    if !choices.contains(&MovementIntent::Stop) {
-        choices.push(MovementIntent::Stop);
-    }
+    let choices = super::steering::movement_choices(ordinary.intent.movement);
 
     let mut fallback = None;
     for mode in [

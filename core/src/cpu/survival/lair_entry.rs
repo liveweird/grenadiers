@@ -54,6 +54,7 @@ pub fn plan_lairs_with_origin(
         false,
         false,
         false,
+        super::RefugeGuidance::default(),
     )
 }
 
@@ -84,6 +85,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v23(
         false,
         false,
         false,
+        super::RefugeGuidance::default(),
     )
 }
 
@@ -114,6 +116,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v24(
         false,
         false,
         false,
+        super::RefugeGuidance::default(),
     )
 }
 
@@ -144,5 +147,6 @@ pub(in crate::cpu::survival) fn plan_lairs_v25(
         false,
         false,
         false,
+        super::RefugeGuidance::default(),
     )
 }

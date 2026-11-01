@@ -20,6 +20,7 @@ mod planner;
 mod plant_tactic;
 mod plant_value;
 mod punch_tactic;
+mod refuge_guidance;
 mod respawn_disabled;
 mod respawn_v22;
 mod route_execution;
@@ -37,6 +38,9 @@ pub use pickup_progress::{
 pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
+pub use refuge_guidance::{
+    plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
+};
 pub use respawn_v22::{
     plan_counter_pressure_v29_with_origin, plan_hard_v28_with_origin,
     plan_reliable_v27_with_origin, plan_respawn, plan_respawn_v22_with_origin,
@@ -81,6 +85,15 @@ mod pickup_stall_tests;
 
 #[cfg(test)]
 mod pickup_progress_execution_tests;
+
+#[cfg(test)]
+mod refuge_centering_test_fixture;
+
+#[cfg(test)]
+mod refuge_centering_tests;
+
+#[cfg(test)]
+mod refuge_centering_episode_tests;
 
 #[cfg(test)]
 mod reliable_v27_oil_guard_tests;

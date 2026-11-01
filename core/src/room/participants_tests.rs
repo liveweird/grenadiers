@@ -334,3 +334,20 @@ fn pit_avoidance_profiles_extend_without_relabeling_the_previous_pair() {
     assert_eq!(CpuProfile::TELEPORTER_V50_STANDARD.policy.version(), 50);
     assert_eq!(CpuProfile::HARD_V51.policy.version(), 51);
 }
+
+#[test]
+fn shared_recovery_profiles_have_closed_version_and_difficulty_pairs() {
+    use super::{CpuDifficulty, CpuProfile};
+    assert_eq!(CpuProfile::RECOVERY_V54_STANDARD.policy.version(), 54);
+    assert_eq!(CpuProfile::RECOVERY_V54_EASY.policy.version(), 54);
+    assert_eq!(CpuProfile::HARD_V55.policy.version(), 55);
+    assert_eq!(
+        CpuProfile::RECOVERY_V54_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(
+        CpuProfile::RECOVERY_V54_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V55.difficulty, CpuDifficulty::Hard);
+}

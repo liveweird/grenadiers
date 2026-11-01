@@ -27,6 +27,11 @@ fn pit_avoidance_easy_retains_the_real_stop_through_the_same_twelve_tick_pause()
     assert_teleporter_easy_cadence(CpuProfile::PIT_AVOIDANCE_V52_EASY);
 }
 
+#[test]
+fn shared_recovery_easy_preserves_the_physical_stop_and_pause() {
+    assert_teleporter_easy_cadence(CpuProfile::RECOVERY_V54_EASY);
+}
+
 fn assert_teleporter_easy_cadence(profile: CpuProfile) {
     let basis = at_tick(teleporter_observation(), Tick(20));
     let mut controller = CpuController::new(

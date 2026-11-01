@@ -83,10 +83,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::PIT_AVOIDANCE_V52_EASY)
+            Some(CpuProfile::RECOVERY_V54_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::PIT_AVOIDANCE_V52_STANDARD)
+            Some(CpuProfile::RECOVERY_V54_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -110,7 +110,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V53)
+            Some(CpuProfile::HARD_V55)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -175,6 +175,8 @@ mod range_three_escape_diagnostics;
 mod range_three_escape_owner_support;
 #[cfg(test)]
 mod range_three_escape_owner_tests;
+#[cfg(test)]
+mod range_three_shared_recovery_tests;
 #[cfg(test)]
 mod tests;
 

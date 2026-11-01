@@ -39,4 +39,10 @@ impl CpuProfile {
     pub const PIT_AVOIDANCE_V52_EASY: Self =
         Self::profile(CpuPolicy::UtilityV52, CpuDifficulty::Easy);
     pub const HARD_V53: Self = Self::profile(CpuPolicy::UtilityV53, CpuDifficulty::Hard);
+
+    /// Common recovery preparation before bounded optional continuation.
+    pub const RECOVERY_V54_STANDARD: Self =
+        Self::profile(CpuPolicy::UtilityV54, CpuDifficulty::Standard);
+    pub const RECOVERY_V54_EASY: Self = Self::profile(CpuPolicy::UtilityV54, CpuDifficulty::Easy);
+    pub const HARD_V55: Self = Self::profile(CpuPolicy::UtilityV55, CpuDifficulty::Hard);
 }

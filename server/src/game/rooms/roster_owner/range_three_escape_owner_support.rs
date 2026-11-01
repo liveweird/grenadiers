@@ -23,6 +23,7 @@ pub(super) struct Trigger {
     pub detonates_at: Tick,
     pub cells: [CellId; 3],
     pub oil: Vec<CellId>,
+    pub block_count: usize,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -39,8 +40,19 @@ pub(super) struct ControllerFlags {
 pub(super) struct ControllerTransition {
     pub seat: SeatId,
     pub tick: Tick,
+    pub position: Position,
     pub flags: ControllerFlags,
     pub state: String,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct BombBirth {
+    pub id: EntityId,
+    pub seat: SeatId,
+    pub placed_at: Tick,
+    pub cell: CellId,
+    pub range: u16,
+    pub detonates_at: Option<Tick>,
 }
 
 #[derive(Debug)]
@@ -53,7 +65,16 @@ pub(super) struct Outcome {
     pub max_visible_flames: usize,
     pub flames_clear_after_trigger: Option<Tick>,
     pub final_tick: Tick,
+    pub final_block_count: usize,
     pub final_phase: MatchPhase,
+    pub final_positions: [Position; 3],
+    pub final_ranges: [u16; 3],
+    pub final_alive: [bool; 3],
+    pub bomb_births: Vec<BombBirth>,
+    pub cohort_cutoff: Tick,
+    pub cohort_deadline: Option<Tick>,
+    pub cohort_resolved: bool,
+    pub alive_through_cohort: bool,
     pub queued_bases: Vec<QueuedBasis>,
     pub recovery_bases: Vec<QueuedBasis>,
     pub transitions: Vec<ControllerTransition>,
@@ -62,16 +83,20 @@ pub(super) struct Outcome {
 }
 
 pub(super) fn run(with_oil: bool, ticks: usize) -> Outcome {
+    run_with_profile(with_oil, ticks, CpuProfile::HARD_V53)
+}
+
+pub(super) fn run_with_profile(with_oil: bool, ticks: usize, profile: CpuProfile) -> Outcome {
     let scene = if with_oil {
         scene_with_oil
     } else {
         scene_without_oil
     };
-    let (mut owner, planner) =
-        scenario_driver_for_cpus(CpuProfile::HARD_V53, &CPUS, scene, None, [47; 32]);
+    let (mut owner, planner) = scenario_driver_for_cpus(profile, &CPUS, scene, None, [47; 32]);
     let initial = owner.runtime.state_for_test().unwrap();
     let initial_blocks = initial.world().arena().blocks().len();
     let initial_positions = CPUS.map(|seat| initial.actor(seat).unwrap().position());
+    let cohort_cutoff = Tick(initial.tick().0 + ticks as u64);
     let mut trigger = None;
     let mut first_deaths = [None; 3];
     let mut max_visible_flames = 0;
@@ -79,25 +104,52 @@ pub(super) fn run(with_oil: bool, ticks: usize) -> Outcome {
     let mut queued_bases = Vec::new();
     let mut recovery_bases = Vec::new();
     let mut transitions = Vec::new();
+    let mut known_bombs = BTreeSet::new();
+    let mut bomb_births = Vec::new();
+    let mut cohort_deadline = None;
+    let mut cohort_resolved = false;
+    let mut alive_through_cohort = true;
     let mut prior_flags = [None; 3];
     let mut worker = PumpReport::default();
-    for _ in 0..ticks {
+    let max_updates = ticks + usize::from(profile != CpuProfile::HARD_V53) * 300;
+    for _ in 0..max_updates {
         let report = planner.pump_for_test_inspecting(usize::MAX, |basis| {
-            capture_diagnostics(basis, with_oil, &mut queued_bases, &mut recovery_bases);
+            if profile == CpuProfile::HARD_V53 {
+                capture_diagnostics(basis, with_oil, &mut queued_bases, &mut recovery_bases);
+            }
         });
         merge(&mut worker, report);
         owner.tick(Instant::now()).unwrap();
         assert_eq!(owner.runtime.lifecycle().round_attempt(), 1);
         let state = owner.runtime.state_for_test().unwrap();
         let tick = state.tick();
+        for (&id, bomb) in state.world().bombs() {
+            if known_bombs.insert(id)
+                && let Some(index) = CPUS
+                    .iter()
+                    .position(|&seat| state.actor(seat).unwrap().id() == bomb.owner())
+            {
+                bomb_births.push(BombBirth {
+                    id,
+                    seat: CPUS[index],
+                    placed_at: bomb.placed_at(),
+                    cell: bomb.cell(),
+                    range: bomb.range(),
+                    detonates_at: bomb.detonates_at(),
+                });
+            }
+        }
         trigger = trigger.or_else(|| synchronized_trigger(state, &owner, with_oil));
-        let visible_flames = owner.cpus[0]
-            .latest_observation_for_test()
-            .map_or(0, |observation| observation.parts().flames.len());
+        let visible_flames = state
+            .world()
+            .hazards()
+            .values()
+            .filter(|expiry| **expiry > tick)
+            .count();
         max_visible_flames = max_visible_flames.max(visible_flames);
         if trigger
             .as_ref()
-            .is_some_and(|value| tick > value.detonates_at)
+            .is_some_and(|value| tick.0 > value.detonates_at.0 + state.rules().flame_ticks())
             && visible_flames == 0
             && flames_clear_after_trigger.is_none()
         {
@@ -113,15 +165,36 @@ pub(super) fn run(with_oil: bool, ticks: usize) -> Outcome {
                 transitions.push(ControllerTransition {
                     seat,
                     tick,
+                    position: state.actor(seat).unwrap().position(),
                     flags,
                     state: controller,
                 });
                 prior_flags[index] = Some(flags);
             }
         }
+        alive_through_cohort &= CPUS.iter().all(|&seat| state.actor(seat).unwrap().alive());
+        if profile != CpuProfile::HARD_V53 && tick >= cohort_cutoff {
+            let deadline = *cohort_deadline.get_or_insert_with(|| {
+                let last = bomb_births
+                    .iter()
+                    .filter(|bomb| bomb.placed_at <= cohort_cutoff)
+                    .filter_map(|bomb| bomb.detonates_at)
+                    .max()
+                    .unwrap_or(cohort_cutoff);
+                Tick(last.0 + state.rules().flame_ticks() + 1)
+            });
+            if tick >= deadline {
+                cohort_resolved = bomb_births
+                    .iter()
+                    .filter(|bomb| bomb.placed_at <= cohort_cutoff)
+                    .all(|bomb| !state.world().bombs().contains_key(&bomb.id));
+                break;
+            }
+        }
     }
     let final_tick = owner.runtime.state_for_test().unwrap().tick();
     let final_phase = owner.runtime.lifecycle().phase();
+    let final_state = owner.runtime.state_for_test().unwrap();
     Outcome {
         with_oil,
         initial_blocks,
@@ -131,7 +204,23 @@ pub(super) fn run(with_oil: bool, ticks: usize) -> Outcome {
         max_visible_flames,
         flames_clear_after_trigger,
         final_tick,
+        final_block_count: owner
+            .runtime
+            .state_for_test()
+            .unwrap()
+            .world()
+            .arena()
+            .blocks()
+            .len(),
         final_phase,
+        final_positions: CPUS.map(|seat| final_state.actor(seat).unwrap().position()),
+        final_ranges: CPUS.map(|seat| final_state.actor(seat).unwrap().bomb_range()),
+        final_alive: CPUS.map(|seat| final_state.actor(seat).unwrap().alive()),
+        bomb_births,
+        cohort_cutoff,
+        cohort_deadline,
+        cohort_resolved,
+        alive_through_cohort,
         queued_bases,
         recovery_bases,
         transitions,
@@ -201,6 +290,7 @@ fn synchronized_trigger(
         detonates_at,
         cells: std::array::from_fn(|index| bombs[index].cell()),
         oil,
+        block_count: state.world().arena().blocks().len(),
     })
 }
 

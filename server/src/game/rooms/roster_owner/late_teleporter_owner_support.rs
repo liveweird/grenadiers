@@ -12,8 +12,8 @@ use grenadiers_core::{
     },
     protocol::{RoomCode, RoomId},
     room::{
-        BoardSize, CpuDifficulty, CpuProfile, RespawnLairSettings, RespawnLairTuning,
-        RoomConfiguration, RoomSettings, SeatControl, SpikePitSettings, SpikePitTuning,
+        BoardSize, CpuProfile, RespawnLairSettings, RespawnLairTuning, RoomConfiguration,
+        RoomSettings, SeatControl, SpikePitSettings, SpikePitTuning,
     },
 };
 use tokio::{sync::watch, time::Instant};
@@ -195,7 +195,7 @@ pub(super) fn scenario_driver_for_cpus(
     }
     let configuration = RoomConfiguration::new(
         &controls,
-        Some(CpuDifficulty::Hard),
+        Some(profile.difficulty),
         BoardSize::FifteenByThirteen,
     )
     .unwrap();

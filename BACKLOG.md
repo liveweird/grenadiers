@@ -32,6 +32,8 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
   observations, bounded planning and unchanged physics. Require authoritative before/after
   witnesses and independent review; preserve archived policies and complete seeded episodes.
+  The [controlled firing-position comparison](docs/history/cpu-exit-pressure-2026-11-02.md)
+  establishes the current equal-distance exit-coverage weakness; implementation remains next.
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.

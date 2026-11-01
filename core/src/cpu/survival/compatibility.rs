@@ -235,24 +235,24 @@ pub(super) fn plant_actor_compatible_charged(
     let (Some(before), Some(after)) = (actor(basis), actor(observation)) else {
         return false;
     };
-    let effects = after
+    let Some(effect_width) = before.effects.len().checked_add(after.effects.len()) else {
+        return false;
+    };
+    let Some(effects) = after
         .effects
         .len()
-        .checked_mul(
-            before
-                .effects
-                .len()
-                .checked_add(after.effects.len())
-                .unwrap_or(usize::MAX),
-        )
+        .checked_mul(effect_width)
         .and_then(|nested| nested.checked_add(before.effects.len()))
-        .and_then(|nested| nested.checked_add(after.effects.len()));
+        .and_then(|nested| nested.checked_add(after.effects.len()))
+    else {
+        return false;
+    };
     let charge = old
         .actors
         .len()
         .checked_mul(2)
         .and_then(|count| count.checked_add(new.actors.len()))
-        .and_then(|count| count.checked_add(effects?))
+        .and_then(|count| count.checked_add(effects))
         .and_then(|count| {
             count.checked_add(usize::try_from(certificate.contact_actor_work()?).ok()?)
         })

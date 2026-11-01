@@ -158,7 +158,7 @@ fn actor(seat: SeatId, id: u32, cell: CellId) -> ObservedActor {
     })
 }
 
-fn committed(basis: &Observation) -> CommittedPulse {
+fn pulse_lease(basis: &Observation, start_window: TickWindow) -> crate::cpu::routing::PulseLease {
     let key = crate::cpu::MemoryKey {
         world: basis.parts().world,
         cpu_seat: basis.parts().recipient,
@@ -171,23 +171,30 @@ fn committed(basis: &Observation) -> CommittedPulse {
         &mut WorkBudget::new(65_536),
     )
     .unwrap();
-    let lease = certify_respawn_pulse(
+    certify_respawn_pulse(
         basis,
         &forecast,
         PulseRequest {
             movement: crate::cpu::MovementIntent::Stop,
             hold_ticks: 1,
-            start_window: TickWindow {
-                start: Tick(1),
-                end: Tick(2),
-            },
+            start_window,
             stopped_safe_until: Tick(23),
             mode: RouteMode::CertifiedOnly,
             settled_stop_tick: Tick(0),
         },
         &mut WorkBudget::new(65_536),
     )
-    .unwrap();
+    .unwrap()
+}
+
+fn committed(basis: &Observation) -> CommittedPulse {
+    let lease = pulse_lease(
+        basis,
+        TickWindow {
+            start: Tick(1),
+            end: Tick(2),
+        },
+    );
     CommittedPulse::admit(lease, basis.clone(), basis, Tick(0)).unwrap()
 }
 
@@ -212,6 +219,33 @@ fn an_expired_guard_never_authorizes_future_input() {
         committed(&basis).validate(&observed(23, SpikePitPhase::Idle, 0), Tick(23)),
         PulseStatus::Invalidated
     );
+}
+
+#[test]
+fn stale_publication_before_admission_has_no_pit_guard_and_rejects_the_pulse() {
+    let basis = observed(0, SpikePitPhase::Idle, 0);
+    let lease = pulse_lease(
+        &basis,
+        TickWindow {
+            start: Tick(1),
+            end: Tick(3),
+        },
+    );
+    let admission_tick = Tick(1);
+    let first_execution = Tick(2);
+    assert_eq!(basis.parts().tick, Tick(0));
+    assert!(
+        lease
+            .spike_pit_guard_at(first_execution, basis.parts().tick)
+            .is_none()
+    );
+    let mut work = WorkBudget::new(super::WORK_ALLOWANCE);
+    assert_eq!(
+        lease.spike_pits_match_at(first_execution, &basis, &mut work),
+        Ok(false)
+    );
+    assert_eq!(work.spent(), 1);
+    assert!(CommittedPulse::admit(lease, basis.clone(), &basis, admission_tick).is_err());
 }
 
 #[test]

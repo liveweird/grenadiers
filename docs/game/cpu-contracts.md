@@ -429,6 +429,13 @@ Oil, pit and publication checks remain unchanged; Oil still excludes full contin
 it did previously. CPU44–53 retain their original allocation and results. This does not relax
 the separate foreign-bomb planting/future-loot support guard.
 
+A completed rules10 pulse waits for a publication at its actual admission tick before
+the controller attempts strict admission. Waiting retains the pending result and authorizes no
+input. The original six-tick freshness limit, selected start window and world/command checks
+still apply; changed pit state, pose or contact facts can reject the plan. This shared controller
+correction also applies to archived policies. Planning results and playback of existing accepted-
+input journals retain their contracts; newly played matches can accept input at different ticks.
+
 ## Voluntary pit avoidance
 
 CPU54/55 inherit CPU52/53's exclusion of every observed pit site, regardless of phase, from ordinary search maps before

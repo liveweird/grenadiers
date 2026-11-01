@@ -133,6 +133,22 @@ impl CpuController {
                 std::cmp::Ordering::Equal => {}
             }
         }
+        // A rules-ten pulse's pit guard is defined at admission. The latest
+        // publication must have reached this tick before strict admission can
+        // compare that guard; retaining the completed result does not grant
+        // input authority or extend its bounded start window.
+        let defer_rules_ten_pulse = result.basis.parts().rules.version == 10
+            && plan.lease.as_ref().is_some_and(|lease| {
+                let Some(next_update) = current_tick.0.checked_add(1).map(Tick) else {
+                    return false;
+                };
+                self.latest_observation.as_ref().is_some_and(|latest| {
+                    latest.parts().tick < current_tick && lease.start_window().contains(next_update)
+                })
+            });
+        if defer_rules_ten_pulse {
+            return None;
+        }
         self.admit_completed(current_tick, command_epoch)
     }
 

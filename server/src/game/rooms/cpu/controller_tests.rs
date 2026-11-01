@@ -365,5 +365,7 @@ fn observation_at(tick: Tick, x_offset: i32) -> grenadiers_core::cpu::Observatio
     grenadiers_core::cpu::Observation::new(parts).unwrap()
 }
 
+#[path = "controller_pulse_admission_tests.rs"]
+mod pulse_admission_tests;
 #[path = "controller_pulse_intent_tests.rs"]
 mod pulse_intent_tests;

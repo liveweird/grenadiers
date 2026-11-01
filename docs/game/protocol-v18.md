@@ -8,7 +8,8 @@ API versions are independent.
 
 ## Closed live profile
 
-The live room binds rules10, CPU26 and mob navigation2. Generator3 covers 15×13; generator4
+The live room uses rules10. CPU and mob-navigation identities are private replay provenance,
+not gameplay18 wire fields. Generator3 covers 15×13; generator4
 covers 13×11 and 11×9. Gameplay17/rules9/CPU25 remains an archived contract and is not widened.
 
 Room configuration and settings extend the v17 environment with required
@@ -43,6 +44,7 @@ commands remain limited to 4,096 bytes. Upgrade or restart ends process-local ma
 no cross-version resume.
 
 Replay format10 privately binds rules10, CPU26, mob navigation2, spike-pit layout1 and exact
-spike timing. It does not widen retained format9 or enable production replay recording. See
+spike timing. Format11 binds navigation3 with the same public rules and CPU26. Neither widens
+retained readers or enables production replay recording. See
 [spike pits](spike-pits.md), [lairs](lairs.md), [protocol consumers](protocol-consumers.md) and
 the [historical v17 contract](protocol-v17.md).

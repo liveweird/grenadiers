@@ -1,0 +1,182 @@
+--- /dev/null
++++ b/server/src/game/rooms/roster_owner/short_fuse_diagnostics.rs
+@@ -0,0 +1,145 @@
++use std::collections::{BTreeMap,BTreeSet};
++use std::sync::Arc;
++use grenadiers_core::{game::{ActorInit,Arena,CellId,Direction,EnabledItems,EntityId,MobNavigationPolicy,PickupKind,Position,RoundAssignment,SeatId,SimulationSeed,State,StormCloudConfig,Tick,World,fixed_arena},protocol::{RoomCode,RoomId},room::{BoardSize,CpuDifficulty,CpuProfile,RespawnLairSettings,RespawnLairTuning,RoomConfiguration,RoomSettings,SeatControl,SpikePitSettings,SpikePitTuning}};
++use tokio::{sync::watch,time::Instant};
++use super::{RosterOwnerNotice,driver::Driver};
++use crate::{game::rooms::{RandomFill,cpu::{CpuController,CpuPlanner},roster_runtime::{RosterAction,RosterIdentity,RosterRuntime}},round_seed::RoundSeedSource};
++const INSTANCE:u64=9035;
++
++fn setup(short:bool,dual:bool,lairs:bool)->(Driver,CpuPlanner) {
++ let settings=RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
++ let controls=[SeatControl::Human,SeatControl::Human,SeatControl::Cpu,if dual {SeatControl::Cpu}else{SeatControl::Human}];
++ let configuration=RoomConfiguration::new(&controls,Some(CpuDifficulty::Hard),BoardSize::FifteenByThirteen).unwrap();
++ let mut runtime=RosterRuntime::new_spike_v19_with_navigation(RosterIdentity{id:RoomId::new("0123456789abcdef0123456789abc035").unwrap(),code:RoomCode::new("ABCDEFGH").unwrap(),registry_serial:INSTANCE,configuration},settings,StormCloudConfig::Disabled,RespawnLairTuning::new(lairs,RespawnLairSettings::DEFAULT),SpikePitTuning::new(false,SpikePitSettings::DEFAULT),RoundSeedSource::with_entropy(|bytes|{bytes.fill(35);Ok(())}),Arc::new(|epoch|Ok(SimulationSeed::new([epoch as u8;32]))),MobNavigationPolicy::TimedEscapeV3).unwrap();
++ for seat in SeatId::ALL { if controls[seat.index()]==SeatControl::Human {
++  let admission=runtime.prepare_join(seat).unwrap();runtime.commit_admission(admission);
++  runtime.action(seat,1,RosterAction::Ready{ready:true,settings_revision:1}).unwrap();
++ }}
++ for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {runtime.settle_boundary([None;4]).unwrap();}
++ let basis=runtime.state_for_test().unwrap();
++ let fixed=fixed_arena();let terrain=std::array::from_fn(|index|fixed.terrain(CellId::new((index%15)as u16,(index/15)as u16)).unwrap());
++ let blocks=BTreeSet::from([CellId::new(3,1),
++CellId::new(4,1),
++CellId::new(6,1),
++CellId::new(7,1),
++CellId::new(8,1),
++CellId::new(10,1),
++CellId::new(3,2),
++CellId::new(5,2),
++CellId::new(9,2),
++CellId::new(11,2),
++CellId::new(1,3),
++CellId::new(2,3),
++CellId::new(5,3),
++CellId::new(6,3),
++CellId::new(8,3),
++CellId::new(9,3),
++CellId::new(12,3),
++CellId::new(1,4),
++CellId::new(5,4),
++CellId::new(7,4),
++CellId::new(9,4),
++CellId::new(13,4),
++CellId::new(2,5),
++CellId::new(3,5),
++CellId::new(5,5),
++CellId::new(6,5),
++CellId::new(7,5),
++CellId::new(8,5),
++CellId::new(9,5),
++CellId::new(11,5),
++CellId::new(12,5),
++CellId::new(1,6),
++CellId::new(3,6),
++CellId::new(5,6),
++CellId::new(7,6),
++CellId::new(9,6),
++CellId::new(11,6),
++CellId::new(13,6),
++CellId::new(2,7),
++CellId::new(3,7),
++CellId::new(5,7),
++CellId::new(6,7),
++CellId::new(7,7),
++CellId::new(8,7),
++CellId::new(9,7),
++CellId::new(11,7),
++CellId::new(12,7),
++CellId::new(1,8),
++CellId::new(5,8),
++CellId::new(7,8),
++CellId::new(9,8),
++CellId::new(13,8),
++CellId::new(2,9),
++CellId::new(5,9),
++CellId::new(6,9),
++CellId::new(8,9),
++CellId::new(9,9),
++CellId::new(12,9),
++CellId::new(3,10),
++CellId::new(5,10),
++CellId::new(9,10),
++CellId::new(11,10),
++CellId::new(4,11),
++CellId::new(6,11),
++CellId::new(7,11),
++CellId::new(8,11),
++CellId::new(10,11)]);
++ let arena=Arena::new(terrain,blocks,[CellId::new(1,1),CellId::new(13,1),CellId::new(1,11),CellId::new(13,11)]).unwrap();
++ let pickups=if short {BTreeMap::from([(CellId::new(1,9),PickupKind::ShortFuse),(CellId::new(13,9),PickupKind::ShortFuse)])}else{BTreeMap::new()};
++ let world=World::with_pickups(arena,BTreeMap::new(),BTreeMap::new(),pickups).unwrap();
++ let cells=[CellId::new(1,1),CellId::new(13,1),CellId::new(1,9),CellId::new(13,9)];
++ let actors=SeatId::ALL.map(|seat|ActorInit{id:EntityId(seat.index()as u32+1),seat,position:Position::center(cells[seat.index()]),heading:Direction::South,speed:settings.starting_speed()});
++ let mut controlled=State::new_at_tick_with_assignment_and_seed(*basis.rules(),world,actors,basis.tick(),RoundAssignment::first(),SimulationSeed::new([35;32])).unwrap();
++ controlled.step(&[]).unwrap();runtime.settle_boundary([None;4]).unwrap();
++ for seat in [SeatId::Three,SeatId::Four] {assert_eq!(controlled.actor(seat).unwrap().bomb_capacity(),1);assert_eq!(controlled.actor(seat).unwrap().bomb_range(),2);}
++ let notice=runtime.install_running_scene_for_test(controlled).unwrap();
++ let planner=CpuPlanner::without_workers();
++ let cpus=SeatId::ALL.into_iter().filter(|seat|controls[seat.index()]==SeatControl::Cpu).map(|seat|CpuController::new(planner.clone(),seat,INSTANCE,[35;32],CpuProfile::HARD_V35)).collect();
++ let (notices,receiver)=watch::channel(RosterOwnerNotice::Publication(notice.clone()));drop(receiver);
++ let random_fill:Arc<RandomFill>=Arc::new(|bytes|{bytes.fill(35);Ok(())});
++ let mut driver=Driver::new(runtime,notice.clone(),notices,Instant::now()+std::time::Duration::from_secs(300),random_fill,cpus);driver.publish(notice);
++ (driver,planner)
++}
++
++#[test]
++fn short_fuse_simultaneous_owner_diagnostic() {
++ for (short,dual) in [(true,false),(true,true),(false,true)] {
++  eprintln!("SF_CASE short={short} dual={dual}");
++  let (mut owner,planner)=setup(short,dual,false);let mut first=None;let mut detonation=None;let mut births=Vec::new();let mut max_work=0;
++  for _ in 0..500 {
++   let report=planner.pump_for_test(usize::MAX);assert_eq!(report.failed,0);max_work=max_work.max(report.work.into_iter().max().unwrap_or(0));
++   owner.tick(Instant::now()).unwrap();let state=owner.runtime.state_for_test().unwrap();
++   for bomb in state.world().bombs().values() {if !births.iter().any(|x:&(u32,Tick,Tick)|x.0==bomb.id().0) {
++    births.push((bomb.id().0,bomb.placed_at(),bomb.detonates_at().unwrap()));eprintln!("SF_BIRTH id={:?} owner={:?} at={:?} due={:?} cell={:?}",bomb.id(),bomb.owner(),bomb.placed_at(),bomb.detonates_at(),bomb.cell());
++    if first.is_none(){first=Some(bomb.placed_at());detonation=bomb.detonates_at();}
++   }}
++   if first.is_some() && state.tick().0.is_multiple_of(3) {eprintln!("SF_TICK t={} actors={:?} routes={:?} stops={:?}",state.tick().0,[SeatId::Three,SeatId::Four].map(|seat|{let a=state.actor(seat).unwrap();(seat,a.position(),a.alive())}),owner.cpus.iter().map(|c|c.has_committed_route()).collect::<Vec<_>>(),owner.cpu_stop_at);}
++   if detonation.is_some_and(|tick|state.tick().0>tick.0+31){break;}
++  }
++  let state=owner.runtime.state_for_test().unwrap();
++  eprintln!("SF_RESULT short={short} dual={dual} first={first:?} due={detonation:?} births={births:?} actors={:?} max_work={max_work} admissions={:?}",[SeatId::Three,SeatId::Four].map(|seat|{let a=state.actor(seat).unwrap();(seat,a.position(),a.alive())}),owner.cpus.iter().map(|c|c.admission_trace_for_test()).collect::<Vec<_>>());
++  assert!(first.is_some(),"fixture must plant");
++ }
++}
++
++#[test]
++fn short_fuse_lairs_enabled_owner_diagnostic() {
++ for (short,dual) in [(true,true)] {
++  eprintln!("SF_CASE lairs=true cloud=false pits=false short={short} dual={dual}");
++  let (mut owner,planner)=setup(short,dual,true);let mut first=None;let mut detonation=None;let mut births=Vec::new();let mut max_work=0;
++  for _ in 0..500 {
++   let report=planner.pump_for_test(usize::MAX);assert_eq!(report.failed,0);max_work=max_work.max(report.work.into_iter().max().unwrap_or(0));
++   owner.tick(Instant::now()).unwrap();let state=owner.runtime.state_for_test().unwrap();
++   for bomb in state.world().bombs().values() {if !births.iter().any(|x:&(u32,Tick,Tick)|x.0==bomb.id().0) {
++    births.push((bomb.id().0,bomb.placed_at(),bomb.detonates_at().unwrap()));eprintln!("SF_BIRTH id={:?} owner={:?} at={:?} due={:?} cell={:?}",bomb.id(),bomb.owner(),bomb.placed_at(),bomb.detonates_at(),bomb.cell());
++    if first.is_none(){first=Some(bomb.placed_at());detonation=bomb.detonates_at();}
++   }}
++   if first.is_some() && state.tick().0.is_multiple_of(3) {eprintln!("SF_TICK t={} actors={:?} routes={:?} stops={:?}",state.tick().0,[SeatId::Three,SeatId::Four].map(|seat|{let a=state.actor(seat).unwrap();(seat,a.position(),a.alive())}),owner.cpus.iter().map(|c|(c.has_committed_route(),c.recovery_state())).collect::<Vec<_>>(),owner.cpu_stop_at);}
++   if detonation.is_some_and(|tick|state.tick().0>tick.0+31){break;}
++  }
++  let state=owner.runtime.state_for_test().unwrap();
++  eprintln!("SF_RESULT lairs=true cloud=false pits=false short={short} dual={dual} first={first:?} due={detonation:?} births={births:?} actors={:?} max_work={max_work} admissions={:?}",[SeatId::Three,SeatId::Four].map(|seat|{let a=state.actor(seat).unwrap();(seat,a.position(),a.alive())}),owner.cpus.iter().map(|c|c.admission_trace_for_test()).collect::<Vec<_>>());
++  assert!(first.is_some(),"fixture must plant");
++ }
++}
+--- a/server/src/game/rooms/roster_owner/mod.rs
++++ b/server/src/game/rooms/roster_owner/mod.rs
+@@ -176,3 +176,6 @@
+ #[cfg(test)]
+ #[path = "../cpu/hard_episode_tests.rs"]
+ mod hard_episode_tests;
++
++#[cfg(test)]
++mod short_fuse_diagnostics;
+--- a/server/src/game/rooms/cpu/controller_route.rs
++++ b/server/src/game/rooms/cpu/controller_route.rs
+@@ -40,10 +40,12 @@
+             .as_mut()?
+             .observe_with_stop(observation, settled_stop_tick);
+         if matches!(status, RouteStatus::Completed | RouteStatus::Invalidated) {
++            eprintln!("SF_ROUTE seat={:?} t={} status={status:?}",self.cpu_seat,observation.parts().tick.0);
+             let origin = (status == RouteStatus::Invalidated)
+                 .then(|| self.committed_route.as_ref()?.escape_origin(observation))
+                 .flatten();
+             let origin_epoch = origin.as_ref().and(self.committed_route_epoch);
++            eprintln!("SF_ORIGIN seat={:?} tick={} retained={}",self.cpu_seat,observation.parts().tick.0,origin.is_some());
+             self.clear_route(status == RouteStatus::Invalidated);
+             self.escape_origin = origin;
+             self.escape_origin_epoch = origin_epoch;
+--- a/server/src/game/rooms/cpu/controller.rs
++++ b/server/src/game/rooms/cpu/controller.rs
+@@ -178,6 +178,7 @@
+     }
+ 
+     pub(in crate::game::rooms) fn commit(&mut self, accepted: AcceptedPlan, actual_intent: Intent) {
++        eprintln!("SF_COMMIT seat={:?} basis={} intent={actual_intent:?} hold={} route={} pulse={}",self.cpu_seat,accepted.decision.observation_tick.0,accepted.hold_ticks,accepted.committed_route.is_some(),accepted.committed_pulse.is_some());
+         self.arm_cadence_after(&accepted, actual_intent);
+         let manual_admitted =
+             accepted.intent.manual.is_some() && actual_intent.manual == accepted.intent.manual;

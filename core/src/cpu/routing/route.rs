@@ -218,7 +218,7 @@ pub(super) fn plan_route_seeded(
     Err(RouteFailure::NoRoute)
 }
 
-fn validate_request(
+pub(super) fn validate_request(
     context: &Context<'_>,
     forecast: &HazardForecast,
     request: RouteRequest,

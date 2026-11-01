@@ -335,7 +335,7 @@ fn certified_plant_inner_prefiltered(
     })
 }
 
-fn teleporter_plant_supported(
+pub(super) fn teleporter_plant_supported(
     observation: &Observation,
     support: PlantSupport,
     work: &mut WorkBudget,

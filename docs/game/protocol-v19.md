@@ -18,13 +18,13 @@ value. Mixed CPU difficulties and private planner data are rejected.
 ## Runtime and compatibility
 
 The lobby offers three localized choices and defaults to Standard. Every CPU in a room uses
-the selected tier. Easy/Standard select CPU33; Hard selects CPU35. Rules10, generator3/4,
+the selected tier. Easy/Standard select CPU36; Hard selects CPU37. Rules10, generator3/4,
 navigation3 and all movement/damage settings remain shared.
 
 Runtime publication identity is explicit and immutable. Every newly created live room uses19,
 including human-only rooms. Archived constructors and replay10–12 retain18; no Hard room is
 projected through an Easy/Standard shadow. Retained v14–18 wire types and replay readers reject
-Hard rather than downgrading it. Private replay13 retains Hard28 and replay14 retains Hard29/Easy/Standard27. Replay15 retains gameplay19 with Hard32 or Easy/Standard31; replay16 retains Hard34 or Easy/Standard33; replay17 binds the current Hard35 or Easy/Standard33 pair.
+Hard rather than downgrading it. Private replay13 retains Hard28 and replay14 retains Hard29/Easy/Standard27. Replay15 retains gameplay19 with Hard32 or Easy/Standard31; replay16 retains Hard34 or Easy/Standard33; replay17 retains Hard35 or Easy/Standard33; replay18 binds the current Hard37 or Easy/Standard36 pair.
 Production recording/export remains disabled.
 
 The browser ships only the v19 generated runtime validator and retains the same semantic,

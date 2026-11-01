@@ -356,6 +356,10 @@ mod tests {
             grenadiers_core::room::CpuProfile::REFUGE_V33_STANDARD,
             grenadiers_core::room::CpuProfile::REFUGE_V33_EASY,
             grenadiers_core::room::CpuProfile::HARD_V34,
+            grenadiers_core::room::CpuProfile::HARD_V35,
+            grenadiers_core::room::CpuProfile::FARM_REFUGES_V36_STANDARD,
+            grenadiers_core::room::CpuProfile::FARM_REFUGES_V36_EASY,
+            grenadiers_core::room::CpuProfile::HARD_V37,
         ] {
             assert!(controller(profile).accept_observation(&observed));
         }

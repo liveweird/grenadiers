@@ -11,6 +11,7 @@ use crate::game::{
 
 use super::motion::{Motion, advance};
 use super::route::plan_route_seeded;
+use super::route_hints::plan_route_to_refuge;
 use super::validation;
 use super::{
     PlannedBomb, PlantCertificate, PlantFailure, PlantRequest, RouteMode, RouteRequest, RouteStep,
@@ -25,7 +26,7 @@ pub fn plan_ordinary_plant(
     if observation.parts().rules.version >= 8 {
         return Err(PlantFailure::Unsupported);
     }
-    plan_timed_plant(observation, memory, request, work, None)
+    plan_timed_plant(observation, memory, request, work, None, None)
 }
 
 pub(crate) fn plan_lair_ordinary_plant(
@@ -35,7 +36,18 @@ pub(crate) fn plan_lair_ordinary_plant(
     work: &mut WorkBudget,
 ) -> Result<PlantCertificate, PlantFailure> {
     validate_lair_observation(observation)?;
-    plan_timed_plant(observation, memory, request, work, None)
+    plan_timed_plant(observation, memory, request, work, None, None)
+}
+
+pub(crate) fn plan_lair_ordinary_plant_to_refuge(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    refuge: crate::game::CellId,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    validate_lair_observation(observation)?;
+    plan_timed_plant(observation, memory, request, work, None, Some(refuge))
 }
 
 pub fn plan_timed_weapon_plant(
@@ -76,7 +88,14 @@ fn plan_lair_or_legacy_weapon_plant(
         | SpecialWeapon::Piercing
         | SpecialWeapon::Power => return Err(PlantFailure::Unsupported),
     };
-    plan_timed_plant(observation, memory, request, work, Some((weapon, blast)))
+    plan_timed_plant(
+        observation,
+        memory,
+        request,
+        work,
+        Some((weapon, blast)),
+        None,
+    )
 }
 
 fn validate_lair_observation(observation: &Observation) -> Result<(), PlantFailure> {
@@ -92,6 +111,7 @@ fn plan_timed_plant(
     request: PlantRequest,
     work: &mut WorkBudget,
     weapon: Option<(SpecialWeapon, BlastKind)>,
+    refuge: Option<crate::game::CellId>,
 ) -> Result<PlantCertificate, PlantFailure> {
     let parts = observation.parts();
     let expected = parts
@@ -211,21 +231,34 @@ fn plan_timed_plant(
     {
         return Err(PlantFailure::Unsupported);
     }
-    let route = plan_route_seeded(
-        observation,
-        &[&absent, &present],
-        RouteRequest {
-            start_window,
-            settled_stop_tick: request.settled_stop_tick,
-            survive_until,
-            mode: RouteMode::CertifiedOnly,
-            limits: request.limits,
-        },
-        Some(first_step),
-        Some(cell),
-        None,
-        work,
-    )?;
+    let route_request = RouteRequest {
+        start_window,
+        settled_stop_tick: request.settled_stop_tick,
+        survive_until,
+        mode: RouteMode::CertifiedOnly,
+        limits: request.limits,
+    };
+    let route = if let Some(refuge) = refuge {
+        plan_route_to_refuge(
+            observation,
+            &[&absent, &present],
+            route_request,
+            first_step,
+            cell,
+            refuge,
+            work,
+        )
+    } else {
+        plan_route_seeded(
+            observation,
+            &[&absent, &present],
+            route_request,
+            Some(first_step),
+            Some(cell),
+            None,
+            work,
+        )
+    }?;
     Ok(PlantCertificate::new(
         route,
         placement,

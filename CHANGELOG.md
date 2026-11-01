@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.5 — 2026-11-01
+
+- Add bounded alternate-refuge candidates for CPU wall farming, retaining complete bomb escape, target-usefulness and monster-contact proofs.
+- Select Easy/Standard36 and Hard37 with private replay18; retain archived policies and Hard's certified second-bomb handoff.
+
 ## 1.3.4 — 2026-11-01
 
 - Allow Hard35 to make one optional, fully certified second-bomb attempt from a stopped refuge while retaining the original hold.

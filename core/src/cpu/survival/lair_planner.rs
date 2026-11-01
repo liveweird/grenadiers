@@ -40,6 +40,7 @@ pub(super) fn plan_lairs_inner(
     counter_pressure: bool,
     pickup_progress: bool,
     refuge_guidance: RefugeGuidance,
+    joint_refuges: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -135,6 +136,19 @@ pub(super) fn plan_lairs_inner(
         && super::strategic_recovery::attained_firing_position(observation, &ordinary);
     let plant_support =
         super::plant_tactic::PlantSupport::for_policy(persistent_burning_oil, counter_pressure);
+    if joint_refuges
+        && let Some(plan) = super::joint_refuge::certified_farm_plant(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            &ordinary,
+            plant_support,
+            work,
+        )
+    {
+        return Ok(plan);
+    }
     if opportunistic_planting
         && !recovering_plant
         && let Some(plan) = super::lair_v23::opening(

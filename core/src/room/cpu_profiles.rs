@@ -281,6 +281,23 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Pickup progress with certified farming refuges.
+    pub const FARM_REFUGES_V36_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV36,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const FARM_REFUGES_V36_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV36,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Hard farming refuges with terminal-hold replacement retained.
+    pub const HARD_V37: Self = Self {
+        policy: CpuPolicy::UtilityV37,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

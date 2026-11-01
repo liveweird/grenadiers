@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy33 on Easy/Standard and policy35 on Hard for every live
+The live environment CPU implementation uses policy36 on Easy/Standard and policy37 on Hard for every live
 two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,8 +19,8 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::REFUGE_V33_STANDARD` and `REFUGE_V33_EASY` select Utility33 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V35` selects Utility35 for Hard rooms with the same observation boundary.
+`CpuProfile::FARM_REFUGES_V36_STANDARD` and `FARM_REFUGES_V36_EASY` select Utility36 for live rules10 Easy/Standard rooms.
+`CpuProfile::HARD_V37` selects Utility37 for Hard rooms with the same observation boundary.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
@@ -92,7 +92,23 @@ complete hazard forecast, spike/storm checks and mob-contact proof; it does not 
 uncertified movement on rules10. Teleporter and Diarrhea retain their existing exclusions.
 Easy keeps its normal clear-navigation cadence. Old policies27–32 remain unchanged; replay15
 retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34; replay17 binds
-Easy/Standard33 and Hard35.
+Easy/Standard33 and Hard35. Replay18 binds Easy/Standard36 and Hard37; earlier replay versions retain
+their exact policy identities.
+
+## Alternate farming refuges
+
+When already at a committed adjacent block-farming approach, current profiles can try up to two
+deterministic refuge candidates before the general route search. Candidate geometry follows the
+target, blast range and public monster/lair positions. Movement lengths can include an interior
+turn point instead of only the turn-band boundary or maximum pulse length.
+
+Each candidate must pass the complete absent/present bomb-route proof, exact selected-block
+usefulness check and unchanged monster-contact proof. Failed candidates consume the same bounded
+allowance: the optional search receives at most 8,192 work units and one eighth of the remaining
+job budget, leaving the existing fallback available. Unsupported items, uncertain hazards and
+unsafe routes still prevent planting. With lairs disabled, the prior planner is reused unchanged.
+This expands supported safe routes; it does not guarantee that every farming approach has an escape
+or that a bot can automatically recover from every long-match stall.
 
 ## Safe second bombs
 
@@ -103,7 +119,8 @@ Reengage memory and RNG and commits live state only after the owner accepts Stop
 survival horizon must cover the old deadline. Queue refusal, stale or failed proof, non-plant result,
 displacement or submission refusal retain the old hold. Optional jobs follow every seat's urgent jobs.
 The existing two workers, 32-job queue, 65,536-work limit and all forecast, motion, contact and usefulness
-proofs remain unchanged. Hard35 reuses the Core34 planner; Teleporter counter-pressure still requires
+proofs remain unchanged. Hard35 reuses the Core34 planner; current Hard37 additionally supports the
+bounded farming refuges above. Teleporter counter-pressure still requires
 globally clear soft blocks and its prior support rules.
 
 ## Footprint-boundary recovery
@@ -193,8 +210,10 @@ its own matching bomb. After a confirmed Stop, fresh planning uses the complete 
 scene and certifies a new movement pulse together with its mob-contact lease. The old route
 never authorizes further movement. Origin grace ends when the footprint leaves the bomb cell.
 Escape guidance excludes visible bomb cells. Foreign unpaused timed-bomb motion uses only named
-stationary assumptions on checked pulses of at most three updates, so distant bombs do not
-force waiting until the CPU's own fuse is almost spent.
+stationary assumptions on checked pulses of at most three updates. Repeated Stop/replanning
+cycles can still make an interrupted escape too slow, especially with Short Fuse; these pulses
+do not guarantee completion of the original full escape. See the
+[controlled recovery investigation](../history/cpu-short-fuse-investigation-2026-11-01.md).
 
 Scheduled stops between route legs retain their contact lease. Contact invalidation stops the
 route or pulse while preserving valid origin provenance for a fresh proof; completed commitments

@@ -1,7 +1,7 @@
 use grenadiers_core::room::CpuProfile;
 
 use super::CpuController;
-use super::refuge_handoff_test_support::{EPOCH, queued_refuge};
+use super::refuge_handoff_test_support::{EPOCH, queued_refuge, queued_refuge_for};
 
 #[test]
 fn archived_hard_profile_cannot_enter_otherwise_eligible_refuge_replacement_flow() {
@@ -63,6 +63,26 @@ fn delayed_worker_keeps_the_installed_hold_and_live_state_until_admission() {
     assert!(fixture.controller.has_committed_route());
     assert_eq!(fixture.controller.memory, memory);
     assert_eq!(fixture.controller.rng_draws(), rng_draws);
+}
+
+#[test]
+fn hard37_queues_and_admits_a_real_refuge_replacement() {
+    let mut fixture = queued_refuge_for(CpuProfile::HARD_V37);
+    assert!(fixture.controller.has_pending());
+    assert_eq!(fixture.planner.pump_for_test(1).delivered, 1);
+
+    let mut accepted = None;
+    for _ in 0..=grenadiers_core::cpu::survival::MAX_PLAN_AGE_TICKS {
+        accepted = fixture.controller.poll(fixture.state.tick(), EPOCH);
+        if accepted.is_some() {
+            break;
+        }
+        fixture.advance_publication();
+    }
+    assert!(
+        accepted.is_some_and(|plan| plan.is_refuge_handoff()),
+        "Hard37 worker result did not reach ordinary handoff admission"
+    );
 }
 
 #[test]

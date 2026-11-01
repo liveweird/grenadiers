@@ -56,6 +56,9 @@ mod replay_v16;
 #[allow(dead_code)] // Hard handoff pairing over the retained accepted-input executor.
 mod replay_v17;
 #[cfg(test)]
+#[allow(dead_code)] // Current farm-refuge pairing; production export remains disabled.
+mod replay_v18;
+#[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]

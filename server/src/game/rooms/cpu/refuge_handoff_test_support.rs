@@ -46,6 +46,10 @@ impl RefugeFixture {
 }
 
 pub(super) fn queued_refuge() -> RefugeFixture {
+    queued_refuge_for(CpuProfile::HARD_V35)
+}
+
+pub(super) fn queued_refuge_for(profile: CpuProfile) -> RefugeFixture {
     let (mut state, settings) = state();
     for _ in 0..48 {
         state.step(&input(Some(Direction::North), false)).unwrap();
@@ -53,13 +57,8 @@ pub(super) fn queued_refuge() -> RefugeFixture {
     state.step(&input(None, false)).unwrap();
     let basis = observe(&state, settings);
     let planner = CpuPlanner::without_workers();
-    let mut controller = CpuController::new(
-        planner.clone(),
-        CPU,
-        WORLD.room_instance,
-        [30; 32],
-        CpuProfile::HARD_V35,
-    );
+    let mut controller =
+        CpuController::new(planner.clone(), CPU, WORLD.room_instance, [30; 32], profile);
     assert!(controller.accept_observation(&basis));
     controller.settled_stop_tick = Some(basis.parts().tick);
     let key = controller.memory.unwrap().key();

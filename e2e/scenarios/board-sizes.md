@@ -10,7 +10,7 @@ occupied seat.
 
 ## Scenario: CPU controller counts and difficulties make authoritative progress on every board preset
 
-For every board, controller count, and Easy or Standard difficulty, one human starts a match with
+For every board, controller count, and Easy, Standard or Hard difficulty, one human starts a match with
 the remaining seats server-controlled. Real snapshots must show each configured CPU moving or
 owning a live bomb, and at least one CPU-owned bomb in the room. Configured controller metadata
 alone is not accepted as evidence of progress. Every combination also verifies the rules9 cloud and lair

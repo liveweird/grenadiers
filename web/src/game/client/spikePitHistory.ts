@@ -1,4 +1,4 @@
-import type { GameState, RoomView, Snapshot } from '../v18/schema'
+import type { GameState, RoomView, Snapshot } from '../v19/schema'
 
 function cellKey(cell: { column: number; row: number }): string {
   return `${cell.column},${cell.row}`

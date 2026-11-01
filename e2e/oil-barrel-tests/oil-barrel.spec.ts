@@ -6,7 +6,7 @@ import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '..
 import { moveSeatTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
 import { applyItemSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v18/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v19/schema'
 
 test.beforeAll(() => expect(process.env.E2E_OIL_BARREL_FIXTURE).toBe('arena-v3-oil-barrel'))
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>

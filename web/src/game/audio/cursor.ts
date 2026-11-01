@@ -1,6 +1,6 @@
 import type { GameClientState } from '../client/client'
 import type { PresentationDeaths } from '../arena/types'
-import type { EventKind } from '../v18/schema'
+import type { EventKind } from '../v19/schema'
 
 export type AudioCue = 'step' | 'placement' | 'specialPlacement' | 'detonation'
   | 'specialDetonation' | 'pickup' | 'specialPickup' | 'elimination'

@@ -34,4 +34,4 @@ The creator chooses All off and applies the accepted settings revision before st
 Human/CPU/CPU/CPU room. All three real CPU workers must make physical progress while lairs,
 clouds and items remain disabled; the published lair and mob arrays stay empty.
 
-These cases require the active gameplay v17 endpoint. They must not run against an archived deployment.
+These cases require the active gameplay v19 endpoint. They must not run against an archived deployment.

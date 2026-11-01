@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { GameSettings } from '../v18/schema'
+import type { GameSettings } from '../v19/schema'
 import { admitted, authenticate, harness, messages, room, SocketStub } from './testSupport'
 
 const changed = {

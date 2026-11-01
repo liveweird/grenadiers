@@ -29,11 +29,11 @@ it('creates an explicit four-controller mixed configuration while keeping player
   fireEvent.change(screen.getByRole('combobox', { name: 'Player 2 controller' }), { target: { value: 'cpu' } })
   fireEvent.change(screen.getByRole('combobox', { name: 'Player 4 controller' }), { target: { value: 'cpu' } })
   const difficulties = screen.getAllByRole('combobox', { name: 'CPU difficulty' })
-  fireEvent.change(difficulties.at(-1)!, { target: { value: 'easy' } })
+  fireEvent.change(difficulties.at(-1)!, { target: { value: 'hard' } })
   fireEvent.click(screen.getByRole('button', { name: 'Create custom match' }))
   expect(controls.admit).toHaveBeenCalledWith({
     type: 'create', configuration: {
-      controllers: ['human', 'cpu', 'human', 'cpu'], cpuDifficulty: 'easy',
+      controllers: ['human', 'cpu', 'human', 'cpu'], cpuDifficulty: 'hard',
       board: { width: 11, height: 9 },
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
         spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },

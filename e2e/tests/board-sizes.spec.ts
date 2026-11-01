@@ -1,18 +1,17 @@
 import { expect, test, type Browser, type BrowserContextOptions, type Page } from '@playwright/test'
-import type { BoardSize, Seat } from '../../web/src/game/v18/schema'
+import type { BoardSize, Difficulty, Seat } from '../../web/src/game/v19/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
 
 type Controller = 'human' | 'cpu'
-type Difficulty = 'easy' | 'standard'
 type Group = { pages: Page[]; games: ObservedGame[]; close: () => Promise<void> }
 
 const BOARDS = [
   { width: 15, height: 13 }, { width: 13, height: 11 }, { width: 11, height: 9 },
 ] as const satisfies readonly BoardSize[]
 const COUNTS = [2, 3, 4] as const
-const DIFFICULTIES = ['easy', 'standard'] as const
+const DIFFICULTIES = ['easy', 'standard', 'hard'] as const
 const SEATS = ['one', 'two', 'three', 'four'] as const
 const boardValue = ({ width, height }: BoardSize): string => `${width}x${height}`
 

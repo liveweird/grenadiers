@@ -39,8 +39,8 @@ describe('v12 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 18 })
-    socket.message({ type: 'authenticated', protocolVersion: 18 })
+    socket.message({ type: 'authenticated', protocolVersion: 19 })
+    socket.message({ type: 'authenticated', protocolVersion: 19 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()
@@ -62,6 +62,7 @@ describe('v12 session and admission failures', () => {
   it.each([
     [{ type: 'snapshot' }, 'invalidServerMessage'],
     ['not-json', 'invalidServerMessage'],
+    [{ type: 'authenticated', protocolVersion: 18 }, 'invalidServerMessage'],
     [{ type: 'incompatibleProtocol', supportedVersion: 3 }, 'incompatibleProtocol'],
   ])('tears down a terminal protocol failure %#', async (frame, failure) => {
     const value = harness()

@@ -24,12 +24,14 @@ pub(in crate::game::rooms) struct TeleporterSubmission {
 }
 
 enum SubmissionKind {
-    Admission {
-        prepared: PreparedTeleporterStep,
-        rng: CpuRng,
-        decision: DecisionId,
-    },
+    Admission(Box<TeleporterAdmission>),
     Stop,
+}
+
+struct TeleporterAdmission {
+    prepared: PreparedTeleporterStep,
+    rng: CpuRng,
+    decision: DecisionId,
 }
 
 impl TeleporterSubmission {
@@ -152,11 +154,11 @@ impl CpuController {
         };
         TeleporterService::Submit(TeleporterSubmission {
             command,
-            kind: SubmissionKind::Admission {
+            kind: SubmissionKind::Admission(Box::new(TeleporterAdmission {
                 prepared,
                 rng: result.rng,
                 decision,
-            },
+            })),
         })
     }
 
@@ -165,11 +167,12 @@ impl CpuController {
         submission: TeleporterSubmission,
     ) -> bool {
         match submission.kind {
-            SubmissionKind::Admission {
-                prepared,
-                rng,
-                decision,
-            } => {
+            SubmissionKind::Admission(admission) => {
+                let TeleporterAdmission {
+                    prepared,
+                    rng,
+                    decision,
+                } = *admission;
                 if !self.admit_continuation_decision(decision, submission.command.command_epoch()) {
                     return false;
                 }

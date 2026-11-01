@@ -1,6 +1,5 @@
-use super::compatibility::actor;
-use super::punch_tactic::certified_punch;
 use super::{ExecutionCertificate, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
+use super::{compatibility::actor, punch_tactic::certified_punch};
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
@@ -59,6 +58,7 @@ pub fn plan_with_origin(
         false,
         false,
         false,
+        false,
     )
 }
 #[allow(clippy::too_many_arguments)]
@@ -78,6 +78,7 @@ pub(super) fn plan_inner(
     persistent_burning_oil: bool,
     hard_tactics: bool,
     counter_pressure: bool,
+    pickup_progress: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -200,6 +201,7 @@ pub(super) fn plan_inner(
             start_window,
             end,
             settled_stop_tick,
+            pickup_progress,
             work,
         )
     {

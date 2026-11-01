@@ -15,6 +15,7 @@ pub(super) fn lair(
     start_window: TickWindow,
     end: u64,
     settled_stop_tick: Tick,
+    pickup_progress: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let (survival, contact) = certify(
@@ -26,6 +27,7 @@ pub(super) fn lair(
         end,
         settled_stop_tick,
         true,
+        pickup_progress,
         work,
     )?;
     Some(LairSurvivalPlan { survival, contact })
@@ -40,6 +42,7 @@ pub(super) fn disabled(
     start_window: TickWindow,
     end: u64,
     settled_stop_tick: Tick,
+    pickup_progress: bool,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     certify(
@@ -51,6 +54,7 @@ pub(super) fn disabled(
         end,
         settled_stop_tick,
         false,
+        pickup_progress,
         work,
     )
     .map(|(plan, _)| plan)
@@ -66,9 +70,12 @@ fn certify(
     end: u64,
     settled_stop_tick: Tick,
     with_contact: bool,
+    pickup_progress: bool,
     work: &mut WorkBudget,
 ) -> Option<(SurvivalPlan, Option<crate::cpu::MobContactLease>)> {
-    if ordinary.intent.manual.is_some() || !ordinary_clear || observation.parts().pickups.is_empty()
+    if ordinary.intent.manual.is_some()
+        || (!ordinary_clear && !pickup_progress)
+        || observation.parts().pickups.is_empty()
     {
         return None;
     }

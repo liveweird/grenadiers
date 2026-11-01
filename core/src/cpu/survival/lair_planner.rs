@@ -37,6 +37,7 @@ pub(super) fn plan_lairs_inner(
     persistent_burning_oil: bool,
     hard_tactics: bool,
     counter_pressure: bool,
+    pickup_progress: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -145,6 +146,7 @@ pub(super) fn plan_lairs_inner(
             start_window,
             end,
             strategic_goals,
+            pickup_progress,
             work,
         )
     {
@@ -192,6 +194,7 @@ pub(super) fn plan_lairs_inner(
             start_window,
             end,
             settled_stop_tick,
+            pickup_progress,
             work,
         )
     {

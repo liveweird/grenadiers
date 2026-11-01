@@ -18,6 +18,7 @@ pub(super) fn opening(
     start_window: TickWindow,
     end: u64,
     strategic: bool,
+    pickup_progress: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     if ordinary.intent.manual.is_some() {
@@ -60,6 +61,7 @@ pub(super) fn opening(
             start_window,
             end,
             settled_stop_tick,
+            pickup_progress,
             work,
         )?
     };

@@ -4,6 +4,51 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.11 — 2026-11-01
+
+Fix two CPU Teleporter recovery failures: already-dead roster members no longer cause repeated
+admission refusal, and a snapshot arriving after the physical Stop can confirm the handoff
+without discarding strategic progress. Easy/Standard use CPU48, Hard uses CPU49 and private
+replay24 binds those identities. CPU46/47 and replay23 retain their original contracts.
+
+An actual queued-owner regression preserves the captured public pose and arena with declared
+controlled private history. Hard47 reproduces the refusal; Hard49 completes 74 movement/Stop
+pairs without fences, commits collection intent, collects, plants, destroys a block and survives.
+Physical deadlines, scene/contact checks, ordinary planning, RNG and work limits remain unchanged.
+
+No UI, artwork, transport, physics, dependency or database changes. Restart ends in-memory games.
+Multiple exposed Teleporters remain unsupported by recovery; broader farming and difficulty
+improvements remain in BACKLOG.md. A fresh 180-second all-items round completed without browser
+errors and exposed that separate support limit; it is not a matched difficulty comparison.
+
+### Verification
+
+Accepted application source: `303e104a70e02fcac4917cf9cfd93739c6b46e51`.
+Accepted exact image: `sha256:3195bd3453df4aac560594acb9ef535542d820f950290aa11d88e26b2101f8eb`.
+
+- Independent review clear; focused Core admission/completion and legacy rejection tests pass.
+- Current/archived policy gates, cadence, worker dispatch/fallback, owner witnesses and replay24 pass.
+- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes pass.
+- Dependency policy/audits pass at the configured threshold; 12 existing moderate npm tooling
+  advisories remain. Pinned Trivy 0.74.0 reports zero fixable high/critical image vulnerabilities.
+- All five frontend assets are byte-identical to accepted v1.3.10; unchanged frontend/native
+  inputs reuse their accepted checks. No duplicate full web or remote suite is required.
+- Unique Linux x86_64 debug/release workspace units and doctests pass ([run 41329394822](https://github.com/liveweird/grenadiers/actions/runs/41329394822)).
+- Frozen Rust gate passes in 762 seconds: 1,839 Core and 732 ordinary server tests pass in
+  debug and release, with all 4,194,304 item masks independently checked in debug, release and
+  coverage (32 partitions, four workers, zero retries in the accepted run). Coverage is
+  68,051/73,177 lines (93.00%), above the unchanged 90% floor. Formatting, strict Clippy,
+  build and repository checks pass. The first sandboxed attempt could not bind loopback
+  listeners; the accepted run used the required access.
+
+### Operation
+
+The exact accepted image runs on localhost:8085. Health/readiness, security headers, CSP/cache,
+all five served assets and a fresh three-Hard-CPU smoke pass. The v1.3.10 immutable image and
+local override remain available for rollback. This is a source/local-runtime release; no hosted
+service or production registry is configured. Artwork remains in the unchanged
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.10 — 2026-11-01
 
 CPUs can deliberately clear one exposed Teleporter when it prevents otherwise useful farming.

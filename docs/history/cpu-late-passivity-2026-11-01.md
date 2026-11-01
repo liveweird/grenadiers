@@ -202,3 +202,24 @@ CPU50/51 isolate the extension; CPU48/49 retain exact-one-target planning. Priva
 reuses replay24’s accepted-input recording/validation implementation with independent closed
 50/51 identity constants. This supports multiple distant pickups without guaranteeing completion
 of every multi-Teleporter scene or resolving the separate early farming cycle.
+
+## Fresh CPU51 concurrent-load round
+
+`target/quality-review/multi-v1312-long-match.json` records an uncontrolled fresh round from
+running tick 222 to result 1576 (22 seconds), with 24 saved public samples, 29 diagnostics,
+17 observed CPU bombs (5/6/6) and no browser errors. This ran alongside release compilation,
+mask checks and other browser smoke tests; it is not an isolated latency or balance comparison.
+
+At saved tick 1560, three range-two timed bombs placed at 1396 have 16 ticks remaining:
+`(13,3)` owned by Two, `(3,9)` by Three and `(11,9)` by Four. The saved footprints overlap their
+predicted blast rays at `(13,1)`, `(3,10)/(3,11)` and `(13,9)` respectively. The terminal state,
+accepted input queues, private Stop/origin and planner/refusal history were not retained, so
+this does not establish individual death attribution or queue starvation.
+
+Read-only source tracing finds no simple range or clock mismatch: simulation and forecast share
+`visit_blast`, observation clocks are physical ticks, and both retain flames until detonation
+plus 30. An intact planted route spans through 1606. A concrete mechanism to discriminate is
+simultaneous foreign plants invalidating an exact expected-bomb scene, followed by recovery
+whose origin can expire after leaving its bomb footprint and whose ordinary pulse safety
+window is shorter than the full bomb lifetime. Opening-scene recovery already has a witness;
+this later geometry needs a paired actual-owner episode before a defect is claimed or fixed.

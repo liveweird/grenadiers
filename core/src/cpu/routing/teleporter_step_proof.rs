@@ -26,6 +26,7 @@ pub(super) struct ProofInput<'a> {
     pub(super) phase: TeleporterStepPhase,
     pub(super) safe_until: Tick,
     pub(super) nominal: &'a [(Tick, Motion, Vec<MovementSegment>)],
+    pub(super) allow_distant_teleporters: bool,
     pub(super) work: &'a mut WorkBudget,
 }
 
@@ -53,16 +54,7 @@ pub(super) fn prove(mut input: ProofInput<'_>) -> Result<ProofOutcome, RouteFail
     let mut landing_regions = Vec::with_capacity(landing_capacity);
     for (start, motion, segments) in input.nominal {
         take(input.work, 1)?;
-        let first_wait = Tick(
-            input
-                .context
-                .observation
-                .parts()
-                .tick
-                .0
-                .checked_add(1)
-                .ok_or(RouteFailure::InvalidRequest)?,
-        );
+        let first_wait = next_tick(input.context.observation.parts().tick)?;
         if first_wait < *start {
             let waiting = [MovementSegment::new(
                 input.context.actor.position,
@@ -200,6 +192,9 @@ fn validate_named_pickup_sweep(
 }
 
 fn reject_reachable_pickups(input: &mut ProofInput<'_>) -> Result<(), RouteFailure> {
+    // A successful swap only permutes actor positions. Bounding every living
+    // basis origin, including the root's, therefore also covers the partner
+    // that may inherit that origin after collecting the selected Teleporter.
     let ticks = input.safe_until.0 - input.context.observation.parts().tick.0;
     let travel = max_travel(ticks)?;
     let parts = input.context.observation.parts();
@@ -221,7 +216,13 @@ fn reject_reachable_pickups(input: &mut ProofInput<'_>) -> Result<(), RouteFailu
         .parts()
         .pickups
         .iter()
-        .filter(|pickup| pickup.kind != PickupKind::Teleporter)
+        .filter(|pickup| {
+            if input.allow_distant_teleporters {
+                pickup.cell != input.request.target
+            } else {
+                pickup.kind != PickupKind::Teleporter
+            }
+        })
     {
         for actor in input
             .context

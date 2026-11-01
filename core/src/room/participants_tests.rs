@@ -298,3 +298,21 @@ fn teleporter_profiles_extend_for_stable_dead_rosters_without_relabeling_archive
     assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
     assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
 }
+
+#[test]
+fn multiple_teleporter_profiles_preserve_the_previous_pair() {
+    assert_eq!(CpuProfile::TELEPORTER_V50_STANDARD.policy.version(), 50);
+    assert_eq!(CpuProfile::TELEPORTER_V50_EASY.policy.version(), 50);
+    assert_eq!(CpuProfile::HARD_V51.policy.version(), 51);
+    assert_eq!(CpuProfile::TELEPORTER_V48_STANDARD.policy.version(), 48);
+    assert_eq!(CpuProfile::HARD_V49.policy.version(), 49);
+    assert_eq!(
+        CpuProfile::TELEPORTER_V50_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(
+        CpuProfile::TELEPORTER_V50_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V51.difficulty, CpuDifficulty::Hard);
+}

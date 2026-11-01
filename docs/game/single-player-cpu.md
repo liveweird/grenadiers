@@ -182,7 +182,20 @@ improvements and broader scene support stay in the [backlog](../../BACKLOG.md#si
 
 ## Intentional Teleporter collection boundary
 
-CPU48 serves Easy/Standard and CPU49 serves Hard under private replay24. Their ordinary fallback
+Multiple exposed Teleporters are supported only when every unselected pickup is beyond the
+maximum full-window travel bound of every visible living actor’s basis position, including the
+root. Swapping permutes occupied positions and resets movement residual; checking all origins
+therefore also excludes another activation after a partner lands at the root’s former position.
+Other reachable pickups, contested collection and unsafe landings remain unsupported.
+
+Guidance builds one map/BFS, scans charged neighboring approaches and keeps a valid prior target.
+Otherwise it chooses reachable approach distance, then target row/column. It freezes one target
+and two movement candidates before the single forecast/proof attempt; failure does not try more
+targets. Unselected pickups must remain unchanged at admission and completion. CPU48/49 retain
+their exact-one-target contract; CPU50/51 reuse their physical executor.
+
+
+CPU50 serves Easy/Standard and CPU51 serves Hard under private replay25. Their ordinary fallback
 is exactly CPU44/45's result, memory and RNG; only the additional selector work is charged. An
 active confirmed-origin record bypasses the new selector and retains CPU44/45 continuation
 behavior. The existing planting, pulse and contact-topology guards still reject exposed
@@ -203,7 +216,7 @@ Keep the controller's actual physical Stop-confirmation tick `S <= B`; continued
 the stopped-motion premise. Any admitted direction, even one blocked by collision, clears that
 provenance. Admission requires the same retained `S`, not a replacement or a clock inferred from
 unchanged positions; Easy cadence may deliberately wait after confirmation.
-For CPU48/49, an unchanged visible dead player remains an inert roster member. The sealed Stop
+For CPU50/51, an unchanged visible dead player remains an inert roster member. The sealed Stop
 still takes effect at admission `A+2`; its confirmation may arrive in a later snapshot before
 the original safety deadline. Only then does strategic progress commit. Archived CPU46/47 and
 replay23 retain their original admission/confirmation behavior.
@@ -213,7 +226,7 @@ private randomness. Swap has two endpoints and no connecting sweep; the same pub
 opposite endpoint poses identify it. It resets both actors' residual and pending turn, preserves
 headings and leaves the partner's held input active. The root's Stop never stops the partner.
 
-The kernel requires exactly one exposed Teleporter, a complete visible living roster, visible
+The kernel requires the selected Teleporter, a complete visible living roster, visible
 empty bombs and no flames, Oil, Bracelet, active origin, unsupported effects, immediately usable
 Remote or Landmine, or reachable invalidating pickup. Both lair modes use honest checked contact.
 Marker-aware sealed contact containment permits natural births and deaths without fabricating an

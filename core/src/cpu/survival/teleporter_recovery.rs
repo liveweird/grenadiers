@@ -1,6 +1,8 @@
 use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, forecast};
-use crate::cpu::policy::{UtilityMemory, teleporter_guidance};
-use crate::cpu::routing::{TeleporterStepRequest, certify_teleporter_step};
+use crate::cpu::policy::{UtilityMemory, teleporter_guidance, teleporter_guidance_v50};
+use crate::cpu::routing::{
+    TeleporterStepRequest, certify_teleporter_step, certify_teleporter_step_v50,
+};
 use crate::cpu::{Observation, WorkBudget};
 use crate::game::Tick;
 
@@ -13,6 +15,12 @@ pub enum TeleporterRecoveryChoice {
     Step(Box<TeleporterStepPlan>),
 }
 
+#[derive(Clone, Copy)]
+enum RecoveryMode {
+    Legacy,
+    V50,
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn select_teleporter_recovery(
     observation: &Observation,
@@ -23,12 +31,61 @@ pub fn select_teleporter_recovery(
     fallback: LairSurvivalPlan,
     work: &mut WorkBudget,
 ) -> TeleporterRecoveryChoice {
+    select(
+        observation,
+        history,
+        settled_stop_tick,
+        memory,
+        origin,
+        fallback,
+        work,
+        RecoveryMode::Legacy,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn select_teleporter_recovery_v50(
+    observation: &Observation,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: Option<&PlantEscapeOrigin>,
+    fallback: LairSurvivalPlan,
+    work: &mut WorkBudget,
+) -> TeleporterRecoveryChoice {
+    select(
+        observation,
+        history,
+        settled_stop_tick,
+        memory,
+        origin,
+        fallback,
+        work,
+        RecoveryMode::V50,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn select(
+    observation: &Observation,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: Option<&PlantEscapeOrigin>,
+    fallback: LairSurvivalPlan,
+    work: &mut WorkBudget,
+    mode: RecoveryMode,
+) -> TeleporterRecoveryChoice {
     if origin.is_some() || work.remaining() == 0 {
         return TeleporterRecoveryChoice::Ordinary(Box::new(fallback));
     }
 
     let mut recovery_work = WorkBudget::new(work.remaining().min(TELEPORTER_RECOVERY_CAP));
-    let Some(guidance) = teleporter_guidance(observation, memory, &mut recovery_work) else {
+    let guidance = match mode {
+        RecoveryMode::Legacy => teleporter_guidance(observation, memory, &mut recovery_work),
+        RecoveryMode::V50 => teleporter_guidance_v50(observation, memory, &mut recovery_work),
+    };
+    let Some(guidance) = guidance else {
         charge_shared(work, recovery_work);
         return TeleporterRecoveryChoice::Ordinary(Box::new(fallback));
     };
@@ -51,16 +108,19 @@ pub fn select_teleporter_recovery(
     let allowances = candidate_allowances(recovery_work.remaining(), candidate_count);
     for (candidate, allowance) in candidates.into_iter().flatten().zip(allowances) {
         let mut candidate_work = WorkBudget::new(allowance);
-        let step = certify_teleporter_step(
-            observation,
-            &hazards,
-            TeleporterStepRequest {
-                target: guidance.target,
-                movement: candidate.movement,
-                settled_stop_tick,
-            },
-            &mut candidate_work,
-        )
+        let request = TeleporterStepRequest {
+            target: guidance.target,
+            movement: candidate.movement,
+            settled_stop_tick,
+        };
+        let step = match mode {
+            RecoveryMode::Legacy => {
+                certify_teleporter_step(observation, &hazards, request, &mut candidate_work)
+            }
+            RecoveryMode::V50 => {
+                certify_teleporter_step_v50(observation, &hazards, request, &mut candidate_work)
+            }
+        }
         .ok()
         .filter(|step| {
             step.nominal_makes_progress_toward(candidate.waypoint, &mut candidate_work)
@@ -102,3 +162,7 @@ fn charge_shared(shared: &mut WorkBudget, recovery: WorkBudget) {
 #[cfg(test)]
 #[path = "teleporter_recovery_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "teleporter_recovery_v50_tests.rs"]
+mod v50_tests;

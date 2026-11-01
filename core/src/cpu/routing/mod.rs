@@ -42,7 +42,7 @@ pub use route_types::{
     RouteStep,
 };
 pub use spike_pits::SpikePitGuard;
-pub use teleporter_step::certify_teleporter_step;
+pub use teleporter_step::{certify_teleporter_step, certify_teleporter_step_v50};
 pub use teleporter_step_types::{TeleporterStep, TeleporterStepPhase, TeleporterStepRequest};
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
 
@@ -135,3 +135,9 @@ mod teleporter_step_hazard_tests;
 
 #[cfg(test)]
 mod teleporter_step_disabled_tests;
+
+#[cfg(test)]
+pub(crate) mod teleporter_step_v50_fixture;
+
+#[cfg(test)]
+mod teleporter_step_v50_tests;

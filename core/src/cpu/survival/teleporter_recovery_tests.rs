@@ -4,7 +4,7 @@ use crate::cpu::policy::{ControlPlan, StrategicObjectiveKind, StrategicTarget, U
 use crate::cpu::{CpuRng, MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, EntityId, PickupKind, Tick};
 
-fn scene() -> (Observation, UtilityMemory, ObservedHazardMemory) {
+pub(super) fn scene() -> (Observation, UtilityMemory, ObservedHazardMemory) {
     let observation = crate::cpu::lair_contact::v139_teleporter_fixture::captured_tick_6121();
     let key = MemoryKey {
         world: observation.parts().world,
@@ -15,7 +15,7 @@ fn scene() -> (Observation, UtilityMemory, ObservedHazardMemory) {
     (observation, UtilityMemory::new(key), history)
 }
 
-fn fallback(memory: UtilityMemory) -> LairSurvivalPlan {
+pub(super) fn fallback(memory: UtilityMemory) -> LairSurvivalPlan {
     LairSurvivalPlan {
         survival: super::super::SurvivalPlan {
             control: ControlPlan {
@@ -30,7 +30,7 @@ fn fallback(memory: UtilityMemory) -> LairSurvivalPlan {
     }
 }
 
-fn unrelated_origin() -> PlantEscapeOrigin {
+pub(super) fn unrelated_origin() -> PlantEscapeOrigin {
     let basis = crate::cpu::routing::tests::observation(Vec::new(), Vec::new());
     let certificate = crate::cpu::routing::plan_ordinary_plant(
         &basis,
@@ -54,7 +54,7 @@ fn unrelated_origin() -> PlantEscapeOrigin {
         .expect("fixture should provide a valid unrelated origin")
 }
 
-fn assert_fallback(choice: TeleporterRecoveryChoice, memory: UtilityMemory) {
+pub(super) fn assert_fallback(choice: TeleporterRecoveryChoice, memory: UtilityMemory) {
     let TeleporterRecoveryChoice::Ordinary(plan) = choice else {
         panic!("expected unchanged ordinary fallback")
     };

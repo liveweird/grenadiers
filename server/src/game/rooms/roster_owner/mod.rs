@@ -83,10 +83,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::TELEPORTER_V48_EASY)
+            Some(CpuProfile::TELEPORTER_V50_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::TELEPORTER_V48_STANDARD)
+            Some(CpuProfile::TELEPORTER_V50_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -110,7 +110,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V49)
+            Some(CpuProfile::HARD_V51)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -152,8 +152,11 @@ mod lair_cpu_opening_tests;
 mod late_teleporter_owner_support;
 #[cfg(test)]
 mod late_teleporter_owner_tests;
+
 #[cfg(test)]
 mod lifecycle_tests;
+#[cfg(test)]
+mod multi_teleporter_owner_tests;
 #[cfg(test)]
 mod tests;
 

@@ -88,7 +88,9 @@ pub use teleporter_execution_types::{
     CommittedTeleporterStep, PreparedTeleporterStep, TeleporterOutcome, TeleporterStepCommand,
     TeleporterStepStatus,
 };
-pub use teleporter_recovery::{TeleporterRecoveryChoice, select_teleporter_recovery};
+pub use teleporter_recovery::{
+    TeleporterRecoveryChoice, select_teleporter_recovery, select_teleporter_recovery_v50,
+};
 pub use teleporter_recovery_types::TeleporterStepPlan;
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;

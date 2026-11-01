@@ -8,6 +8,7 @@ mod movement;
 mod placement;
 mod planner;
 mod teleporter_guidance;
+mod teleporter_guidance_v50;
 mod types;
 
 pub use execution::{EscapeExecution, follow_checked_escape, follow_committed_escape};
@@ -17,6 +18,7 @@ pub(crate) use planner::{
     plan_respawn_v24, plan_respawn_v25, plan_spike_pits_v26,
 };
 pub(crate) use teleporter_guidance::teleporter_guidance;
+pub(crate) use teleporter_guidance_v50::teleporter_guidance_v50;
 pub use types::{
     ControlPlan, FAILED_TARGET_DEFER_TICKS, GoalKind, GoalMemory, IntentDebugSummary,
     MAX_HOLD_TICKS, MAX_RECENT_CELLS, MAX_ROUTE_CELLS, PolicyError, STRATEGIC_COMMITMENT_TICKS,

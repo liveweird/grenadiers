@@ -23,11 +23,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   [late-match investigation](docs/history/cpu-late-passivity-2026-11-01.md) now reproduces and
   repairs dead-roster admission refusal and delayed Stop-confirmation invalidation through a
   continuous queued-owner episode. Keep its complete movement, real Stop, committed intent,
-  collection, useful bombing and survival regressions. A fresh CPU49 round exposes two persistent
-  Teleporters, beyond the current exact-one support boundary. Next characterize bounded collection
-  with multiple exposed targets: select one, preserve every unselected pickup and exclude its
-  activation throughout the proof, including swapped-partner movement. Require full queued
-  execution before claiming this resolves the captured scene. Separately reproduce seat Two's
+  collection, useful bombing and survival regressions. A fresh CPU49 round exposed two persistent
+  Teleporters. Conditional v50 certificates and a controlled owner episode now cover multiple
+  distant targets with unchanged unselected pickups and all-origin reach exclusion. Observe fresh
+  CPU50/51 matches and preserve refusal/queue evidence before claiming the captured scene resolves. Separately reproduce seat Two's
   early farming cycle before either pickup appears, plus remaining passive pickups or lethal waits.
   Preserve exact public observations plus worker/refusal/admission evidence. Unchanged sampled
   poses, static reachability or a free bomb slot alone do not establish a missed safe action.

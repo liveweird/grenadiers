@@ -26,6 +26,10 @@ impl PlantSupport {
     }
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keep the opt-in support policy explicit beside the existing proof inputs"
+)]
 pub(super) fn certified_plant(
     observation: &Observation,
     history: &ObservedHazardMemory,
@@ -120,6 +124,10 @@ pub(super) fn certified_plant_for_policy(
 /// V23 optional tactic. A cheap shared-geometry check runs before any escape
 /// proof, then every distinct first input receives a reserved bounded slice.
 /// Failed proofs are charged and cannot consume the later-candidate reserve.
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keep the opt-in support policy explicit beside the existing proof inputs"
+)]
 pub(super) fn certified_plant_candidates(
     observation: &Observation,
     history: &ObservedHazardMemory,

@@ -97,70 +97,38 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.5 — 2026-11-01
+## v1.3.6 — 2026-11-01
 
-CPU wall farming can try two bounded alternate refuges before the general escape search.
-The candidates include an interior turn point missed by the existing route expansion and are
-ordered using public monster/lair geometry. Every candidate still requires the full absent/present
-bomb escape, exact selected-block usefulness and unchanged monster-contact proof.
+Lair-enabled CPUs remember one eligible refused farming position for 120 ticks and exclude it
+before selecting each wall's best approach. This prevents a different wall target from immediately
+reusing the same failed bomb position. The memory is bounded, local to one CPU/world and expires
+normally. Pickup and opponent-pressure selection keep their existing rules.
 
-Optional work is capped at 8,192 units and one eighth of the remaining job allowance; failed
-attempts are charged and retain the existing fallback. No extra workers, larger global budget,
-hidden information, changed physics or weakened hazard/contact checks.
+A mark requires a stopped adjacent Farm approach, visible bomb knowledge, spare capacity, an
+ordinary bomb and supported planting conditions, followed by failure of every full plant attempt.
+Successful planting, unsupported effects, capacity exhaustion and queue/admission refusal do not
+create a mark. Movement and planting still require all forecast, contact, usefulness and admission
+proofs within the unchanged work allowance.
 
 ### Compatibility and limits
 
-Easy/Standard select CPU36 and Hard selects CPU37 with its existing certified second-bomb
-handoff. Private replay18 binds those exact identities with gameplay19/rules10/navigation3;
-replay17 retains Easy/Standard33 and Hard35. Earlier policies and replay readers remain unchanged.
-With lairs disabled, the prior planner is reused with identical results, work and RNG.
+Easy/Standard select CPU38 and Hard selects CPU39 with its existing certified second-bomb handoff.
+Private replay19 binds those identities with gameplay19/rules10/navigation3. Private replay18
+retains CPU36/37; this does not introduce another network version. With lairs disabled, the prior
+planner remains unchanged. Earlier policy/replay behavior stays isolated.
 
-A legal controlled approach at (3,8) now produces a complete useful escape that the previous
-search missed. This does not establish that the original long-match stall at (3,9) automatically
-recovers, nor that every farming approach has a safe bomb placement. Short-fuse recovery and
-other reproduced liveness issues remain in the backlog. No network, UI, artwork or external
+The captured (3,9) refusal now records its position and the next guidance selects (3,8) for
+block (3,7). The guidance decision and safe physical planting from (3,8) are separate witnesses;
+they do not establish a continuous restoration of the original match. Short-fuse interrupted
+recovery remains a separate known limitation. No UI, artwork, network schema, physics or external
 dependency changes. Restart ends process-local matches.
 
 ### Verification
 
-Accepted image source: `b6462f00cdecfc38d6c93ebe246d51a2e745a17f`.
-Independent Core and integration review is clear, including the corrected charging of every
-public danger scan and failure path. Final release-record edits leave image build inputs unchanged.
+Candidate acceptance is in progress; this draft is not a published release record.
 
-- Full frozen-source Rust gate passes in 658 seconds: 1,731 passing Core tests and 669 passing
-  ordinary server tests, plus all 4,194,304 item masks separately in debug, release and coverage.
-  Four workers, 32 partitions, no retries. Formatting, strict Clippy, build and repository checks
-  pass. Fresh coverage is 58,506/63,095 lines (92.73%), above the unchanged 90% floor.
-- The captured legal (3,8) fixture automatically produces the complete eight-step useful route,
-  passes unchanged monster-contact checks, destroys block (3,7) in physical State execution and
-  survives beyond flame expiry. The unsafe captured (3,9) approach still refuses planting.
-  Blocked refuge, unavailable bomb facts and exhausted optional-work cases fail closed.
-- Normal queued worker/owner episodes for Standard36 and Hard37 plant, destroy their target and
-  survive with real lair observations. This easier owner scene also succeeds under Standard33;
-  its claim is transport/execution coverage, not the distinguishing route-search improvement.
-  Hard37 additionally passes real queued second-bomb admission.
-- Replay18, retained Replay17 future-policy rejection, exact profile/owner/worker mapping,
-  archived no-lair result/work/RNG parity and source limits pass.
-- Unique Linux x86_64 workspace debug/release tests and doctests pass on the accepted source
-  ([run 41274125676](https://github.com/liveweird/grenadiers/actions/runs/41274125676)).
-  The same Linux unit coverage is not repeated in a second container suite.
-- Exact-image Compose authentication and rendered keyboard duel pass; three Hard CPUs move
-  and plant with every feature enabled and no browser errors. Restricted Kubernetes passes
-  the same three-CPU smoke. Owned acceptance stacks and namespaces are removed.
-- All five image web assets equal accepted v1.3.0/v1.3.4 byte-for-byte. Web, contracts, renderer,
-  artwork, external dependencies and toolchain inputs are unchanged; their complete accepted
-  web/native suites are reused. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL findings in the
-  exact accepted image.
-
-### Operation
-
-Accepted local image:
-`sha256:83eb7f0a16d995683beab5c7c26b9c3ff8349522bc7e5c3ba6c50ab5c78858b3`.
-The exact accepted image is promoted to localhost:8085; served-asset/security checks and a
-fresh three-Hard-CPU smoke pass. Version 1.3.4 remains available for rollback.
-This is a source/local-runtime release without a hosted service or production registry.
-The unchanged artwork remains in the
-[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+<a id="v135--2026-11-01"></a>
+The [v1.3.5 record](history/releases.md#v135--2026-11-01) is preserved in release history.
 
 <a id="v134--2026-11-01"></a>
 The [v1.3.4 record](history/releases.md#v134--2026-11-01) is preserved in release history.

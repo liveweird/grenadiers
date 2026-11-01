@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy36 on Easy/Standard and policy37 on Hard for every live
+The live environment CPU implementation uses policy38 on Easy/Standard and policy39 on Hard for every live
 two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,8 +19,8 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::FARM_REFUGES_V36_STANDARD` and `FARM_REFUGES_V36_EASY` select Utility36 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V37` selects Utility37 for Hard rooms with the same observation boundary.
+`CpuProfile::FARM_ORIGINS_V38_STANDARD` and `FARM_ORIGINS_V38_EASY` select Utility38 for live rules10 Easy/Standard rooms.
+`CpuProfile::HARD_V39` selects Utility39 for Hard rooms with the same observation boundary.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
@@ -93,7 +93,7 @@ uncertified movement on rules10. Teleporter and Diarrhea retain their existing e
 Easy keeps its normal clear-navigation cadence. Old policies27–32 remain unchanged; replay15
 retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34; replay17 binds
 Easy/Standard33 and Hard35. Replay18 binds Easy/Standard36 and Hard37; earlier replay versions retain
-their exact policy identities.
+their exact policy identities. Replay19 binds current Easy/Standard38 and Hard39, without changing gameplay19.
 
 ## Alternate farming refuges
 
@@ -110,6 +110,25 @@ unsafe routes still prevent planting. With lairs disabled, the prior planner is 
 This expands supported safe routes; it does not guarantee that every farming approach has an escape
 or that a bot can automatically recover from every long-match stall.
 
+## Refused farming approaches
+
+With lairs enabled, current profiles remember one eligible refused farming position for 120 ticks
+(two seconds). They exclude that cell before choosing the best approach for each block, so
+switching wall targets cannot immediately select the same failed position. Pickup and opponent
+candidates keep their existing selection rules. The memory belongs to the CPU's world/seat,
+expires normally, and starts empty in a new world.
+
+The position is recorded only when the bot is stopped at an adjacent farming approach with
+visible bomb knowledge, spare capacity, an ordinary bomb and supported planting conditions,
+and every complete planting attempt has failed. A successful plant does not record a failure.
+Capacity exhaustion, unsupported effects and queue/admission delays do not create this memory.
+All movement and later planting still need their existing complete proofs; this is guidance,
+not permission to move or plant. With lairs disabled, the prior planner remains unchanged.
+
+The captured refused (3,9) position now leads to guidance toward (3,8) for block (3,7). That
+guidance decision and the safe plant from (3,8) are separately tested; they do not establish a
+continuous restoration or replay of the original captured match.
+
 ## Safe second bombs
 
 After a Hard bot reaches a confirmed stopped refuge from its first bomb and has spare capacity, it may
@@ -119,7 +138,7 @@ Reengage memory and RNG and commits live state only after the owner accepts Stop
 survival horizon must cover the old deadline. Queue refusal, stale or failed proof, non-plant result,
 displacement or submission refusal retain the old hold. Optional jobs follow every seat's urgent jobs.
 The existing two workers, 32-job queue, 65,536-work limit and all forecast, motion, contact and usefulness
-proofs remain unchanged. Hard35 reuses the Core34 planner; current Hard37 additionally supports the
+proofs remain unchanged. Hard35 reuses the Core34 planner; current Hard39 additionally supports the
 bounded farming refuges above. Teleporter counter-pressure still requires
 globally clear soft blocks and its prior support rules.
 

@@ -35,6 +35,7 @@ pub enum CpuPolicy {
     UtilityV26,
     UtilityV27,
     UtilityV28,
+    UtilityV29,
 }
 
 impl CpuPolicy {
@@ -69,6 +70,7 @@ impl CpuPolicy {
             Self::UtilityV26 => 26,
             Self::UtilityV27 => 27,
             Self::UtilityV28 => 28,
+            Self::UtilityV29 => 29,
         }
     }
 }
@@ -319,6 +321,12 @@ impl CpuProfile {
     /// Rules-v10 Hard tactics use the same public observation and safety proofs.
     pub const HARD_V28: Self = Self {
         policy: CpuPolicy::UtilityV28,
+        difficulty: CpuDifficulty::Hard,
+    };
+
+    /// Hard counter-pressure with the unchanged certified route model.
+    pub const HARD_V29: Self = Self {
+        policy: CpuPolicy::UtilityV29,
         difficulty: CpuDifficulty::Hard,
     };
 

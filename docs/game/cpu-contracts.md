@@ -340,7 +340,7 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 ## Live difficulty profiles
 
 Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU27, including
-certified planting around persistent burning Oil. Hard selects CPU28 with range-aware firing
+certified planting around persistent burning Oil. Hard selects CPU29 with range-aware firing
 positions against visible rivals. Both retain the same 65,536-work budget and full planting,
 route, mob-contact and admission proofs. Hard does not receive hidden positions, concealed loot,
 private seeds or faster physics.
@@ -350,3 +350,8 @@ remaining work, with at most 32 origins per rival. Failure falls back to existin
 guidance. Strong useful pickups retain their values; attack pressure outranks routine farming.
 Retained goals keep commitment/progress deadlines. Admission rechecks the exact target: a rival
 moving out of the certified blast withdraws planting usefulness.
+
+CPU29 permits clear-arena counter-pressure only from completed-update observations: no finite
+flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. Empty-bomb
+farming retains its prior support. This changes a Teleporter support precondition, not the
+route proof, public observation facts or work limit; all conservative motion checks remain.

@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy27 on Easy/Standard and policy28 on Hard for every live
+The live environment CPU implementation uses policy27 on Easy/Standard and policy29 on Hard for every live
 two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -20,7 +20,7 @@ or a private arena/simulation random stream.
 ## Policies and controller ownership
 
 `CpuProfile::RELIABLE_V27_STANDARD` and `RELIABLE_V27_EASY` select Utility27 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V28` selects Utility28 for Hard rooms with the same observation boundary.
+`CpuProfile::HARD_V29` selects Utility29 for Hard rooms with the same observation boundary.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
 `RESPAWN_V23_STANDARD`/`RESPAWN_V23_EASY` retain Utility23 with goal-cell persistence.
@@ -68,6 +68,19 @@ pressure analysis shares a small bounded allowance across rivals; exhausted or u
 analysis falls back to collect/farm guidance. Hard has no hidden information, faster movement,
 larger bomb inventory, extra planning workers or immunity. Easy keeps its navigation pause and
 Standard remains the default. See [Solo difficulty](single-player.md#difficulty).
+
+## Clear-arena counter-pressure
+
+With Teleporter enabled, CPU29 requires at least one completed running update, no finite flames,
+no exposed Teleporter and complete visible bomb knowledge before planting. An empty bomb set
+retains supported farming around blocks and Burning Oil. With existing bombs, every bomb must
+be timed and unpaused and the entire soft-block set must be empty. This prevents hidden item
+reveals, including when an existing blast ignites the proposed bomb early.
+
+These public preconditions authorize only attempting the unchanged full escape/contact/usefulness
+proof. Bomb motion remains uncertain. A bomb's conservative motion envelope can still make a
+nearby or same-axis plant unprovable; the CPU keeps its certified fallback. Its active own-escape
+route retains its existing hold. Replay14 binds CPU29; replay13 keeps CPU28 unchanged.
 
 ## Retained storm profile
 

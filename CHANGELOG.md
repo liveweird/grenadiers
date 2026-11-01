@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 1.3.1 — 2026-11-01
+
+- Let Hard CPUs certify useful counter-pressure against visible unpaused timed bombs in
+  globally clear arenas, while retaining complete escape, contact and target-usefulness proofs.
+- Require a completed running update before Teleporter-enabled Hard planting and preserve
+  conservative bomb-motion refusals and supported empty-bomb farming.
+- Bind current Hard29 and retained Easy/Standard27 in private replay14; keep Hard28/replay13 immutable.
+
 ## 1.3.0 — 2026-11-01
 
 - Add a room-wide Hard CPU tier to Solo and custom matches, keeping Standard as the default

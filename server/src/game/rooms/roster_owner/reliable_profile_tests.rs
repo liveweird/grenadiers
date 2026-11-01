@@ -36,8 +36,8 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V29,
             CpuProfile::HARD_V28,
-            CpuProfile::SPIKE_PITS_STANDARD,
             CpuProfile::RELIABLE_V27_STANDARD,
         ),
     ] {

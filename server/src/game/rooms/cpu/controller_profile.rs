@@ -4,7 +4,11 @@ impl CpuController {
     pub(super) fn profile_supports(&self, rules_version: u16) -> bool {
         if self.profile.difficulty == grenadiers_core::room::CpuDifficulty::Hard {
             return rules_version == 10
-                && self.profile == grenadiers_core::room::CpuProfile::HARD_V28;
+                && matches!(
+                    self.profile,
+                    grenadiers_core::room::CpuProfile::HARD_V28
+                        | grenadiers_core::room::CpuProfile::HARD_V29
+                );
         }
         match rules_version {
             5 => self.profile.policy.version() <= 16,
@@ -58,7 +62,7 @@ mod tests {
     };
 
     #[test]
-    fn hard_requires_exact_policy28_and_rules10() {
+    fn hard_requires_an_exact_supported_policy_and_rules10() {
         let controller = |profile| {
             CpuController::new(
                 CpuPlanner::without_workers(),
@@ -68,8 +72,9 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V28);
+        let hard = controller(CpuProfile::HARD_V29);
         assert!(hard.profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }

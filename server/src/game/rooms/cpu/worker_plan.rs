@@ -3,10 +3,10 @@ use grenadiers_core::cpu::{
     MobContactLease, WorkBudget,
     policy::PolicyError,
     survival::{
-        SurvivalPlan, plan_hard_v28_with_origin, plan_lairs_with_origin,
-        plan_reliable_v27_with_origin, plan_respawn_v22_with_origin, plan_respawn_v23_with_origin,
-        plan_respawn_v24_with_origin, plan_respawn_v25_with_origin, plan_respawn_with_origin,
-        plan_spike_pits_v26_with_origin, plan_with_origin,
+        SurvivalPlan, plan_counter_pressure_v29_with_origin, plan_hard_v28_with_origin,
+        plan_lairs_with_origin, plan_reliable_v27_with_origin, plan_respawn_v22_with_origin,
+        plan_respawn_v23_with_origin, plan_respawn_v24_with_origin, plan_respawn_v25_with_origin,
+        plan_respawn_with_origin, plan_spike_pits_v26_with_origin, plan_with_origin,
     },
 };
 use grenadiers_core::room::CpuPolicy;
@@ -18,10 +18,23 @@ pub(super) fn plan(
     if job.observation.parts().rules.version == 10
         || matches!(
             job.policy,
-            CpuPolicy::UtilityV26 | CpuPolicy::UtilityV27 | CpuPolicy::UtilityV28
+            CpuPolicy::UtilityV26
+                | CpuPolicy::UtilityV27
+                | CpuPolicy::UtilityV28
+                | CpuPolicy::UtilityV29
         )
     {
-        let plan = if job.policy == CpuPolicy::UtilityV28 {
+        let plan = if job.policy == CpuPolicy::UtilityV29 {
+            plan_counter_pressure_v29_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV28 {
             plan_hard_v28_with_origin(
                 &job.observation,
                 &job.memory,

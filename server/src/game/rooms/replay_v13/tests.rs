@@ -262,3 +262,38 @@ fn replay13_binds_gameplay19_and_exact_easy_standard_hard_policy_pairs() {
         }
     }
 }
+
+#[test]
+fn replay13_rejects_consistently_forged_future_hard29_provenance() {
+    let pits = SpikePitTuning::DEFAULT;
+    let base = configuration(pits);
+    let hard = SpikeRoomConfiguration::new(
+        LairRoomConfiguration::new(
+            RoomConfiguration::new(
+                &[SeatControl::Human, SeatControl::Cpu],
+                Some(CpuDifficulty::Hard),
+                base.base().base().board(),
+            )
+            .unwrap(),
+            base.base().storm_cloud(),
+            base.base().lairs(),
+        ),
+        pits,
+    );
+    let (_, mut journal) = RecordingRosterRuntime::new(
+        hard,
+        RoomSettings::DEFAULT,
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(13);
+            Ok(())
+        }),
+        vec![(SeatId::Two, CpuDifficulty::Hard, [13; 32])],
+    )
+    .unwrap()
+    .into_parts();
+    journal.header.cpu_policy_version = 29;
+    journal.body.header.cpu_policy_version = 29;
+    journal.header.cpus[0].policy_version = 29;
+    journal.body.header.cpus[0].policy_version = 29;
+    assert_eq!(replay(&journal), Err(ReplayError::InvalidHeader));
+}

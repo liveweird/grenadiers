@@ -4,6 +4,65 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.3 — 2026-11-01
+
+CPU escape guidance now finishes clearing a blast tile when the actor's centre has already
+entered a safe tile but part of its body still overlaps the threatened tile. Previously, the
+refuge search excluded the current tile and could send the bot backwards, producing repeated
+boundary crossings until detonation. Current guidance keeps moving toward the safe tile's centre.
+
+The centred full footprint must be traversable and free of definite lethal forecast cells.
+This only changes the target; full pulse, contact, storm, spike, geometry and fresh-admission
+checks remain authoritative. Existing conditional-stationary fallback contracts and origin
+guidance are unchanged. See [recovery guidance](../game/multiplayer-cpu.md#footprint-boundary-recovery).
+
+### Compatibility and limits
+
+Easy/Standard select CPU33 and Hard selects CPU34, retaining their pickup progress and Hard
+pressure tactics. Older policies through32 remain unchanged. Private replay16 binds the exact
+33/34 pairing, gameplay19/rules10/navigation3 and human-only rooms. Replay15 retains31/32 and
+rejects consistent future forgeries. Production replay export stays disabled.
+
+Network contracts, simulation physics, UI, artwork and external dependencies are unchanged.
+Restart ends process-local matches. This fixes a reproduced recovery loop, not every possible
+AI failure or survival against arbitrary future opponent actions.
+
+### Verification
+
+Accepted image source: `18b6faea4bad0d39cdce393fcda05c8a909cbd80`.
+Independent core and activation/replay reviews are clear; later release-record edits do not
+change image build inputs. The post-rebase tree exactly equals the tested candidate.
+
+- Full frozen-source Rust gate passes in 633 seconds: 1,716 core and 646 server tests, plus
+  all 4,194,304 item masks separately in debug, release and coverage. Four workers, 32 partitions,
+  no retries. Formatting, strict Clippy, build and repository checks pass. Fresh coverage is
+  56,410/60,895 lines (92.63%), above the unchanged 90% floor.
+- Captured public observations reproduce the backward guidance. In a controlled authoritative
+  local-blast episode, old CPU32 alternates across the boundary and dies at tick670; CPU34 clears
+  its footprint and survives through701, within the unchanged work allowance. This isolates local
+  physics and does not claim to restore hidden cloud RNG, mob, spike or loot state from the match.
+- Horizontal mirrors, vertical edges, blocked/lethal current cells and full centred-footprint
+  checks pass. Legacy flag defaults, movement ordering, RNG/work forwarding and origin guidance
+  remain unchanged; independent review confirms no forecast or certificate relaxation.
+- Distinct Linux ARM64 release checks pass: 347 CPU, 32 replay10–16, five dispatch and three
+  current Hard episode tests, including no-CPU recording and future-policy forgery rejection.
+- Exact-image Compose authentication/duel passes both scenarios. Three Hard CPUs move and plant
+  with every feature enabled and no browser errors. The same three-CPU smoke passes restricted
+  Kubernetes CPU/memory limits; owned test stacks and namespaces are removed.
+- All five image web assets are byte-identical to accepted v1.3.0. Corresponding web/contracts,
+  renderer and external dependency inputs are unchanged, so its full 7,426-test web gate and
+  native renderer acceptance are reused. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
+  vulnerabilities in the exact accepted image.
+
+### Operation
+
+Accepted local image:
+`sha256:5a5830e4a2c3e59b9a3f5abf057cf887f8c126a689fdf9a9c1b9f5da3f9a7ebe`.
+The exact accepted image is promoted to localhost:8085; v1.3.2 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.2 — 2026-11-01
 
 CPU players now finish supported pickup approaches instead of repeatedly stopping outside a

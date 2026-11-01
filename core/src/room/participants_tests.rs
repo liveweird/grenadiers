@@ -141,3 +141,13 @@ fn refuge_profiles_keep_prior_pickup_policy_identities() {
     assert!(!CpuProfile::REFUGE_V33_EASY.is_current());
     assert!(!CpuProfile::HARD_V34.is_current());
 }
+
+#[test]
+fn hard35_adds_handoff_without_relabeling_refuge_profiles() {
+    assert_eq!(CpuProfile::HARD_V35.policy.version(), 35);
+    assert_eq!(CpuProfile::HARD_V35.difficulty, CpuDifficulty::Hard);
+    assert!(!CpuProfile::HARD_V35.is_current());
+    assert_eq!(CpuProfile::HARD_V34.policy.version(), 34);
+    assert_eq!(CpuProfile::REFUGE_V33_STANDARD.policy.version(), 33);
+    assert_eq!(CpuProfile::REFUGE_V33_EASY.policy.version(), 33);
+}

@@ -3,11 +3,11 @@ use crate::cpu::routing::{PlantCertificate, PlantPresence, RouteCertificate, Rou
 use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
 
-use super::MAX_PLAN_AGE_TICKS;
 use super::compatibility::{
     actor, plant_actor_compatible, route_compatible, visible_rivals_allow_segment,
 };
 use super::manual_execution::CommittedPunch;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteStatus {
     Continue,
@@ -41,9 +41,9 @@ impl RouteCommand {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct Transition {
-    command: RouteCommand,
-    required_stop_snapshot: Option<Tick>,
+pub(super) struct Transition {
+    pub(super) command: RouteCommand,
+    pub(super) required_stop_snapshot: Option<Tick>,
 }
 
 #[derive(Clone, Debug)]
@@ -53,10 +53,11 @@ pub struct CommittedRoute {
     pub(super) punch: Option<CommittedPunch>,
     pub(super) basis: Observation,
     pub(super) first_update: Tick,
-    transitions: Vec<Transition>,
-    next_transition: usize,
+    pub(super) transitions: Vec<Transition>,
+    pub(super) next_transition: usize,
     pub(super) last_observation_tick: Tick,
-    movement: MovementIntent,
+    pub(super) last_observation: Observation,
+    pub(super) movement: MovementIntent,
 }
 #[derive(Clone, Debug)]
 pub(super) struct CommittedPlant {
@@ -132,7 +133,7 @@ impl CommittedRoute {
                     &mut WorkBudget::new(crate::cpu::survival::WORK_ALLOWANCE),
                 )
                 .unwrap_or(false);
-        if age > MAX_PLAN_AGE_TICKS
+        if age > super::MAX_PLAN_AGE_TICKS
             || current.parts().tick > admission_tick
             || certificate.key() != key
             || certificate.basis_tick() != basis.parts().tick
@@ -169,6 +170,7 @@ impl CommittedRoute {
             transitions,
             next_transition: 1,
             last_observation_tick: current.parts().tick,
+            last_observation: current.clone(),
             movement: accepted_movement,
         })
     }
@@ -204,6 +206,7 @@ impl CommittedRoute {
                 return RouteStatus::Invalidated;
             }
             self.last_observation_tick = tick;
+            self.last_observation = current.clone();
             return RouteStatus::Completed;
         }
         let Some(expected) = self
@@ -260,9 +263,11 @@ impl CommittedRoute {
             settled_stop_tick,
         }) {
             self.last_observation_tick = tick;
+            self.last_observation = current.clone();
             return RouteStatus::Completed;
         }
         self.last_observation_tick = tick;
+        self.last_observation = current.clone();
         self.active_status()
     }
 
@@ -304,10 +309,9 @@ impl CommittedRoute {
     }
 
     fn active_status(&self) -> RouteStatus {
-        if self.movement == MovementIntent::Stop {
-            RouteStatus::Wait
-        } else {
-            RouteStatus::Continue
+        match self.movement {
+            MovementIntent::Stop => RouteStatus::Wait,
+            MovementIntent::Direction(_) => RouteStatus::Continue,
         }
     }
 }

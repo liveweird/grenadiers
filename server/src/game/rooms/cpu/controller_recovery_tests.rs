@@ -5,9 +5,8 @@ use grenadiers_core::cpu::{
 use grenadiers_core::game::{BlastKind, EntityId, SeatId, Tick};
 
 use super::CpuController;
-use super::plant_tests::{
-    PlantFixture, advanced, inject_certified, placement_observation, prepared,
-};
+use super::plant_test_support::advanced;
+use super::plant_tests::{PlantFixture, inject_certified, placement_observation, prepared};
 
 #[test]
 fn confirmed_plant_invalidation_stops_then_admits_a_fresh_recovery_pulse() {

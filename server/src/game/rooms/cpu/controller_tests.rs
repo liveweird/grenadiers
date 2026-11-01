@@ -16,6 +16,7 @@ use grenadiers_core::cpu::{
 };
 use grenadiers_core::game::{CellId, Direction, Position, SeatId, Tick};
 
+use super::test_support::key_for;
 use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 
@@ -97,6 +98,7 @@ fn inject_plan(
         receiver,
         live: Arc::new(AtomicBool::new(true)),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = decision.checked_request_serial;
 }
@@ -178,6 +180,7 @@ fn expired_empty_request_is_canceled_and_does_not_block_retry() {
         receiver,
         live: Arc::clone(&live),
         completed: None,
+        refuge_handoff: None,
     });
     controller.request_serial = 1;
 
@@ -221,6 +224,7 @@ fn rejected_bomb_clears_prospective_escape_but_commits_rng() {
         certified_manual: None,
         escape_origin: false,
         ordinary_navigation: false,
+        refuge_handoff: false,
     };
 
     controller.commit(
@@ -346,9 +350,6 @@ fn admitted_long_pulse_waits_for_its_scheduled_stop_update() {
         Some(PulseStatus::Completed)
     );
 }
-#[path = "controller_pulse_intent_tests.rs"]
-mod pulse_intent_tests;
-
 fn observation_at(tick: Tick, x_offset: i32) -> grenadiers_core::cpu::Observation {
     let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
     parts.tick = tick;
@@ -392,9 +393,5 @@ fn observation_with_pose(
     grenadiers_core::cpu::Observation::new(parts).unwrap()
 }
 
-fn key_for(controller: &CpuController) -> MemoryKey {
-    MemoryKey {
-        world: controller.world.unwrap(),
-        cpu_seat: SeatId::Two,
-    }
-}
+#[path = "controller_pulse_intent_tests.rs"]
+mod pulse_intent_tests;

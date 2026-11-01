@@ -47,6 +47,7 @@ impl CpuController {
         self.escape_origin_epoch = None;
         self.cadence = super::CadenceState::default();
         self.strategic_blast = None;
+        self.refuge_attempt = None;
         #[cfg(test)]
         {
             self.admission_trace = super::admission::AdmissionTrace::default();

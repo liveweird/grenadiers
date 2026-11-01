@@ -330,6 +330,7 @@ mod tests {
             certified_manual: None,
             escape_origin: false,
             ordinary_navigation: true,
+            refuge_handoff: false,
         };
         controller.on_movement_admitted();
         controller.commit(accepted, intent);

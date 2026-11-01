@@ -97,64 +97,72 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.3 — 2026-11-01
+## v1.3.4 — 2026-11-01
 
-CPU escape guidance now finishes clearing a blast tile when the actor's centre has already
-entered a safe tile but part of its body still overlaps the threatened tile. Previously, the
-refuge search excluded the current tile and could send the bot backwards, producing repeated
-boundary crossings until detonation. Current guidance keeps moving toward the safe tile's centre.
+Hard CPUs can attempt a second useful bomb after reaching a confirmed stopped refuge from
+an earlier planted bomb, instead of always holding still through its entire remaining fuse.
+The old route and contact proof stay installed while the ordinary bounded planner evaluates
+the replacement. Only a full Stop+Bomb certificate with fresh usefulness/contact admission
+and a shared absent/present survival horizon covering the old deadline can replace it.
 
-The centred full footprint must be traversable and free of definite lethal forecast cells.
-This only changes the target; full pulse, contact, storm, spike, geometry and fresh-admission
-checks remain authoritative. Existing conditional-stationary fallback contracts and origin
-guidance are unchanged. See [recovery guidance](game/multiplayer-cpu.md#footprint-boundary-recovery).
+One successfully queued attempt is permitted per old planted-bomb identity. Failed queueing,
+stale or unusable results, displacement and refused inputs preserve the old hold and live
+strategic memory/RNG. Every seat's urgent work gets queue access before optional handoffs.
+See [safe second bombs](game/multiplayer-cpu.md#safe-second-bombs).
 
 ### Compatibility and limits
 
-Easy/Standard select CPU33 and Hard selects CPU34, retaining their pickup progress and Hard
-pressure tactics. Older policies through32 remain unchanged. Private replay16 binds the exact
-33/34 pairing, gameplay19/rules10/navigation3 and human-only rooms. Replay15 retains31/32 and
-rejects consistent future forgeries. Production replay export stays disabled.
+Easy/Standard remain CPU33; Hard selects CPU35 and reuses the exact CPU34 planner, including
+pickup progress and complete-footprint recovery. Private replay17 binds Easy/Standard33 or
+Hard35 with gameplay19/rules10/navigation3. Replay16 retains33/34 and rejects future Hard35.
+Production recording/export stays disabled.
 
-Network contracts, simulation physics, UI, artwork and external dependencies are unchanged.
-Restart ends process-local matches. This fixes a reproduced recovery loop, not every possible
-AI failure or survival against arbitrary future opponent actions.
+This is conditional combination availability: spare capacity, a suitable refuge and all existing
+counter-pressure, forecast, motion, contact and target-usefulness conditions still apply. It does
+not guarantee a useful second plant on every generated board. No network, physics, UI, artwork
+or external dependency changes. Restart ends process-local matches.
 
 ### Verification
 
-Accepted image source: `18b6faea4bad0d39cdce393fcda05c8a909cbd80`.
-Independent core and activation/replay reviews are clear; later release-record edits do not
-change image build inputs. The post-rebase tree exactly equals the tested candidate.
+Accepted image source: `1faf46b8893d565218cd125fbb03f80f2814a7b2`.
+Independent Core/controller/owner, physical-scene and final activation/replay reviews are clear.
+Later release-record edits do not change image build inputs.
 
-- Full frozen-source Rust gate passes in 633 seconds: 1,716 core and 646 server tests, plus
+- Full frozen-source Rust gate passes in 666 seconds: 1,721 core and 663 server tests, plus
   all 4,194,304 item masks separately in debug, release and coverage. Four workers, 32 partitions,
   no retries. Formatting, strict Clippy, build and repository checks pass. Fresh coverage is
-  56,410/60,895 lines (92.63%), above the unchanged 90% floor.
-- Captured public observations reproduce the backward guidance. In a controlled authoritative
-  local-blast episode, old CPU32 alternates across the boundary and dies at tick670; CPU34 clears
-  its footprint and survives through701, within the unchanged work allowance. This isolates local
-  physics and does not claim to restore hidden cloud RNG, mob, spike or loot state from the match.
-- Horizontal mirrors, vertical edges, blocked/lethal current cells and full centred-footprint
-  checks pass. Legacy flag defaults, movement ordering, RNG/work forwarding and origin guidance
-  remain unchanged; independent review confirms no forecast or certificate relaxation.
-- Distinct Linux ARM64 release checks pass: 347 CPU, 32 replay10–16, five dispatch and three
-  current Hard episode tests, including no-CPU recording and future-policy forgery rejection.
-- Exact-image Compose authentication/duel passes both scenarios. Three Hard CPUs move and plant
-  with every feature enabled and no browser errors. The same three-CPU smoke passes restricted
-  Kubernetes CPU/memory limits; owned test stacks and namespaces are removed.
-- All five image web assets are byte-identical to accepted v1.3.0. Corresponding web/contracts,
-  renderer and external dependency inputs are unchanged, so its full 7,426-test web gate and
-  native renderer acceptance are reused. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
-  vulnerabilities in the exact accepted image.
+  57,597/62,129 lines (92.71%), above the unchanged 90% floor.
+- Real queued planning and `Driver::tick` execute two distinct owned bombs simultaneously,
+  with the second planted at(6,3) before the first detonates, a live selected rival at(9,3)
+  inside its blast, and CPU survival beyond both flame lifetimes. The same Hard34 scene retains
+  its old hold and has no early second birth. Actual capacity/range pickups supply the inventory.
+- The physical witness uses legal controlled default terrain, all items and disabled environment
+  hazards. Its cfg(test) scene installer validates identity, clocks, rules, roster and board,
+  resets inputs/reports/caches on a clone and republishes normally before committing. Retained
+  generation metadata is publication context, not generated-world or replay provenance.
+- Delayed workers, cancellation, stale epochs, full queues, non-plant results and nonfatal
+  Stop/Bomb refusal retain old authority. Third-seat urgent work takes the last queue slot
+  before an optional replacement. Replacement horizons cannot shorten the installed hold.
+- Distinct Linux ARM64 release checks pass: 351 CPU, 38 replay10–17, five dispatch, three
+  current Hard episodes and all 11 handoff tests, including the three physical/runtime cases.
+- Exact-image Compose authentication/duel passes both scenarios; three Hard CPUs move and plant
+  with all features enabled and no browser errors. Restricted Kubernetes passes the same
+  three-CPU smoke under CPU/memory limits. Owned acceptance stacks/namespaces are removed.
+- All five image web assets equal accepted v1.3.0 byte-for-byte. Unchanged web/contracts/renderer
+  and external dependency inputs reuse its full 7,426-test web gate/native renderer acceptance.
+  Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities in the exact accepted image.
 
 ### Operation
 
 Accepted local image:
-`sha256:5a5830e4a2c3e59b9a3f5abf057cf887f8c126a689fdf9a9c1b9f5da3f9a7ebe`.
-The exact accepted image is promoted to localhost:8085; v1.3.2 remains available for rollback.
+`sha256:d53da7585541da815e8feb92be4af94ff9158f3b7b4748fae3f694cc6fe5f82e`.
+The exact accepted image is promoted to localhost:8085; v1.3.3 remains available for rollback.
 This is a source/local-runtime release without a hosted service or production registry.
 The unchanged artwork remains in the
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v133--2026-11-01"></a>
+The [v1.3.3 record](history/releases.md#v133--2026-11-01) is preserved in release history.
 
 <a id="v132--2026-11-01"></a>
 The [v1.3.2 record](history/releases.md#v132--2026-11-01) is preserved in release history.

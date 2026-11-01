@@ -1,11 +1,7 @@
 use grenadiers_core::{
-    cpu::{
-        Intent, ManualIntent, MovementIntent, WorldId,
-        policy::EscapeExecution,
-        survival::{PulseStatus, RouteStatus},
-    },
+    cpu::{Intent, ManualIntent, MovementIntent, survival::RouteStatus},
     game::{SeatId, Tick},
-    protocol::{v14, v15, v16, v17, v18, v19},
+    protocol::v14,
     room::MatchPhase,
 };
 
@@ -47,6 +43,9 @@ impl Driver {
     }
 
     fn apply_plan(&mut self, index: usize, plan: AcceptedPlan) -> Result<(), RosterRuntimeError> {
+        if plan.is_refuge_handoff() {
+            return self.apply_refuge_handoff(index, plan);
+        }
         let seat = self.cpus[index].seat();
         let tick = self.runtime.lifecycle().tick();
         let epoch = self.runtime.lifecycle().round_attempt();
@@ -86,6 +85,34 @@ impl Driver {
                 manual,
             },
         );
+        Ok(())
+    }
+
+    fn apply_refuge_handoff(
+        &mut self,
+        index: usize,
+        plan: AcceptedPlan,
+    ) -> Result<(), RosterRuntimeError> {
+        debug_assert_eq!(plan.intent.movement, MovementIntent::Stop);
+        debug_assert_eq!(plan.intent.manual, Some(ManualIntent::Bomb));
+        let seat = self.cpus[index].seat();
+        let tick = self.runtime.lifecycle().tick();
+        let epoch = self.runtime.lifecycle().round_attempt();
+        match self
+            .runtime
+            .submit_cpu_intent(seat, epoch, RosterAction::Movement(None))
+        {
+            Ok(_) => {}
+            Err(error) if fatal(error) => return Err(error),
+            Err(_) => return Ok(()),
+        }
+        if self.apply_manual(index, Some(ManualIntent::Bomb))? != Some(ManualIntent::Bomb) {
+            return Ok(());
+        }
+        self.cpu_stationary[seat.index()] = true;
+        self.cpu_stop_at[seat.index()] = None;
+        self.cpus[index].on_stop_admitted(tick);
+        self.cpus[index].commit(plan, Intent::STOP.with_manual(ManualIntent::Bomb));
         Ok(())
     }
 
@@ -209,145 +236,6 @@ impl Driver {
         }
         Ok(())
     }
-
-    pub(super) fn observe_cpus(
-        &mut self,
-        notice: &crate::game::rooms::roster_runtime::RosterNotice,
-    ) {
-        if self.runtime.lifecycle().phase() != MatchPhase::Running {
-            for cpu in &mut self.cpus {
-                cpu.cancel();
-            }
-            return;
-        }
-        let physical_round = self.runtime.lifecycle().round_attempt();
-        let room_instance = self.runtime.identity().registry_serial;
-        let world = WorldId {
-            room_instance,
-            physical_round,
-        };
-        let observations: Option<Vec<_>> =
-            if let Some(publication) = notice.spike_v19_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v19::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else if let Some(publication) = notice.spike_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v18::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else if let Some(publication) = notice.respawn_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v17::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else if let Some(publication) = notice.lair_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v16::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else if let Some(publication) = notice.environment_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v15::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else if let Some(publication) = notice.legacy_cpu_publication() {
-                self.cpus
-                    .iter()
-                    .map(|cpu| {
-                        v14::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
-                    })
-                    .collect()
-            } else {
-                return;
-            };
-        let Some(observations) = observations else {
-            return;
-        };
-        let epoch = self.runtime.lifecycle().round_attempt();
-        for (index, observation) in observations.iter().enumerate() {
-            let seat = self.cpus[index].seat();
-            self.cpus[index].validate_escape_epoch(epoch);
-            if !self.cpus[index].accept_observation(observation) {
-                continue;
-            }
-            if self.cpus[index].validate_contact(observation, observation.parts().tick)
-                == Some(ContactStatus::Invalidated)
-            {
-                self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-                continue;
-            }
-            let route = self.cpus[index].observe_route(observation);
-            if route == Some(RouteStatus::Invalidated) {
-                self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-                continue;
-            }
-            if matches!(
-                route,
-                Some(RouteStatus::Continue | RouteStatus::Wait | RouteStatus::Submit(_))
-            ) {
-                continue;
-            }
-            let pulse = self.cpus[index].validate_pulse(observation, observation.parts().tick);
-            if pulse == Some(PulseStatus::Invalidated) && !self.cpu_stationary[seat.index()] {
-                self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-                continue;
-            }
-            if matches!(pulse, Some(PulseStatus::Continue | PulseStatus::Wait)) {
-                continue;
-            }
-            if self.cpus[index].is_escaping() {
-                match self.cpus[index].follow_escape(observation).ok() {
-                    Some(EscapeExecution::Continue(plan) | EscapeExecution::Wait(plan))
-                        if self.cpu_stationary[seat.index()] =>
-                    {
-                        let _ = self.apply_escape(index, plan);
-                        continue;
-                    }
-                    Some(EscapeExecution::Continue(_) | EscapeExecution::Wait(_)) => continue,
-                    Some(EscapeExecution::Invalidated) if !self.cpu_stationary[seat.index()] => {
-                        self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-                        continue;
-                    }
-                    Some(EscapeExecution::Completed | EscapeExecution::Invalidated) | None => {}
-                }
-            }
-            if self.cpu_stationary[seat.index()] && self.cpus[index].needs_stop_confirmation() {
-                self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-            } else if self.cpu_stationary[seat.index()] && !self.cpus[index].has_pending() {
-                let _ = self.cpus[index].submit(observation.clone(), epoch);
-            }
-        }
-    }
-
-    #[cfg(test)]
-    pub(in crate::game::rooms::roster_owner) fn expire_contact_for_test(
-        &mut self,
-        index: usize,
-    ) -> bool {
-        let Some(observation) = self.cpus[index].latest_observation_for_test() else {
-            return false;
-        };
-        if self.cpus[index].validate_contact(&observation, Tick(u64::MAX - 1))
-            != Some(ContactStatus::Invalidated)
-        {
-            return false;
-        }
-        let seat = self.cpus[index].seat();
-        self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
-        true
-    }
 }
 
 const fn movement(intent: MovementIntent) -> Option<grenadiers_core::game::Direction> {
@@ -365,3 +253,18 @@ const fn wire_seat(seat: SeatId) -> v14::Seat {
         SeatId::Four => v14::Seat::Four,
     }
 }
+
+#[cfg(test)]
+#[path = "../refuge_handoff_observation_support.rs"]
+mod refuge_handoff_observation_support;
+
+#[cfg(test)]
+#[path = "../refuge_handoff_owner_support.rs"]
+mod refuge_handoff_owner_support;
+
+#[cfg(test)]
+#[path = "../refuge_handoff_owner_tests.rs"]
+mod refuge_handoff_owner_tests;
+
+#[path = "../driver_cpu_observation.rs"]
+mod observation;

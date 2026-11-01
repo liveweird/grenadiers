@@ -275,6 +275,12 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Hard refuge guidance with certified terminal-hold replacement.
+    pub const HARD_V35: Self = Self {
+        policy: CpuPolicy::UtilityV35,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

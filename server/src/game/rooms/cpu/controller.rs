@@ -20,6 +20,7 @@ struct Pending {
     receiver: Receiver<PlanResult>,
     live: Arc<AtomicBool>,
     completed: Option<PlanResult>,
+    refuge_handoff: Option<grenadiers_core::cpu::survival::TerminalRefugeHandoff>,
 }
 
 pub(in crate::game::rooms) struct AcceptedPlan {
@@ -34,6 +35,7 @@ pub(in crate::game::rooms) struct AcceptedPlan {
     certified_manual: Option<grenadiers_core::cpu::ManualIntent>,
     escape_origin: bool,
     ordinary_navigation: bool,
+    refuge_handoff: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -67,6 +69,7 @@ pub(in crate::game::rooms) struct CpuController {
     profile: CpuProfile,
     cadence: CadenceState,
     strategic_blast: Option<intent::StrategicBlastContext>,
+    refuge_attempt: Option<refuge_handoff::AttemptIdentity>,
     #[cfg(test)]
     admission_trace: admission::AdmissionTrace,
 }
@@ -105,6 +108,7 @@ impl CpuController {
             profile,
             cadence: CadenceState::default(),
             strategic_blast: None,
+            refuge_attempt: None,
             #[cfg(test)]
             admission_trace: admission::AdmissionTrace::default(),
         }
@@ -168,6 +172,7 @@ impl CpuController {
             receiver,
             live,
             completed: None,
+            refuge_handoff: None,
         });
         true
     }
@@ -275,50 +280,6 @@ impl CpuController {
             self.cancel();
         }
     }
-
-    #[cfg(test)]
-    pub(in crate::game::rooms) fn plan_now_for_test(
-        &mut self,
-        observation: &Observation,
-        command_epoch: u64,
-    ) -> AcceptedPlan {
-        self.cancel();
-        self.accept_observation(observation);
-        let serial = self.request_serial + 1;
-        self.request_serial = serial;
-        let decision = DecisionId {
-            world: observation.parts().world,
-            command_epoch,
-            observation_tick: observation.parts().tick,
-            checked_request_serial: serial,
-        };
-        let mut rng = self.rng.as_ref().unwrap().clone();
-        let plan = grenadiers_core::cpu::policy::plan(
-            observation,
-            self.memory.as_ref().unwrap(),
-            &mut rng,
-            &mut grenadiers_core::cpu::WorkBudget::new(256),
-        )
-        .unwrap();
-        AcceptedPlan {
-            decision,
-            intent: plan.intent,
-            hold_ticks: plan.hold_ticks,
-            next_memory: plan.next_memory,
-            next_rng: rng,
-            committed_pulse: None,
-            committed_route: None,
-            contact: None,
-            certified_manual: None,
-            escape_origin: false,
-            ordinary_navigation: false,
-        }
-    }
-
-    #[cfg(test)]
-    pub(in crate::game::rooms) fn rng_draws(&self) -> u64 {
-        self.rng.as_ref().map_or(0, CpuRng::draws)
-    }
 }
 
 impl Drop for CpuController {
@@ -377,12 +338,20 @@ mod bracelet_tests;
 mod plant_tests;
 
 #[cfg(test)]
+#[path = "controller_plant_test_support.rs"]
+mod plant_test_support;
+
+#[cfg(test)]
 #[path = "controller_recovery_tests.rs"]
 mod recovery_tests;
 
 #[cfg(test)]
 #[path = "controller_lair_recovery_tests.rs"]
 mod lair_recovery_tests;
+
+#[cfg(test)]
+#[path = "controller_lair_recovery_test_support.rs"]
+mod lair_recovery_test_support;
 
 #[cfg(test)]
 #[path = "controller_weapon_tests.rs"]
@@ -398,3 +367,14 @@ mod respawn_tests;
 
 #[path = "controller_profile.rs"]
 mod profile;
+
+#[path = "controller_refuge_handoff.rs"]
+mod refuge_handoff;
+
+#[cfg(test)]
+#[path = "controller_refuge_handoff_tests.rs"]
+mod refuge_handoff_tests;
+
+#[cfg(test)]
+#[path = "refuge_handoff_test_support.rs"]
+mod refuge_handoff_test_support;

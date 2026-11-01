@@ -106,7 +106,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V34)
+            Some(CpuProfile::HARD_V35)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -166,6 +166,12 @@ mod cpu_farm_progress_tests;
 
 #[cfg(test)]
 mod reliable_profile_tests;
+
+#[cfg(test)]
+mod refuge_handoff_physical_support;
+
+#[cfg(test)]
+mod refuge_handoff_physical_tests;
 
 #[cfg(test)]
 #[path = "../cpu/hard_episode_tests.rs"]

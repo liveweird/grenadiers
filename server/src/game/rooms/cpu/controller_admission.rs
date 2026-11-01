@@ -22,6 +22,7 @@ pub(in crate::game::rooms) struct AdmissionTrace {
     pub pulse: u32,
     pub route: u32,
     pub duplicate_decision: u32,
+    pub refuge_handoff: u32,
 }
 
 #[derive(Clone, Copy)]
@@ -36,6 +37,7 @@ enum AdmissionRejection {
     Pulse,
     Route,
     DuplicateDecision,
+    RefugeHandoff,
 }
 
 impl CpuController {
@@ -44,7 +46,14 @@ impl CpuController {
         current_tick: Tick,
         command_epoch: u64,
     ) -> Option<AcceptedPlan> {
-        if self.escaping || self.committed_pulse.is_some() || self.committed_route.is_some() {
+        let refuge_pending = self
+            .pending
+            .as_ref()
+            .is_some_and(|pending| pending.refuge_handoff.is_some());
+        if self.escaping
+            || self.committed_pulse.is_some()
+            || (self.committed_route.is_some() && !refuge_pending)
+        {
             self.cancel();
             return None;
         }
@@ -108,6 +117,24 @@ impl CpuController {
             && result.plan.control.intent.movement != grenadiers_core::cpu::MovementIntent::Stop
             && super::cadence::is_clear_for_easy(&result.basis);
         let latest = self.latest_observation.as_ref()?;
+        let refuge_handoff = pending.refuge_handoff.as_ref();
+        if refuge_handoff.is_some_and(|handoff| {
+            result.escape_origin.is_some()
+                || result.plan.lease.is_some()
+                || result.plan.control.intent
+                    != grenadiers_core::cpu::Intent {
+                        movement: grenadiers_core::cpu::MovementIntent::Stop,
+                        manual: Some(grenadiers_core::cpu::ManualIntent::Bomb),
+                    }
+                || result
+                    .plan
+                    .execution
+                    .as_ref()
+                    .is_none_or(|execution| !handoff.accepts_replacement(execution))
+                || !self.refuge_handoff_still_installed(handoff, latest)
+        }) {
+            return self.reject(AdmissionRejection::RefugeHandoff);
+        }
         let escape_origin = match (&result.escape_origin, &self.escape_origin) {
             (None, None) => false,
             (Some(result), Some(current)) if result.same_origin(current) => true,
@@ -226,6 +253,7 @@ impl CpuController {
             certified_manual,
             escape_origin,
             ordinary_navigation,
+            refuge_handoff: refuge_handoff.is_some(),
         })
     }
 
@@ -244,6 +272,7 @@ impl CpuController {
             AdmissionRejection::Pulse => self.admission_trace.pulse += 1,
             AdmissionRejection::Route => self.admission_trace.route += 1,
             AdmissionRejection::DuplicateDecision => self.admission_trace.duplicate_decision += 1,
+            AdmissionRejection::RefugeHandoff => self.admission_trace.refuge_handoff += 1,
         }
         #[cfg(not(test))]
         let _ = reason;

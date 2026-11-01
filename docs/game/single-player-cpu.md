@@ -182,16 +182,21 @@ improvements and broader scene support stay in the [backlog](../../BACKLOG.md#si
 
 ## Intentional Teleporter collection boundary
 
-Current planting and ordinary pulse guards reject exposed Teleporters. The collection extension
-must use a separate typed `TeleporterStep` certificate rather than weakening those guards or
-making curses ordinary pickup goals. Its work is tracked only in the [backlog](../../BACKLOG.md#single-player).
+CPU46 serves Easy/Standard and CPU47 serves Hard under private replay23. Their ordinary fallback
+is exactly CPU44/45's result, memory and RNG; only the additional selector work is charged. An
+active confirmed-origin record bypasses the new selector and retains CPU44/45 continuation
+behavior. The existing planting, pulse and contact-topology guards still reject exposed
+Teleporters. Deliberate collection instead uses a separate typed `TeleporterStep` certificate,
+without weakening those guards, assigning curses globally positive pickup value or allowing
+ordinary navigation to transit a Teleporter.
 
 Each step authorizes one movement update, an unconditional Stop on the next physical update,
 and a fresh confirmed stopped observation before further movement. Ordinary checked navigation
-approaches a neighboring cell center. A target-specific **Approach** step may overlap the named
-Teleporter with the footprint while every possible final center remains outside its cell.
-Repeated Approach steps end at a pose where **Collect** enters that cell in one update.
-Do not snap positions or infer a stopped residual from a public screenshot.
+through the existing `SearchMap`/BFS reaches a stable neighboring cell center. A target-specific
+**Approach** step may overlap only the named Teleporter with the footprint while every possible
+final center remains outside its cell. Repeated Approach steps end at a pose where **Collect**
+enters that cell in one update. Positions are never snapped, and an unchanged public pose does
+not synthesize a stopped residual or clock.
 
 For a stopped basis `B`, check every start in `[B+1, B+8)` and safety through exclusive `B+18`.
 Keep the controller's actual physical Stop-confirmation tick `S <= B`; continued held Stop supplies
@@ -199,27 +204,48 @@ the stopped-motion premise. Any admitted direction, even one blocked by collisio
 provenance. Admission requires the same retained `S`, not a replacement or a clock inferred from
 unchanged positions; Easy cadence may deliberately wait after confirmation.
 Cover partial or blocked movement, no collection, refused swap, consumed-without-swap and every
-possible live partner without reading private randomness. Swap has two endpoints and no connecting
-sweep; it resets both actors' residual and pending turn, preserves headings and leaves the
-partner's held input active. The root's Stop never stops the partner.
+possible living partner, including humans and bounded moving-partner outcomes, without reading
+private randomness. Swap has two endpoints and no connecting sweep; the same public markers and
+opposite endpoint poses identify it. It resets both actors' residual and pending turn, preserves
+headings and leaves the partner's held input active. The root's Stop never stops the partner.
 
-Bound arbitrary rival movement, unknown residual and contested collection. Check complete landing
-footprints and post-teleport mob, pit, mine and storm consequences. Initially require one exposed
-Teleporter, a complete visible living roster, visible empty bombs and no flames, Oil, active origin
-or unsupported immediate weapons, forced motion or reachable effects. New bomb blocking remains
-possible; a short proof window can exclude detonation only with a checked minimum-fuse argument.
-Reject unsupported landing regions rather than treating engine destination validity as safety.
+The kernel requires exactly one exposed Teleporter, a complete visible living roster, visible
+empty bombs and no flames, Oil, Bracelet, active origin, unsupported effects, immediately usable
+Remote or Landmine, or reachable invalidating pickup. Both lair modes use honest checked contact.
+Marker-aware sealed contact containment permits natural births and deaths without fabricating an
+observation. Bound arbitrary rival movement, unknown residual and contested collection. Check
+complete landing footprints and post-teleport mob, mine and storm consequences. Every pit site is
+excluded from all prefixes and landing regions; the proof binds fresh pit layout and settings,
+while irrelevant phase changes may occur. New bomb blocking remains possible, and a short proof
+window excludes detonation only with a checked minimum-fuse argument. Unsupported landing regions
+are rejected rather than treating engine destination validity as safety. The certificate promises
+only the root CPU's safety under observed support, not a partner's future self-survival or safety
+against future unseen enemy actions.
 
 Retain the ordinary fallback's result, memory and RNG. Attempt new recovery only from the remaining
-shared 65,536 work, initially capped at 32,768; charge generation, forecasts, every start/partner
-branch and failures. Admission has one shared bounded allowance without fresh search. Bind actual
-world/seat/actor, stopped pose, settings, capabilities/effects/markers, pickup, topology, hazards
-and the full living roster. Rejected or stale submission cannot commit authority.
+shared 65,536 work, capped at 32,768, after computing that fallback first. Use one forecast and
+freeze at most two candidate slots after generation; charge generation, forecasts, every
+start/partner branch and all failures. Prepared admission and Stop validation are each fail-closed
+within an 8,192-work cap and perform no new search or forecast. Bind actual world/seat/actor,
+stopped pose, settings, capabilities/effects/markers, pickup, topology, hazards and the full living
+roster.
+Memory, RNG and authority commit only after actual mailbox success. Missing observations, expiry,
+submission rejection, world or epoch changes, or changed facts revoke the step and apply a physical
+input queue fence before ordinary planning resumes.
 
-Acceptance requires normal adjacent-center approach, actual collection, physical Stop confirmation
-and a subsequent independently certified productive action through the live roster owner. The
-legacy owner is test-only and keeps its archived profile/rejection regressions. A handcrafted
-edge pose is insufficient. Archived policy behavior and existing Teleporter refusals remain closed.
+The high-level goal retains its commitment and progress deadlines. Only observed BFS-cell or
+subcell progress refreshes the progress deadline. On expiry it tries one alternate approach; an
+invalid or stalled alternate ends that recovery episode instead of oscillating. Later fallback or
+new world facts may make a future episode eligible, so this is not a permanent no-revisit promise.
+
+The live roster owner executes the normal neighboring-center approach, repeated steps, a real swap
+with matching markers and opposite endpoint poses, physical Stop, fresh completion and a later
+independently certified useful plant that destroys the named block while the CPU survives its
+flame. This path is shared by Standard, Easy and Hard with lairs on or off through the native 60 Hz
+Driver/worker/queue integration. The legacy owner remains test-only and preserves its archived
+profile and rejection behavior. Existing Teleporter refusals and archived policies remain closed.
+Unsupported scenes and general passivity are intentionally not solved; broader farming/contact
+stalls and further Hard tactics remain in the [backlog](../../BACKLOG.md#single-player).
 
 ## Plant-bound contact topology
 

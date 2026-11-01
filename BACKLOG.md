@@ -29,10 +29,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   from the original captured conditions: alternate-route proof and refused-origin guidance have
   separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
   proofs and the existing work allowance. The [fresh late-match investigation](docs/history/cpu-late-passivity-2026-11-01.md)
-  identifies exposed Teleporter as a global planting support limit; replace that refusal only
-  with the [typed one-update handoff](docs/game/single-player-cpu.md#intentional-teleporter-collection-boundary):
-  certify Approach/Collect steps, all possible swap partners, mandatory physical Stop and a
-  subsequent productive-action witness before policy activation. Reproduce remaining long-match
+  identified exposed Teleporter as a global planting support limit. The
+  [typed one-update handoff](docs/game/single-player-cpu.md#intentional-teleporter-collection-boundary)
+  now covers Approach/Collect, all possible swap partners, mandatory physical Stop and a
+  subsequent productive-action witness. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone

@@ -3,7 +3,7 @@ use grenadiers_core::cpu::{
     WorkBudget,
     policy::PolicyError,
     survival::{
-        OriginRecoveryChoice, plan_blocked_births_v42_with_origin,
+        OriginRecoveryChoice, TeleporterRecoveryChoice, plan_blocked_births_v42_with_origin,
         plan_contact_topology_v40_with_origin, plan_continuation_lairs,
         plan_counter_pressure_v29_with_origin, plan_farm_origins_v38_with_origin,
         plan_farm_refuges_v36_with_origin, plan_hard_blocked_births_v43_with_origin,
@@ -13,14 +13,19 @@ use grenadiers_core::cpu::{
         plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
         plan_reliable_v27_with_origin, plan_respawn_v22_with_origin, plan_respawn_v23_with_origin,
         plan_respawn_v24_with_origin, plan_respawn_v25_with_origin, plan_respawn_with_origin,
-        plan_spike_pits_v26_with_origin, plan_with_origin,
+        plan_spike_pits_v26_with_origin, plan_with_origin, select_teleporter_recovery,
     },
 };
 use grenadiers_core::room::CpuPolicy;
 
 pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPlan, PolicyError> {
-    if matches!(job.policy, CpuPolicy::UtilityV44 | CpuPolicy::UtilityV45)
-        && let Some(origin) = job.escape_origin.as_ref()
+    if matches!(
+        job.policy,
+        CpuPolicy::UtilityV44
+            | CpuPolicy::UtilityV45
+            | CpuPolicy::UtilityV46
+            | CpuPolicy::UtilityV47
+    ) && let Some(origin) = job.escape_origin.as_ref()
     {
         return Ok(
             match plan_continuation_lairs(
@@ -71,9 +76,14 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV43
                 | CpuPolicy::UtilityV44
                 | CpuPolicy::UtilityV45
+                | CpuPolicy::UtilityV46
+                | CpuPolicy::UtilityV47
         )
     {
-        let plan = if matches!(job.policy, CpuPolicy::UtilityV42 | CpuPolicy::UtilityV44) {
+        let plan = if matches!(
+            job.policy,
+            CpuPolicy::UtilityV42 | CpuPolicy::UtilityV44 | CpuPolicy::UtilityV46
+        ) {
             plan_blocked_births_v42_with_origin(
                 &job.observation,
                 &job.memory,
@@ -83,7 +93,10 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 &mut job.rng,
                 work,
             )
-        } else if matches!(job.policy, CpuPolicy::UtilityV43 | CpuPolicy::UtilityV45) {
+        } else if matches!(
+            job.policy,
+            CpuPolicy::UtilityV43 | CpuPolicy::UtilityV45 | CpuPolicy::UtilityV47
+        ) {
             plan_hard_blocked_births_v43_with_origin(
                 &job.observation,
                 &job.memory,
@@ -245,9 +258,29 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 work,
             )
         };
-        plan.map(|plan| WorkerPlan::Ordinary {
-            plan: Box::new(plan.survival),
-            contact: plan.contact,
+        plan.map(|plan| {
+            if matches!(job.policy, CpuPolicy::UtilityV46 | CpuPolicy::UtilityV47) {
+                match select_teleporter_recovery(
+                    &job.observation,
+                    &job.hazard_memory,
+                    job.settled_stop_tick,
+                    &job.memory,
+                    job.escape_origin.as_ref(),
+                    plan,
+                    work,
+                ) {
+                    TeleporterRecoveryChoice::Ordinary(plan) => WorkerPlan::Ordinary {
+                        plan: Box::new(plan.survival),
+                        contact: plan.contact,
+                    },
+                    TeleporterRecoveryChoice::Step(step) => WorkerPlan::TeleporterStep(step),
+                }
+            } else {
+                WorkerPlan::Ordinary {
+                    plan: Box::new(plan.survival),
+                    contact: plan.contact,
+                }
+            }
         })
     } else if job.observation.parts().rules.version == 9 {
         let plan = if job.policy == CpuPolicy::UtilityV25 {

@@ -83,10 +83,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::CONTINUATION_V44_EASY)
+            Some(CpuProfile::TELEPORTER_V46_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::CONTINUATION_V44_STANDARD)
+            Some(CpuProfile::TELEPORTER_V46_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -110,7 +110,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V45)
+            Some(CpuProfile::HARD_V47)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -182,6 +182,13 @@ mod continuation_owner_tests;
 
 #[cfg(test)]
 mod continuation_perturbation_tests;
+
+#[cfg(test)]
+mod teleporter_owner_failure_tests;
+#[cfg(test)]
+mod teleporter_owner_support;
+#[cfg(test)]
+mod teleporter_owner_tests;
 
 #[cfg(test)]
 mod farm_refuge_owner_support;

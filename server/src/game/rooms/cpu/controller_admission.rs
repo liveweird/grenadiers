@@ -78,6 +78,7 @@ impl CpuController {
         if self.escaping
             || self.committed_pulse.is_some()
             || (self.committed_route.is_some() && !refuge_pending)
+            || self.committed_teleporter.is_some()
         {
             self.cancel();
             return None;

@@ -44,6 +44,7 @@ pub(super) enum WorkerPlan {
         contact: Option<grenadiers_core::cpu::MobContactLease>,
     },
     Continuation(Box<ContinuationCertificate>),
+    TeleporterStep(Box<grenadiers_core::cpu::survival::TeleporterStepPlan>),
 }
 
 pub(super) struct PlanResult {
@@ -59,6 +60,7 @@ impl PlanResult {
         match &self.outcome {
             WorkerPlan::Ordinary { plan, .. } => plan.as_ref(),
             WorkerPlan::Continuation(_) => panic!("expected ordinary worker result"),
+            WorkerPlan::TeleporterStep(_) => panic!("expected ordinary worker result"),
         }
     }
 
@@ -66,6 +68,7 @@ impl PlanResult {
         match &mut self.outcome {
             WorkerPlan::Ordinary { plan, .. } => plan.as_mut(),
             WorkerPlan::Continuation(_) => panic!("expected ordinary worker result"),
+            WorkerPlan::TeleporterStep(_) => panic!("expected ordinary worker result"),
         }
     }
 }
@@ -284,6 +287,7 @@ fn execute_job(
     let intent = match &outcome {
         WorkerPlan::Ordinary { plan, .. } => Some(plan.control.intent),
         WorkerPlan::Continuation(_) => None,
+        WorkerPlan::TeleporterStep(_) => None,
     };
     let escape_origin = job.escape_origin;
     if !job.live.load(Ordering::Acquire) {

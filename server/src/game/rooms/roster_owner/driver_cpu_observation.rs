@@ -109,6 +109,16 @@ impl Driver {
             if !self.cpus[index].accept_observation(observation) {
                 continue;
             }
+            match self.cpus[index].observe_teleporter(observation) {
+                Some(grenadiers_core::cpu::survival::TeleporterStepStatus::Completed(_)) => {}
+                Some(grenadiers_core::cpu::survival::TeleporterStepStatus::Invalidated) => {
+                    self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
+                    continue;
+                }
+                Some(_) => continue,
+                None if self.cpus[index].teleporter_controlled() => continue,
+                None => {}
+            }
             if self.cpus[index].validate_contact(observation, observation.parts().tick)
                 == Some(ContactStatus::Invalidated)
             {

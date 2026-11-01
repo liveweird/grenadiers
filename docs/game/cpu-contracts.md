@@ -8,11 +8,11 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. `CpuProfile::CURRENT` selects Standard and `CURRENT_EASY` selects Easy in the current
-policy family. Named archive constants preserve historical Standard replay identities. Policy
-identity describes decision semantics, not measured strength; seeds stay private. Live owner
-construction accepts only the two exact current profiles. Retaining a historical replay identity
-does not re-enable that older policy for new matches.
+Two. Live selection uses `TELEPORTER_V46_STANDARD` or `TELEPORTER_V46_EASY` and `HARD_V47`;
+private replay23 binds those identities. Named archive constants preserve historical replay
+identities. Policy identity describes decision semantics, not measured strength; seeds stay
+private. Live owner construction accepts only those three exact selected profiles. Retaining a
+historical replay identity does not re-enable that older policy for new matches.
 Controllers carry an explicit seat identity through memory, recipient validation and ordinary
 input submission. Foreign-recipient observations are rejected before state changes. Current
 solo construction still authorizes only seat Two; an explicit identity does not grant a human
@@ -366,11 +366,13 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU44, including
-certified planting around persistent burning Oil. Hard selects CPU45 with range-aware firing
-positions against visible rivals. Both retain the same 65,536-work budget and full planting,
-route, mob-contact and admission proofs. Hard does not receive hidden positions, concealed loot,
-private seeds or faster physics.
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU46 and Hard
+selects CPU47. Their ordinary fallback is computed first and preserves exactly CPU44/45's result,
+memory and RNG; only the typed Teleporter selector consumes additional remaining work. Confirmed-
+origin continuation delegates unchanged to CPU44/45. The selected profiles retain the same shared
+65,536-work budget and full planting, route, mob-contact and admission proofs. Hard keeps CPU45's
+range-aware firing positions against visible rivals and does not receive hidden positions,
+concealed loot, private seeds or faster physics.
 
 Hard pressure uses an optional shared allowance of at most 4,096 work units and one eighth of
 remaining work, with at most 32 origins per rival. Failure falls back to existing collect/farm
@@ -383,21 +385,65 @@ flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. E
 farming retains its prior support. This changes a Teleporter support precondition, not the
 route proof, public observation facts or work limit; all conservative motion checks remain.
 
-Current CPU44/45 inherit CPU42/43's one-update pickup handoff on rules10 even though ordinary clear
-navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop and fresh
-observation requirements remain. The longer ordinary pulse still rejects physics-changing
-collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are unchanged.
+CPU46/47 inherit CPU44/45 and CPU42/43's one-update pickup handoff on rules10 even though
+ordinary clear navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop
+and fresh observation requirements remain. The longer ordinary pulse still rejects physics-
+changing collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are
+unchanged.
 
-CPU44/45 retain CPU42/43's refinement of a failed mob-contact envelope for an ordinary plant when public
-barriers separate every source from the complete certified escape. Potentially destroyed blocks
-are treated as open throughout. The opaque plant-bound certificate retains scene, bomb-presence,
-source and barrier checks at admission and each publication; unsupported changes withdraw it.
+CPU46/47 retain CPU44/45 and CPU42/43's refinement of a failed mob-contact envelope for an
+ordinary plant when public barriers separate every source from the complete certified escape.
+Potentially destroyed blocks are treated as open throughout. The opaque plant-bound certificate
+retains scene, bomb-presence, source and barrier checks at admission and each publication;
+unsupported changes withdraw it.
 When every original source is a possible birth blocked by a retained soft wall, the new profiles
 can prove an empty reachable source set. Every birth barrier must remain intact; any observed mob
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay22 binds CPU44/45. CPU42/43 and private replay21 remain archived; replay20 retains
-CPU40/41. Outside an eligible confirmed-origin recovery, CPU44/45 delegate to CPU42/43. During
-continuation, lairs-disabled and lairs-enabled scenes use distinct checked contact modes. Older
-policy/replay contracts remain isolated.
+Private replay23 binds CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
+private replay21; replay20 retains CPU40/41. CPU46/47 ordinary fallback delegates exactly to
+CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
+origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
+contact modes. Older policy/replay contracts remain isolated.
+
+## Typed Teleporter recovery
+
+Planting, ordinary pulse and contact-topology guards continue to reject exposed Teleporters.
+CPU46/47 may instead remove exactly one exposed Teleporter with a separate `TeleporterStep` after
+the ordinary CPU44/45 fallback has already been computed. Existing `SearchMap`/BFS navigation
+approaches a stable neighboring center without giving curses positive global value or using a
+Teleporter as ordinary transit. Target-specific Approach steps permit footprint overlap only with
+the named target while the center remains outside; Collect enters its center cell.
+
+Each certificate covers one directional update, unconditional Stop on the next physical update,
+and a fresh physical stopped observation before any further movement or planning. For stopped
+basis `B`, every start in `[B+1, B+8)` is proved through exclusive `B+18` using the retained
+physical Stop tick `S <= B`; a direction admission clears `S` even if collision blocks movement.
+The executor never synthesizes stopped provenance from unchanged positions or a global clock.
+
+The proof covers every possible living swap partner, including humans, plus blocked, partial,
+no-move, no-swap, consumed and bounded moving-partner outcomes. A swap binds unchanged public
+markers and opposite endpoint poses. It stops the root while preserving the partner's held input.
+Both endpoint footprints retain mob, mine, pit and storm checks. Every pit site is excluded from
+prefixes and landings; fresh pit layout/settings remain bound while irrelevant phases may change.
+Sealed marker-aware contact containment permits natural births and deaths without inventing
+observations. The guarantee is root safety under observed supported facts, not the partner's future
+self-survival or protection from unseen future enemy input.
+
+Eligibility requires exactly one exposed Teleporter, the complete visible living roster, visible
+empty bombs, no flames or Oil, and no Bracelet, unsupported effects, immediate Remote or Landmine,
+active origin, or reachable invalidating pickup. Both lair modes are checked honestly. New bomb
+blocking and other changed facts can still invalidate the proof.
+
+The selector uses only remaining shared work, capped at 32,768, one forecast and at most two frozen
+candidate slots; every success and failure path is charged. Admission and Stop validation are
+each fail-closed within an 8,192-work cap, with no new search or forecast. Actual mailbox success
+precedes memory, RNG and token commit. Missing observations, expiry, rejection, world/epoch
+mismatch or changed facts revoke authority and cause a physical queue fence.
+
+The stable high-level goal keeps its deadlines unless observed BFS-cell or subcell progress occurs.
+Expiry tries one alternate approach; an invalid or stalled alternate ends that recovery episode.
+Fallback or later world facts can make a later episode eligible. Unsupported scenes and general
+passivity remain unsolved; broader farm/contact stalls and further Hard tactics remain in the
+[backlog](../../BACKLOG.md#single-player).

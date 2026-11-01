@@ -52,6 +52,7 @@ impl CpuController {
         self.prepared_continuation = None;
         self.continuation = None;
         self.continuation_fence_required = false;
+        self.committed_teleporter = None;
         #[cfg(test)]
         {
             self.continuation_trace = super::continuation_types::ContinuationTrace::default();

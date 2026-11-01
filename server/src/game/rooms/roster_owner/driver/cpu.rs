@@ -31,6 +31,9 @@ impl Driver {
         self.next_cpu = (first + 1) % count;
         for offset in 0..count {
             let index = (first + offset) % count;
+            if self.apply_teleporter(index)? {
+                continue;
+            }
             if self.apply_continuation(index)? {
                 continue;
             }
@@ -346,3 +349,6 @@ mod refuge_handoff_owner_tests;
 
 #[path = "../driver_cpu_observation.rs"]
 mod observation;
+
+#[path = "../driver_cpu_teleporter.rs"]
+mod teleporter;

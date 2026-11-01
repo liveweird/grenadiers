@@ -2,7 +2,7 @@ use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::CellId;
 
 use super::{GuidanceV24, select_inner};
-use crate::cpu::policy::UtilityMemory;
+use crate::cpu::policy::{PressureMode, UtilityMemory};
 
 pub(in crate::cpu::policy) fn select(
     observation: &Observation,
@@ -18,7 +18,7 @@ pub(in crate::cpu::policy) fn select(
         memory,
         work,
         false,
-        false,
+        PressureMode::Disabled,
         false,
         false,
     )
@@ -38,7 +38,7 @@ pub(in crate::cpu::policy) fn select_v25(
         memory,
         work,
         true,
-        false,
+        PressureMode::Disabled,
         false,
         false,
     )
@@ -58,7 +58,7 @@ pub(in crate::cpu::policy) fn select_v28(
         memory,
         work,
         true,
-        true,
+        PressureMode::Baseline,
         false,
         false,
     )
@@ -70,7 +70,7 @@ pub(in crate::cpu::policy) fn select_v38(
     current: CellId,
     memory: &UtilityMemory,
     work: &mut WorkBudget,
-    hard: bool,
+    pressure_mode: PressureMode,
 ) -> Option<GuidanceV24> {
     select_inner(
         observation,
@@ -79,7 +79,7 @@ pub(in crate::cpu::policy) fn select_v38(
         memory,
         work,
         true,
-        hard,
+        pressure_mode,
         true,
         false,
     )
@@ -92,7 +92,7 @@ pub(in crate::cpu::policy) fn select_pits(
     current: CellId,
     memory: &UtilityMemory,
     work: &mut WorkBudget,
-    hard_tactics: bool,
+    pressure_mode: PressureMode,
     farm_origin_recovery: bool,
 ) -> Option<GuidanceV24> {
     select_inner(
@@ -102,7 +102,7 @@ pub(in crate::cpu::policy) fn select_pits(
         memory,
         work,
         true,
-        hard_tactics,
+        pressure_mode,
         farm_origin_recovery,
         true,
     )

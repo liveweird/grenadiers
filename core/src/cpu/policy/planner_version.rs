@@ -14,6 +14,8 @@ pub(in crate::cpu::policy) enum PlannerVersion {
     HardFarmPitsV53,
     SpikePitsCautiousV52,
     HardPitsCautiousV53,
+    HardFarmExitPressureV58,
+    HardPitsExitPressureV58,
 }
 
 impl PlannerVersion {
@@ -35,6 +37,8 @@ impl PlannerVersion {
                 | Self::HardFarmPitsV53
                 | Self::SpikePitsCautiousV52
                 | Self::HardPitsCautiousV53
+                | Self::HardFarmExitPressureV58
+                | Self::HardPitsExitPressureV58
         )
     }
 
@@ -51,6 +55,8 @@ impl PlannerVersion {
                 | Self::HardFarmPitsV53
                 | Self::SpikePitsCautiousV52
                 | Self::HardPitsCautiousV53
+                | Self::HardFarmExitPressureV58
+                | Self::HardPitsExitPressureV58
         )
     }
 
@@ -66,20 +72,35 @@ impl PlannerVersion {
                 | Self::HardFarmPitsV53
                 | Self::SpikePitsCautiousV52
                 | Self::HardPitsCautiousV53
+                | Self::HardFarmExitPressureV58
+                | Self::HardPitsExitPressureV58
         )
     }
 
-    pub(super) const fn hard_tactics(self) -> bool {
-        matches!(
+    pub(super) const fn pressure_mode(self) -> super::super::PressureMode {
+        if matches!(
+            self,
+            Self::HardFarmExitPressureV58 | Self::HardPitsExitPressureV58
+        ) {
+            super::super::PressureMode::ExitCoverage
+        } else if matches!(
             self,
             Self::HardV28 | Self::HardFarmV39 | Self::HardFarmPitsV53 | Self::HardPitsCautiousV53
-        )
+        ) {
+            super::super::PressureMode::Baseline
+        } else {
+            super::super::PressureMode::Disabled
+        }
     }
 
     pub(super) const fn farm_origin_recovery(self) -> bool {
         matches!(
             self,
-            Self::FarmV38 | Self::HardFarmV39 | Self::FarmPitsV52 | Self::HardFarmPitsV53
+            Self::FarmV38
+                | Self::HardFarmV39
+                | Self::FarmPitsV52
+                | Self::HardFarmPitsV53
+                | Self::HardFarmExitPressureV58
         )
     }
 
@@ -90,6 +111,8 @@ impl PlannerVersion {
                 | Self::HardFarmPitsV53
                 | Self::SpikePitsCautiousV52
                 | Self::HardPitsCautiousV53
+                | Self::HardFarmExitPressureV58
+                | Self::HardPitsExitPressureV58
         )
     }
 }

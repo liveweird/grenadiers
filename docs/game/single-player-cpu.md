@@ -313,7 +313,7 @@ required alongside geometric separation tests.
 
 ## Ordinary pit avoidance
 
-Live CPU56/57 inherit CPU52/53's fair observation, shared work limit and multi-Teleporter recovery,
+Live CPU56/58 inherit CPU52/53's fair observation, shared work limit and multi-Teleporter recovery,
 while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
 pulse check covers swept footprint contact, including partial overlaps; a rejected candidate can
 fall through to another checked direction. This prevents choosing a locally safe approach that
@@ -321,12 +321,12 @@ leaves the CPU standing on a pit when its warning expires.
 
 Complete planting and continuation routes keep their time-dependent pit proofs and may cross
 pits when the entire escape is certified. Already-on-pit recovery remains checked and can still
-be impossible. Private replay28 binds these profiles; older formats retain their original policy
+be impossible. Private replay29 binds these profiles; older formats retain their original policy
 identities. See the [pit contract](cpu-contracts.md#voluntary-pit-avoidance).
 
 ## Shared preparation for interrupted escapes
 
-CPU56/57 retain CPU54/55's common forecast before reserving optional continuation work. Preparation
+CPU56/58 retain CPU54/55's common forecast before reserving optional continuation work. Preparation
 that fits the historical half allowance retains its exact previous continuation/fallback
 allocation. More expensive supported forecasts can use the shared allowance, with at least
 half the remaining work reserved for the existing checked pulse fallback. Both paths reuse
@@ -335,9 +335,18 @@ Oil and pit guards. See the [allocation contract](cpu-contracts.md#shared-escape
 
 ## Bounded farming refuges
 
-When an adjacent farming target leaves the usual retreat facing a hard wall or lair, CPU56/57
+When an adjacent farming target leaves the usual retreat facing a hard wall or lair, CPU56/58
 can try two lateral-first refuge hints. This requires a current committed approach and a clear
 bomb/flame scene. Geometry and the complete route, usefulness and contact proofs share the
 existing optional hint allowance; failed attempts leave the normal checked fallback available.
 The earlier foreign-bomb/future-loot support boundary remains unchanged. See the
 [refuge contract](cpu-contracts.md#farming-when-the-usual-retreat-is-blocked).
+
+## Hard opponent exit coverage
+
+Hard58 breaks equal-distance firing-position ties by how many of the visible rival’s currently
+open adjacent terrain branches the exact blast covers. It keeps the existing nearest candidate
+when comparison is unsupported, incomplete or tied. Rival equipment determines branch openness;
+this does not predict rival controls or promise a kill. All rivals receive their existing baseline
+search before optional ranking spends remaining work. Full planting, escape and contact proofs
+remain authoritative. See the [bounded contract](cpu-contracts.md#equal-distance-opponent-exit-coverage).

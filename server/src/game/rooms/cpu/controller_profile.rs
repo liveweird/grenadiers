@@ -22,6 +22,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V53
                         | grenadiers_core::room::CpuProfile::HARD_V55
                         | grenadiers_core::room::CpuProfile::HARD_V57
+                        | grenadiers_core::room::CpuProfile::HARD_V58
                 );
         }
         match rules_version {
@@ -106,6 +107,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
                 | grenadiers_core::room::CpuProfile::HARD_V57
+                | grenadiers_core::room::CpuProfile::HARD_V58
         )
     }
 
@@ -139,6 +141,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
                 | grenadiers_core::room::CpuProfile::HARD_V57
+                | grenadiers_core::room::CpuProfile::HARD_V58
         )
     }
 
@@ -169,6 +172,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
                 | grenadiers_core::room::CpuProfile::HARD_V57
+                | grenadiers_core::room::CpuProfile::HARD_V58
         )
     }
 
@@ -196,6 +200,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
                 | grenadiers_core::room::CpuProfile::HARD_V57
+                | grenadiers_core::room::CpuProfile::HARD_V58
         )
     }
 
@@ -220,6 +225,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
                 | grenadiers_core::room::CpuProfile::HARD_V57
+                | grenadiers_core::room::CpuProfile::HARD_V58
         )
     }
 
@@ -241,6 +247,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
                 | grenadiers_core::room::CpuProfile::HARD_V57
+                | grenadiers_core::room::CpuProfile::HARD_V58
         )
     }
 }

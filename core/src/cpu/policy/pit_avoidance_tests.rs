@@ -8,6 +8,7 @@ use crate::game::{
 };
 use crate::room::{SpikePitConfig, SpikePitSettings};
 
+use super::plan_hard_pits_exit_pressure_v58;
 use super::planner::{plan_farm_v38, plan_hard_farm_v39, plan_hard_v28, plan_spike_pits_v26};
 use super::tests::{key, observation};
 use super::{
@@ -212,15 +213,15 @@ fn hard_pressure_does_not_select_the_current_pit_as_its_attack_origin() {
         )),
     )
     .unwrap();
-    let cautious = run(
-        plan_hard_pits_cautious_v53,
-        &observed,
-        UtilityMemory::new(key()),
-        53,
-    );
-    let intent = cautious.next_memory.strategic_intent().unwrap();
-    assert_eq!(intent.objective, StrategicObjectiveKind::Attack);
-    assert_ne!(intent.approach_cell, Some(CellId::new(7, 7)));
+    for (planner, seed) in [
+        (plan_hard_pits_cautious_v53 as PlanFn, 53),
+        (plan_hard_pits_exit_pressure_v58 as PlanFn, 58),
+    ] {
+        let cautious = run(planner, &observed, UtilityMemory::new(key()), seed);
+        let intent = cautious.next_memory.strategic_intent().unwrap();
+        assert_eq!(intent.objective, StrategicObjectiveKind::Attack);
+        assert!(!center_pits.contains(&intent.approach_cell.unwrap()));
+    }
 }
 
 #[test]

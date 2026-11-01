@@ -1,4 +1,4 @@
-use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
+use crate::cpu::policy::{ControlPlan, PolicyError, PressureMode, UtilityMemory};
 use crate::cpu::{CpuRng, Observation, WorkBudget};
 
 #[allow(clippy::too_many_arguments)]
@@ -11,23 +11,27 @@ pub(super) fn plan(
     opportunistic_planting: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
-    hard_tactics: bool,
+    pressure_mode: PressureMode,
     farm_origin_recovery: bool,
     avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
-    if avoid_pits && farm_origin_recovery && hard_tactics {
+    if avoid_pits && farm_origin_recovery && pressure_mode == PressureMode::ExitCoverage {
+        crate::cpu::policy::plan_hard_farm_exit_pressure_v58(observation, memory, rng, work)
+    } else if avoid_pits && pressure_mode == PressureMode::ExitCoverage {
+        crate::cpu::policy::plan_hard_pits_exit_pressure_v58(observation, memory, rng, work)
+    } else if avoid_pits && farm_origin_recovery && pressure_mode.enabled() {
         crate::cpu::policy::plan_hard_farm_pits_v53(observation, memory, rng, work)
     } else if avoid_pits && farm_origin_recovery {
         crate::cpu::policy::plan_farm_pits_v52(observation, memory, rng, work)
-    } else if avoid_pits && hard_tactics {
+    } else if avoid_pits && pressure_mode.enabled() {
         crate::cpu::policy::plan_hard_pits_cautious_v53(observation, memory, rng, work)
     } else if avoid_pits {
         crate::cpu::policy::plan_spike_pits_cautious_v52(observation, memory, rng, work)
-    } else if farm_origin_recovery && hard_tactics {
+    } else if farm_origin_recovery && pressure_mode.enabled() {
         crate::cpu::policy::plan_hard_farm_v39(observation, memory, rng, work)
     } else if farm_origin_recovery {
         crate::cpu::policy::plan_farm_v38(observation, memory, rng, work)
-    } else if hard_tactics {
+    } else if pressure_mode.enabled() {
         crate::cpu::policy::plan_hard_v28(observation, memory, rng, work)
     } else if observation.parts().rules.version == 10 {
         crate::cpu::policy::plan_spike_pits_v26(observation, memory, rng, work)

@@ -51,5 +51,8 @@ impl CpuProfile {
         Self::profile(CpuPolicy::UtilityV56, CpuDifficulty::Standard);
     pub const CORNER_REFUGES_V56_EASY: Self =
         Self::profile(CpuPolicy::UtilityV56, CpuDifficulty::Easy);
+    /// Equal-distance visible opponent exit coverage, retaining corner refuges.
+    pub const HARD_V58: Self = Self::profile(CpuPolicy::UtilityV58, CpuDifficulty::Hard);
+
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

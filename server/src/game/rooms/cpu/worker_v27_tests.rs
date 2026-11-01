@@ -311,3 +311,60 @@ fn queued_worker_dispatches_contact_topology_profiles_with_direct_parity() {
         assert_eq!(queued.rng.draws(), rng.draws());
     }
 }
+
+#[test]
+fn queued_worker_keeps_hard57_archived_and_dispatches_hard58_exactly() {
+    use grenadiers_core::cpu::{
+        WorkBudget,
+        survival::{
+            TeleporterRecoveryChoice, plan_hard_corner_refuges_v57_with_origin,
+            plan_hard_exit_pressure_v58_with_origin, select_teleporter_recovery_v50,
+        },
+    };
+    for policy in [CpuPolicy::UtilityV57, CpuPolicy::UtilityV58] {
+        let planner = CpuPlanner::without_workers();
+        let (job, result) = spike_job(policy);
+        let mut rng = job.rng.clone();
+        let mut work = WorkBudget::new(WORK_ALLOWANCE);
+        let direct = if policy == CpuPolicy::UtilityV57 {
+            plan_hard_corner_refuges_v57_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut rng,
+                &mut work,
+            )
+        } else {
+            plan_hard_exit_pressure_v58_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut rng,
+                &mut work,
+            )
+        }
+        .unwrap();
+        let TeleporterRecoveryChoice::Ordinary(direct) = select_teleporter_recovery_v50(
+            &job.observation,
+            &job.hazard_memory,
+            job.settled_stop_tick,
+            &job.memory,
+            job.escape_origin.as_ref(),
+            direct,
+            &mut work,
+        ) else {
+            panic!("the no-target fixture must retain its ordinary fallback")
+        };
+        assert!(planner.try_submit(job));
+        let report = planner.pump_for_test(1);
+        assert_eq!((report.delivered, report.failed), (1, 0));
+        assert_eq!(report.work, vec![work.spent()]);
+        let queued = result.recv().unwrap();
+        assert_eq!(queued.ordinary().control, direct.survival.control);
+        assert_eq!(queued.rng.draws(), rng.draws());
+    }
+}

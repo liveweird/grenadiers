@@ -266,6 +266,9 @@ fn probe_basis(basis: &PlanningBasis<'_>) -> BasisProbe {
         CpuPolicy::UtilityV55 => plan_hard_pit_avoidance_v53_with_origin,
         CpuPolicy::UtilityV56 => plan_corner_refuges_v56_with_origin,
         CpuPolicy::UtilityV57 => plan_hard_corner_refuges_v57_with_origin,
+        CpuPolicy::UtilityV58 => {
+            grenadiers_core::cpu::survival::plan_hard_exit_pressure_v58_with_origin
+        }
         _ => panic!("unsupported interaction characterization profile"),
     };
     let planned = plan(

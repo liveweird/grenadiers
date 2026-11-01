@@ -1,5 +1,5 @@
 use crate::cpu::forecast::ObservedHazardMemory;
-use crate::cpu::policy::{PolicyError, UtilityMemory};
+use crate::cpu::policy::{PolicyError, PressureMode, UtilityMemory};
 use crate::cpu::{CpuRng, Observation, WorkBudget};
 use crate::game::Tick;
 
@@ -26,7 +26,7 @@ pub fn plan_corner_refuges_v56_with_origin(
         origin,
         rng,
         work,
-        false,
+        PressureMode::Disabled,
     )
 }
 
@@ -48,7 +48,29 @@ pub fn plan_hard_corner_refuges_v57_with_origin(
         origin,
         rng,
         work,
-        true,
+        PressureMode::Baseline,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_hard_exit_pressure_v58_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        PressureMode::ExitCoverage,
     )
 }
 
@@ -61,7 +83,7 @@ fn plan(
     origin: Option<&PlantEscapeOrigin>,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
-    hard_tactics: bool,
+    pressure_mode: PressureMode,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     super::refuge_guidance::plan_policy(
         observation,
@@ -72,8 +94,8 @@ fn plan(
         rng,
         work,
         true,
-        hard_tactics,
-        hard_tactics,
+        pressure_mode,
+        pressure_mode.enabled(),
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
         FarmRefugeMode::BlockedAway,

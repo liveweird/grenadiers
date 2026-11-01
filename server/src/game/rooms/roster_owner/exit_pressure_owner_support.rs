@@ -52,6 +52,7 @@ pub(super) struct Outcome {
     pub cpu_death: Option<Tick>,
     pub resolved: bool,
     pub rival_flame_observed: bool,
+    pub covered_branches: Vec<CellId>,
     pub initial_range: u16,
     pub final_range: u16,
     pub worker: PumpReport,
@@ -82,6 +83,7 @@ pub(super) fn run_with_environment(
     let mut cpu_death = None;
     let mut resolved = false;
     let mut rival_flame_observed = false;
+    let mut covered_branches = Vec::new();
     let mut worker = PumpReport::default();
     for _ in 0..updates {
         let mut index = 0;
@@ -138,6 +140,10 @@ pub(super) fn run_with_environment(
         if let Some(first) = plant
             && state.tick() == first.detonates_at
         {
+            covered_branches = [CellId::new(7, 6), CellId::new(6, 7), CellId::new(8, 7)]
+                .into_iter()
+                .filter(|cell| state.world().hazards().get(cell) == Some(&first.flame_end))
+                .collect();
             rival_flame_observed =
                 state.world().hazards().get(&CellId::new(7, 7)) == Some(&first.flame_end);
         }
@@ -163,6 +169,7 @@ pub(super) fn run_with_environment(
         cpu_death,
         resolved,
         rival_flame_observed,
+        covered_branches,
         initial_range,
         final_range,
         worker,
@@ -175,11 +182,17 @@ fn ranged(observation: &Observation) -> bool {
 }
 
 fn inspect(job: &PlanningBasis<'_>) -> Basis {
-    assert_eq!(*job.policy, grenadiers_core::room::CpuPolicy::UtilityV57);
+    let plan = match job.policy {
+        grenadiers_core::room::CpuPolicy::UtilityV57 => plan_hard_corner_refuges_v57_with_origin,
+        grenadiers_core::room::CpuPolicy::UtilityV58 => {
+            grenadiers_core::cpu::survival::plan_hard_exit_pressure_v58_with_origin
+        }
+        _ => panic!("unsupported pressure witness profile"),
+    };
     assert!(job.escape_origin.is_none());
     let mut rng = job.rng.clone();
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
-    let planned = plan_hard_corner_refuges_v57_with_origin(
+    let planned = plan(
         job.observation,
         job.memory,
         job.hazard_memory,

@@ -38,8 +38,8 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V58,
             CpuProfile::HARD_V57,
-            CpuProfile::HARD_V55,
             CpuProfile::CORNER_REFUGES_V56_STANDARD,
             CpuProfile::HARD_V47,
         ),

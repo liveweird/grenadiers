@@ -195,3 +195,26 @@ pub(super) fn plan_lairs_with_forecast(
         contact: plan.contact,
     })
 }
+
+pub(super) fn plan_disabled_with_forecast(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: &PlantEscapeOrigin,
+    work: &mut WorkBudget,
+) -> Option<LairSurvivalPlan> {
+    let plan = plan_with_forecast(
+        observation,
+        forecast,
+        settled_stop_tick,
+        memory,
+        origin,
+        false,
+        work,
+    )?;
+    Some(LairSurvivalPlan {
+        survival: plan.survival,
+        contact: None,
+    })
+}

@@ -7,7 +7,7 @@ use crate::game::{Direction, InputAction, SeatId, SeatInput, Tick};
 use super::continuation_execution::{ContinuationPublication, ContinuationStatus};
 use super::continuation_execution_guard_tests::assert_renewal_bound_and_rejections;
 use super::continuation_pending::PendingContinuation;
-use super::continuation_scene_fixture::{ContinuationScene, scene};
+use super::continuation_scene_fixture::{ContinuationScene, no_lair_scene, scene};
 use super::continuation_selection::{OriginRecoveryChoice, plan_lairs};
 use super::continuation_test_fixture::{CPU, observe, step_until};
 use super::{PlantEscapeOrigin, WORK_ALLOWANCE};
@@ -56,7 +56,116 @@ fn input(seat: SeatId, movement: MovementIntent) -> SeatInput {
 
 #[test]
 fn charged_grants_execute_the_full_physical_continuation() {
-    let ContinuationScene {
+    execute_scene(scene());
+}
+
+#[test]
+fn no_lair_grants_execute_the_full_physical_continuation() {
+    execute_scene(no_lair_scene());
+}
+
+#[test]
+fn continuation_contact_rejects_lair_mode_changes() {
+    let mut disabled = no_lair_scene();
+    let mut enabled = scene();
+    let decision = DecisionId {
+        world: disabled.basis.parts().world,
+        command_epoch: 4,
+        observation_tick: disabled.basis.parts().tick,
+        checked_request_serial: 9,
+    };
+    let certificate = build_certificate(&disabled.basis, disabled.key, &disabled.origin);
+    let mut pending = PendingContinuation::new(certificate, decision, disabled.key, 28).unwrap();
+    step_until(&mut disabled.state, Tick(199));
+    pending
+        .observe(
+            &observe(&disabled.state, disabled.settings),
+            publication(decision, 29, Tick(199)),
+            &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
+        )
+        .unwrap();
+    step_until(&mut disabled.state, Tick(202));
+    step_until(&mut enabled.state, Tick(202));
+    assert!(
+        pending
+            .observe(
+                &observe(&enabled.state, enabled.settings),
+                publication(decision, 30, Tick(202)),
+                &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
+            )
+            .is_err()
+    );
+}
+
+#[test]
+fn no_lair_renewal_rejects_an_enabled_overlay() {
+    let mut disabled = no_lair_scene();
+    let mut enabled = scene();
+    let decision = DecisionId {
+        world: disabled.basis.parts().world,
+        command_epoch: 4,
+        observation_tick: disabled.basis.parts().tick,
+        checked_request_serial: 9,
+    };
+    let certificate = build_certificate(&disabled.basis, disabled.key, &disabled.origin);
+    let rival = build_certificate(
+        &disabled.rival_basis,
+        disabled.rival_key,
+        &disabled.rival_origin,
+    );
+    let rival_checkpoints = rival.checkpoints_for_test();
+    let mut pending = PendingContinuation::new(certificate, decision, disabled.key, 28).unwrap();
+    for (tick, sequence) in [(Tick(199), 29), (Tick(202), 30)] {
+        step_until(&mut disabled.state, tick);
+        step_until(&mut enabled.state, tick);
+        let prepared = pending
+            .observe(
+                &observe(&disabled.state, disabled.settings),
+                publication(decision, sequence, tick),
+                &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
+            )
+            .unwrap();
+        if tick == Tick(199) {
+            assert!(prepared.is_none());
+            continue;
+        }
+        let prepared = prepared.unwrap();
+        let first = prepared.command();
+        let mut executor = prepared.commit(first.clone()).unwrap();
+        let mut next = first;
+        while disabled.state.tick() < Tick(205) {
+            let update = Tick(disabled.state.tick().0 + 1);
+            let rival = rival_checkpoints
+                .iter()
+                .find(|checkpoint| checkpoint.tick == update)
+                .map_or(MovementIntent::Stop, |checkpoint| checkpoint.movement);
+            let inputs = [input(CPU, next.movement()), input(SeatId::One, rival)];
+            disabled.state.step(&inputs).unwrap();
+            enabled.state.step(&inputs).unwrap();
+            if disabled.state.tick() < Tick(205) {
+                let ContinuationStatus::Submit(command) =
+                    executor.poll_command(disabled.state.tick(), decision.command_epoch)
+                else {
+                    panic!("next initial grant input must be due")
+                };
+                assert!(executor.commit_command(command.clone()));
+                next = command;
+            }
+        }
+        assert!(
+            executor
+                .prepare_grant(
+                    &observe(&enabled.state, enabled.settings),
+                    publication(decision, 31, Tick(205)),
+                    &mut WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE),
+                )
+                .is_err()
+        );
+    }
+}
+
+fn execute_scene(
+    ContinuationScene {
         mut state,
         settings,
         basis,
@@ -65,7 +174,8 @@ fn charged_grants_execute_the_full_physical_continuation() {
         rival_origin,
         key,
         rival_key,
-    } = scene();
+    }: ContinuationScene,
+) {
     let certificate = build_certificate(&basis, key, &origin);
     let rival = build_certificate(&rival_basis, rival_key, &rival_origin);
     let rival_checkpoints = rival.checkpoints_for_test();

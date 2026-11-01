@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use crate::cpu::forecast::{HazardForecast, TickWindow};
-use crate::cpu::lair_contact::MobContactEnvelope;
 use crate::cpu::{MovementIntent, Observation, WorkBudget};
 use crate::game::{EntityId, MovementSegment, Tick};
 
+use super::continuation_contact::ContinuationContact;
 use super::continuation_proof::{
     ProofContext, ProofState, advance_checked, certify_stationary_suffix, certify_stop_branch,
     reject_initial_scene,
@@ -112,7 +112,7 @@ fn certify_continuation_inner(
         origin,
         RouteMode::AllowStationaryAssumptions,
     )?;
-    let contact = MobContactEnvelope::new(observation, work).map_err(contact_failure)?;
+    let contact = ContinuationContact::new(observation, work).map_err(contact_failure)?;
     let proof = ProofContext {
         context: &context,
         forecast,

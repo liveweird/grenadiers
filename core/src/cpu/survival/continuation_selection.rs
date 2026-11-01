@@ -39,7 +39,12 @@ pub(crate) fn plan_lairs(
     if let Some(certificate) = prepared.continuation {
         return Some(OriginRecoveryChoice::Continuation(Box::new(certificate)));
     }
-    super::origin_planner::plan_lairs_with_forecast(
+    let fallback = if observation.respawn_lairs().is_some() {
+        super::origin_planner::plan_lairs_with_forecast
+    } else {
+        super::origin_planner::plan_disabled_with_forecast
+    };
+    fallback(
         observation,
         &prepared.forecast,
         settled_stop_tick,

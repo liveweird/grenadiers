@@ -1,10 +1,10 @@
 //! Charged renewal frames for inactive continuation execution.
 
 use crate::cpu::forecast::TickWindow;
-use crate::cpu::lair_contact::{MobContactEnvelope, teleport};
 use crate::cpu::{MovementIntent, Observation, ObservedActor, WorkBudget};
 use crate::game::{MovementSegment, Tick};
 
+use super::continuation_contact::ContinuationContact;
 use super::continuation_types::{ContinuationCertificate, ContinuationCheckpoint, StopBranch};
 use super::{RouteFailure, storm};
 
@@ -66,7 +66,9 @@ impl ContinuationCertificate {
         {
             return Err(RouteFailure::NoRoute);
         }
-        charge_len(current.parts().actors.len(), work)?;
+        if self.contact().is_enabled() {
+            charge_len(current.parts().actors.len(), work)?;
+        }
         if !self
             .contact()
             .contains(current, self.survive_until(), work)
@@ -85,7 +87,8 @@ impl ContinuationCertificate {
         if safe_until > self.survive_until() {
             return Err(RouteFailure::InvalidRequest);
         }
-        if !teleport::is_clear(&fresh, current, safe_until, 3, work)
+        if !fresh
+            .teleport_is_clear(current, safe_until, 3, work)
             .map_err(super::pulse_support::contact_failure)?
         {
             return Err(RouteFailure::NoRoute);
@@ -245,15 +248,17 @@ fn validate_expected(
 fn fresh_contact(
     current: &Observation,
     work: &mut WorkBudget,
-) -> Result<MobContactEnvelope, RouteFailure> {
-    charge_len(current.parts().actors.len(), work)?;
-    MobContactEnvelope::new(current, work).map_err(super::pulse_support::contact_failure)
+) -> Result<ContinuationContact, RouteFailure> {
+    if current.respawn_lairs().is_some() {
+        charge_len(current.parts().actors.len(), work)?;
+    }
+    ContinuationContact::new(current, work).map_err(super::pulse_support::contact_failure)
 }
 
 fn validate_fresh_paths(
     certificate: &ContinuationCertificate,
     observation: &Observation,
-    fresh: &MobContactEnvelope,
+    fresh: &ContinuationContact,
     future: &[&ContinuationCheckpoint],
     work: &mut WorkBudget,
 ) -> Result<(), RouteFailure> {
@@ -279,7 +284,7 @@ fn validate_fresh_paths(
 fn validate_complete_stop(
     certificate: &ContinuationCertificate,
     observation: &Observation,
-    fresh: &MobContactEnvelope,
+    fresh: &ContinuationContact,
     publication: Tick,
     work: &mut WorkBudget,
 ) -> Result<(), RouteFailure> {
@@ -291,7 +296,7 @@ fn validate_complete_stop(
 
 fn validate_segments(
     observation: &Observation,
-    fresh: &MobContactEnvelope,
+    fresh: &ContinuationContact,
     tick: Tick,
     segments: &[MovementSegment],
     work: &mut WorkBudget,
@@ -312,8 +317,13 @@ fn validate_segments(
     work.try_take(scans)
         .map_err(|_| RouteFailure::WorkExhausted)?;
     let end = Tick(tick.0.checked_add(1).ok_or(RouteFailure::InvalidRequest)?);
-    if !teleport::motion_is_clear(observation, TickWindow { start: tick, end }, segments, work)
-        .map_err(super::pulse_support::contact_failure)?
+    if !crate::cpu::lair_contact::teleport::motion_is_clear(
+        observation,
+        TickWindow { start: tick, end },
+        segments,
+        work,
+    )
+    .map_err(super::pulse_support::contact_failure)?
     {
         return Err(RouteFailure::NoRoute);
     }

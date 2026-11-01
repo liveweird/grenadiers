@@ -6,6 +6,7 @@ mod bracelet_guard;
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation;
 mod continuation_candidates;
+mod continuation_contact;
 #[cfg_attr(not(test), allow(dead_code))]
 mod continuation_proof;
 mod continuation_renewal;

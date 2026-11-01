@@ -8,7 +8,7 @@ use super::continuation_execution::{
     CommittedContinuation, ContinuationCommand, ContinuationPublication, ContinuationStatus,
 };
 use super::continuation_pending::PendingContinuation;
-use super::continuation_scene_fixture::{ContinuationScene, scene};
+use super::continuation_scene_fixture::{ContinuationScene, no_lair_scene, scene};
 use super::continuation_selection::{OriginRecoveryChoice, plan_lairs};
 use super::continuation_test_fixture::{CPU, observe, observe_for, step_until};
 use super::{PlantEscapeOrigin, WORK_ALLOWANCE};
@@ -85,7 +85,16 @@ fn next_command(
 
 #[test]
 fn grants_cannot_splice_between_mirrored_episodes_at_a_stop_boundary() {
-    let ContinuationScene {
+    assert_mirrored_authority(scene());
+}
+
+#[test]
+fn no_lair_grants_keep_independent_mirrored_authority() {
+    assert_mirrored_authority(no_lair_scene());
+}
+
+fn assert_mirrored_authority(
+    ContinuationScene {
         mut state,
         settings,
         basis,
@@ -94,7 +103,8 @@ fn grants_cannot_splice_between_mirrored_episodes_at_a_stop_boundary() {
         rival_origin,
         key,
         rival_key,
-    } = scene();
+    }: ContinuationScene,
+) {
     let decision = DecisionId {
         world: basis.parts().world,
         command_epoch: 4,

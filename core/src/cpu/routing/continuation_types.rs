@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use crate::cpu::forecast::ForecastEvolution;
-use crate::cpu::lair_contact::MobContactEnvelope;
 use crate::cpu::{MemoryKey, MovementIntent, Observation};
 use crate::game::{Direction, EntityId, MovementSegment, Tick};
 
+use super::continuation_contact::ContinuationContact;
 use super::motion::MotionSnapshot;
 use super::pulse::PulseOriginGrace;
 use super::{RouteAssurance, SpikePitGuard};
@@ -87,7 +87,7 @@ pub(crate) struct ContinuationCertificate {
     assurance: RouteAssurance,
     assumptions: BTreeSet<EntityId>,
     evolution: ForecastEvolution,
-    contact: MobContactEnvelope,
+    contact: ContinuationContact,
 }
 
 pub(super) struct ContinuationParts {
@@ -102,7 +102,7 @@ pub(super) struct ContinuationParts {
     pub(super) stop_branches: Vec<StopBranch>,
     pub(super) assumptions: BTreeSet<EntityId>,
     pub(super) evolution: ForecastEvolution,
-    pub(super) contact: MobContactEnvelope,
+    pub(super) contact: ContinuationContact,
 }
 
 #[allow(dead_code)] // Accessors are consumed by the later bounded grant package.
@@ -213,7 +213,7 @@ impl ContinuationCertificate {
         &self.evolution
     }
 
-    pub(super) const fn contact(&self) -> &MobContactEnvelope {
+    pub(super) const fn contact(&self) -> &ContinuationContact {
         &self.contact
     }
 

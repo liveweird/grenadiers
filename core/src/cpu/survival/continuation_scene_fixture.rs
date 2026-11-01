@@ -4,7 +4,7 @@ use crate::cpu::{MemoryKey, MovementIntent, Observation, WorkBudget};
 use crate::game::{Direction, EntityId, InputAction, Position, SeatId, SeatInput, State, Tick};
 use crate::room::RoomSettings;
 
-use super::continuation_test_fixture::{CPU, observe, observe_for, state, step_until};
+use super::continuation_test_fixture::{CPU, observe, observe_for, state_with_lairs, step_until};
 use super::{PlantEscapeOrigin, WORK_ALLOWANCE};
 
 pub(super) struct ContinuationScene {
@@ -19,7 +19,15 @@ pub(super) struct ContinuationScene {
 }
 
 pub(super) fn scene() -> ContinuationScene {
-    let (mut state, settings) = state();
+    scene_with_lairs(true)
+}
+
+pub(super) fn no_lair_scene() -> ContinuationScene {
+    scene_with_lairs(false)
+}
+
+fn scene_with_lairs(enabled: bool) -> ContinuationScene {
+    let (mut state, settings) = state_with_lairs(enabled);
     state.step(&[]).unwrap();
     step_until(&mut state, Tick(184));
     let plant_basis = observe(&state, settings);

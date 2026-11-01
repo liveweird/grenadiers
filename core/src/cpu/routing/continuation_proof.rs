@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
 use crate::cpu::forecast::{HazardForecast, TickWindow};
-use crate::cpu::lair_contact::MobContactEnvelope;
 use crate::cpu::{MovementIntent, Observation, WorkBudget};
 use crate::game::{EntityId, Tick};
 
+use super::continuation_contact::ContinuationContact;
 use super::continuation_types::{ContinuationCheckpoint, STOP_BRANCH_UPDATES, StopBranch};
 use super::motion::{Motion, advance};
 use super::pulse::PulseOriginGrace;
@@ -22,7 +22,7 @@ pub(super) struct ProofState {
 pub(super) struct ProofContext<'a> {
     pub(super) context: &'a Context<'a>,
     pub(super) forecast: &'a HazardForecast,
-    pub(super) contact: &'a MobContactEnvelope,
+    pub(super) contact: &'a ContinuationContact,
     pub(super) origin: PulseOriginGrace,
 }
 

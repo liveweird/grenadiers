@@ -17,6 +17,22 @@ pub(crate) fn is_clear(
     hold_ticks: u8,
     work: &mut WorkBudget,
 ) -> Result<bool, ContactEnvelopeError> {
+    is_clear_sources(
+        envelope.sources(),
+        observation,
+        safe_until,
+        hold_ticks,
+        work,
+    )
+}
+
+pub(crate) fn is_clear_sources(
+    sources: &[super::Source],
+    observation: &Observation,
+    safe_until: Tick,
+    hold_ticks: u8,
+    work: &mut WorkBudget,
+) -> Result<bool, ContactEnvelopeError> {
     let parts = observation.parts();
     if !parts.rules.settings.enabled_items().contains_teleporter() {
         return Ok(true);
@@ -42,7 +58,7 @@ pub(crate) fn is_clear(
         .and_then(|pairs| {
             candidates
                 .len()
-                .checked_mul(envelope.sources.len())
+                .checked_mul(sources.len())
                 .and_then(|sources| pairs.checked_add(sources))
         })
         .ok_or(ContactEnvelopeError::Capacity)?;
@@ -62,7 +78,7 @@ pub(crate) fn is_clear(
             .ok_or(ContactEnvelopeError::InvalidTime)?,
     );
     for &cell in candidates.keys() {
-        for &source in &envelope.sources {
+        for &source in sources {
             if source.begins_at > last {
                 continue;
             }

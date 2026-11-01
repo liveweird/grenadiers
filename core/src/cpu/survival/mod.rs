@@ -98,6 +98,9 @@ mod refuge_centering_tests;
 mod refuge_centering_episode_tests;
 
 #[cfg(test)]
+mod farm_progress_tests;
+
+#[cfg(test)]
 mod refuge_handoff_tests;
 
 #[cfg(test)]

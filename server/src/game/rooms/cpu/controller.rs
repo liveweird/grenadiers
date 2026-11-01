@@ -280,51 +280,6 @@ impl CpuController {
             self.cancel();
         }
     }
-
-    #[cfg(test)]
-    pub(in crate::game::rooms) fn plan_now_for_test(
-        &mut self,
-        observation: &Observation,
-        command_epoch: u64,
-    ) -> AcceptedPlan {
-        self.cancel();
-        self.accept_observation(observation);
-        let serial = self.request_serial + 1;
-        self.request_serial = serial;
-        let decision = DecisionId {
-            world: observation.parts().world,
-            command_epoch,
-            observation_tick: observation.parts().tick,
-            checked_request_serial: serial,
-        };
-        let mut rng = self.rng.as_ref().unwrap().clone();
-        let plan = grenadiers_core::cpu::policy::plan(
-            observation,
-            self.memory.as_ref().unwrap(),
-            &mut rng,
-            &mut grenadiers_core::cpu::WorkBudget::new(256),
-        )
-        .unwrap();
-        AcceptedPlan {
-            decision,
-            intent: plan.intent,
-            hold_ticks: plan.hold_ticks,
-            next_memory: plan.next_memory,
-            next_rng: rng,
-            committed_pulse: None,
-            committed_route: None,
-            contact: None,
-            certified_manual: None,
-            escape_origin: false,
-            ordinary_navigation: false,
-            refuge_handoff: false,
-        }
-    }
-
-    #[cfg(test)]
-    pub(in crate::game::rooms) fn rng_draws(&self) -> u64 {
-        self.rng.as_ref().map_or(0, CpuRng::draws)
-    }
 }
 
 impl Drop for CpuController {
@@ -383,12 +338,20 @@ mod bracelet_tests;
 mod plant_tests;
 
 #[cfg(test)]
+#[path = "controller_plant_test_support.rs"]
+mod plant_test_support;
+
+#[cfg(test)]
 #[path = "controller_recovery_tests.rs"]
 mod recovery_tests;
 
 #[cfg(test)]
 #[path = "controller_lair_recovery_tests.rs"]
 mod lair_recovery_tests;
+
+#[cfg(test)]
+#[path = "controller_lair_recovery_test_support.rs"]
+mod lair_recovery_test_support;
 
 #[cfg(test)]
 #[path = "controller_weapon_tests.rs"]

@@ -1,3 +1,4 @@
+use super::plant_test_support::advanced;
 use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 use grenadiers_core::cpu::forecast::ObservedHazardMemory;
@@ -309,22 +310,6 @@ fn inject(controller: &mut CpuController, basis: Observation, plan: SurvivalPlan
         refuge_handoff: None,
     });
     controller.request_serial = 1;
-}
-
-pub(super) fn advanced(basis: &Observation, tick: Tick) -> Observation {
-    let mut parts = basis.clone().into_parts();
-    let elapsed = u16::try_from(tick.0 - parts.tick.0).unwrap();
-    parts.tick = tick;
-    parts.rules.running_updates += elapsed;
-    parts.rules.remaining_ticks -= elapsed;
-    let ObservedActor::Visible(cpu) = &mut parts.actors[SeatId::Two.index()] else {
-        unreachable!()
-    };
-    for effect in &mut cpu.effects {
-        effect.remaining_ticks = effect.remaining_ticks.saturating_sub(elapsed);
-    }
-    cpu.effects.retain(|effect| effect.remaining_ticks > 0);
-    Observation::new(parts).unwrap()
 }
 
 #[derive(Clone, Copy, Debug)]

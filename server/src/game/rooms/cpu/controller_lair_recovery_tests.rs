@@ -15,6 +15,7 @@ use grenadiers_core::game::{
 use grenadiers_core::room::{BoardSize, CpuProfile, LairConfig, LairSettings};
 
 use super::contact::ContactStatus;
+use super::lair_recovery_test_support::{visible_cpu, visible_cpu_mut};
 use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 
@@ -382,20 +383,4 @@ fn observed_mob(id: u32) -> MobView {
         heading: Direction::East,
         frozen: false,
     }
-}
-
-fn visible_cpu(observation: &Observation) -> &grenadiers_core::cpu::VisibleActor {
-    let ObservedActor::Visible(actor) = &observation.parts().actors[SeatId::Two.index()] else {
-        unreachable!()
-    };
-    actor
-}
-
-fn visible_cpu_mut(
-    parts: &mut grenadiers_core::cpu::ObservationParts,
-) -> &mut grenadiers_core::cpu::VisibleActor {
-    let ObservedActor::Visible(actor) = &mut parts.actors[SeatId::Two.index()] else {
-        unreachable!()
-    };
-    actor
 }

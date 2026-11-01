@@ -16,6 +16,7 @@ use grenadiers_core::cpu::{
 };
 use grenadiers_core::game::{CellId, Direction, Position, SeatId, Tick};
 
+use super::test_support::key_for;
 use super::{CpuController, Pending};
 use crate::game::rooms::cpu::worker::{CpuPlanner, PlanResult};
 
@@ -349,9 +350,6 @@ fn admitted_long_pulse_waits_for_its_scheduled_stop_update() {
         Some(PulseStatus::Completed)
     );
 }
-#[path = "controller_pulse_intent_tests.rs"]
-mod pulse_intent_tests;
-
 fn observation_at(tick: Tick, x_offset: i32) -> grenadiers_core::cpu::Observation {
     let mut parts = crate::game::rooms::cpu::tests::observation().into_parts();
     parts.tick = tick;
@@ -395,9 +393,5 @@ fn observation_with_pose(
     grenadiers_core::cpu::Observation::new(parts).unwrap()
 }
 
-fn key_for(controller: &CpuController) -> MemoryKey {
-    MemoryKey {
-        world: controller.world.unwrap(),
-        cpu_seat: SeatId::Two,
-    }
-}
+#[path = "controller_pulse_intent_tests.rs"]
+mod pulse_intent_tests;

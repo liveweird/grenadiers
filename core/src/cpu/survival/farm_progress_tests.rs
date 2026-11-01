@@ -211,7 +211,7 @@ pub(super) fn key(observation: &Observation) -> MemoryKey {
     }
 }
 
-fn stalled_memory(observation: &Observation) -> UtilityMemory {
+pub(super) fn stalled_memory(observation: &Observation) -> UtilityMemory {
     UtilityMemory::new(key(observation)).with_strategic_intent(StrategicIntent {
         objective: StrategicObjectiveKind::Farm,
         target: StrategicTarget::Block { cell: TARGET },
@@ -392,6 +392,6 @@ fn joint_refuge_planner_automatically_finds_the_western_full_contact_route() {
         assert_eq!(certificate.route().steps().len(), 8);
         assert_eq!(certificate.route().survive_until(), Tick(7_239));
         assert!(planned.contact.is_some());
-        assert!(work.spent() <= WORK_ALLOWANCE);
+        assert_eq!(work.spent(), if hard { 5_184 } else { 6_584 });
     }
 }

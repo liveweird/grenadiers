@@ -1,6 +1,11 @@
 use crate::cpu::policy::tests::{key, observation};
-use crate::cpu::{Observation, ObservedActor, ObservedEffect, ObservedPickup, WorkBudget};
-use crate::game::{CellId, EffectKind, EntityId, PickupKind, Position, SeatId, Tick};
+use crate::cpu::{
+    Observation, ObservedActor, ObservedEffect, ObservedPickup, UnknownActorFacts, VisibleActor,
+    WorkBudget,
+};
+use crate::game::{
+    CellId, Direction, EffectKind, EntityId, PickupKind, Position, SeatId, SpeedLevel, Tick,
+};
 
 use super::*;
 
@@ -221,6 +226,69 @@ fn expected_long_fuse_wait_suspends_stall_then_reengages_with_a_fresh_deadline()
     assert_eq!(
         resumed.intent.progress_deadline,
         add_ticks(Tick(200), STRATEGIC_PROGRESS_TICKS)
+    );
+}
+
+#[test]
+fn failed_farm_origin_does_not_filter_pickup_or_opponent_candidates() {
+    let failed = CellId::new(8, 7);
+    let mut pickup_parts = observation(CellId::new(7, 7)).into_parts();
+    pickup_parts.pickups.push(ObservedPickup {
+        cell: failed,
+        kind: PickupKind::MovementSpeed,
+    });
+    let pickup_scene = Observation::new(pickup_parts).unwrap();
+    let actor = match &pickup_scene.parts().actors[1] {
+        ObservedActor::Visible(actor) => actor,
+        _ => unreachable!(),
+    };
+    let pickup = select_v38(
+        &pickup_scene,
+        actor,
+        CellId::new(7, 7),
+        &UtilityMemory::new(key()).defer_farm_approach(failed, Tick(10)),
+        &mut WorkBudget::new(65_536),
+        false,
+    )
+    .unwrap();
+    assert!(matches!(pickup.intent.target, StrategicTarget::Pickup { cell, .. } if cell == failed));
+
+    let mut attack_parts = observation(CellId::new(7, 7)).into_parts();
+    attack_parts.actors[0] = ObservedActor::Visible(VisibleActor {
+        id: EntityId(1),
+        seat: SeatId::One,
+        position: Position::center(CellId::new(9, 7)),
+        heading: Direction::West,
+        speed: SpeedLevel::Base,
+        alive: true,
+        bomb_capacity: 1,
+        bomb_range: 2,
+        live_bomb_count: 0,
+        equipment: None,
+        weapon: None,
+        effects: Vec::new(),
+        damage_grace_remaining_ticks: 0,
+        voluntary_actions_frozen: false,
+        last_teleport_tick: None,
+        unknown: UnknownActorFacts::ALL,
+    });
+    let attack_scene = Observation::new(attack_parts).unwrap();
+    let actor = match &attack_scene.parts().actors[1] {
+        ObservedActor::Visible(actor) => actor,
+        _ => unreachable!(),
+    };
+    let attack = select_v38(
+        &attack_scene,
+        actor,
+        CellId::new(7, 7),
+        &UtilityMemory::new(key()).defer_farm_approach(failed, Tick(10)),
+        &mut WorkBudget::new(65_536),
+        true,
+    )
+    .unwrap();
+    assert_eq!(
+        attack.intent.target,
+        StrategicTarget::Opponent { seat: SeatId::One }
     );
 }
 

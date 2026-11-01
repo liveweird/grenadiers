@@ -30,6 +30,7 @@ pub fn plan_refuge_guidance_v33_with_origin(
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
         false,
+        false,
     )
 }
 
@@ -56,6 +57,7 @@ pub fn plan_refuge_guidance_v34_with_origin(
         true,
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
+        false,
         false,
     )
 }
@@ -84,6 +86,7 @@ pub fn plan_farm_refuges_v36_with_origin(
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
         true,
+        false,
     )
 }
 
@@ -111,6 +114,63 @@ pub fn plan_hard_farm_refuges_v37_with_origin(
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
         true,
+        false,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_farm_origins_v38_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_policy(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        true,
+        false,
+        false,
+        true,
+        RefugeGuidance::CENTER_THREATENED_ROOT,
+        true,
+        true,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_hard_farm_origins_v39_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    plan_policy(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        true,
+        true,
+        true,
+        true,
+        RefugeGuidance::CENTER_THREATENED_ROOT,
+        true,
+        true,
     )
 }
 
@@ -129,6 +189,7 @@ pub(super) fn plan_policy(
     pickup_progress: bool,
     refuge_guidance: RefugeGuidance,
     joint_refuges: bool,
+    farm_origin_recovery: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     if observation.parts().rules.version != 10 {
         return Err(PolicyError::InvalidObservation);
@@ -177,5 +238,6 @@ pub(super) fn plan_policy(
         pickup_progress,
         refuge_guidance,
         joint_refuges,
+        farm_origin_recovery,
     )
 }

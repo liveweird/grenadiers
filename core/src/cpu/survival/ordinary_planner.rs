@@ -12,8 +12,13 @@ pub(super) fn plan(
     strategic_goals: bool,
     failed_plant_recovery: bool,
     hard_tactics: bool,
+    farm_origin_recovery: bool,
 ) -> Result<ControlPlan, PolicyError> {
-    if hard_tactics {
+    if farm_origin_recovery && hard_tactics {
+        crate::cpu::policy::plan_hard_farm_v39(observation, memory, rng, work)
+    } else if farm_origin_recovery {
+        crate::cpu::policy::plan_farm_v38(observation, memory, rng, work)
+    } else if hard_tactics {
         crate::cpu::policy::plan_hard_v28(observation, memory, rng, work)
     } else if observation.parts().rules.version == 10 {
         crate::cpu::policy::plan_spike_pits_v26(observation, memory, rng, work)

@@ -118,6 +118,30 @@ pub(crate) fn plan_hard_v28(
     plan_inner(observation, memory, rng, work, PlannerVersion::HardV28)
 }
 
+pub(crate) fn plan_farm_v38(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 10 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, PlannerVersion::FarmV38)
+}
+
+pub(crate) fn plan_hard_farm_v39(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    if observation.parts().rules.version != 10 {
+        return Err(PolicyError::InvalidObservation);
+    }
+    plan_inner(observation, memory, rng, work, PlannerVersion::HardFarmV39)
+}
+
 fn plan_inner(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -130,6 +154,7 @@ fn plan_inner(
     let strategic_goals = version.strategic_goals();
     let failed_plant_recovery = version.failed_plant_recovery();
     let hard_tactics = version.hard_tactics();
+    let farm_origin_recovery = version.farm_origin_recovery();
     let parts = observation.parts();
     let key = MemoryKey {
         world: parts.world,
@@ -227,6 +252,7 @@ fn plan_inner(
         strategic_goals,
         failed_plant_recovery,
         hard_tactics,
+        farm_origin_recovery,
     )
 }
 
@@ -242,10 +268,13 @@ fn navigate(
     strategic_goals: bool,
     failed_plant_recovery: bool,
     hard_tactics: bool,
+    farm_origin_recovery: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let key = memory.key();
     if strategic_goals {
-        let guidance = if hard_tactics {
+        let guidance = if farm_origin_recovery {
+            super::goals::select_v38(observation, actor, current, memory, work, hard_tactics)
+        } else if hard_tactics {
             super::goals::select_v28(observation, actor, current, memory, work)
         } else if failed_plant_recovery {
             super::goals::select_v25(observation, actor, current, memory, work)

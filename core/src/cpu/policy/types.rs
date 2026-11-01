@@ -113,6 +113,7 @@ pub struct UtilityMemory {
     deferred_goal: Option<GoalMemory>,
     strategic_intent: Option<StrategicIntent>,
     failed_target: Option<(StrategicTarget, Tick)>,
+    failed_farm_approach: Option<(CellId, Tick)>,
 }
 
 impl UtilityMemory {
@@ -133,6 +134,7 @@ impl UtilityMemory {
             deferred_goal: None,
             strategic_intent: None,
             failed_target: None,
+            failed_farm_approach: None,
         }
     }
 
@@ -187,6 +189,11 @@ impl UtilityMemory {
     }
 
     #[must_use]
+    pub(crate) const fn failed_farm_approach(self) -> Option<(CellId, Tick)> {
+        self.failed_farm_approach
+    }
+
+    #[must_use]
     pub fn with_strategic_intent(mut self, intent: StrategicIntent) -> Self {
         self.strategic_intent = Some(intent);
         self
@@ -206,6 +213,12 @@ impl UtilityMemory {
             intent.last_switch_reason = StrategicSwitchReason::Stalled;
             intent.observation_tick = tick;
         }
+        self
+    }
+
+    pub(crate) fn defer_farm_approach(mut self, cell: CellId, tick: Tick) -> Self {
+        self.failed_farm_approach =
+            Some((cell, Tick(tick.0.saturating_add(FAILED_TARGET_DEFER_TICKS))));
         self
     }
 
@@ -241,6 +254,7 @@ impl UtilityMemory {
         Self {
             strategic_intent: self.strategic_intent,
             failed_target: self.failed_target,
+            failed_farm_approach: self.failed_farm_approach,
             ..Self::new(self.key)
         }
     }
@@ -284,6 +298,7 @@ impl UtilityMemory {
         self.deferred_goal = previous.deferred_goal;
         self.strategic_intent = previous.strategic_intent;
         self.failed_target = previous.failed_target;
+        self.failed_farm_approach = previous.failed_farm_approach;
         self
     }
 

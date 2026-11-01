@@ -41,7 +41,8 @@ pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
 pub use refuge_guidance::{
-    plan_farm_refuges_v36_with_origin, plan_hard_farm_refuges_v37_with_origin,
+    plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
+    plan_hard_farm_origins_v39_with_origin, plan_hard_farm_refuges_v37_with_origin,
     plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
 };
 pub use refuge_handoff::TerminalRefugeHandoff;
@@ -101,6 +102,9 @@ mod refuge_centering_episode_tests;
 
 #[cfg(test)]
 mod farm_progress_tests;
+
+#[cfg(test)]
+mod farm_origin_tests;
 
 #[cfg(test)]
 mod joint_refuge_execution_tests;

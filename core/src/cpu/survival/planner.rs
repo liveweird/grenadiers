@@ -135,6 +135,7 @@ pub(super) fn plan_inner(
         strategic_goals,
         failed_plant_recovery,
         hard_tactics,
+        false,
     )?;
     let storm_enabled = observation.environment().is_some_and(|environment| {
         environment.storm_cloud_config() == crate::game::StormCloudConfig::Single

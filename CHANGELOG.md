@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## 1.3.14 — 2026-11-01
+
+- Prepare the shared escape forecast before optional continuation work, so expensive but supported three-bomb scenes can reach certified movement without raising the work limit.
+- Preserve legacy choices and work whenever preparation fits its original allowance; retain contact, pit, Oil and publication guards.
+- Select Easy/Standard54 and Hard55 under private replay27. Reproduce the previous three-player range-three deaths, then verify actual blast/flame survival and a closed cohort of later bombs on all difficulties.
+- Retain a completed rules10 pulse until a fresh publication can validate its pit state, within the original admission deadline, instead of discarding it between publications.
+
 ## 1.3.13 — 2026-11-01
 
 - Prevent CPU players from choosing pit tiles as ordinary routes or pickup, farming and attack approaches; check swept short-pulse footprints before accepting movement.

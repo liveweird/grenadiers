@@ -57,6 +57,7 @@ pub use continuation_selection::{
     OriginRecoveryChoice, continuation_recovery_memory, continuation_recovery_stop,
     plan_lairs as plan_continuation_lairs,
     plan_lairs_avoiding_pits as plan_continuation_lairs_avoiding_pits,
+    plan_lairs_v54 as plan_continuation_lairs_v54,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
@@ -153,6 +154,8 @@ mod continuation_guard_tests;
 
 #[cfg(test)]
 mod continuation_selection_tests;
+#[cfg(test)]
+mod continuation_selection_v54_tests;
 
 #[cfg(test)]
 mod pickup_stall_tests;

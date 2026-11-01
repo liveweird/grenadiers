@@ -72,6 +72,64 @@ pub fn plan_lairs_avoiding_pits(
     )
 }
 
+/// Opt-in selector that prepares one shared forecast before reserving optional
+/// continuation work. Legacy selectors retain their historical allocation.
+pub fn plan_lairs_v54(
+    observation: &Observation,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: &PlantEscapeOrigin,
+    work: &mut WorkBudget,
+) -> Option<OriginRecoveryChoice> {
+    let incoming = work.remaining();
+    let common_start = work.spent();
+    super::continuation_planner::charge_origin_validation(origin, observation, work).ok()?;
+    origin.retain_stopped(observation)?;
+    let forecast = forecast(observation, history, None, ForecastLimits::default(), work).ok()?;
+
+    let common = work.spent().checked_sub(common_start)?;
+    let optional_limit = v54_optional_allowance(incoming, common);
+    let mut optional = WorkBudget::new(optional_limit);
+    let continuation = try_continuation(
+        observation,
+        settled_stop_tick,
+        origin,
+        &forecast,
+        &mut optional,
+    );
+    work.try_take(optional.spent()).ok()?;
+    if let Some(certificate) = continuation {
+        return Some(OriginRecoveryChoice::Continuation(Box::new(certificate)));
+    }
+
+    let fallback = if observation.respawn_lairs().is_some() {
+        super::origin_planner::plan_lairs_with_forecast
+    } else {
+        super::origin_planner::plan_disabled_with_forecast
+    };
+    let mut plan = fallback(
+        observation,
+        &forecast,
+        settled_stop_tick,
+        memory,
+        origin,
+        true,
+        work,
+    )?;
+    plan.survival.control.next_memory = continuation_recovery_memory(memory);
+    Some(OriginRecoveryChoice::Pulse(Box::new(plan)))
+}
+
+fn v54_optional_allowance(incoming: u32, common: u32) -> u32 {
+    let legacy_half = incoming / 2;
+    if common <= legacy_half {
+        legacy_half - common
+    } else {
+        (incoming - common) / 2
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn plan_lairs_inner(
     observation: &Observation,
@@ -269,5 +327,21 @@ mod tests {
         });
         assert_eq!(selected, Some(9));
         assert_eq!(work.spent(), 57);
+    }
+
+    #[test]
+    fn v54_reservation_preserves_legacy_half_until_common_exceeds_it() {
+        for (incoming, common, expected) in [
+            (20, 9, 1),
+            (20, 10, 0),
+            (20, 11, 4),
+            (21, 9, 1),
+            (21, 10, 0),
+            (21, 11, 5),
+        ] {
+            let allowance = v54_optional_allowance(incoming, common);
+            assert_eq!(allowance, expected);
+            assert!(allowance <= (incoming - common) / 2);
+        }
     }
 }

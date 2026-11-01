@@ -5,7 +5,6 @@ import test from "node:test";
 const fullPath = new URL("../.github/workflows/ci.yml", import.meta.url);
 const platformPath = new URL("../.github/workflows/platform.yml", import.meta.url);
 const fixturePath = new URL("../e2e/compose/fixture.yaml", import.meta.url);
-const exhaustive = "expanded_item_masks_and_disabled_preset_replay_deterministically";
 const rustCache = "Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3";
 const failureArtifactPaths = [
   "e2e/playwright-report/",
@@ -127,7 +126,9 @@ export function validatePlatformWorkflow(workflow) {
   assert.match(event, /^  workflow_dispatch:$/m);
   assert.doesNotMatch(event, /^  push:$/m);
   for (const path of ["Cargo.lock", "Cargo.toml", ".cargo/**", "rust-toolchain.toml", "api/**",
-    "core/**", "server/**", "scripts/gates.sh", "scripts/ci-server-mask-*.mjs"]) {
+    "core/**", "server/**", "scripts/gates.sh", "scripts/ci-server-mask-*.mjs",
+    "scripts/local-server-parallel.py", "scripts/native-cpu-tests.py",
+    "scripts/measure-game-artifact.mjs", ".nvmrc"]) {
     assert.ok(event.includes(`      - ${path}\n`), `missing path filter ${path}`);
   }
   assert.match(workflow, /runs-on: ubuntu-24\.04/);
@@ -138,17 +139,17 @@ export function validatePlatformWorkflow(workflow) {
   assert.match(workflow, /cache-targets: true/);
   assert.match(workflow, /cache-workspace-crates: false/);
   assert.match(workflow, /cache-on-failure: false/);
+  assert.match(workflow, /actions\/setup-node@820762786026740c76f36085b0efc47a31fe5020/);
+  assert.match(workflow, /node-version-file: \.nvmrc/);
   assert.doesNotMatch(workflow, /upload-artifact|download-artifact/);
 
-  const commands = [...workflow.matchAll(/^        run: >-\n((?:^          .+\n?)+)/gm)]
-    .map(([, lines]) => lines.trim().split("\n").map((line) => line.trim()).join(" "))
-    .filter((command) => command.startsWith("cargo test "));
+  const commands = [...workflow.matchAll(/^        run: (python3 -I -B scripts\/native-cpu-tests\.py.*)$/gm)]
+    .map(([, command]) => command);
   assert.deepEqual(commands, [
-    `cargo test --workspace --locked -- --skip ${exhaustive}`,
-    `cargo test --workspace --release --locked -- --skip ${exhaustive}`,
+    "python3 -I -B scripts/native-cpu-tests.py",
+    "python3 -I -B scripts/native-cpu-tests.py --release",
   ]);
-  assert.equal((workflow.match(new RegExp(`--skip ${exhaustive}`, "g")) ?? []).length, 2);
-  assert.doesNotMatch(workflow, /--skip checked_enabled_items_catalog_is_authoritative/);
+  assert.doesNotMatch(workflow, /cargo test --workspace/);
   assert.doesNotMatch(workflow, /--ignored|--include-ignored/);
 }
 
@@ -216,12 +217,15 @@ test("contracts reject automatic full verification and weakened mask coverage", 
   const platform = fs.readFileSync(platformPath, "utf8");
   assert.throws(() => validatePlatformWorkflow(platform.replace("  workflow_dispatch:\n", "  push:\n")));
   assert.throws(() => validatePlatformWorkflow(platform.replace(
-    `--skip ${exhaustive}`, "--skip checked_enabled_items_catalog_is_authoritative")));
-  assert.throws(() => validatePlatformWorkflow(platform.replace("cargo test --workspace --release", "true")));
+    "python3 -I -B scripts/native-cpu-tests.py\n", "true\n")));
   assert.throws(() => validatePlatformWorkflow(platform.replace(
-    `--skip ${exhaustive}`, `--skip ${exhaustive}\n          --skip rejects_invalid_catalogs_and_cardinality_overflow`)));
+    "python3 -I -B scripts/native-cpu-tests.py --release", "true")));
   assert.throws(() => validatePlatformWorkflow(platform.replace(
-    "cargo test --workspace --locked --\n", "cargo test --workspace --locked --\n          replay\n")));
+    "      - scripts/local-server-parallel.py\n", "")));
+  assert.throws(() => validatePlatformWorkflow(platform.replace(
+    "      - scripts/measure-game-artifact.mjs\n", "")));
+  assert.throws(() => validatePlatformWorkflow(platform.replace(
+    "node-version-file: .nvmrc", "node-version-file: missing")));
 });
 
 test("failure artifact paths reject broad parents and hidden subtree patterns", () => {

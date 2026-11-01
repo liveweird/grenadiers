@@ -97,58 +97,72 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.13 — 2026-11-01
+## v1.3.14 — 2026-11-01
 
-CPUs exclude pit sites from ordinary pickup, farming and attack approaches, retained routes
-and short movement pulses. The pulse check covers swept footprint bounds, including partial
-contact, before selecting a candidate so alternatives remain available. Complete planting and
-continuation routes retain their time-dependent proofs and can still cross pits safely.
+CPUs can resume checked movement after simultaneous bomb plants when a supported forecast
+exceeds the old preparation allowance. The previous selector spent its 32,768-unit half-budget
+and returned before pulse fallback, despite the same forecast fitting the full shared budget.
 
-Easy/Standard use CPU52, Hard uses CPU53 and private replay26 binds those identities.
-Archived policies/replays, multi-Teleporter recovery, Easy cadence and work limits are preserved.
-The queued-owner regression retains CPU51's pit entry and death at tick 242. All current
-difficulties avoid that trap; a separate one-wall-open variant plants at 235, destroys a wall and
-survives through flame expiry at 446.
+CPU54/55 prepare one forecast first. Preparation that fits the original allowance retains
+identical continuation/fallback choices and work; more expensive preparation reserves at least
+half the remainder for the existing checked fallback. The 65,536 total limit, candidate caps,
+RNG, physical Stop, contact, Oil, pit and strict publication guards remain unchanged. Non-origin
+planning delegates to CPU52/53. Private replay27 binds Easy/Standard54 and Hard55; previous
+policies and replays remain isolated.
 
-This is bounded pit prevention. A boxed CPU can still wait when the existing prover cannot
-certify escape; already-on-pit rescue is not guaranteed. Foreign-bomb farming and the new
-simultaneous-plant/Oil escape capture remain in the backlog. No UI, art, protocol, physics,
-dependency or database changes. Restart ends in-memory matches.
+The controlled owner witness preserves three CPU53 deaths at tick 1042. All six new difficulty
+and Oil combinations reproduce the same natural three-way range-three wave at 862, survive its
+detonation/flames, then remain alive through a fixed tick 2180 bomb cohort's computed blast
+horizon. Later bombs do not extend that finite cohort. Actual old queued bases also select a
+certified Pulse within budget. Inputs, upgrades and stopped clocks arise through real owner
+execution. Concealed contents and fresh seed/history are explicit controlled assumptions.
+
+Completed rules10 pulses also wait for a fresh publication before strict admission, within the
+existing age/start-window limits. A captured 837-refusal native stall identifies the missing
+historical pit guard; the controller now retains the result without granting input. Changed
+pit state and pose still reject, and Core admission remains fail-closed. Existing journal
+playback is preserved; newly played matches can accept input at different ticks.
+
+This repairs the demonstrated recovery bottlenecks. The separate foreign-bomb planting/future-
+loot guard and broader tactical tuning remain in the backlog. No UI, art, protocol, physics,
+dependency or database changes; restart ends in-memory matches.
 
 ### Verification
 
-Application/image source: `f87e0d729be1c2eacb8007867931b2078102e1d5`.
-Final full-gate source: `7a1320dad094564b7df4fc0e745b48592d33eb6f`; subsequent differences
-are confined to test-only fixtures/shutdown synchronization, local runner scheduling and testing
-documentation. Production application code is unchanged. Accepted image:
-`sha256:a15d4244059bd05640493010318acd6dfb962dccc8e4ad6b52c29e4bb6358b7e`.
+Accepted source: `a5d723f995dee228a048f89136d91f4a02f2a7cb`.
+Accepted image:
+`sha256:ee8e02ce832b5ffb67dd26fc8de432bfca88470d30cf4305f2c2bffe27081842`.
+Subsequent changes update release documentation/backlog only; Docker build inputs are unchanged.
 
-- Independent policy, pulse, identity, replay, owner and shutdown-test reviews are clear.
-  Exact/one-short pit work and no-pit base parity pass. A direct valid origin-fallback pit-entry
-  fixture remains a coverage gap; flag propagation is reviewed and full continuation regressions
-  remain unchanged.
-- The clean local Rust gate passes in 840 seconds: 1,871 Core and 748 server tests per
-  profile (744 ordinary plus four isolated timing cases). All 4,194,304 item masks pass in debug,
-  release and coverage, with 32 partitions, four workers and zero retries in the accepted run.
-  Official coverage is 67,865/72,671 lines (93.39%), above the unchanged 90% floor. Formatting,
-  strict Clippy, build, repository and runner-contract checks pass. Earlier candidates exposed
-  stale profile fixtures, a paused-clock shutdown-test race and native timing contention;
-  corrected runs retain every assertion and raw coverage profile. Failure logs remain separate.
-- Linux x86_64 debug/release units and doctests pass
-  ([run 41340023695](https://github.com/liveweird/grenadiers/actions/runs/41340023695)) on
-  `c08413b6`; the later portable test-only synchronization correction passes locally.
-- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes
-  acceptance pass. Pinned Trivy reports zero fixable high/critical findings. Dependency audits
-  pass the configured threshold with the existing moderate npm tooling advisories.
-- All five web assets match v1.3.12 byte-for-byte; unchanged frontend/native inputs reuse
-  accepted checks. No repeated portable remote matrix is required.
+- Independent Core, runtime, replay, owner and CI reviews are clear. Successful-preparation
+  equivalence, allowance boundaries, partly spent budgets and fail-closed cases pass.
+- The frozen local Rust gate passes in 988 seconds: 1,879 Core and 759 server tests per
+  profile (755 ordinary plus four isolated native cases). All 4,194,304 item masks pass in
+  debug, release and coverage with 32 partitions, four workers and zero retries. Official
+  coverage is 68,411/73,249 lines (93.40%), above the unchanged 90% floor; all 40 raw profiles,
+  including the native cohort, contribute to the report. Formatting, strict Clippy, build,
+  repository and runner-contract checks pass. The earlier coverage failure and its exact
+  missing-guard diagnostic remain separate; no clocks, assertions or work limits were relaxed.
+- Linux x86_64 workspace units and doctests pass in debug/release
+  ([run 41351629226](https://github.com/liveweird/grenadiers/actions/runs/41351629226)).
+  Local and Linux runners share one timing catalog; all four native cases execute once
+  serially after ordinary tests, retaining coverage where applicable.
+- Exact-image Compose authentication/keyboard duel/three-CPU play and restricted Kubernetes
+  acceptance pass. Pinned Trivy reports zero fixable high/critical findings. Dependency
+  policies/audits pass the configured threshold with existing moderate tooling advisories.
+- All five web assets match v1.3.13 byte-for-byte. Unchanged frontend inputs reuse
+  accepted checks. Dependency audits reuse the unchanged manifest/lockfile inputs.
 
 ### Operation
 
-The accepted image is running on localhost:8085. Exact image/source labels, health/readiness,
-security headers, CSP/cache, all five served assets and fresh three-Hard-CPU play pass.
-The immutable v1.3.12 image/override remain available for rollback. This is a source/local-runtime
+The exact accepted image is running on localhost:8085. Image/source labels, restricted container
+settings, health/readiness, security headers, CSP/cache and all five served assets pass. Fresh
+three-Hard-CPU play shows all three moving and CPU bombs, without browser errors.
+The immutable v1.3.13 image/override remain available for rollback. This is a source/local-runtime
 release; no hosted service or production registry is configured. The artist bundle is unchanged.
+
+<a id="v1313--2026-11-01"></a>
+The [v1.3.13 record](history/releases.md#v1313--2026-11-01) is preserved in release history.
 
 <a id="v1312--2026-11-01"></a>
 The [v1.3.12 record](history/releases.md#v1312--2026-11-01) is preserved in release history.

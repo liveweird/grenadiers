@@ -83,6 +83,9 @@ mod replay_v25;
 #[allow(dead_code)] // Pit-avoidance pairing; accepted-input implementation is shared.
 mod replay_v26;
 #[cfg(test)]
+#[allow(dead_code)] // Shared-preparation recovery; production replay export remains disabled.
+mod replay_v27;
+#[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]

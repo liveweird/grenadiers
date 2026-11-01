@@ -51,6 +51,7 @@ const fn is_easy_profile(profile: CpuProfile) -> bool {
             | CpuProfile::TELEPORTER_V48_EASY
             | CpuProfile::TELEPORTER_V50_EASY
             | CpuProfile::PIT_AVOIDANCE_V52_EASY
+            | CpuProfile::RECOVERY_V54_EASY
     )
 }
 

@@ -57,9 +57,11 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV51
                 | CpuPolicy::UtilityV52
                 | CpuPolicy::UtilityV53
+                | CpuPolicy::UtilityV54
+                | CpuPolicy::UtilityV55
         )
     {
-        let plan = if job.policy == CpuPolicy::UtilityV52 {
+        let plan = if matches!(job.policy, CpuPolicy::UtilityV52 | CpuPolicy::UtilityV54) {
             plan_pit_avoidance_v52_with_origin(
                 &job.observation,
                 &job.memory,
@@ -69,7 +71,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 &mut job.rng,
                 work,
             )
-        } else if job.policy == CpuPolicy::UtilityV53 {
+        } else if matches!(job.policy, CpuPolicy::UtilityV53 | CpuPolicy::UtilityV55) {
             plan_hard_pit_avoidance_v53_with_origin(
                 &job.observation,
                 &job.memory,

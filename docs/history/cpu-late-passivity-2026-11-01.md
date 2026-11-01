@@ -328,3 +328,46 @@ work from useful movement, and rules out missing-origin and Oil-only explanation
 These records establish the old failure and its preparation bottleneck, not complete success
 of any alternative allocation. A repair needs actual survival through bomb flames and must
 retain the shared work ceiling, contact/pit checks and archived policy behavior.
+
+## Shared-preparation owner comparison
+
+CPU54/55 build the common forecast against the existing shared allowance before optional
+continuation work. When preparation fits the former half allowance, the remaining continuation
+allowance and planner results match the old selector. More expensive preparation reserves at
+least half the remaining work for the existing checked pulse fallback. Failed attempts remain
+charged; neither the total allowance nor the route/contact proof is enlarged.
+
+All six difficulty/Oil combinations reproduce the natural three-way range-three planting wave
+at 862 and keep every CPU alive through detonation at 1042 and flame clearance at 1073. The
+episode then freezes a finite cohort of bombs observed by tick 2180 and checks continuous
+survival through that cohort's computed blast horizon. Later bombs cannot extend the deadline;
+the assertions require every tracked bomb to resolve. This is not a claim that all future bombs
+have expired or that no later game can lose a CPU.
+
+Cloned actual old queued bases select certified pulses at 48,396, 47,233 and 48,405 work,
+within the unchanged 65,536 limit. Boundary, partly spent budget, successful-preparation parity
+and invalid-origin tests accompany the physical owner comparison. The original CPU53 death
+witness remains in the suite. Hidden contents, fresh history and seed assumptions stay explicit;
+none of these controlled episodes restores the private browser match.
+
+## Between-publication pulse refusal
+
+The first v1.3.14 full local run passed debug/release tests but failed two coverage-instrumented
+native episodes: current Hard55 and archived CPU26. In each lair-enabled scene all 837 jobs
+delivered, but every seat recorded 279 pulse-admission refusals and no movement. This was not a
+worker-disconnection or work-budget failure. An instrumented Hard55 episode also reproduced all
+837 refusals. Other diagnostic executions progressed while exposing individual refusals; the
+total stall is schedule-dependent.
+
+The retained failing diagnostic's first lair-enabled refusal has controller tick 184, basis/latest
+publication and confirmed Stop tick 183, East heading and identical position `(13824,1536)`.
+The lease starts in `[184,191)` and remains safe until 212. Admission at 184 selects first
+execution 185, but the stored pit guards begin at that lane's admission tick. Looking up publication
+183 yields no guard and a false match after one work unit, so strict admission rejects. The
+deterministic Core fixture preserves this fail-closed behavior.
+
+The controller correction retains the completed result until a fresh publication can be checked.
+It grants no input while waiting and does not reconstruct unseen pit activity. The original
+age limit, start window and exact scene/pose/contact checks still decide whether admission is
+possible. This addresses the identified rejection mechanism without changing coverage clocks
+or relaxing the pit guard; a successful probe alone does not establish that all stalls are fixed.

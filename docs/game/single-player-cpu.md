@@ -143,7 +143,7 @@ own-origin exception. This does not enlarge existing pulse/route authority or in
 from bomb ownership. Ineligible or failed continuation attempts retain the existing checked
 short-pulse recovery.
 
-The certificate separates a complete nominal trajectory of at most eight geometric legs and 96
+The certificate separates a complete nominal trajectory of at most eight legs, including planned Stops, and 96
 movement updates from renewable movement grants. A fresh publication at `P` authorizes only
 updates `P+1…P+3`. Validation runs before the owner services `P+4`;
 missing, stale, duplicate or mismatched publications withdraw continuation. Admission binds an

@@ -28,7 +28,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   the controlled interrupted-escape case. Validate sustained farming
   from the original captured conditions: alternate-route proof and refused-origin guidance have
   separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
-  proofs and the existing work allowance. Reproduce remaining long-match
+  proofs and the existing work allowance. The [fresh late-match investigation](docs/history/cpu-late-passivity-2026-11-01.md)
+  identifies exposed Teleporter as a global planting support limit; replace that refusal only
+  with a bounded proof, starting with an all-partner collection feasibility witness. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone

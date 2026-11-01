@@ -4,6 +4,73 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.8 — 2026-11-01
+
+CPUs can plant while every possible monster birth remains blocked by retained soft walls.
+Previously the contact proof filtered those birth sources, then refused the resulting empty set,
+causing repeated farming approaches even when a complete useful plant route existed.
+
+The new capability requires a nonempty original envelope consisting entirely of possible births
+whose origin blocks stay retained. Existing mobs cannot be omitted. Source binding uses one charged
+traversal; exhaustion cannot be rescued, and the empty case skips unnecessary component/route scans.
+Every retained barrier and the full plant scene remain mandatory at renewal; any observed mob
+withdraws the empty-source authority. Global, candidate, renewal and queue limits are unchanged.
+
+### Compatibility and limits
+
+Easy/Standard select CPU42 and Hard selects CPU43 with its certified second-bomb handoff.
+Private replay21 binds those identities with gameplay19/rules10/navigation3; replay20 retains
+CPU40/41. Archived profiles cannot construct or admit the additional certificate capability.
+Lairs-disabled planning delegates unchanged to CPU40/41 with identical result, work and RNG.
+No UI, artwork, network schema, physics or external dependency changes. Restart ends active matches.
+
+This fixes the blocked-birth farming refusal. It does not complete interrupted-escape continuation
+or establish that every remaining long-match stall has a missed safe action.
+
+### Verification
+
+Accepted application/image source: `3ceeb6ebad602fc0c2cdc8017357a4061080cecc`.
+Independent Core/server review is clear. Review corrected uncharged failure recovery and vacuous
+route traversal; the final binding preserves budget failures and never omits Existing sources.
+Final documentation-only changes leave application build inputs unchanged.
+
+- Frozen Rust gate passes in 756 seconds: 1,758 passing Core tests and 696 passing ordinary server
+  tests, plus all 4,194,304 item masks independently in debug, release and coverage. Four workers,
+  32 partitions, zero retries. Formatting, strict Clippy, build and repository checks pass.
+  Fresh coverage is 60,975/65,779 lines (92.70%), above the unchanged 90% floor.
+- The exact public observation at tick 10741 reproduces the refusal: all eight possible births
+  remain blocked. CPU40/41 retain their original refusal and work (51,682/50,792); CPU42/43 select
+  typed plant execution inside the real candidate allowance at 30,686/29,206 work. Binding uses
+  exactly eight units; seven fails. Construction uses 1,222; one-short fails closed.
+- Fresh Standard42/Hard43 controllers in an active cloud/lair/pit scene, after 600 natural updates,
+  use normal worker/queue/admission, destroy the useful target and survive flame expiry. This
+  controlled two-actor SeatTwo/no-Punch/fresh-clock witness is distinct from the four-actor
+  captured SeatThree/Punch/tick 10741 observation. It claims no hidden-state restoration.
+- Existing-source/nonempty-authority parity, no-lair result/work/RNG parity, new-mob/barrier
+  withdrawal, stale workers, three publication phases, expiry, archived injected-certificate
+  rejection, worker routing, Hard handoff and Replay20/21 boundaries pass.
+- Unique Linux x86_64 debug/release workspace tests and doctests pass
+  ([run 41300417904](https://github.com/liveweird/grenadiers/actions/runs/41300417904)).
+  Equivalent Linux units are not duplicated in another container suite.
+- Exact-image Compose authentication/keyboard duel and three-Hard-CPU smoke pass. Restricted
+  Kubernetes three-CPU smoke passes; owned stacks/namespaces are removed. One 180-second
+  all-features capture reaches a result with no JavaScript errors; CPUs move and plant
+  (8/7/7 observed bombs). One surviving seat moves long after its last bomb; this is observational
+  evidence, not a matched balance comparison or a claim that all passivity is resolved.
+- All five browser assets remain byte-identical to accepted v1.3.0. Unchanged web/native inputs
+  reuse their accepted suites. Fresh dependency gates pass; pinned Trivy 0.74 reports zero fixable
+  HIGH/CRITICAL image findings.
+
+### Operation
+
+Accepted local image:
+`sha256:be391341a58780e9243d8e9b0cc931e8c7549e6325903f1cb0e5d5833cd7086e`.
+The exact accepted image is promoted to localhost:8085; served assets, security headers, readiness
+and a fresh three-Hard-CPU smoke pass. Version 1.3.7 remains available for rollback. This is a
+source/local-runtime release without a hosted service or production registry. The unchanged
+artwork remains in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.7 — 2026-11-01
 
 CPUs can certify useful ordinary bomb plants when retained public walls keep monsters outside

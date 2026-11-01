@@ -266,7 +266,7 @@ provenance. Recovery emits movement or Stop without another manual action. New i
 still withhold movement, and future enemy actions can invalidate a fresh pulse.
 
 CPU44/45 add an opaque continuation certificate for this same confirmed-origin state. The worker
-proves one complete nominal escape of at most eight geometric legs and 96 movement updates, plus a
+proves one complete nominal escape of at most eight legs, including planned Stops, and 96 movement updates, plus a
 safe Stop after every nominal update. If continuation is ineligible or cannot be proved inside the
 shared decision allowance, recovery falls back to the existing checked origin pulse. Non-origin
 decisions delegate to CPU42/43 rather than changing their planner behavior.

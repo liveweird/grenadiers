@@ -19,11 +19,11 @@ use super::{
     plan_counter_pressure_v29_with_origin,
 };
 
-const CPU: SeatId = SeatId::Two;
-const ORIGIN: CellId = CellId::new(5, 5);
+pub(super) const CPU: SeatId = SeatId::Two;
+pub(super) const ORIGIN: CellId = CellId::new(5, 5);
 const RIVAL: CellId = CellId::new(6, 5);
 
-fn fixture() -> (State, RoomSettings) {
+pub(super) fn fixture() -> (State, RoomSettings) {
     let settings = RoomSettings::new(SpeedLevel::Four, 256, 3, 240)
         .unwrap()
         .with_enabled_items(EnabledItems::TELEPORTER);
@@ -91,7 +91,7 @@ fn fixture() -> (State, RoomSettings) {
     (state, settings)
 }
 
-fn plan(observation: &Observation, memory: &UtilityMemory) -> (LairSurvivalPlan, u32) {
+pub(super) fn plan(observation: &Observation, memory: &UtilityMemory) -> (LairSurvivalPlan, u32) {
     let key = MemoryKey {
         world: observation.parts().world,
         cpu_seat: CPU,
@@ -113,7 +113,7 @@ fn plan(observation: &Observation, memory: &UtilityMemory) -> (LairSurvivalPlan,
     (result, work.spent())
 }
 
-fn input(movement: MovementIntent, bomb: bool) -> Vec<SeatInput> {
+pub(super) fn input(movement: MovementIntent, bomb: bool) -> Vec<SeatInput> {
     let mut inputs = vec![SeatInput {
         seat: CPU,
         action: match movement {
@@ -130,7 +130,7 @@ fn input(movement: MovementIntent, bomb: bool) -> Vec<SeatInput> {
     inputs
 }
 
-fn reach_terminal_refuge(
+pub(super) fn reach_terminal_refuge(
     state: &mut State,
     settings: RoomSettings,
     basis: Observation,
@@ -268,69 +268,6 @@ fn live_first_bomb_can_yield_a_second_full_v29_plant_certificate() {
     assert_eq!(handoff.old_survive_until(), first_deadline);
     assert_eq!(handoff.bomb_id(), bombs[0].id);
 
-    for changed in [
-        refuge
-            .clone()
-            .map_parts(|parts| parts.world.room_instance += 1)
-            .unwrap(),
-        refuge
-            .clone()
-            .map_parts(|parts| parts.world.physical_round += 1)
-            .unwrap(),
-        refuge
-            .clone()
-            .map_parts(|parts| {
-                let actor = parts
-                    .actors
-                    .iter_mut()
-                    .find(|actor| actor.seat() == CPU)
-                    .unwrap();
-                let crate::cpu::ObservedActor::Visible(actor) = actor else {
-                    unreachable!()
-                };
-                actor.bomb_capacity = actor.live_bomb_count;
-            })
-            .unwrap(),
-        refuge
-            .clone()
-            .map_parts(|parts| parts.tick = Tick(parts.tick.0 + 1))
-            .unwrap(),
-        refuge
-            .clone()
-            .map_parts(|parts| {
-                let actor = parts
-                    .actors
-                    .iter_mut()
-                    .find(|actor| actor.seat() == CPU)
-                    .unwrap();
-                let crate::cpu::ObservedActor::Visible(actor) = actor else {
-                    unreachable!()
-                };
-                actor.position = Position::center(ORIGIN);
-            })
-            .unwrap(),
-        refuge
-            .clone()
-            .map_parts(|parts| {
-                let rival = parts
-                    .actors
-                    .iter_mut()
-                    .find(|actor| actor.seat() == SeatId::One)
-                    .unwrap();
-                let crate::cpu::ObservedActor::Visible(rival) = rival else {
-                    unreachable!()
-                };
-                rival.heading = Direction::West;
-            })
-            .unwrap(),
-    ] {
-        assert!(
-            first_route
-                .terminal_refuge_handoff(&changed, Some(settled))
-                .is_none()
-        );
-    }
-
     let memory = first
         .survival
         .control
@@ -358,6 +295,7 @@ fn live_first_bomb_can_yield_a_second_full_v29_plant_certificate() {
             >= first_deadline
     );
     assert!(handoff.accepts_replacement(second.survival.execution.as_ref().unwrap()));
+    assert!(!handoff.accepts_replacement(first.survival.execution.as_ref().unwrap()));
     let nonplant = super::ExecutionCertificate::Route(Box::new(
         second.survival.execution.as_ref().unwrap().route().clone(),
     ));
@@ -379,6 +317,35 @@ fn live_first_bomb_can_yield_a_second_full_v29_plant_certificate() {
         .unwrap()
         .route()
         .survive_until();
+    let (route_basis, first_update) = handoff.route_identity();
+    let shorter = super::TerminalRefugeHandoff::new(
+        handoff.key(),
+        route_basis,
+        first_update,
+        handoff.bomb_id(),
+        handoff.refuge(),
+        handoff.checkpoint().clone(),
+        Tick(second_deadline.0 + 1),
+    );
+    assert!(!shorter.accepts_replacement(second.survival.execution.as_ref().unwrap()));
+
+    let wrong_observation = handoff
+        .checkpoint()
+        .clone()
+        .map_parts(|parts| parts.world.room_instance += 1)
+        .unwrap();
+    let wrong_key = MemoryKey {
+        world: wrong_observation.parts().world,
+        cpu_seat: CPU,
+    };
+    let wrong_memory =
+        UtilityMemory::new(wrong_key).with_strategic_intent(memory.strategic_intent().unwrap());
+    let (wrong_world, _) = plan(&wrong_observation, &wrong_memory);
+    assert_eq!(
+        wrong_world.survival.control.intent.manual,
+        Some(ManualIntent::Bomb)
+    );
+    assert!(!handoff.accepts_replacement(wrong_world.survival.execution.as_ref().unwrap()));
     let (mut second_route, _, second_settled) =
         reach_terminal_refuge(&mut state, settings, refuge, &second);
     while state.tick() < second_deadline && state.result().is_none() {

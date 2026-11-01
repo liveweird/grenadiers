@@ -101,6 +101,9 @@ mod refuge_centering_episode_tests;
 mod refuge_handoff_tests;
 
 #[cfg(test)]
+mod refuge_handoff_guard_tests;
+
+#[cfg(test)]
 mod reliable_v27_oil_guard_tests;
 
 #[cfg(test)]

@@ -24,7 +24,10 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   [controlled investigation](docs/history/cpu-short-fuse-investigation-2026-11-01.md) defines the
   observation-gated continuation boundary and required owner witnesses. The
   [inactive timing experiment](docs/history/cpu-recovery-timing-2026-11-01.md) establishes
-  scheduling facts only; Core safety proof and production integration are still required. Validate sustained farming
+  scheduling facts only; Core safety proof and production integration are still required. The
+  [contact topology experiment](docs/history/cpu-contact-topology-2026-11-01.md) demonstrates
+  bounded geometric separation; full plant/scene binding, spawning/survival and runtime admission
+  must be established before using it to refine conservative contact refusals. Validate sustained farming
   from the original captured conditions: alternate-route proof and refused-origin guidance have
   separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
   proofs and the existing work allowance. Reproduce remaining long-match

@@ -23,8 +23,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   recovery after simultaneous rival bombs invalidate committed routes; the
   [controlled investigation](docs/history/cpu-short-fuse-investigation-2026-11-01.md) defines the
   observation-gated continuation boundary and required owner witnesses. The
-  [inactive timing experiment](docs/history/cpu-recovery-timing-2026-11-01.md) establishes
-  scheduling facts only; Core safety proof and production integration are still required. Validate sustained farming
+  [timing experiment](docs/history/cpu-recovery-timing-2026-11-01.md) establishes
+  scheduling facts; certified continuation and actual queued-owner Short Fuse survival now cover
+  the controlled interrupted-escape case. Validate sustained farming
   from the original captured conditions: alternate-route proof and refused-origin guidance have
   separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
   proofs and the existing work allowance. Reproduce remaining long-match

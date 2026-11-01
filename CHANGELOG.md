@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.9 — 2026-11-01
+
+- Continue certified CPU escapes across fresh observation checkpoints after rival bombs invalidate the original route, preserving motion and checked Stop fallbacks.
+- Fence held and queued input on missing renewal, changed hazards, stale work or rejected submission; verify both Short Fuse CPUs survive through actual queued execution with lairs enabled and disabled.
+- Select Easy/Standard44 and Hard45 with private replay22 while retaining archived planning, work limits and ordinary fallback behavior.
+
 ## 1.3.8 — 2026-11-01
 
 - Fix CPU farming refusals when every possible monster birth stays blocked by retained soft walls, while preserving full plant and scene proofs.

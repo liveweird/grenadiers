@@ -35,11 +35,16 @@ pub(super) fn certified_farm_plant(
     {
         return None;
     }
-    let (movement, hints) = refuge_hints(observation, origin, target, actor.bomb_range)?;
+    let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
     let allowance = MAX_HINT_WORK.min(work.remaining() / 8);
     let mut child = WorkBudget::new(allowance);
     child.try_take(2).ok()?;
-    let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
+    let Some((movement, hints)) =
+        refuge_hints(observation, origin, target, actor.bomb_range, &mut child)
+    else {
+        work.try_take(child.spent()).ok()?;
+        return None;
+    };
     for refuge in hints {
         let certificate_result = plan_lair_ordinary_plant_to_refuge(
             observation,
@@ -105,6 +110,7 @@ fn refuge_hints(
     origin: CellId,
     target: CellId,
     range: u16,
+    work: &mut WorkBudget,
 ) -> Option<(MovementIntent, [CellId; 2])> {
     let (away_column, away_row, lateral_column, lateral_row, direction) = match (
         target.column as i32 - origin.column as i32,
@@ -129,16 +135,25 @@ fn refuge_hints(
         .then(|| CellId::new(column as u16, row as u16))
     };
     let mut hints = [make(-1)?, make(1)?];
-    hints.sort_by_key(|cell| {
-        (
-            std::cmp::Reverse(public_danger_clearance(observation, *cell)),
-            *cell,
-        )
-    });
+    let scores = [
+        public_danger_clearance(observation, hints[0], work)?,
+        public_danger_clearance(observation, hints[1], work)?,
+    ];
+    if (std::cmp::Reverse(scores[1]), hints[1]) < (std::cmp::Reverse(scores[0]), hints[0]) {
+        hints.swap(0, 1);
+    }
     Some((MovementIntent::Direction(direction), hints))
 }
 
-fn public_danger_clearance(observation: &Observation, cell: CellId) -> u32 {
+fn public_danger_clearance(
+    observation: &Observation,
+    cell: CellId,
+    work: &mut WorkBudget,
+) -> Option<u32> {
+    let inspected = observation
+        .respawn_lairs()
+        .map_or(0, |lairs| lairs.lairs().len() + lairs.mobs().len());
+    work.try_take(u32::try_from(inspected).ok()?).ok()?;
     let lair_cells = observation
         .respawn_lairs()
         .into_iter()
@@ -147,12 +162,41 @@ fn public_danger_clearance(observation: &Observation, cell: CellId) -> u32 {
         .respawn_lairs()
         .into_iter()
         .flat_map(|lairs| lairs.mobs().iter().filter_map(|mob| mob.position.cell()));
-    lair_cells
-        .chain(mob_cells)
-        .map(|danger| {
-            u32::from(cell.column.abs_diff(danger.column))
-                + u32::from(cell.row.abs_diff(danger.row))
-        })
-        .min()
-        .unwrap_or(u32::MAX)
+    Some(
+        lair_cells
+            .chain(mob_cells)
+            .map(|danger| {
+                u32::from(cell.column.abs_diff(danger.column))
+                    + u32::from(cell.row.abs_diff(danger.row))
+            })
+            .min()
+            .unwrap_or(u32::MAX),
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn refuge_ordering_charges_each_danger_scan_and_refuses_incomplete_work() {
+        let observation = super::super::farm_progress_tests::captured_tick_7022();
+        let lairs = observation.respawn_lairs().unwrap();
+        let entries = u32::try_from(lairs.lairs().len() + lairs.mobs().len()).unwrap();
+        assert!(entries > 0);
+        let attempt = |work: &mut WorkBudget| {
+            refuge_hints(&observation, CellId::new(3, 8), CellId::new(3, 7), 2, work)
+        };
+        let mut complete = WorkBudget::new(entries * 2);
+        let (_, hints) = attempt(&mut complete).unwrap();
+        assert_eq!(hints[0], CellId::new(1, 9));
+        assert_eq!(complete.spent(), entries * 2);
+
+        let mut interrupted = WorkBudget::new(entries * 2 - 1);
+        assert!(attempt(&mut interrupted).is_none());
+        assert_eq!(interrupted.spent(), entries);
+        let mut empty = WorkBudget::new(0);
+        assert!(attempt(&mut empty).is_none());
+        assert_eq!(empty.spent(), 0);
+    }
 }

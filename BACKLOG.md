@@ -20,8 +20,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 ## Single-player
 
 - [next] **CPU-RELIABILITY — validate remaining CPU liveness.** Investigate the reproduced
-  farm-approach route-search refusal and retain complete escape/contact proofs within the
-  existing work allowance. Reproduce remaining long-match
+  farm-approach route-search refusal, including reaching a provably safe alternate approach,
+  and retain complete escape/contact proofs within the existing work allowance. Investigate
+  short-fuse recovery after simultaneous rival bombs invalidate committed routes. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone

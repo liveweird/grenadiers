@@ -53,7 +53,7 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":18,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":19,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
@@ -110,7 +110,7 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 18` |
+| `authenticated` | `protocolVersion: 19` |
 | `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 18) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |

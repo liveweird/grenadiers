@@ -79,6 +79,8 @@ impl TerminalRefugeHandoff {
             return false;
         };
         plant.route().key() == self.key
+            // Awaiting confirmation repeats this through the forecast header;
+            // retain the explicit identity fence at this API boundary.
             && plant.route().basis_tick() == self.checkpoint.parts().tick
             && horizon_preserved(plant.route().survive_until(), self.old_survive_until)
             && matches!(

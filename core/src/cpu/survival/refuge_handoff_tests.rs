@@ -295,7 +295,15 @@ fn live_first_bomb_can_yield_a_second_full_v29_plant_certificate() {
             >= first_deadline
     );
     assert!(handoff.accepts_replacement(second.survival.execution.as_ref().unwrap()));
-    assert!(!handoff.accepts_replacement(first.survival.execution.as_ref().unwrap()));
+    let second_plant = second.survival.execution.as_ref().unwrap().plant().unwrap();
+    assert_eq!(
+        second_plant.route().basis_tick(),
+        handoff.checkpoint().parts().tick
+    );
+    assert_eq!(
+        second_plant.confirm(handoff.checkpoint(), handoff.checkpoint()),
+        Ok(crate::cpu::routing::PlantPresence::Awaiting)
+    );
     let nonplant = super::ExecutionCertificate::Route(Box::new(
         second.survival.execution.as_ref().unwrap().route().clone(),
     ));

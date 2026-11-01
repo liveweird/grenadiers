@@ -97,60 +97,80 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.2.5 — 2026-11-01
+## v1.3.0 — 2026-11-01
 
-CPU players can certify useful bomb placement while an Oil barrel keeps burning. The previous
-Teleporter support guard could prohibit planting globally for the rest of the round. CPU27
-models static Oil through the existing persistent lethal-cell forecast instead. With Teleporter
-enabled it still requires visible empty bomb knowledge, no finite flames and no exposed
-Teleporter. Full escape, selected-target usefulness, mob-contact and bounded-work proofs remain
-required. See [CPU support boundaries](game/multiplayer-cpu.md#persistent-burning-oil).
+Solo and custom rooms now offer Easy, Standard and Hard, with Standard as the default and one
+shared tier for every CPU seat. Hard uses range-aware firing positions and gives demonstrated
+opponent pressure priority over routine farming while retaining valuable pickups and persistent
+goals. A bounded geometric prefilter and legacy pursuit fallback keep distant rivals reachable
+when the board clears. See [difficulty](game/single-player.md#difficulty) and
+[CPU pressure](game/multiplayer-cpu.md#hard-pressure).
 
-Easy and Standard select CPU27 with their existing cadence. Historical CPU26 behavior and
-navigation policies remain immutable. Private replay12 binds rules10/CPU27/navigation3 and
-rejects mixed provenance; production recording/export remains disabled. Wire18 is unchanged.
+Hard has the same permitted observations, movement/damage rules, two-worker planner and 65,536-work
+limit. Its optional pressure analysis is capped at 4,096 and one eighth of remaining work.
+Planting still needs full escape, contact and exact-target usefulness proofs; fresh admission
+withdraws usefulness when a rival leaves the blast. Pressure evaluates current visible positions.
+Easy keeps its navigation pause; Easy/Standard retain CPU27, and Hard selects CPU28.
+
+The [controls capture](screenshots/hard-difficulty.md) records the visible lobby changes.
+
+### Paired upgrade
+
+Gameplay19 is the live contract for every newly created room, including human-only matches.
+Reload tabs after upgrading the paired server/web image. Restart ends process-local matches.
+Archived wire14–18 and replay readers remain closed to Hard. Runtime publication identity is
+explicit and independent of rules, difficulty and navigation. Private replay13 binds gameplay19,
+rules10/navigation3 and the exact Easy/Standard27 or Hard28 pairing. Production replay recording
+and export remain disabled. See [gameplay19](game/protocol-v19.md).
 
 ### Verification
 
-Accepted image source: `6e322f2fce8208e7e03e75c0c9a0b8a27cea057c`.
-Independent core and cross-component activation reviews are clear. Later release-record edits
-do not change image build inputs.
+Accepted image source: `3b6944d21267f82aebf5759fbe47e53ffc2f3b02`.
+Independent protocol, client, tactics, server/activation and final regression reviews are clear.
+Later release-record changes do not alter image build inputs.
 
-- Actual State-derived lairs-enabled/disabled fixtures show CPU26 refusing and CPU27 certifying
-  a useful bomb in the identical scene. Authoritative execution destroys the selected block
-  and survives the complete escape interval. Guard-isolation, lethal escape Oil, visible bombs,
-  finite flames, unavailable bomb knowledge, exposed Teleporter, scene invalidation and hidden
-  item-reveal controls pass. Per-job work remains at most 65,536.
-- A production-paced three-CPU episode records each seat moving and placing its own bomb,
-  with worker delivery/admission accounting; cancellation and guarded admission refusals remain
-  diagnostic scheduling outcomes, rather than prohibited events. It is operational evidence, not a guarantee that
-  productive planting is always available. An earlier accelerated-tick farming-stall hypothesis
-  was rejected after identical-input plant proofs showed no omitted productive certificate.
-- Native Rust debug/release suites pass: 1,678 core and 609 server tests, plus the separately
-  partitioned exhaustive catalogue test. After test-only scheduling corrections, both native
-  worker tests and the complete fresh instrumented workspace are rerun. Line coverage is
-  53,089/57,336 (92.59%), above the unchanged 90% floor. All 4,194,304 masks run in debug,
-  release and coverage with four workers, 32 partitions and no retries. Clippy, formatting,
-  build and repository checks pass.
-- Distinct Linux ARM64 release checks pass: six Oil proofs, one worker-dispatch test, two
-  exact-profile tests and nine replay10–12 tests. The final image retains the exact same
-  filesystem layers as that Linux-accepted candidate; only test scheduling and provenance
-  labels changed.
-- Exact-image Compose authentication/duel: two passed; an all-features three-CPU match moves
-  all CPUs and plants bombs without browser errors. Exact-image Kubernetes authentication/duel
-  and restricted runtime pass. Owned acceptance stacks and namespaces are removed.
-- Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities. All five image web files
-  equal the accepted v1.2.3 production build. Reuse that full web/native camera acceptance and
-  v1.2.2 artwork/audio acceptance; these inputs and dependencies did not change.
+- Full local parallel Rust gate passes on the frozen candidate in 696 seconds: 1,698 core and
+  626 server tests, plus all 4,194,304 catalogue masks in debug, release and coverage. Four
+  workers, 32 partitions and no retries; Clippy, formatting, build and repository checks pass.
+  Fresh line coverage is 55,073/59,483 (92.59%), above the unchanged 90% floor.
+- Authoritative fixtures execute useful range-aware planting, target destruction and survival
+  with lairs enabled/disabled. Selector/guard fixtures cover pickup priority, moving/hidden/blocked
+  rivals, commitment retention, low-work fallback and unchanged old policy output/work. A reproduced
+  distant-rival Explore regression is fixed and retained with/without a competing Farm goal.
+- Current profile episodes cover every board/lair combination with deterministic reruns and
+  native two-worker scheduling. Each CPU moves and creates physical owned bombs; completed-job
+  accounting and work limits hold. Cancellation/admission refusal remains diagnostic. Random
+  episode outcomes are not a universal survival or planting-availability guarantee.
+- Distinct Linux ARM64 release checks pass: 332 CPU, ten gameplay19, 15 replay10–13 and three
+  current Hard episode tests. Archived readers reject consistently forged Hard provenance.
+- Full web gate: 7,426 tests in 169 files. Coverage: 95.57% lines, 92.54% statements,
+  91.73% functions and 88.95% branches. Types, lint, Knip, API/contracts/validator drift and
+  120 documented browser scenarios pass. JavaScript is 399,742/400,000 gzip bytes;
+  CSS is 15,474/20,000. Production loads only the v19 gameplay validator.
+- Native renderer regression: 25 passed, 13 project-specific skips; all camera, death,
+  billboard, terrain, fire, reduced-motion and recovery checks pass. Rendering logic,
+  artwork and audio are unchanged.
+- Exact-image Compose authentication/duel: two passed. A three-Hard-CPU all-features match
+  moves every CPU, places bombs and renders diagnostics without browser errors. Three browser
+  scenarios pass: all 27 board/count/tier combinations, two real countdown/round intros, and
+  Polish keyboard Hard creation at 320 pixels. Enabled diagnostics pass both opt-in and ordinary
+  URL cases, EN/PL rendering, controls and accessibility.
+- Exact-image restricted Kubernetes authentication/duel and disabled-diagnostics checks pass.
+  Three Hard CPUs also move and plant with every feature enabled under the pod's CPU/memory
+  limits. Owned stacks/namespaces are removed. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
+  vulnerabilities. All five image web files equal the verified build.
 
 ### Operation
 
 Accepted local image:
-`sha256:fbca836651065065bcd9222ec6333efb1e36a8b33f9938ab5c0f44db1169735b`.
-The exact accepted image is promoted to localhost:8085; v1.2.4 remains available for rollback.
+`sha256:86541d79381f6436e5a9c1e4e0c60cbfde61d9526249dbe80c52757ee3119727`.
+The exact accepted image is promoted to localhost:8085; v1.2.5 remains available for rollback.
 This is a source/local-runtime release without a hosted service or production registry.
 The unchanged artwork remains in the
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v125--2026-11-01"></a>
+The [v1.2.5 record](history/releases.md#v125--2026-11-01) is preserved in release history.
 
 <a id="v124--2026-11-01"></a>
 The [v1.2.4 record](history/releases.md#v124--2026-11-01) is preserved in release history.

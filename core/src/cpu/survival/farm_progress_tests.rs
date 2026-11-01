@@ -17,7 +17,9 @@ use crate::room::{
 };
 
 use super::{
-    WORK_ALLOWANCE, plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
+    ExecutionCertificate, WORK_ALLOWANCE, plan_farm_refuges_v36_with_origin,
+    plan_hard_farm_refuges_v37_with_origin, plan_refuge_guidance_v33_with_origin,
+    plan_refuge_guidance_v34_with_origin,
 };
 
 const CPU: SeatId = SeatId::Three;
@@ -51,7 +53,7 @@ fn actor(
     })
 }
 
-fn captured_tick_7022() -> Observation {
+pub(super) fn captured_tick_7022() -> Observation {
     let fixed = fixed_arena();
     let terrain = (0..195)
         .map(|index| fixed.terrain(CellId::new(index % 15, index / 15)).unwrap())
@@ -202,7 +204,7 @@ fn captured_tick_7022() -> Observation {
     .unwrap()
 }
 
-fn key(observation: &Observation) -> MemoryKey {
+pub(super) fn key(observation: &Observation) -> MemoryKey {
     MemoryKey {
         world: observation.parts().world,
         cpu_seat: CPU,
@@ -316,4 +318,80 @@ fn legal_open_corridor_off_center_already_certifies_without_centering() {
         Some(crate::cpu::ManualIntent::Bomb)
     );
     assert!(planned.survival.execution.is_some());
+}
+
+pub(super) fn north_farm_memory(observation: &Observation) -> UtilityMemory {
+    let approach = CellId::new(3, 8);
+    UtilityMemory::new(key(observation)).with_strategic_intent(StrategicIntent {
+        objective: StrategicObjectiveKind::Farm,
+        target: StrategicTarget::Block {
+            cell: CellId::new(3, 7),
+        },
+        approach_cell: Some(approach),
+        phase: StrategicPhase::Approach,
+        last_switch_reason: StrategicSwitchReason::Stalled,
+        observation_tick: observation.parts().tick,
+        score: 2,
+        committed_until: Tick(observation.parts().tick.0 + 120),
+        progress_deadline: Tick(observation.parts().tick.0 + 180),
+        last_distance: 0,
+        last_cpu_position: Position::center(approach),
+        deferred_until: None,
+    })
+}
+
+#[test]
+fn joint_refuge_planner_automatically_finds_the_western_full_contact_route() {
+    let observed = captured_tick_7022()
+        .map_parts(|parts| {
+            let ObservedActor::Visible(cpu) = &mut parts.actors[CPU.index()] else {
+                unreachable!()
+            };
+            cpu.position = Position::center(CellId::new(3, 8));
+            cpu.heading = Direction::North;
+        })
+        .unwrap();
+    let memory = north_farm_memory(&observed);
+    let key = key(&observed);
+    let mut history = ObservedHazardMemory::new(key);
+    history.observe(&observed).unwrap();
+
+    for hard in [false, true] {
+        let mut work = WorkBudget::new(WORK_ALLOWANCE);
+        let mut rng = CpuRng::from_seed(key, [136 + u8::from(hard); 32]);
+        let planned = if hard {
+            plan_hard_farm_refuges_v37_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut rng,
+                &mut work,
+            )
+        } else {
+            plan_farm_refuges_v36_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut rng,
+                &mut work,
+            )
+        }
+        .unwrap();
+        assert_eq!(
+            planned.survival.control.intent.manual,
+            Some(crate::cpu::ManualIntent::Bomb)
+        );
+        let Some(ExecutionCertificate::Plant(certificate)) = planned.survival.execution else {
+            panic!("v{} did not return a plant", if hard { 37 } else { 36 });
+        };
+        assert_eq!(certificate.placement().cell, CellId::new(3, 8));
+        assert_eq!(certificate.route().steps().len(), 8);
+        assert_eq!(certificate.route().survive_until(), Tick(7_239));
+        assert!(planned.contact.is_some());
+        assert!(work.spent() <= WORK_ALLOWANCE);
+    }
 }

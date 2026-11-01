@@ -14,6 +14,7 @@ mod respawn_pulse;
 mod route;
 mod route_checks;
 mod route_expand;
+mod route_hints;
 mod route_priority;
 mod route_replay;
 mod route_time;
@@ -37,7 +38,8 @@ pub(crate) use bracelet_guard::BraceletGuard;
 
 pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};
 pub(crate) use plant::{
-    derive_bomb_modifiers, plan_lair_ordinary_plant, plan_lair_timed_weapon_plant,
+    derive_bomb_modifiers, plan_lair_ordinary_plant, plan_lair_ordinary_plant_to_refuge,
+    plan_lair_timed_weapon_plant,
 };
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub(crate) use pulse::{PulseOriginGrace, certify_escape_pulse, certify_lair_escape_pulse};

@@ -312,6 +312,7 @@ pub(super) fn plan_spike_policy(
         counter_pressure,
         pickup_progress,
         super::steering::RefugeGuidance::default(),
+        false,
     )
 }
 
@@ -363,5 +364,6 @@ fn plan_respawn_policy(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
     )
 }

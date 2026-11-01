@@ -1,0 +1,789 @@
+{
+  "producer": "hand-authored web contract scaffold derived from the v18 lobby shape; Rust producer proof pending",
+  "validMessages": [
+    {
+      "caseId": "hard-cpu-room-state",
+      "value": {
+        "type": "roomState",
+        "room": {
+          "settings": {
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3,
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "settingsRevision": 1,
+          "settingsEditor": "one",
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "controllers": [
+              "human",
+              "cpu"
+            ],
+            "cpuDifficulty": "hard",
+            "board": {
+              "width": 15,
+              "height": 13
+            },
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roomCode": "ABCDEFGH",
+          "roundId": 1,
+          "revision": 1,
+          "tick": 0,
+          "rulesVersion": 10,
+          "mapId": "generated_v2",
+          "roundNumber": 0,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "lastRound": null,
+          "seats": [
+            {
+              "seat": "one",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            },
+            {
+              "seat": "two",
+              "occupied": true,
+              "ready": true,
+              "rematchReady": false,
+              "controller": {
+                "type": "cpu",
+                "difficulty": "hard"
+              },
+              "connection": {
+                "type": "serverControlled"
+              }
+            }
+          ],
+          "phase": {
+            "type": "waiting"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "human-room-null-difficulty",
+      "value": {
+        "type": "roomState",
+        "room": {
+          "settings": {
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3,
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "settingsRevision": 1,
+          "settingsEditor": "one",
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "controllers": [
+              "human",
+              "human"
+            ],
+            "cpuDifficulty": null,
+            "board": {
+              "width": 15,
+              "height": 13
+            },
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roomCode": "ABCDEFGH",
+          "roundId": 1,
+          "revision": 1,
+          "tick": 0,
+          "rulesVersion": 10,
+          "mapId": "generated_v2",
+          "roundNumber": 0,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "lastRound": null,
+          "seats": [
+            {
+              "seat": "one",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            },
+            {
+              "seat": "two",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            }
+          ],
+          "phase": {
+            "type": "waiting"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "v19-authenticated",
+      "value": {
+        "type": "authenticated",
+        "protocolVersion": 19
+      }
+    }
+  ],
+  "invalidMessages": [
+    {
+      "caseId": "mixed-cpu-difficulties",
+      "value": {
+        "type": "roomState",
+        "room": {
+          "settings": {
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3,
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "settingsRevision": 1,
+          "settingsEditor": "one",
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "controllers": [
+              "human",
+              "cpu"
+            ],
+            "cpuDifficulty": "hard",
+            "board": {
+              "width": 15,
+              "height": 13
+            },
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roomCode": "ABCDEFGH",
+          "roundId": 1,
+          "revision": 1,
+          "tick": 0,
+          "rulesVersion": 10,
+          "mapId": "generated_v2",
+          "roundNumber": 0,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "lastRound": null,
+          "seats": [
+            {
+              "seat": "one",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            },
+            {
+              "seat": "two",
+              "occupied": true,
+              "ready": true,
+              "rematchReady": false,
+              "controller": {
+                "type": "cpu",
+                "difficulty": "standard"
+              },
+              "connection": {
+                "type": "serverControlled"
+              }
+            }
+          ],
+          "phase": {
+            "type": "waiting"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "cpu-room-null-difficulty",
+      "value": {
+        "type": "roomState",
+        "room": {
+          "settings": {
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3,
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "settingsRevision": 1,
+          "settingsEditor": "one",
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "controllers": [
+              "human",
+              "cpu"
+            ],
+            "cpuDifficulty": null,
+            "board": {
+              "width": 15,
+              "height": 13
+            },
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roomCode": "ABCDEFGH",
+          "roundId": 1,
+          "revision": 1,
+          "tick": 0,
+          "rulesVersion": 10,
+          "mapId": "generated_v2",
+          "roundNumber": 0,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "lastRound": null,
+          "seats": [
+            {
+              "seat": "one",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            },
+            {
+              "seat": "two",
+              "occupied": true,
+              "ready": true,
+              "rematchReady": false,
+              "controller": {
+                "type": "cpu",
+                "difficulty": "hard"
+              },
+              "connection": {
+                "type": "serverControlled"
+              }
+            }
+          ],
+          "phase": {
+            "type": "waiting"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "extra-room-planner-field",
+      "value": {
+        "type": "roomState",
+        "room": {
+          "settings": {
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3,
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "settingsRevision": 1,
+          "settingsEditor": "one",
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "controllers": [
+              "human",
+              "cpu"
+            ],
+            "cpuDifficulty": "hard",
+            "board": {
+              "width": 15,
+              "height": 13
+            },
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            },
+            "planner": "aggressive"
+          },
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roomCode": "ABCDEFGH",
+          "roundId": 1,
+          "revision": 1,
+          "tick": 0,
+          "rulesVersion": 10,
+          "mapId": "generated_v2",
+          "roundNumber": 0,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "lastRound": null,
+          "seats": [
+            {
+              "seat": "one",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            },
+            {
+              "seat": "two",
+              "occupied": true,
+              "ready": true,
+              "rematchReady": false,
+              "controller": {
+                "type": "cpu",
+                "difficulty": "hard"
+              },
+              "connection": {
+                "type": "serverControlled"
+              }
+            }
+          ],
+          "phase": {
+            "type": "waiting"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "private-cpu-route",
+      "value": {
+        "type": "roomState",
+        "room": {
+          "settings": {
+            "startingSpeedLevel": 0,
+            "turnAssistUnits": 256,
+            "winsToFinish": 3,
+            "bombFuseTicks": 180,
+            "enabledItems": [],
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "settingsRevision": 1,
+          "settingsEditor": "one",
+          "availableItems": [
+            "kick",
+            "punch",
+            "bracelet",
+            "wallPass",
+            "heart",
+            "remoteBomb",
+            "piercingBomb",
+            "powerBomb",
+            "landmine",
+            "shield",
+            "stopwatch",
+            "invisibilityCloak",
+            "goldenFlame",
+            "shortFuse",
+            "diarrhea",
+            "slowFoot",
+            "shortFlame",
+            "longFuse",
+            "reverseControls",
+            "invisibleBombs",
+            "oilBarrel",
+            "teleporter"
+          ],
+          "configuration": {
+            "controllers": [
+              "human",
+              "cpu"
+            ],
+            "cpuDifficulty": "hard",
+            "board": {
+              "width": 15,
+              "height": 13
+            },
+            "environment": {
+              "stormCloud": false,
+              "lairs": {
+                "enabled": false,
+                "spawnSeconds": 10,
+                "maxLivingMobs": 1
+              },
+              "spikePits": {
+                "enabled": true,
+                "warningTicks": 6,
+                "raisedTicks": 60
+              }
+            }
+          },
+          "roomId": "0123456789abcdef0123456789abcdef",
+          "roomCode": "ABCDEFGH",
+          "roundId": 1,
+          "revision": 1,
+          "tick": 0,
+          "rulesVersion": 10,
+          "mapId": "generated_v2",
+          "roundNumber": 0,
+          "scores": [
+            {
+              "seat": "one",
+              "wins": 0
+            },
+            {
+              "seat": "two",
+              "wins": 0
+            }
+          ],
+          "lastRound": null,
+          "seats": [
+            {
+              "seat": "one",
+              "occupied": true,
+              "ready": false,
+              "rematchReady": false,
+              "controller": {
+                "type": "human"
+              },
+              "connection": {
+                "type": "connected"
+              }
+            },
+            {
+              "seat": "two",
+              "occupied": true,
+              "ready": true,
+              "rematchReady": false,
+              "controller": {
+                "type": "cpu",
+                "difficulty": "hard",
+                "route": [
+                  {
+                    "column": 2,
+                    "row": 1
+                  }
+                ]
+              },
+              "connection": {
+                "type": "serverControlled"
+              }
+            }
+          ],
+          "phase": {
+            "type": "waiting"
+          }
+        }
+      }
+    },
+    {
+      "caseId": "v18-identity",
+      "value": {
+        "type": "authenticated",
+        "protocolVersion": 18
+      }
+    }
+  ]
+}

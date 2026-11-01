@@ -48,3 +48,16 @@ A farther endpoint, block `(1,5)` from `(1,6)`, preserves that separator in stat
 It remains a candidate until the complete approach, contact checks and physical execution are
 certified. A possible one-entry rejection-memory cycle must not be called the cause of a missed
 safe action without that witness. The two captures need separate reproductions.
+
+### Preserved public-scene regressions
+
+The fixture and three focused tests in `core/src/cpu/lair_contact_v138_farm_witness_*`
+preserve the public arena and explicitly assumed all-items settings. The capture does not retain
+the private settled-Stop clock or motion residual; every certificate also assumes that stopped
+basis and execution tick. These are conditional tests, not restored-match execution.
+
+Under that premise, a productive route at the original public pose fails both mob contact proofs.
+One westward 12-update prefix passes route/contact checks. Relocating only the actor to `(1,6)`
+allows a contact-safe endpoint plant against `(1,5)`, but the complete approach is not demonstrated.
+No alternating-memory guidance defect is established. Focused tests, strict all-target Clippy,
+formatting and repository checks pass. Independent review corrected the stopped-clock claim.

@@ -1,11 +1,11 @@
 use grenadiers_core::{
     cpu::{
-        ManualIntent, MovementIntent,
-        policy::{StrategicSwitchReason, StrategicTarget},
+        BombKnowledge, ManualIntent, MovementIntent, ObservedActor, ObservedBombTrigger, WorldId,
+        policy::{StrategicObjectiveKind, StrategicPhase, StrategicSwitchReason, StrategicTarget},
         survival::WORK_ALLOWANCE,
     },
-    game::{CellId, Direction, Position, Tick},
-    room::CpuPolicy,
+    game::{BlastKind, CellId, Direction, EntityId, Position, SeatId, Tick},
+    room::{CpuPolicy, RespawnLairConfig, RespawnLairSettings},
 };
 
 use super::{
@@ -27,6 +27,7 @@ fn other_cpu_activity_reproduces_cpu_two_passivity_with_a_guarded_queued_basis()
         interaction.basis_probe,
         interaction.admissions,
     );
+    eprintln!("EVIDENCE_FULL_BASIS {:#?}", interaction.basis_probe.capture);
     assert_eq!(single.first_bomb, Some(Tick(232)));
     assert_eq!(
         interaction.initial_positions,
@@ -103,6 +104,7 @@ fn other_cpu_activity_reproduces_cpu_two_passivity_with_a_guarded_queued_basis()
     assert_eq!(basis.planner_intent.manual, None::<ManualIntent>);
     assert!(!basis.planner_execution);
     assert_eq!(basis.planner_work, 10_443);
+    assert_complete_transcription_basis(basis);
     let first_stall = interaction
         .cpu_two_samples
         .iter()
@@ -172,4 +174,150 @@ fn other_cpu_activity_reproduces_cpu_two_passivity_with_a_guarded_queued_basis()
             .iter()
             .all(|admission| *admission == Default::default())
     );
+}
+
+fn assert_complete_transcription_basis(
+    basis: &super::early_farm_owner_interaction_support::BasisProbe,
+) {
+    let capture = &basis.capture;
+    let parts = capture.observation.parts();
+    assert_eq!(
+        (parts.world, parts.tick, parts.recipient),
+        (
+            WorldId {
+                room_instance: 5_461,
+                physical_round: 1,
+            },
+            Tick(234),
+            SeatId::Two,
+        )
+    );
+    assert_eq!(
+        (parts.rules.running_updates, parts.rules.remaining_ticks),
+        (54, 10_746)
+    );
+    assert_eq!(capture.settled_stop_tick, Tick(234));
+    assert!(!capture.had_origin);
+    assert_eq!(capture.hazard_memory.key(), capture.memory.key());
+
+    let actors = parts
+        .actors
+        .iter()
+        .map(|actor| match actor {
+            ObservedActor::Visible(actor) => {
+                assert!(actor.alive);
+                assert!(actor.effects.is_empty());
+                assert_eq!(actor.damage_grace_remaining_ticks, 0);
+                assert!(!actor.voluntary_actions_frozen);
+                (
+                    actor.id,
+                    actor.seat,
+                    actor.position,
+                    actor.heading,
+                    actor.live_bomb_count,
+                )
+            }
+            ObservedActor::Hidden { .. } => panic!("all four actors must be visible"),
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        actors,
+        vec![
+            (
+                EntityId(1),
+                SeatId::One,
+                Position { x: 1_536, y: 1_536 },
+                Direction::East,
+                0
+            ),
+            (
+                EntityId(2),
+                SeatId::Two,
+                Position {
+                    x: 11_727,
+                    y: 1_536
+                },
+                Direction::West,
+                0
+            ),
+            (
+                EntityId(3),
+                SeatId::Three,
+                Position {
+                    x: 1_638,
+                    y: 11_776
+                },
+                Direction::East,
+                1
+            ),
+            (
+                EntityId(4),
+                SeatId::Four,
+                Position {
+                    x: 13_722,
+                    y: 11_776
+                },
+                Direction::West,
+                1
+            ),
+        ]
+    );
+
+    let BombKnowledge::Visible(bombs) = &parts.bombs else {
+        panic!("the queued basis must carry complete visible bomb facts");
+    };
+    assert_eq!(bombs.len(), 2);
+    for (bomb, id, owner, cell) in [
+        (&bombs[0], EntityId(0), EntityId(3), CellId::new(1, 10)),
+        (&bombs[1], EntityId(5), EntityId(4), CellId::new(13, 10)),
+    ] {
+        assert_eq!((bomb.id, bomb.owner, bomb.cell), (id, owner, cell));
+        assert_eq!(
+            (bomb.placed_at, bomb.range, bomb.blast),
+            (Tick(205), 2, BlastKind::Standard)
+        );
+        assert_eq!(
+            bomb.trigger,
+            ObservedBombTrigger::Timed {
+                remaining_ticks: 151,
+                paused: false,
+            }
+        );
+    }
+    assert!(parts.flames.is_empty());
+    assert!(parts.pickups.is_empty());
+
+    let lairs = capture.observation.respawn_lairs().unwrap();
+    assert_eq!(
+        lairs.config(),
+        RespawnLairConfig::Enabled(RespawnLairSettings::DEFAULT)
+    );
+    assert_eq!(lairs.mobs(), []);
+    assert_eq!(
+        lairs
+            .lairs()
+            .iter()
+            .map(|lair| (lair.cell, lair.next_spawn_at, lair.living_mobs))
+            .collect::<Vec<_>>(),
+        vec![
+            (CellId::new(6, 6), Some(Tick(780)), 0),
+            (CellId::new(8, 6), Some(Tick(780)), 0),
+        ]
+    );
+
+    let intent = capture.memory.strategic_intent().unwrap();
+    assert_eq!(
+        (intent.objective, intent.phase),
+        (StrategicObjectiveKind::Farm, StrategicPhase::Approach)
+    );
+    assert_eq!(
+        (intent.committed_until, intent.progress_deadline),
+        (Tick(303), Tick(390))
+    );
+    assert_eq!(
+        (intent.observation_tick, intent.last_distance),
+        (Tick(210), 1)
+    );
+    assert_eq!(capture.memory.route()[0], Some(CellId::new(11, 1)));
+    assert_eq!(capture.memory.refuge(), Some(CellId::new(11, 1)));
 }

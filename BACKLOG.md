@@ -24,14 +24,14 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   [controlled investigation](docs/history/cpu-short-fuse-investigation-2026-11-01.md) defines the
   observation-gated continuation boundary and required owner witnesses. The
   [inactive timing experiment](docs/history/cpu-recovery-timing-2026-11-01.md) establishes
-  scheduling facts only; Core safety proof and production integration are still required. The
-  [contact topology experiment](docs/history/cpu-contact-topology-2026-11-01.md) demonstrates
-  bounded geometric separation; full plant/scene binding, spawning/survival and runtime admission
-  must be established before using it to refine conservative contact refusals. Validate sustained farming
+  scheduling facts only; Core safety proof and production integration are still required. Validate sustained farming
   from the original captured conditions: alternate-route proof and refused-origin guidance have
   separate witnesses, without a continuous restored-match trajectory. Retain complete escape/contact
   proofs and the existing work allowance. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
+  Investigate the late-match Farm approach oscillation in the
+  [v1.3.7 observation capture](docs/releases.md#v137--2026-11-01); establish the exact refusal
+  before tuning its target selection or planting.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone
   does not establish a missed safe action. Preserve safety certificates, bounded scheduling,

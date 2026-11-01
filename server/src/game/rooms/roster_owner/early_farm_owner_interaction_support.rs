@@ -2,8 +2,11 @@ use grenadiers_core::{
     cpu::{
         BombKnowledge, Intent, Observation, ObservedActor, WorkBudget, WorldId,
         forecast::ObservedHazardMemory,
-        policy::{IntentDebugSummary, UtilityMemory},
-        survival::{WORK_ALLOWANCE, plan_hard_blocked_births_v43_with_origin},
+        policy::{IntentDebugSummary, StrategicIntent, UtilityMemory},
+        survival::{
+            TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_hard_blocked_births_v43_with_origin,
+            plan_hard_pit_avoidance_v53_with_origin, select_teleporter_recovery_v50,
+        },
     },
     game::{CellId, EntityId, PickupKind, Position, SeatId, Tick},
     room::{CpuPolicy, CpuProfile},
@@ -36,6 +39,23 @@ pub(super) struct InteractionOutcome {
     pub worker: PumpReport,
     pub admissions: [AdmissionTrace; 3],
     pub basis_probe: BasisProbe,
+    pub post_foreign_probe: Option<BasisProbe>,
+    pub clear_after_foreign_probe: Option<BasisProbe>,
+    pub farm_approach_probe: Option<BasisProbe>,
+    pub post_jobs: Vec<PostJobSummary>,
+}
+
+#[derive(Debug)]
+pub(super) struct PostJobSummary {
+    pub tick: Tick,
+    pub stop: Tick,
+    pub position: Position,
+    pub bombs: usize,
+    pub flames: usize,
+    pub strategy: Option<StrategicIntent>,
+    pub had_origin: bool,
+    pub work: u32,
+    pub intent: Option<Intent>,
 }
 
 #[derive(Debug)]
@@ -53,6 +73,7 @@ pub(super) struct BasisProbe {
     pub exposed_teleporter: bool,
     pub had_origin: bool,
     pub planner_work: u32,
+    pub dispatched_work: u32,
     pub planner_intent: Intent,
     pub planner_execution: bool,
 }
@@ -67,13 +88,12 @@ pub(super) struct CapturedPlanningBasis {
 }
 
 pub(super) fn run(ticks: usize) -> InteractionOutcome {
-    let (mut owner, planner) = scenario_driver_for_cpus(
-        CpuProfile::HARD_V51,
-        &CPUS,
-        controlled_scene,
-        None,
-        [47; 32],
-    );
+    run_for_profile(CpuProfile::HARD_V51, ticks)
+}
+
+pub(super) fn run_for_profile(profile: CpuProfile, ticks: usize) -> InteractionOutcome {
+    let (mut owner, planner) =
+        scenario_driver_for_cpus(profile, &CPUS, controlled_scene, None, [47; 32]);
     let state = owner.runtime.state_for_test().unwrap();
     let initial_positions = CPUS.map(|seat| state.actor(seat).unwrap().position());
     let world = WorldId {
@@ -85,10 +105,82 @@ pub(super) fn run(ticks: usize) -> InteractionOutcome {
     let mut pump_batches = Vec::new();
     let mut worker = PumpReport::default();
     let mut basis_probe = None;
+    let mut post_foreign_probe = None;
+    let mut clear_after_foreign_probe = None;
+    let mut farm_approach_probe = None;
+    let mut post_jobs = Vec::new();
     for _ in 0..ticks {
+        let mut inspected = 0;
+        let mut captured_index = None;
+        let mut post_captured_index = None;
+        let mut clear_captured_index = None;
+        let mut approach_captured_index = None;
+        let mut batch_post_jobs = Vec::new();
         let report = planner.pump_for_test_inspecting(usize::MAX, |basis| {
-            inspect_cpu_two_approach_basis(basis, &mut basis_probe);
+            let was_captured = basis_probe.is_some();
+            inspect_cpu_two_approach_basis(&basis, &mut basis_probe);
+            if !was_captured && basis_probe.is_some() {
+                captured_index = Some(inspected);
+            }
+            if basis.observation.parts().recipient == SeatId::Two
+                && basis.observation.parts().tick >= Tick(415)
+            {
+                let ObservedActor::Visible(actor) = &basis.observation.parts().actors[SeatId::Two.index()] else { panic!("CPU must be visible") };
+                let BombKnowledge::Visible(bombs) = &basis.observation.parts().bombs else { panic!("bombs must be visible") };
+                batch_post_jobs.push((inspected, PostJobSummary {
+                    tick: basis.observation.parts().tick,
+                    stop: basis.settled_stop_tick,
+                    position: actor.position,
+                    bombs: bombs.len(),
+                    flames: basis.observation.parts().flames.len(),
+                    strategy: basis.memory.strategic_intent(),
+                    had_origin: basis.escape_origin.is_some(),
+                    work: 0,
+                    intent: None,
+                }));
+                if post_foreign_probe.is_none() {
+                    post_foreign_probe = Some(probe_basis(&basis));
+                    post_captured_index = Some(inspected);
+                }
+                if clear_after_foreign_probe.is_none()
+                    && basis.observation.parts().flames.is_empty()
+                    && matches!(&basis.observation.parts().bombs, BombKnowledge::Visible(bombs) if bombs.is_empty())
+                {
+                    clear_after_foreign_probe = Some(probe_basis(&basis));
+                    clear_captured_index = Some(inspected);
+                }
+                if farm_approach_probe.is_none()
+                    && bombs.is_empty()
+                    && basis.observation.parts().flames.is_empty()
+                    && basis.memory.strategic_intent().and_then(|intent| intent.approach_cell) == actor.position.cell()
+                {
+                    farm_approach_probe = Some(probe_basis(&basis));
+                    approach_captured_index = Some(inspected);
+                }
+            }
+            inspected += 1;
         });
+        for (index, probe) in [
+            captured_index.zip(basis_probe.as_ref()),
+            post_captured_index.zip(post_foreign_probe.as_ref()),
+            clear_captured_index.zip(clear_after_foreign_probe.as_ref()),
+            approach_captured_index.zip(farm_approach_probe.as_ref()),
+        ]
+        .into_iter()
+        .flatten()
+        {
+            assert_eq!(report.delivered, report.dequeued);
+            assert_eq!(report.work[index], probe.dispatched_work);
+            assert_eq!(
+                report.planned_intents_by_job[index],
+                Some(probe.planner_intent)
+            );
+        }
+        for (index, mut summary) in batch_post_jobs {
+            summary.work = report.work[index];
+            summary.intent = report.planned_intents_by_job[index];
+            post_jobs.push(summary);
+        }
         if !report.work.is_empty() {
             pump_batches.push(report.work.clone());
         }
@@ -122,10 +214,14 @@ pub(super) fn run(ticks: usize) -> InteractionOutcome {
         worker,
         admissions: std::array::from_fn(|index| owner.cpus[index].admission_trace_for_test()),
         basis_probe: basis_probe.expect("CPU Two must queue a post-bomb approach basis"),
+        post_foreign_probe,
+        clear_after_foreign_probe,
+        farm_approach_probe,
+        post_jobs,
     }
 }
 
-fn inspect_cpu_two_approach_basis(basis: PlanningBasis<'_>, captured: &mut Option<BasisProbe>) {
+fn inspect_cpu_two_approach_basis(basis: &PlanningBasis<'_>, captured: &mut Option<BasisProbe>) {
     if captured.is_some() || basis.observation.parts().recipient != SeatId::Two {
         return;
     }
@@ -142,9 +238,25 @@ fn inspect_cpu_two_approach_basis(basis: PlanningBasis<'_>, captured: &mut Optio
     {
         return;
     }
+    *captured = Some(probe_basis(basis));
+}
+
+fn probe_basis(basis: &PlanningBasis<'_>) -> BasisProbe {
+    let ObservedActor::Visible(actor) = &basis.observation.parts().actors[SeatId::Two.index()]
+    else {
+        panic!("captured CPU must be visible");
+    };
+    let BombKnowledge::Visible(bombs) = &basis.observation.parts().bombs else {
+        panic!("captured bombs must be visible");
+    };
     let mut rng = basis.rng.clone();
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
-    let planned = plan_hard_blocked_births_v43_with_origin(
+    let plan = match basis.policy {
+        CpuPolicy::UtilityV51 => plan_hard_blocked_births_v43_with_origin,
+        CpuPolicy::UtilityV55 => plan_hard_pit_avoidance_v53_with_origin,
+        _ => panic!("unsupported interaction characterization profile"),
+    };
+    let planned = plan(
         basis.observation,
         basis.memory,
         basis.hazard_memory,
@@ -154,7 +266,19 @@ fn inspect_cpu_two_approach_basis(basis: PlanningBasis<'_>, captured: &mut Optio
         &mut work,
     )
     .unwrap();
-    *captured = Some(BasisProbe {
+    let planner_work = work.spent();
+    let TeleporterRecoveryChoice::Ordinary(planned) = select_teleporter_recovery_v50(
+        basis.observation,
+        basis.hazard_memory,
+        basis.settled_stop_tick,
+        basis.memory,
+        basis.escape_origin,
+        planned,
+        &mut work,
+    ) else {
+        panic!("captured scene has no exposed Teleporter recovery target");
+    };
+    BasisProbe {
         capture: CapturedPlanningBasis {
             observation: basis.observation.clone(),
             hazard_memory: basis.hazard_memory.clone(),
@@ -184,10 +308,11 @@ fn inspect_cpu_two_approach_basis(basis: PlanningBasis<'_>, captured: &mut Optio
             .iter()
             .any(|pickup| pickup.kind == PickupKind::Teleporter),
         had_origin: basis.escape_origin.is_some(),
-        planner_work: work.spent(),
+        planner_work,
+        dispatched_work: work.spent(),
         planner_intent: planned.survival.control.intent,
         planner_execution: planned.survival.execution.is_some(),
-    });
+    }
 }
 
 fn merge(total: &mut PumpReport, next: PumpReport) {
@@ -198,5 +323,8 @@ fn merge(total: &mut PumpReport, next: PumpReport) {
     total.dropped += next.dropped;
     total.work.extend(next.work);
     total.planned_intents.extend(next.planned_intents);
+    total
+        .planned_intents_by_job
+        .extend(next.planned_intents_by_job);
     total.planner_times.extend(next.planner_times);
 }

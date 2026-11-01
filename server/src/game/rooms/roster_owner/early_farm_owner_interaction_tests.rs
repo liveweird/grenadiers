@@ -104,6 +104,7 @@ fn other_cpu_activity_reproduces_cpu_two_passivity_with_a_guarded_queued_basis()
     assert_eq!(basis.planner_intent.manual, None::<ManualIntent>);
     assert!(!basis.planner_execution);
     assert_eq!(basis.planner_work, 10_443);
+    assert_eq!(basis.dispatched_work, 10_559);
     assert_complete_transcription_basis(basis);
     let first_stall = interaction
         .cpu_two_samples

@@ -35,6 +35,7 @@ pub(in crate::game::rooms) struct PumpReport {
     pub(in crate::game::rooms) dropped: usize,
     pub(in crate::game::rooms) work: Vec<u32>,
     pub(in crate::game::rooms) planned_intents: Vec<grenadiers_core::cpu::Intent>,
+    pub(in crate::game::rooms) planned_intents_by_job: Vec<Option<grenadiers_core::cpu::Intent>>,
     pub(in crate::game::rooms) planner_times: Vec<std::time::Duration>,
 }
 
@@ -286,6 +287,7 @@ fn record(
         JobStatus::Dropped => report.dropped += 1,
     }
     report.work.push(spent);
+    report.planned_intents_by_job.push(intent);
     report.planned_intents.extend(intent);
 }
 

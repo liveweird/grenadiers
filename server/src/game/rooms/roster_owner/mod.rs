@@ -227,6 +227,9 @@ mod farm_refuge_owner_tests;
 mod reliable_profile_tests;
 
 #[cfg(test)]
+mod foreign_bomb_farming_owner_tests;
+
+#[cfg(test)]
 mod refuge_handoff_physical_support;
 
 #[cfg(test)]

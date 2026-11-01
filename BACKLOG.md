@@ -22,7 +22,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [next] **CPU-RELIABILITY — validate remaining CPU liveness.** Investigate the reproduced
   farm-approach route-search refusal, including reaching a provably safe alternate approach,
   and retain complete escape/contact proofs within the existing work allowance. Investigate
-  short-fuse recovery after simultaneous rival bombs invalidate committed routes. Reproduce remaining long-match
+  short-fuse recovery after simultaneous rival bombs invalidate committed routes; the
+  [controlled investigation](docs/history/cpu-short-fuse-investigation-2026-11-01.md) defines the
+  observation-gated continuation boundary and required owner witnesses. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone

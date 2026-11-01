@@ -210,8 +210,10 @@ its own matching bomb. After a confirmed Stop, fresh planning uses the complete 
 scene and certifies a new movement pulse together with its mob-contact lease. The old route
 never authorizes further movement. Origin grace ends when the footprint leaves the bomb cell.
 Escape guidance excludes visible bomb cells. Foreign unpaused timed-bomb motion uses only named
-stationary assumptions on checked pulses of at most three updates, so distant bombs do not
-force waiting until the CPU's own fuse is almost spent.
+stationary assumptions on checked pulses of at most three updates. Repeated Stop/replanning
+cycles can still make an interrupted escape too slow, especially with Short Fuse; these pulses
+do not guarantee completion of the original full escape. See the
+[controlled recovery investigation](../history/cpu-short-fuse-investigation-2026-11-01.md).
 
 Scheduled stops between route legs retain their contact lease. Contact invalidation stops the
 route or pulse while preserving valid origin provenance for a fresh proof; completed commitments

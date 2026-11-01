@@ -9,7 +9,10 @@ use crate::cpu::{
 use crate::game::{CellId, Direction, EnabledItems, EntityId, Position, Tick};
 
 use super::foreign_bomb_farming_fixture::{CPU, SETTLED_STOP, captured_basis};
-use super::{WORK_ALLOWANCE, plan_hard_blocked_births_v43_with_origin};
+use super::{
+    WORK_ALLOWANCE, plan_hard_blocked_births_v43_with_origin,
+    plan_hard_corner_refuges_v57_with_origin,
+};
 
 #[test]
 fn captured_basis_preserves_public_scene_memory_and_two_sample_bomb_history() {
@@ -146,6 +149,32 @@ fn archived_hard_planner_reproduces_the_queued_north_non_manual_result() {
     );
     assert!(planned.survival.execution.is_none());
     assert_eq!(work.spent(), 10_443);
+}
+
+#[test]
+fn corner_refuges_remain_guarded_while_foreign_bombs_are_visible() {
+    let captured = captured_basis();
+    let key = MemoryKey {
+        world: captured.observation.parts().world,
+        cpu_seat: CPU,
+    };
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_corner_refuges_v57_with_origin(
+        &captured.observation,
+        &captured.memory,
+        &captured.hazard_memory,
+        SETTLED_STOP,
+        None,
+        &mut CpuRng::from_seed(key, [57; 32]),
+        &mut work,
+    )
+    .unwrap();
+    assert_eq!(
+        planned.survival.control.intent,
+        Intent::moving(Direction::North)
+    );
+    assert!(planned.survival.execution.is_none());
+    assert_eq!(work.spent(), 10_627);
 }
 
 #[test]

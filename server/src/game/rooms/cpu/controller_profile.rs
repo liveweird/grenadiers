@@ -21,6 +21,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V51
                         | grenadiers_core::room::CpuProfile::HARD_V53
                         | grenadiers_core::room::CpuProfile::HARD_V55
+                        | grenadiers_core::room::CpuProfile::HARD_V57
                 );
         }
         match rules_version {
@@ -83,6 +84,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                     | grenadiers_core::room::CpuProfile::RECOVERY_V54_STANDARD
                     | grenadiers_core::room::CpuProfile::RECOVERY_V54_EASY
+                    | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_STANDARD
+                    | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
             ),
             _ => false,
         }
@@ -102,6 +105,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V51
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
+                | grenadiers_core::room::CpuProfile::HARD_V57
         )
     }
 
@@ -128,10 +132,13 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_EASY
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_STANDARD
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
+                | grenadiers_core::room::CpuProfile::HARD_V57
         )
     }
 
@@ -155,10 +162,13 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_EASY
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_STANDARD
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
+                | grenadiers_core::room::CpuProfile::HARD_V57
         )
     }
 
@@ -179,10 +189,13 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_EASY
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_STANDARD
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
+                | grenadiers_core::room::CpuProfile::HARD_V57
         )
     }
 
@@ -200,10 +213,13 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_EASY
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_STANDARD
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
+                | grenadiers_core::room::CpuProfile::HARD_V57
         )
     }
 
@@ -218,10 +234,13 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V54_EASY
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_STANDARD
+                | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
                 | grenadiers_core::room::CpuProfile::HARD_V53
                 | grenadiers_core::room::CpuProfile::HARD_V55
+                | grenadiers_core::room::CpuProfile::HARD_V57
         )
     }
 }

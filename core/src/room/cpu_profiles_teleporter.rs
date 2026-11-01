@@ -45,4 +45,11 @@ impl CpuProfile {
         Self::profile(CpuPolicy::UtilityV54, CpuDifficulty::Standard);
     pub const RECOVERY_V54_EASY: Self = Self::profile(CpuPolicy::UtilityV54, CpuDifficulty::Easy);
     pub const HARD_V55: Self = Self::profile(CpuPolicy::UtilityV55, CpuDifficulty::Hard);
+
+    /// Lateral refuge hints when an ordinary farming escape points at a hard wall.
+    pub const CORNER_REFUGES_V56_STANDARD: Self =
+        Self::profile(CpuPolicy::UtilityV56, CpuDifficulty::Standard);
+    pub const CORNER_REFUGES_V56_EASY: Self =
+        Self::profile(CpuPolicy::UtilityV56, CpuDifficulty::Easy);
+    pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

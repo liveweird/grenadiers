@@ -12,9 +12,11 @@ mod continuation_execution;
 mod continuation_pending;
 mod continuation_planner;
 mod continuation_selection;
+mod corner_refuges;
 mod deadline;
 mod execution;
 mod joint_refuge;
+mod joint_refuge_geometry;
 mod lair_planner;
 mod lair_v23;
 mod manual_execution;
@@ -58,6 +60,9 @@ pub use continuation_selection::{
     plan_lairs as plan_continuation_lairs,
     plan_lairs_avoiding_pits as plan_continuation_lairs_avoiding_pits,
     plan_lairs_v54 as plan_continuation_lairs_v54,
+};
+pub use corner_refuges::{
+    plan_corner_refuges_v56_with_origin, plan_hard_corner_refuges_v57_with_origin,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};

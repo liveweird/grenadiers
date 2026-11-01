@@ -83,10 +83,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::RECOVERY_V54_EASY)
+            Some(CpuProfile::CORNER_REFUGES_V56_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::RECOVERY_V54_STANDARD)
+            Some(CpuProfile::CORNER_REFUGES_V56_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -110,7 +110,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V55)
+            Some(CpuProfile::HARD_V57)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);
@@ -228,6 +228,9 @@ mod reliable_profile_tests;
 
 #[cfg(test)]
 mod foreign_bomb_farming_owner_tests;
+
+#[cfg(test)]
+mod corner_farm_owner_tests;
 
 #[cfg(test)]
 mod refuge_handoff_physical_support;

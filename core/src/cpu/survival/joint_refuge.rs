@@ -5,13 +5,20 @@ use crate::cpu::policy::{
 };
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant_to_refuge};
 use crate::cpu::{Intent, ManualIntent, MobContactLease, MovementIntent, Observation, WorkBudget};
-use crate::game::{CellId, Direction, Tick};
+use crate::game::{CellId, Tick};
 
 use super::compatibility::actor;
 use super::plant_tactic::PlantSupport;
 use super::{ExecutionCertificate, LairSurvivalPlan, SurvivalPlan};
 
 const MAX_HINT_WORK: u32 = 8_192;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum FarmRefugeMode {
+    Disabled,
+    Legacy,
+    BlockedAway,
+}
 
 pub(super) fn eligible_failed_farm_approach(
     observation: &Observation,
@@ -124,6 +131,7 @@ pub(super) fn certified_farm_plant(
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
     support: PlantSupport,
+    mode: FarmRefugeMode,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let intent = ordinary.next_memory.strategic_intent()?;
@@ -144,23 +152,39 @@ pub(super) fn certified_farm_plant(
     let allowance = MAX_HINT_WORK.min(work.remaining() / 8);
     let mut child = WorkBudget::new(allowance);
     child.try_take(2).ok()?;
-    let Some((movement, hints)) =
-        refuge_hints(observation, origin, target, actor.bomb_range, &mut child)
-    else {
+    let blocked_away = mode == FarmRefugeMode::BlockedAway
+        && intent.objective == StrategicObjectiveKind::Farm
+        && matches!(
+            intent.phase,
+            StrategicPhase::Approach | StrategicPhase::Reengage
+        )
+        && intent.committed_until >= observation.parts().tick
+        && origin.column.abs_diff(target.column) + origin.row.abs_diff(target.row) == 1
+        && actor.position.cell() == Some(origin)
+        && observation.parts().flames.is_empty()
+        && matches!(&observation.parts().bombs, crate::cpu::BombKnowledge::Visible(bombs) if bombs.is_empty());
+    let Some(candidates) = super::joint_refuge_geometry::refuge_candidates(
+        observation,
+        origin,
+        target,
+        actor.bomb_range,
+        blocked_away,
+        &mut child,
+    ) else {
         work.try_take(child.spent()).ok()?;
         return None;
     };
-    for refuge in hints {
+    for candidate in candidates {
         let certificate_result = plan_lair_ordinary_plant_to_refuge(
             observation,
             history,
             PlantRequest {
                 execution_tick,
                 settled_stop_tick,
-                first_movement: movement,
+                first_movement: candidate.movement,
                 limits: RouteLimits::default(),
             },
-            refuge,
+            candidate.refuge,
             &mut child,
         );
         let certificate = certificate_result.ok();
@@ -188,7 +212,7 @@ pub(super) fn certified_farm_plant(
             survival: SurvivalPlan {
                 control: ControlPlan {
                     intent: Intent {
-                        movement,
+                        movement: candidate.movement,
                         manual: Some(ManualIntent::Bomb),
                     },
                     hold_ticks: 1,
@@ -210,75 +234,6 @@ pub(super) fn certified_farm_plant(
     None
 }
 
-fn refuge_hints(
-    observation: &Observation,
-    origin: CellId,
-    target: CellId,
-    range: u16,
-    work: &mut WorkBudget,
-) -> Option<(MovementIntent, [CellId; 2])> {
-    let (away_column, away_row, lateral_column, lateral_row, direction) = match (
-        target.column as i32 - origin.column as i32,
-        target.row as i32 - origin.row as i32,
-    ) {
-        (0, -1) => (0, 1, 1, 0, Direction::South),
-        (1, 0) => (-1, 0, 0, 1, Direction::West),
-        (0, 1) => (0, -1, 1, 0, Direction::North),
-        (-1, 0) => (1, 0, 0, 1, Direction::East),
-        _ => return None,
-    };
-    let base_column = i32::from(origin.column) + away_column;
-    let base_row = i32::from(origin.row) + away_row;
-    let lateral = i32::from(range.max(1));
-    let make = |sign: i32| {
-        let column = base_column + lateral_column * lateral * sign;
-        let row = base_row + lateral_row * lateral * sign;
-        (column >= 0
-            && row >= 0
-            && column < i32::from(observation.parts().arena.width)
-            && row < i32::from(observation.parts().arena.height))
-        .then(|| CellId::new(column as u16, row as u16))
-    };
-    let mut hints = [make(-1)?, make(1)?];
-    let scores = [
-        public_danger_clearance(observation, hints[0], work)?,
-        public_danger_clearance(observation, hints[1], work)?,
-    ];
-    if (std::cmp::Reverse(scores[1]), hints[1]) < (std::cmp::Reverse(scores[0]), hints[0]) {
-        hints.swap(0, 1);
-    }
-    Some((MovementIntent::Direction(direction), hints))
-}
-
-fn public_danger_clearance(
-    observation: &Observation,
-    cell: CellId,
-    work: &mut WorkBudget,
-) -> Option<u32> {
-    let inspected = observation
-        .respawn_lairs()
-        .map_or(0, |lairs| lairs.lairs().len() + lairs.mobs().len());
-    work.try_take(u32::try_from(inspected).ok()?).ok()?;
-    let lair_cells = observation
-        .respawn_lairs()
-        .into_iter()
-        .flat_map(|lairs| lairs.lairs().iter().map(|lair| lair.cell));
-    let mob_cells = observation
-        .respawn_lairs()
-        .into_iter()
-        .flat_map(|lairs| lairs.mobs().iter().filter_map(|mob| mob.position.cell()));
-    Some(
-        lair_cells
-            .chain(mob_cells)
-            .map(|danger| {
-                u32::from(cell.column.abs_diff(danger.column))
-                    + u32::from(cell.row.abs_diff(danger.row))
-            })
-            .min()
-            .unwrap_or(u32::MAX),
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -290,11 +245,17 @@ mod tests {
         let entries = u32::try_from(lairs.lairs().len() + lairs.mobs().len()).unwrap();
         assert!(entries > 0);
         let attempt = |work: &mut WorkBudget| {
-            refuge_hints(&observation, CellId::new(3, 8), CellId::new(3, 7), 2, work)
+            super::super::joint_refuge_geometry::legacy_refuge_candidates(
+                &observation,
+                CellId::new(3, 8),
+                CellId::new(3, 7),
+                2,
+                work,
+            )
         };
         let mut complete = WorkBudget::new(entries * 2);
-        let (_, hints) = attempt(&mut complete).unwrap();
-        assert_eq!(hints[0], CellId::new(1, 9));
+        let hints = attempt(&mut complete).unwrap();
+        assert_eq!(hints[0].refuge, CellId::new(1, 9));
         assert_eq!(complete.spent(), entries * 2);
 
         let mut interrupted = WorkBudget::new(entries * 2 - 1);

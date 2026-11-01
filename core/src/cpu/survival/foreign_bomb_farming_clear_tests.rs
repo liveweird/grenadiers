@@ -1,9 +1,16 @@
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant_to_refuge};
-use crate::cpu::{BombKnowledge, MobContactLease, MovementIntent, ObservedActor, WorkBudget};
+use crate::cpu::{
+    BombKnowledge, CpuRng, MemoryKey, MobContactLease, MovementIntent, ObservedActor,
+    ObservedFlame, WorkBudget,
+};
 use crate::game::{CellId, Direction, EntityId, Position, StormCloudView, Tick};
 
 use super::foreign_bomb_farming_clear_fixture::{FARM_TARGET, SETTLED_STOP, captured_clear_basis};
-use super::{WORK_ALLOWANCE, plant_value::useful_plant_for};
+use super::{
+    ExecutionCertificate, WORK_ALLOWANCE, plan_corner_refuges_v56_with_origin,
+    plan_hard_corner_refuges_v57_with_origin, plan_hard_pit_avoidance_v53_with_origin,
+    plant_value::useful_plant_for,
+};
 use crate::cpu::policy::StrategicTarget;
 
 #[test]
@@ -127,6 +134,194 @@ fn explicitly_named_alternate_refuges_are_separate_diagnostics() {
     let northern = complete_candidate(&captured, CellId::new(13, 1), &mut northern_work);
     assert_eq!(northern, Err("plant:Route(NoRoute)".to_owned()));
     assert_eq!(northern_work.spent(), 1_208);
+}
+
+#[test]
+fn hard_v57_certifies_the_useful_corner_farm_plant() {
+    let captured = captured_clear_basis();
+    let key = MemoryKey {
+        world: captured.observation.parts().world,
+        cpu_seat: captured.observation.parts().recipient,
+    };
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_corner_refuges_v57_with_origin(
+        &captured.observation,
+        &captured.memory,
+        &captured.hazard_memory,
+        SETTLED_STOP,
+        None,
+        &mut CpuRng::from_seed(key, [57; 32]),
+        &mut work,
+    )
+    .unwrap();
+    let Some(ExecutionCertificate::Plant(plant)) = planned.survival.execution else {
+        panic!("expected v57 corner plant")
+    };
+    assert_eq!(
+        planned.survival.control.intent,
+        crate::cpu::Intent {
+            movement: MovementIntent::Direction(Direction::East),
+            manual: Some(crate::cpu::ManualIntent::Bomb),
+        }
+    );
+    assert_eq!(plant.placement().cell, CellId::new(11, 1));
+    assert_eq!(plant.placement().placed_at, Tick(439));
+    assert_eq!(plant.placement().detonates_at, Tick(619));
+    assert_eq!(plant.route().survive_until(), Tick(649));
+    assert_eq!(planned.contact.unwrap().safe_until(), Tick(649));
+    assert_eq!(work.spent(), 4_239);
+}
+
+#[test]
+fn standard_v56_certifies_the_same_closed_corner_plant() {
+    let captured = captured_clear_basis();
+    let key = MemoryKey {
+        world: captured.observation.parts().world,
+        cpu_seat: captured.observation.parts().recipient,
+    };
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_corner_refuges_v56_with_origin(
+        &captured.observation,
+        &captured.memory,
+        &captured.hazard_memory,
+        SETTLED_STOP,
+        None,
+        &mut CpuRng::from_seed(key, [56; 32]),
+        &mut work,
+    )
+    .unwrap();
+    assert_eq!(
+        planned.survival.control.intent.manual,
+        Some(crate::cpu::ManualIntent::Bomb)
+    );
+    assert!(matches!(
+        planned.survival.execution,
+        Some(ExecutionCertificate::Plant(_))
+    ));
+    assert!(planned.contact.is_some());
+    assert_eq!(work.spent(), 4_239);
+}
+
+#[test]
+fn archived_hard_v53_keeps_its_nonplant_result_and_work() {
+    let captured = captured_clear_basis();
+    let key = MemoryKey {
+        world: captured.observation.parts().world,
+        cpu_seat: captured.observation.parts().recipient,
+    };
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_pit_avoidance_v53_with_origin(
+        &captured.observation,
+        &captured.memory,
+        &captured.hazard_memory,
+        SETTLED_STOP,
+        None,
+        &mut CpuRng::from_seed(key, [55; 32]),
+        &mut work,
+    )
+    .unwrap();
+    assert_eq!(
+        planned.survival.control.intent,
+        crate::cpu::Intent::moving(Direction::East)
+    );
+    assert!(planned.survival.execution.is_none());
+    assert_eq!(work.spent(), 58_041);
+}
+
+#[test]
+fn hard_v57_measures_the_existing_child_allocation_boundary() {
+    let captured = captured_clear_basis();
+    let key = MemoryKey {
+        world: captured.observation.parts().world,
+        cpu_seat: captured.observation.parts().recipient,
+    };
+    let run = |allowance| {
+        let mut work = WorkBudget::new(allowance);
+        let planned = plan_hard_corner_refuges_v57_with_origin(
+            &captured.observation,
+            &captured.memory,
+            &captured.hazard_memory,
+            SETTLED_STOP,
+            None,
+            &mut CpuRng::from_seed(key, [57; 32]),
+            &mut work,
+        )
+        .unwrap();
+        (planned, work.spent(), work.remaining())
+    };
+    let exact = run(31_511);
+    let one_short = run(31_510);
+    assert_eq!(
+        exact.0.survival.control.intent,
+        crate::cpu::Intent {
+            movement: MovementIntent::Direction(Direction::East),
+            manual: Some(crate::cpu::ManualIntent::Bomb),
+        }
+    );
+    assert!(matches!(
+        exact.0.survival.execution,
+        Some(ExecutionCertificate::Plant(_))
+    ));
+    assert_eq!((exact.1, exact.2), (4_239, 27_272));
+    assert_eq!(
+        one_short.0.survival.control.intent,
+        crate::cpu::Intent::moving(Direction::East)
+    );
+    assert!(one_short.0.survival.execution.is_none());
+    assert_eq!((one_short.1, one_short.2), (28_321, 3_189));
+}
+
+#[test]
+fn blocked_away_refuges_fail_closed_outside_the_narrow_clear_static_case() {
+    let make_flame = |mut captured: super::foreign_bomb_farming_clear_fixture::ClearBasis| {
+        captured.observation = captured
+            .observation
+            .map_parts(|parts| {
+                parts.flames.push(ObservedFlame {
+                    cell: CellId::new(10, 1),
+                    remaining_ticks: 1,
+                });
+            })
+            .unwrap();
+        captured
+    };
+    let block_both_refuges =
+        |mut captured: super::foreign_bomb_farming_clear_fixture::ClearBasis| {
+            captured.observation = captured
+                .observation
+                .map_parts(|parts| {
+                    parts
+                        .arena
+                        .blocks
+                        .extend([CellId::new(9, 3), CellId::new(13, 3)]);
+                    parts.arena.blocks.sort_unstable();
+                })
+                .unwrap();
+            captured
+        };
+    for captured in [
+        make_flame(captured_clear_basis()),
+        block_both_refuges(captured_clear_basis()),
+    ] {
+        let key = MemoryKey {
+            world: captured.observation.parts().world,
+            cpu_seat: captured.observation.parts().recipient,
+        };
+        let planned = plan_hard_corner_refuges_v57_with_origin(
+            &captured.observation,
+            &captured.memory,
+            &captured.hazard_memory,
+            SETTLED_STOP,
+            None,
+            &mut CpuRng::from_seed(key, [57; 32]),
+            &mut WorkBudget::new(WORK_ALLOWANCE),
+        )
+        .unwrap();
+        assert!(!matches!(
+            planned.survival.execution,
+            Some(ExecutionCertificate::Plant(_))
+        ));
+    }
 }
 
 fn complete_candidate(

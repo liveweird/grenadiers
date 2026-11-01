@@ -9,21 +9,21 @@ use support::{Case, assert_operational, current_profile, run};
 fn current_v19_profile_matrix_is_labeled_and_productive() {
     for (label, difficulty, profile, seed) in [
         (
-            "current-easy-v54",
+            "current-easy-v56",
             CpuDifficulty::Easy,
-            CpuProfile::RECOVERY_V54_EASY,
+            CpuProfile::CORNER_REFUGES_V56_EASY,
             71,
         ),
         (
-            "current-standard-v54",
+            "current-standard-v56",
             CpuDifficulty::Standard,
-            CpuProfile::RECOVERY_V54_STANDARD,
+            CpuProfile::CORNER_REFUGES_V56_STANDARD,
             72,
         ),
         (
-            "current-hard-v55",
+            "current-hard-v57",
             CpuDifficulty::Hard,
-            CpuProfile::HARD_V55,
+            CpuProfile::HARD_V57,
             73,
         ),
     ] {
@@ -45,7 +45,7 @@ fn current_v19_profile_matrix_is_labeled_and_productive() {
 }
 
 #[test]
-fn pumped_hard_v55_is_deterministic_and_productive_on_every_board_and_lair_mode() {
+fn pumped_hard_v57_is_deterministic_and_productive_on_every_board_and_lair_mode() {
     for board in [
         BoardSize::ElevenByNine,
         BoardSize::ThirteenByEleven,
@@ -53,7 +53,7 @@ fn pumped_hard_v55_is_deterministic_and_productive_on_every_board_and_lair_mode(
     ] {
         for lairs in [false, true] {
             let case = Case {
-                label: "pumped-hard-v55",
+                label: "pumped-hard-v57",
                 difficulty: CpuDifficulty::Hard,
                 board,
                 lairs,
@@ -63,18 +63,18 @@ fn pumped_hard_v55_is_deterministic_and_productive_on_every_board_and_lair_mode(
             let first = run(case, 840);
             let second = run(case, 840);
             assert_eq!(first, second, "board={board:?} lairs={lairs}");
-            assert_eq!(first.profile, CpuProfile::HARD_V55);
+            assert_eq!(first.profile, CpuProfile::HARD_V57);
             assert_operational(&first);
         }
     }
 }
 
 #[test]
-fn native_hard_v55_seed73_progresses_with_two_workers_at_production_pacing() {
+fn native_hard_v57_seed73_progresses_with_two_workers_at_production_pacing() {
     for lairs in [false, true] {
         let outcome = run(
             Case {
-                label: "native-hard-v55-seed73",
+                label: "native-hard-v57-seed73",
                 difficulty: CpuDifficulty::Hard,
                 board: BoardSize::FifteenByThirteen,
                 lairs,
@@ -83,7 +83,7 @@ fn native_hard_v55_seed73_progresses_with_two_workers_at_production_pacing() {
             },
             840,
         );
-        assert_eq!(outcome.profile, CpuProfile::HARD_V55);
+        assert_eq!(outcome.profile, CpuProfile::HARD_V57);
         assert_operational(&outcome);
     }
 }

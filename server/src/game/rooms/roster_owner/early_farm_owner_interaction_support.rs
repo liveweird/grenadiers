@@ -4,11 +4,12 @@ use grenadiers_core::{
         forecast::ObservedHazardMemory,
         policy::{IntentDebugSummary, StrategicIntent, UtilityMemory},
         survival::{
-            TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_hard_blocked_births_v43_with_origin,
+            TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_corner_refuges_v56_with_origin,
+            plan_hard_blocked_births_v43_with_origin, plan_hard_corner_refuges_v57_with_origin,
             plan_hard_pit_avoidance_v53_with_origin, select_teleporter_recovery_v50,
         },
     },
-    game::{CellId, EntityId, PickupKind, Position, SeatId, Tick},
+    game::{CellId, EntityId, PickupKind, Position, SeatId, State, Tick},
     room::{CpuPolicy, CpuProfile},
 };
 use tokio::time::Instant;
@@ -92,6 +93,14 @@ pub(super) fn run(ticks: usize) -> InteractionOutcome {
 }
 
 pub(super) fn run_for_profile(profile: CpuProfile, ticks: usize) -> InteractionOutcome {
+    run_inspecting(profile, ticks, |_| {})
+}
+
+pub(super) fn run_inspecting(
+    profile: CpuProfile,
+    ticks: usize,
+    mut observe_state: impl FnMut(&State),
+) -> InteractionOutcome {
     let (mut owner, planner) =
         scenario_driver_for_cpus(profile, &CPUS, controlled_scene, None, [47; 32]);
     let state = owner.runtime.state_for_test().unwrap();
@@ -187,6 +196,7 @@ pub(super) fn run_for_profile(profile: CpuProfile, ticks: usize) -> InteractionO
         merge(&mut worker, report);
         owner.tick(Instant::now()).unwrap();
         let state = owner.runtime.state_for_test().unwrap();
+        observe_state(state);
         for (index, seat) in CPUS.into_iter().enumerate() {
             first_plants[index] = first_plants[index].or_else(|| {
                 state
@@ -254,6 +264,8 @@ fn probe_basis(basis: &PlanningBasis<'_>) -> BasisProbe {
     let plan = match basis.policy {
         CpuPolicy::UtilityV51 => plan_hard_blocked_births_v43_with_origin,
         CpuPolicy::UtilityV55 => plan_hard_pit_avoidance_v53_with_origin,
+        CpuPolicy::UtilityV56 => plan_corner_refuges_v56_with_origin,
+        CpuPolicy::UtilityV57 => plan_hard_corner_refuges_v57_with_origin,
         _ => panic!("unsupported interaction characterization profile"),
     };
     let planned = plan(

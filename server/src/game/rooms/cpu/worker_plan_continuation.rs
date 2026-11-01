@@ -26,11 +26,19 @@ pub(super) fn plan(
             | CpuPolicy::UtilityV53
             | CpuPolicy::UtilityV54
             | CpuPolicy::UtilityV55
+            | CpuPolicy::UtilityV56
+            | CpuPolicy::UtilityV57
     );
     let origin = supports_continuation
         .then_some(job.escape_origin.as_ref())
         .flatten()?;
-    let planner = if matches!(job.policy, CpuPolicy::UtilityV54 | CpuPolicy::UtilityV55) {
+    let planner = if matches!(
+        job.policy,
+        CpuPolicy::UtilityV54
+            | CpuPolicy::UtilityV55
+            | CpuPolicy::UtilityV56
+            | CpuPolicy::UtilityV57
+    ) {
         grenadiers_core::cpu::survival::plan_continuation_lairs_v54
     } else if matches!(job.policy, CpuPolicy::UtilityV52 | CpuPolicy::UtilityV53) {
         plan_continuation_lairs_avoiding_pits

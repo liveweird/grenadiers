@@ -351,3 +351,22 @@ fn shared_recovery_profiles_have_closed_version_and_difficulty_pairs() {
     );
     assert_eq!(CpuProfile::HARD_V55.difficulty, CpuDifficulty::Hard);
 }
+
+#[test]
+fn corner_refuge_profiles_preserve_the_shared_recovery_archive_pair() {
+    for (profile, policy, difficulty) in [
+        (
+            CpuProfile::CORNER_REFUGES_V56_STANDARD,
+            56,
+            CpuDifficulty::Standard,
+        ),
+        (CpuProfile::CORNER_REFUGES_V56_EASY, 56, CpuDifficulty::Easy),
+        (CpuProfile::HARD_V57, 57, CpuDifficulty::Hard),
+    ] {
+        assert_eq!(profile.policy.version(), policy);
+        assert_eq!(profile.difficulty, difficulty);
+    }
+    assert_eq!(CpuProfile::RECOVERY_V54_STANDARD.policy.version(), 54);
+    assert_eq!(CpuProfile::RECOVERY_V54_EASY.policy.version(), 54);
+    assert_eq!(CpuProfile::HARD_V55.policy.version(), 55);
+}

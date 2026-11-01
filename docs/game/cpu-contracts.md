@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `RECOVERY_V54_STANDARD` or `RECOVERY_V54_EASY` and `HARD_V55`;
-private replay27 binds those identities. Named archive constants preserve historical replay
+Two. Live selection uses `CORNER_REFUGES_V56_STANDARD` or `CORNER_REFUGES_V56_EASY` and `HARD_V57`;
+private replay28 binds those identities. Named archive constants preserve historical replay
 identities. Policy identity describes decision semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
@@ -366,10 +366,11 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU54 and Hard
-selects CPU55. Without a retained origin, they delegate exactly to CPU52/53, including ordinary
-planning, pit avoidance, multi-Teleporter selection, work and RNG. Confirmed-origin recovery uses
-the shared preparation rules below. Archived CPU50/51
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU56 and Hard
+selects CPU57. They retain CPU52/53's ordinary planning and pit avoidance, adding the bounded
+blocked-away refuge hints described below. Multi-Teleporter selection and confirmed-origin
+shared preparation remain unchanged. Archived CPU54/55 delegate their non-origin planning
+exactly to CPU52/53. Archived CPU50/51
 compute their ordinary fallback first and preserve exactly CPU44/45's result,
 memory and RNG; only the typed Teleporter selector consumes additional remaining work. Confirmed-
 origin continuation for those archived profiles delegates unchanged to CPU44/45. The selected profiles retain the same shared
@@ -404,7 +405,8 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay27 binds CPU54/55; archived replay26 binds CPU52/53, replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
+Private replay28 binds CPU56/57; archived replay27 binds CPU54/55, replay26 binds CPU52/53,
+replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
 private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
@@ -412,7 +414,7 @@ contact modes. Older policy/replay contracts remain isolated.
 
 ## Shared escape preparation
 
-CPU54/55 validate the actual retained plant origin and build one unchanged default forecast
+CPU54/55 and CPU56/57 validate the actual retained plant origin and build one unchanged default forecast
 against the shared remaining work before attempting optional continuation. A forecast that
 exceeds the old half allowance can therefore still support a checked recovery pulse.
 
@@ -436,9 +438,23 @@ still apply; changed pit state, pose or contact facts can reject the plan. This 
 correction also applies to archived policies. Planning results and playback of existing accepted-
 input journals retain their contracts; newly played matches can accept input at different ticks.
 
+## Farming when the usual retreat is blocked
+
+CPU56/57 can use a lateral refuge when the cell directly away from an adjacent farming target
+is an indestructible wall, lair or outside the board. This requires the CPU to occupy its current
+committed Farm approach, visible empty bombs and no flames. Two deterministic candidates move
+sideways first, then use refuges offset by the observed bomb range both sideways and toward the
+target. The geometry is only a hint: complete planting, route, target-usefulness and mob-contact
+proofs still authorize the action.
+
+Selection and proof share the existing `min(8,192, remaining / 8)` child allowance. Failed work
+is charged to the parent, no RNG is consumed, and legacy hint order/work remain intact for
+archived policies. This does not relax the separate foreign-bomb/future-loot support guard.
+Safe complete planting routes may still cross pits under their existing time-dependent proof.
+
 ## Voluntary pit avoidance
 
-CPU54/55 inherit CPU52/53's exclusion of every observed pit site, regardless of phase, from ordinary search maps before
+Current profiles inherit CPU52/53's exclusion of every observed pit site, regardless of phase, from ordinary search maps before
 reachability. Pickup, wall-farming and rival-pressure approaches also reject pit cells, including
 retained goals and routes. An already-on-pit search root cannot become a new pit approach merely
 because reachability seeds the current cell. No-pit scenes retain their corresponding tactical

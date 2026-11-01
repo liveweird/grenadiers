@@ -9,7 +9,8 @@ use crate::game::{CellId, Direction, PickupKind, Position, StormCloudConfig, Tic
 
 use super::refuge_centering_test_fixture::{CPU, captured_scene};
 use super::{
-    WORK_ALLOWANCE, plan_blocked_births_v42_with_origin, plan_hard_blocked_births_v43_with_origin,
+    WORK_ALLOWANCE, plan_blocked_births_v42_with_origin, plan_corner_refuges_v56_with_origin,
+    plan_hard_blocked_births_v43_with_origin, plan_hard_corner_refuges_v57_with_origin,
     plan_hard_pit_avoidance_v53_with_origin, plan_pit_avoidance_v52_with_origin,
 };
 
@@ -59,7 +60,8 @@ fn key(observation: &Observation) -> MemoryKey {
 fn pit_avoidance_profiles_select_a_safe_short_pulse_alternative() {
     let observation = pit_pickup_scene(true);
     let key = key(&observation);
-    for (hard, seed) in [(false, 52), (true, 53)] {
+    for (version, hard) in [(52, false), (53, true), (56, false), (57, true)] {
+        let seed = version;
         let legacy = if hard {
             plan_hard_blocked_births_v43_with_origin(
                 &observation,
@@ -94,8 +96,8 @@ fn pit_avoidance_profiles_select_a_safe_short_pulse_alternative() {
             ),
             Ok(false),
         );
-        let planned = if hard {
-            plan_hard_pit_avoidance_v53_with_origin(
+        let planned = match version {
+            52 => plan_pit_avoidance_v52_with_origin(
                 &observation,
                 &UtilityMemory::new(key),
                 &ObservedHazardMemory::new(key),
@@ -103,9 +105,8 @@ fn pit_avoidance_profiles_select_a_safe_short_pulse_alternative() {
                 None,
                 &mut CpuRng::from_seed(key, [seed; 32]),
                 &mut WorkBudget::new(WORK_ALLOWANCE),
-            )
-        } else {
-            plan_pit_avoidance_v52_with_origin(
+            ),
+            53 => plan_hard_pit_avoidance_v53_with_origin(
                 &observation,
                 &UtilityMemory::new(key),
                 &ObservedHazardMemory::new(key),
@@ -113,7 +114,26 @@ fn pit_avoidance_profiles_select_a_safe_short_pulse_alternative() {
                 None,
                 &mut CpuRng::from_seed(key, [seed; 32]),
                 &mut WorkBudget::new(WORK_ALLOWANCE),
-            )
+            ),
+            56 => plan_corner_refuges_v56_with_origin(
+                &observation,
+                &UtilityMemory::new(key),
+                &ObservedHazardMemory::new(key),
+                Tick(540),
+                None,
+                &mut CpuRng::from_seed(key, [seed; 32]),
+                &mut WorkBudget::new(WORK_ALLOWANCE),
+            ),
+            57 => plan_hard_corner_refuges_v57_with_origin(
+                &observation,
+                &UtilityMemory::new(key),
+                &ObservedHazardMemory::new(key),
+                Tick(540),
+                None,
+                &mut CpuRng::from_seed(key, [seed; 32]),
+                &mut WorkBudget::new(WORK_ALLOWANCE),
+            ),
+            _ => unreachable!(),
         }
         .unwrap();
         let lease = planned.survival.lease.as_ref().expect("short pulse");

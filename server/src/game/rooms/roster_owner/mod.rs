@@ -166,6 +166,10 @@ mod lifecycle_tests;
 #[cfg(test)]
 mod multi_teleporter_owner_tests;
 #[cfg(test)]
+mod pit_entry_owner_support;
+#[cfg(test)]
+mod pit_entry_owner_tests;
+#[cfg(test)]
 mod tests;
 
 #[cfg(test)]

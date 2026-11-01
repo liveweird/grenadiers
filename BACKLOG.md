@@ -32,7 +32,13 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   identified exposed Teleporter as a global planting support limit. The
   [typed one-update handoff](docs/game/single-player-cpu.md#intentional-teleporter-collection-boundary)
   now covers Approach/Collect, all possible swap partners, mandatory physical Stop and a
-  subsequent productive-action witness. Reproduce remaining long-match
+  subsequent productive-action witness. A fresh CPU47 round records two real Teleporter swaps
+  followed by renewed bombing, then a third persistent Teleporter. Characterize sample 88/tick 5461
+  and its preceding queue/intent transition through a continuous owner witness: seat Four is
+  observed at an unchanged sampled pose with unavailable diagnostics, while seat Two keeps
+  cycling farming approaches.
+  Preserve real Stop provenance, worker/refusal/admission evidence and full useful-action
+  execution; static reachability alone is insufficient. Reproduce remaining long-match
   stalls, passive pickup behavior and waiting beside lethal bombs under current rules/policy.
   Preserve exact public observations and authoritative before/after witnesses. Use action-refusal
   and queue diagnostics plus productive-action witnesses; elapsed time or a free bomb slot alone

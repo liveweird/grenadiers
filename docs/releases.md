@@ -97,73 +97,75 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.9 — 2026-11-01
+## v1.3.10 — 2026-11-01
 
-CPUs can continue a complete certified escape when simultaneous rival bombs interrupt a confirmed
-planting route. The old recovery's separately planned movement pulses could insert enough Stops
-to prevent escape even when a complete route existed.
-
-The new opaque certificate proves the nominal trajectory and a safe Stop branch after every update.
-It permits at most eight legs, including planned Stops, and 96 movement updates. Fresh observations
-authorize only three updates at a time. Admission binds the stopped basis and actual publications
-at basis+3 and basis+6; the first input is for basis+7. Renewal uses one shared 8,192-work allowance
-without another path search or global forecast. Missing renewal, changed facts, stale authority or
-rejected submission withdraws the episode and physically fences held and queued input. The old
-origin exception cannot be restored after the first accepted continuation command.
+CPUs can deliberately clear one exposed Teleporter when it prevents otherwise useful farming.
+Previously an exposed Teleporter remained a global planting support limit. The new typed recovery
+keeps ordinary planting, pulse and pickup guards intact: it approaches a stable neighboring center,
+certifies one directional update, unconditionally Stops on the next physical update and waits for
+a fresh physical stopped observation before continuing. Every possible living swap partner is
+checked without inspecting private randomness.
 
 ### Compatibility and limits
 
-Easy/Standard select CPU44 and Hard selects CPU45 with private replay22. Gameplay19, rules10,
-navigation3 and the 65,536 planning allowance remain unchanged. Non-origin decisions delegate to
-CPU42/43; replay21 and every earlier policy retain their original contracts. Both lair modes have
-explicit contact checks. No UI, artwork, network schema, physics or external dependency changes.
+Easy/Standard select CPU46 and Hard selects CPU47 with private replay23. Gameplay19, rules10,
+navigation3 and the shared 65,536 planning allowance remain unchanged. Ordinary CPU44/45 fallback
+is computed first and preserves its result, memory and RNG on decline. Confirmed-origin
+continuation is unchanged. Earlier policies and replay formats retain their contracts.
 
-Continuation initially requires completed running updates, visible unpaused standard timed bombs,
-supported effects and no initial finite flames, Oil, exposed Teleporter or Diarrhea. Unsupported
-scenes retain checked fallback behavior. The guarantee is conditional on public observations;
-it does not predict future rival actions. Restart ends in-memory matches. Remaining long-match
-passivity and deeper Hard tactics stay in the backlog.
+Recovery requires exactly one exposed Teleporter, the complete visible living roster, visible
+empty bombs, no flames or Oil, and supported effects/equipment/pickups. Both lair modes are checked.
+Pit sites are excluded from movement and landings. The guarantee is conditional on supported
+observed facts; it does not predict future rival actions or guarantee the partner's future survival.
+Broader farm/contact stalls and deeper Hard tactics remain in BACKLOG.md. No UI, artwork, transport
+schema, physics or external dependency changes. Restart ends in-memory matches.
 
 ### Verification
 
-Accepted application/image source: `e2eafc4902c4853f51c661de60b04e1ce1ba80ce`.
-Independent proof, runtime, server integration and activation reviews are clear. Three focused
-engineering PRs share this combined product acceptance; the two inactive intermediate Core tips
-also pass isolated all-target workspace compilation.
+Accepted application/image source: `c89dae052688801a403dcc07a8b0737c24ef4eef`.
+Independent proof, runtime, server integration, activation and storage-fix reviews are clear.
+Three focused engineering PRs share this combined product acceptance; both inactive intermediate
+Core tips pass isolated clean all-target workspace compilation.
 
-- Actual queued-owner regressions cover Standard44/Hard45 with all items enabled and lairs off/on.
-  Both CPUs collect Short Fuse, plant through normal worker/admission paths, make sustained progress
-  and survive full flame expiry. Each executes 20 renewal commits and 40 command commits, with
-  2,918 fixed-point units of post-admission displacement; maximum worker work is 16,203/65,536.
-  This is a controlled original-terrain scene, not a restored hidden-state multiplayer trajectory.
-- Exact/one-short budgets, every-update Stop branches, cross-episode substitution, actual early
-  publication phases, delayed workers, missing renewal, epoch changes, mailbox rejection,
-  publication-sequence overflow, physical input fencing and replay22 boundaries pass focused checks.
-- Frozen Rust gate passes in 906 seconds: 1,777 Core tests and 711 ordinary server tests,
-  plus all 4,194,304 item masks independently in debug, release and coverage. Four workers,
-  32 partitions and zero retries. Formatting, strict Clippy, build and repository checks pass.
-  Coverage is 64,227/69,195 lines (92.82%), above the unchanged 90% floor.
+- Real queued-owner witnesses start at an ordinary cell center, collect through the actual worker,
+  driver and mailbox, verify both teleport markers and swapped endpoints, plant a useful bomb,
+  destroy a named block and survive full flame expiry. Standard/lairs off-on, Easy, Hard and native
+  two-worker 60 Hz cases pass. Actual boundary traces independently assert admission, movement,
+  next-update Stop submission, physical Stop and fresh completion; no injected certificate is used.
+- Rejected movement, rejected Stop and withheld publications perform real input fencing, prevent
+  a second movement and cannot resurrect expired authority. Exact/one-short budgets, all seven
+  start lanes, partial/no-move/no-swap cases, partner movement, contact births/deaths, pit binding,
+  retained Stop provenance, Easy cadence, selector expiry/alternate and replay23 boundaries pass.
+- Frozen Rust gate passes in 733 seconds: 1,831 Core tests and 725 ordinary server tests in
+  debug and release, plus all 4,194,304 item masks independently in debug, release and coverage.
+  Four workers, 32 partitions and zero retries. Formatting, strict Clippy, build and repository
+  checks pass. Coverage is 67,291/72,396 lines (92.95%), above the unchanged 90% floor.
 - Unique Linux x86_64 debug/release workspace tests and doctests pass
-  ([run 41305327706](https://github.com/liveweird/grenadiers/actions/runs/41305327706)).
-  Duplicate intermediate Linux runs reuse this combined acceptance plus their isolated builds.
+  ([run 41319512956](https://github.com/liveweird/grenadiers/actions/runs/41319512956)).
+  Duplicate intermediate and superseded-source runs are canceled; no duplicate final full gate
+  is required for branch, merge or tag.
 - Exact-image Compose authentication/keyboard duel and three-Hard-CPU smoke pass. Restricted
   Kubernetes three-CPU smoke passes; owned short-lived stacks and namespace are removed.
-- One 179-second all-items public capture reaches a result without JavaScript errors. It
-  reproduces repetitive late farming; an exposed Teleporter disables planting under the current
-  proof boundary. This is not a balance comparison or a claim that all passivity is resolved;
-  see the [late-passivity investigation](history/cpu-late-passivity-2026-11-01.md).
-- All five bundled web assets are byte-identical to accepted v1.3.0; unchanged browser/native
+- One 180-second all-items public capture reaches a result without JavaScript errors and records
+  24 CPU bombs (3/10/11 by seat). Late passivity remains: one surviving seat has the same exact
+  pose in every retained sample for about 95 seconds. This is a fresh uncontrolled round, not a matched balance comparison or proof
+  of a missed safe action; the broader investigation remains open.
+- All five bundled web assets are byte-identical to accepted v1.3.9/v1.3.0; unchanged browser/native
   inputs reuse accepted suites. Fresh dependency security checks pass with the existing moderate
   tooling advisories. Pinned Trivy 0.74 reports zero fixable HIGH/CRITICAL image findings.
 
 ### Operation
 
 Accepted local image:
-`sha256:af782ae7268e40bea83e0eedf8322e2382abed4c7efe97076488b655f462e31e`.
-The exact accepted image is promoted to localhost:8085. Health, readiness, served-asset hashes,
-security headers and a fresh three-Hard-CPU smoke pass. Version 1.3.8 remains available for rollback. This is a source/local-runtime release without a
-hosted service or production registry. The unchanged artwork remains in the
+`sha256:9412d8cfef61357a0dc92a35cc41f3a8cf7fed3d51af6506dac3f44f1efdf7e4`.
+The exact accepted image is promoted to localhost:8085. Health, readiness, security headers,
+CSP/cache, all five served-asset hashes and a fresh three-Hard-CPU smoke pass.
+Version 1.3.9 remains available for rollback. This is a source/local-runtime release without a
+hosted service or production registry. Artwork remains in the unchanged
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v139--2026-11-01"></a>
+The [v1.3.9 record](history/releases.md#v139--2026-11-01) is preserved in release history.
 
 <a id="v138--2026-11-01"></a>
 The [v1.3.8 record](history/releases.md#v138--2026-11-01) is preserved in release history.

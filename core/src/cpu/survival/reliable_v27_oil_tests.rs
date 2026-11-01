@@ -5,8 +5,8 @@ use crate::cpu::policy::{StrategicTarget, UtilityMemory};
 use crate::cpu::{
     BombKnowledge, CpuRng, ManualIntent, MemoryKey, MovementIntent, Observation, ObservationParts,
     ObservedActor, ObservedArena, ObservedBomb, ObservedBombTrigger, ObservedEnvironment,
-    ObservedFlame, ObservedOil, ObservedPickup, ObservedRespawnLairs, ObservedRules,
-    UnknownActorFacts, UnknownBombFacts, VisibleActor, WorkBudget, WorldId,
+    ObservedFlame, ObservedOil, ObservedPickup, ObservedRules, UnknownActorFacts, UnknownBombFacts,
+    VisibleActor, WorkBudget, WorldId,
 };
 use crate::game::{
     ActorInit, Arena, BombTrigger, CellId, Direction, EnabledItems, EntityId, InputAction,
@@ -214,13 +214,7 @@ pub(crate) fn observe_with_lairs(
             })
             .collect(),
     };
-    let respawn_lairs = state.lair_statuses().map(|lairs| {
-        ObservedRespawnLairs::new(
-            RespawnLairConfig::Enabled(config.1),
-            lairs.to_vec(),
-            state.mobs(),
-        )
-    });
+    let respawn_lairs = super::observation_test_adapter::projected_respawn_lairs(state, config.1);
     Observation::new_rules_v10(
         parts,
         ObservedEnvironment::new(

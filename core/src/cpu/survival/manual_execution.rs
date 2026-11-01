@@ -5,14 +5,15 @@ use crate::cpu::routing::{
 use crate::cpu::{ManualIntent, MovementIntent, Observation};
 use crate::game::Tick;
 
-use super::CommittedRoute;
 use super::compatibility::{actor, actor_compatible, plant_actor_compatible, route_compatible};
 use super::route_execution::CommittedPlant;
+use super::{CommittedRoute, PlantContactCertificate};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ExecutionCertificate {
     Route(Box<RouteCertificate>),
     Plant(Box<PlantCertificate>),
+    ContactPlant(Box<PlantContactCertificate>),
     Punch(Box<PunchCertificate>),
 }
 
@@ -22,6 +23,7 @@ impl ExecutionCertificate {
         match self {
             Self::Route(route) => route,
             Self::Plant(plant) => plant.route(),
+            Self::ContactPlant(plant) => plant.route(),
             Self::Punch(punch) => punch.route(),
         }
     }
@@ -30,6 +32,7 @@ impl ExecutionCertificate {
     pub const fn plant(&self) -> Option<&PlantCertificate> {
         match self {
             Self::Plant(plant) => Some(plant),
+            Self::ContactPlant(plant) => Some(plant.plant()),
             Self::Route(_) | Self::Punch(_) => None,
         }
     }
@@ -38,7 +41,7 @@ impl ExecutionCertificate {
     pub const fn punch(&self) -> Option<&PunchCertificate> {
         match self {
             Self::Punch(punch) => Some(punch),
-            Self::Route(_) | Self::Plant(_) => None,
+            Self::Route(_) | Self::Plant(_) | Self::ContactPlant(_) => None,
         }
     }
 
@@ -46,7 +49,7 @@ impl ExecutionCertificate {
     pub const fn manual_intent(&self) -> Option<ManualIntent> {
         match self {
             Self::Route(_) => None,
-            Self::Plant(_) => Some(ManualIntent::Bomb),
+            Self::Plant(_) | Self::ContactPlant(_) => Some(ManualIntent::Bomb),
             Self::Punch(_) => Some(ManualIntent::Equipment),
         }
     }
@@ -56,6 +59,7 @@ impl ExecutionCertificate {
         match self {
             Self::Route(_) => None,
             Self::Plant(plant) => Some(plant.placement().placed_at),
+            Self::ContactPlant(plant) => Some(plant.plant().placement().placed_at),
             Self::Punch(punch) => Some(punch.execution_tick()),
         }
     }
@@ -90,6 +94,23 @@ impl CommittedRoute {
                     Some(CommittedPlant {
                         certificate: *certificate,
                         presence: PlantPresence::Awaiting,
+                        contact: None,
+                    }),
+                    basis,
+                    current,
+                    admission_tick,
+                    accepted_movement,
+                )
+            }
+            ExecutionCertificate::ContactPlant(certificate) => {
+                let (plant, proof) = certificate.into_parts();
+                let route = plant.route().clone();
+                Self::admit_inner(
+                    route,
+                    Some(CommittedPlant {
+                        certificate: plant,
+                        presence: PlantPresence::Awaiting,
+                        contact: Some(proof),
                     }),
                     basis,
                     current,
@@ -164,6 +185,19 @@ impl CommittedRoute {
         let Some(plant) = self.plant.as_mut() else {
             return route_compatible(&self.basis, current, self.certificate.evolution());
         };
+        if let Some(contact) = &plant.contact {
+            let Some(candidate) = super::contact_plant::contact_scene_candidate(
+                &self.basis,
+                current,
+                &plant.certificate,
+                contact,
+                plant.presence,
+            ) else {
+                return false;
+            };
+            plant.presence = candidate;
+            return true;
+        }
         let candidate = if plant.presence == PlantPresence::Awaiting {
             let Ok(presence) = plant.certificate.confirm(&self.basis, current) else {
                 return false;

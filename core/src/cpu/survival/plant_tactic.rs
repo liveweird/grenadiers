@@ -259,7 +259,7 @@ fn certified_plant_inner(
     )
 }
 
-fn certified_plant_inner_prefiltered(
+pub(super) fn certified_plant_inner_prefiltered(
     observation: &Observation,
     history: &ObservedHazardMemory,
     settled_stop_tick: Tick,

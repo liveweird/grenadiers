@@ -127,44 +127,13 @@ fn passable(cell: CellId, blocked: &BTreeSet<CellId>) -> bool {
 }
 
 pub(super) fn captured_blocks() -> BTreeSet<CellId> {
-    [
-        (3, 1),
-        (5, 1),
-        (3, 2),
-        (1, 3),
-        (2, 3),
-        (3, 3),
-        (4, 3),
-        (5, 3),
-        (3, 4),
-        (5, 4),
-        (7, 4),
-        (9, 4),
-        (1, 5),
-        (2, 5),
-        (5, 5),
-        (6, 5),
-        (7, 5),
-        (8, 5),
-        (9, 5),
-        (1, 6),
-        (5, 6),
-        (9, 6),
-        (2, 7),
-        (5, 7),
-        (6, 7),
-        (7, 7),
-        (8, 7),
-        (9, 7),
-        (3, 8),
-        (5, 8),
-        (7, 8),
-        (9, 8),
-        (4, 9),
-        (8, 11),
-    ]
+    serde_json::from_str::<Vec<[u16; 2]>>(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/fixtures/trapped-mob-blocks.json"
+    )))
+    .expect("checked-in trapped-mob fixture must parse")
     .into_iter()
-    .map(|(column, row)| CellId::new(column, row))
+    .map(|[column, row]| CellId::new(column, row))
     .collect()
 }
 

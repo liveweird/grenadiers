@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::cpu::{
-    BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MemoryKey, Observation, ObservedBomb,
-    ObservedBombTrigger, WorkBudget,
+    BombKnowledge, MAX_MULTIPLAYER_OBSERVED_BOMBS, MemoryKey, Observation, ObservedBombTrigger,
+    WorkBudget,
 };
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, EntityId, MAX_OIL_BARRELS, OilBarrelState, Tick};
@@ -10,6 +10,7 @@ use crate::room::BoardSize;
 
 use super::ForecastFailure;
 use super::intervals::take;
+use contact::bomb_matches;
 
 const MAX_FLAME_CHANGES: usize = MAX_MULTIPLAYER_OBSERVED_BOMBS * ARENA_CELL_COUNT;
 const _: () = assert!(MAX_FLAME_CHANGES == 6_240);
@@ -363,38 +364,5 @@ impl ForecastEvolution {
     }
 }
 
-fn bomb_matches(before: ObservedBomb, after: ObservedBomb, elapsed: u64) -> bool {
-    before.id == after.id
-        && before.placed_at == after.placed_at
-        && before.cell == after.cell
-        && before.owner == after.owner
-        && before.range == after.range
-        && before.blast == after.blast
-        && before.unknown == after.unknown
-        && trigger_matches(before.trigger, after.trigger, elapsed)
-}
-
-fn trigger_matches(before: ObservedBombTrigger, after: ObservedBombTrigger, elapsed: u64) -> bool {
-    match (before, after) {
-        (
-            ObservedBombTrigger::Timed {
-                remaining_ticks: old,
-                paused: old_pause,
-            },
-            ObservedBombTrigger::Timed {
-                remaining_ticks: new,
-                paused: new_pause,
-            },
-        ) => {
-            old_pause == new_pause
-                && if old_pause {
-                    old == new
-                } else {
-                    u64::from(old).checked_sub(elapsed) == Some(u64::from(new))
-                }
-        }
-        (ObservedBombTrigger::Remote, ObservedBombTrigger::Remote)
-        | (ObservedBombTrigger::Contact, ObservedBombTrigger::Contact) => true,
-        _ => false,
-    }
-}
+#[path = "evolution_contact.rs"]
+mod contact;

@@ -1,116 +1,20 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 use std::ops::ControlFlow;
 
 use crate::cpu::forecast::ObservedHazardMemory;
-use crate::cpu::policy::{
-    StrategicIntent, StrategicObjectiveKind, StrategicPhase, StrategicSwitchReason,
-    StrategicTarget, UtilityMemory,
-};
-use crate::cpu::routing::{
-    PlantRequest, RouteFailure, RouteLimits, RouteStep, plan_lair_ordinary_plant,
-};
+use crate::cpu::routing::{PlantRequest, RouteFailure, RouteLimits, plan_lair_ordinary_plant};
 use crate::cpu::survival::{
-    ObservedBlastGeometry, WORK_ALLOWANCE, plan_farm_origins_v38_with_origin,
+    CommittedRoute, ExecutionCertificate, ObservedBlastGeometry, RouteStatus, WORK_ALLOWANCE,
+    plan_contact_topology_v40_with_origin, plan_farm_origins_v38_with_origin,
+    plan_hard_contact_topology_v41_with_origin,
 };
 use crate::cpu::{CpuRng, MemoryKey, MobContactLease, MovementIntent, WorkBudget, WorldId};
 use crate::game::blast_geometry::{BlastSource, visit_blast};
-use crate::game::{
-    ActorInit, Arena, BlastKind, CellId, Direction, EnabledItems, EntityId, InputAction,
-    MobNavigationPolicy, Position, RoundAssignment, RulesConfig, SeatId, SeatInput, SimulationSeed,
-    SpeedLevel, State, StormCloudConfig, Tick, World, fixed_arena,
-};
-use crate::room::{RespawnLairConfig, RespawnLairSettings, RoomSettings, SpikePitConfig};
+use crate::game::{BlastKind, CellId, Direction, Tick};
+use crate::room::RespawnLairSettings;
 
 use super::connectivity_tests::{IsolationEvidence, captured_blocks};
-
-const CPU: SeatId = SeatId::Two;
-const ORIGIN: CellId = CellId::new(10, 7);
-const TARGET: CellId = CellId::new(9, 7);
-const MOB_POCKET: CellId = CellId::new(7, 6);
-
-fn controlled_state() -> (State, RoomSettings) {
-    let fixed = fixed_arena();
-    let terrain = std::array::from_fn(|index| {
-        fixed
-            .terrain(CellId::new((index % 15) as u16, (index / 15) as u16))
-            .unwrap()
-    });
-    let arena = Arena::new(
-        terrain,
-        captured_blocks(),
-        [CellId::new(1, 1), CellId::new(13, 11)],
-    )
-    .unwrap();
-    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
-    let rules = RulesConfig::environment_v10_with_mob_navigation(
-        settings,
-        StormCloudConfig::Disabled,
-        RespawnLairConfig::Enabled(RespawnLairSettings::DEFAULT),
-        SpikePitConfig::Disabled,
-        MobNavigationPolicy::TimedEscapeV3,
-    );
-    let state = State::new_at_tick_with_assignment_and_seed(
-        rules,
-        World::with_pickups(arena, BTreeMap::new(), BTreeMap::new(), BTreeMap::new()).unwrap(),
-        [
-            ActorInit {
-                id: EntityId(1),
-                seat: SeatId::One,
-                position: Position::center(CellId::new(1, 1)),
-                heading: Direction::East,
-                speed: SpeedLevel::Base,
-            },
-            ActorInit {
-                id: EntityId(2),
-                seat: CPU,
-                position: Position::center(ORIGIN),
-                heading: Direction::East,
-                speed: SpeedLevel::Base,
-            },
-        ],
-        Tick(0),
-        RoundAssignment::first(),
-        SimulationSeed::new([136; 32]),
-    )
-    .unwrap();
-    (state, settings)
-}
-
-fn memory(observation: &crate::cpu::Observation) -> UtilityMemory {
-    let key = MemoryKey {
-        world: observation.parts().world,
-        cpu_seat: CPU,
-    };
-    let tick = observation.parts().tick;
-    UtilityMemory::new(key).with_strategic_intent(StrategicIntent {
-        objective: StrategicObjectiveKind::Farm,
-        target: StrategicTarget::Block { cell: TARGET },
-        approach_cell: Some(ORIGIN),
-        phase: StrategicPhase::Approach,
-        last_switch_reason: StrategicSwitchReason::Stalled,
-        observation_tick: tick,
-        score: 2,
-        committed_until: Tick(tick.0 + 120),
-        progress_deadline: Tick(tick.0 + 180),
-        last_distance: 0,
-        last_cpu_position: Position::center(ORIGIN),
-        deferred_until: None,
-    })
-}
-
-fn input(movement: Option<Direction>, bomb: bool) -> Vec<SeatInput> {
-    let mut inputs = vec![SeatInput {
-        seat: CPU,
-        action: movement.map_or(InputAction::Clear, InputAction::Press),
-    }];
-    if bomb {
-        inputs.push(SeatInput {
-            seat: CPU,
-            action: InputAction::PlaceBomb,
-        });
-    }
-    inputs
-}
+use super::physical_fixture::{CPU, MOB_POCKET, ORIGIN, TARGET, controlled_state, input, memory};
 
 #[test]
 fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
@@ -169,6 +73,13 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
         MobContactLease::certify_route(&observed, certificate.route(), &mut work),
         Err(RouteFailure::NoRoute)
     );
+    let mut proof_work = WorkBudget::new(WORK_ALLOWANCE);
+    let proof = crate::cpu::lair_contact::PlantContactProof::certify(
+        &observed,
+        &certificate,
+        &mut proof_work,
+    );
+    assert!(proof.is_some());
 
     let mut planner_work = WorkBudget::new(WORK_ALLOWANCE);
     let full = plan_farm_origins_v38_with_origin(
@@ -182,6 +93,51 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
     )
     .unwrap();
     assert!(full.survival.execution.is_none());
+
+    let mut topology_work = WorkBudget::new(WORK_ALLOWANCE);
+    let topology = plan_contact_topology_v40_with_origin(
+        &observed,
+        &memory(&observed),
+        &history,
+        observed.parts().tick,
+        None,
+        &mut CpuRng::from_seed(key, [40; 32]),
+        &mut topology_work,
+    )
+    .unwrap();
+    let ExecutionCertificate::ContactPlant(topology_certificate) =
+        topology.survival.execution.as_ref().unwrap()
+    else {
+        panic!("v40 must bind the full plant to topology contact authority");
+    };
+    assert_eq!(
+        topology_certificate.plant().placement(),
+        certificate.placement()
+    );
+    assert_eq!(
+        topology_certificate.plant().route().survive_until(),
+        certificate.route().survive_until()
+    );
+    let admitted_execution = topology.survival.execution.clone().unwrap();
+    assert!(topology_work.spent() <= WORK_ALLOWANCE);
+
+    let mut hard_work = WorkBudget::new(WORK_ALLOWANCE);
+    let hard = plan_hard_contact_topology_v41_with_origin(
+        &observed,
+        &memory(&observed),
+        &history,
+        observed.parts().tick,
+        None,
+        &mut CpuRng::from_seed(key, [41; 32]),
+        &mut hard_work,
+    )
+    .unwrap();
+    assert!(matches!(
+        hard.survival.execution,
+        Some(ExecutionCertificate::ContactPlant(_))
+    ));
+    assert!(hard_work.spent() <= WORK_ALLOWANCE);
+    let certificate = topology_certificate.plant().clone();
 
     let mut geometry_work = WorkBudget::new(WORK_ALLOWANCE);
     let geometry = ObservedBlastGeometry::new(&observed, &mut geometry_work).unwrap();
@@ -243,11 +199,14 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
     assert!(work.spent() <= WORK_ALLOWANCE);
     assert!(geometry_work.spent() <= WORK_ALLOWANCE);
     eprintln!(
-        "contact topology witness: placement={} survive={} route_work={} planner_work={} geometry_work={}",
+        "contact topology witness: placement={} survive={} route_work={} proof_work={} planner_work={} topology_work={} hard_work={} geometry_work={}",
         certificate.placement().placed_at.0,
         certificate.route().survive_until().0,
         work.spent(),
+        proof_work.spent(),
         planner_work.spent(),
+        topology_work.spent(),
+        hard_work.spent(),
         geometry_work.spent(),
     );
 
@@ -257,28 +216,45 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
     while state.tick().0 + 1 < first.0 {
         state.step(&[]).unwrap();
     }
+    let admission =
+        crate::cpu::survival::observe_with_lairs(&state, (settings, RespawnLairSettings::DEFAULT));
+    let mut committed = CommittedRoute::admit_execution(
+        admitted_execution,
+        observed.clone(),
+        &admission,
+        admission.parts().tick,
+        MovementIntent::Stop,
+    )
+    .unwrap();
+    assert!(committed.has_contact_authority());
+    let mut accepted = MovementIntent::Stop;
+    let mut settled_stop = Some(admission.parts().tick);
     while state.tick() < certificate.route().survive_until() {
+        match committed.poll_command(state.tick(), settled_stop) {
+            RouteStatus::Submit(command) => {
+                assert!(committed.commit_command(command));
+                accepted = command.movement();
+                if accepted != MovementIntent::Stop {
+                    settled_stop = None;
+                }
+            }
+            RouteStatus::Invalidated => panic!("contact route invalidated before its next update"),
+            _ => {}
+        }
         let update = Tick(state.tick().0 + 1);
-        let movement = certificate
-            .route()
-            .steps()
-            .iter()
-            .enumerate()
-            .find_map(|(index, step)| {
-                let start = lane.step_start(index)?;
-                let stop = lane.stop_update(index)?;
-                (start <= update && update < stop).then_some(match step {
-                    RouteStep::Move { direction, .. } => Some(*direction),
-                    RouteStep::Wait { .. } => None,
-                })
-            })
-            .flatten();
+        let movement = match accepted {
+            MovementIntent::Direction(direction) => Some(direction),
+            MovementIntent::Stop => None,
+        };
         state
             .step(&input(
                 movement,
                 update == certificate.placement().placed_at,
             ))
             .unwrap();
+        if accepted == MovementIntent::Stop {
+            settled_stop = Some(state.tick());
+        }
         let actor = state.actor(CPU).unwrap();
         assert!(actor.alive());
         if state.tick() < certificate.route().survive_until() {
@@ -302,7 +278,25 @@ fn natural_trapped_mob_has_a_full_plant_route_but_old_contact_rejects_it() {
             assert_eq!(actual.blast, certificate.placement().blast);
             saw_placement = true;
         }
+        let publication = crate::cpu::survival::observe_with_lairs(
+            &state,
+            (settings, RespawnLairSettings::DEFAULT),
+        );
+        let status = committed.observe_with_stop(&publication, settled_stop);
+        if state.tick().0 + 1 == certificate.route().survive_until().0 {
+            assert_eq!(status, RouteStatus::Invalidated);
+            break;
+        }
+        assert_ne!(
+            status,
+            RouteStatus::Invalidated,
+            "contact renewal invalidated at tick {}",
+            state.tick().0
+        );
     }
+    assert_eq!(state.tick().0 + 1, certificate.route().survive_until().0);
+    state.step(&input(None, false)).unwrap();
+    assert!(state.actor(CPU).unwrap().alive());
     assert!(saw_placement);
     assert!(!state.world().arena.blocks().contains(&TARGET));
     assert_eq!(state.live_bomb_count(CPU), 0);

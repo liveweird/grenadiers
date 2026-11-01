@@ -71,7 +71,7 @@ pub(super) fn terminal_refuge() -> TerminalFixture {
         CPU,
         WORLD.room_instance,
         [30; 32],
-        CpuProfile::HARD_V30,
+        CpuProfile::HARD_V35,
     );
     let before_stop = observe(&state, settings);
     assert!(controller.accept_observation(&before_stop));

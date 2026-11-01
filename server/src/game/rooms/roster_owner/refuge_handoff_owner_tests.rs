@@ -101,7 +101,7 @@ fn stopped_controller(
         observation.parts().recipient,
         observation.parts().world.room_instance,
         seed,
-        CpuProfile::HARD_V30,
+        CpuProfile::HARD_V35,
     );
     let mut prior = observation.clone().into_parts();
     prior.tick = Tick(prior.tick.0 - 1);

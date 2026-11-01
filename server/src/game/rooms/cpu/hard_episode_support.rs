@@ -60,7 +60,7 @@ pub(super) const fn current_profile(difficulty: CpuDifficulty) -> CpuProfile {
     match difficulty {
         CpuDifficulty::Easy => CpuProfile::REFUGE_V33_EASY,
         CpuDifficulty::Standard => CpuProfile::REFUGE_V33_STANDARD,
-        CpuDifficulty::Hard => CpuProfile::HARD_V34,
+        CpuDifficulty::Hard => CpuProfile::HARD_V35,
     }
 }
 
@@ -280,6 +280,7 @@ fn rejection_total(trace: &AdmissionTrace) -> u32 {
         + trace.pulse
         + trace.route
         + trace.duplicate_decision
+        + trace.refuge_handoff
 }
 
 fn admission_sum(admissions: &[AdmissionTrace; 3], value: impl Fn(&AdmissionTrace) -> u32) -> u32 {
@@ -317,6 +318,7 @@ fn log(case: Case, outcome: &Outcome) {
                 "strategic": admission_sum(&outcome.admissions, |trace| trace.strategic_plant),
                 "pulse": admission_sum(&outcome.admissions, |trace| trace.pulse),
                 "route": admission_sum(&outcome.admissions, |trace| trace.route),
+                "refugeHandoff": admission_sum(&outcome.admissions, |trace| trace.refuge_handoff),
             },
         })
     );

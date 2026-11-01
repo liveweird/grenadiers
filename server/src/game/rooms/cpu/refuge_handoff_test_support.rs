@@ -58,7 +58,7 @@ pub(super) fn queued_refuge() -> RefugeFixture {
         CPU,
         WORLD.room_instance,
         [30; 32],
-        CpuProfile::HARD_V29,
+        CpuProfile::HARD_V35,
     );
     assert!(controller.accept_observation(&basis));
     controller.settled_stop_tick = Some(basis.parts().tick);
@@ -115,7 +115,7 @@ pub(super) fn queued_refuge() -> RefugeFixture {
                     .unwrap();
             }
             Some(grenadiers_core::cpu::survival::RouteStatus::Wait)
-                if controller.submit_refuge_handoff_for_test(observation, EPOCH) =>
+                if controller.submit_refuge_handoff(observation, EPOCH) =>
             {
                 return RefugeFixture {
                     controller,

@@ -2,27 +2,32 @@ use grenadiers_core::room::CpuProfile;
 
 use super::CpuController;
 use super::refuge_handoff_test_support::{EPOCH, queued_refuge};
-use crate::game::rooms::cpu::worker::CpuPlanner;
 
 #[test]
-fn archived_hard_profile_cannot_enter_refuge_replacement_flow() {
-    let observation = crate::game::rooms::cpu::tests::observation();
-    let mut controller = CpuController::new(
-        CpuPlanner::without_workers(),
-        observation.parts().recipient,
-        observation.parts().world.room_instance,
-        [30; 32],
-        CpuProfile::HARD_V29,
-    );
-    controller.reset_world(observation.parts().world.physical_round);
-    controller.settled_stop_tick = Some(observation.parts().tick);
-    let memory = controller.memory;
-    let rng_draws = controller.rng_draws();
-
-    assert!(!controller.submit_refuge_handoff(observation, 3));
-    assert!(!controller.has_pending());
-    assert_eq!(controller.memory, memory);
-    assert_eq!(controller.rng_draws(), rng_draws);
+fn archived_hard_profile_cannot_enter_otherwise_eligible_refuge_replacement_flow() {
+    for retained in [CpuProfile::HARD_V29, CpuProfile::HARD_V34] {
+        let mut fixture = queued_refuge();
+        fixture.controller.cancel();
+        fixture.controller.refuge_attempt = None;
+        fixture.controller.profile = retained;
+        let memory = fixture.controller.memory;
+        let rng_draws = fixture.controller.rng_draws();
+        assert!(
+            !fixture
+                .controller
+                .submit_refuge_handoff(fixture.publication(), EPOCH)
+        );
+        assert!(!fixture.controller.has_pending());
+        assert!(fixture.controller.has_committed_route());
+        assert_eq!(fixture.controller.memory, memory);
+        assert_eq!(fixture.controller.rng_draws(), rng_draws);
+        fixture.controller.profile = CpuProfile::HARD_V35;
+        assert!(
+            fixture
+                .controller
+                .submit_refuge_handoff(fixture.publication(), EPOCH)
+        );
+    }
 }
 
 #[test]

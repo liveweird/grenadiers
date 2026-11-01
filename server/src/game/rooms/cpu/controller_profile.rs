@@ -10,6 +10,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V29
                         | grenadiers_core::room::CpuProfile::HARD_V32
                         | grenadiers_core::room::CpuProfile::HARD_V34
+                        | grenadiers_core::room::CpuProfile::HARD_V35
                 );
         }
         match rules_version {

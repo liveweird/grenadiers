@@ -29,6 +29,7 @@ pub(super) fn plan(
                 | CpuPolicy::UtilityV32
                 | CpuPolicy::UtilityV33
                 | CpuPolicy::UtilityV34
+                | CpuPolicy::UtilityV35
         )
     {
         let plan = if job.policy == CpuPolicy::UtilityV33 {
@@ -41,7 +42,8 @@ pub(super) fn plan(
                 &mut job.rng,
                 work,
             )
-        } else if job.policy == CpuPolicy::UtilityV34 {
+        // Policy35 adds controller handoff; reuse the exact policy34 planner.
+        } else if matches!(job.policy, CpuPolicy::UtilityV34 | CpuPolicy::UtilityV35) {
             plan_refuge_guidance_v34_with_origin(
                 &job.observation,
                 &job.memory,

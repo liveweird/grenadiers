@@ -274,3 +274,31 @@ basis+29, shorter than the default 36-update warning. That permits a locally saf
 establishing that staying at the goal is safe through the later rise. A pre-entry queued-owner
 witness must establish the accepted sequence before changing policy; these public samples alone
 do not identify the last admitted certificate or a missed escape.
+
+## Controlled CPU51 pit-entry failure
+
+The real queued owner fixture `archived_hard51_voluntarily_enters_the_quiet_capture_pit`
+preserves the quiet recording's public wall layout, Three's position `(3584,8515)` and pit
+`(3,7)`. Other seats are idle humans; empty hidden loot, fresh clocks/controller memory and
+seed 47 are explicit assumptions. It is a controlled reproduction, not restoration of the
+original private match.
+
+CPU51 selects block `(2,7)` with approach `(3,7)`. Its actual queued basis at tick 198 has physical
+Stop confirmed at 198; the checked North pulse has start window `[199,206)`, hold 12 and exclusive
+safe-until 227. The real simulation activates the pit at 206, stops the CPU inside it, and kills
+it when spikes rise at 242. The preceding tick leaves the CPU alive at the same position.
+Delivered jobs stay within 65,536 work and show no cancellation or admission refusal. The pit's
+warning delay exceeds the short pulse's proof window: local pulse safety does not establish a
+productive strategic destination. A minimal one-wall scene changed pit placement and chose
+Attack, so it did not reproduce this failure and is not used as the before witness.
+
+The paired CPU52/53 run preserves that public scene: Hard, Standard and Easy remain alive for
+600 updates without touching a pit. The corridor is boxed by hard walls, a soft block and the
+pit; the retained plant prover cannot certify the available escape. These runs establish
+avoidance, not productive farming or a claim that physical escape is impossible.
+
+A separate productivity fixture removes only soft block `(3,9)`, opening a southward route.
+All three difficulty profiles plant at 235, destroy a block and remain alive through flame
+expiry at 446. Every pre-plant actor footprint avoids every pit. This distinct fixture confirms
+that the restriction still permits useful play when a checked alternative exists; it is not
+presented as the identical captured scene. No safety obligation or work allowance is relaxed.

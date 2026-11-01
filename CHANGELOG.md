@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.13 — 2026-11-01
+
+- Prevent CPU players from choosing pit tiles as ordinary routes or pickup, farming and attack approaches; check swept short-pulse footprints before accepting movement.
+- Retain complete certified bomb escapes and continuation routes, existing work limits, multi-Teleporter recovery and checked already-on-pit behavior.
+- Select Easy/Standard52 and Hard53 under private replay26; preserve all archived policy and replay contracts.
+
 ## 1.3.12 — 2026-11-01
 
 - Recover deliberately from multiple exposed Teleporters when every unselected pickup stays outside every living actor’s full proof-window reach, including post-swap movement.

@@ -32,4 +32,11 @@ impl CpuProfile {
         Self::profile(CpuPolicy::UtilityV50, CpuDifficulty::Standard);
     pub const TELEPORTER_V50_EASY: Self = Self::profile(CpuPolicy::UtilityV50, CpuDifficulty::Easy);
     pub const HARD_V51: Self = Self::profile(CpuPolicy::UtilityV51, CpuDifficulty::Hard);
+
+    /// Pit-avoiding Standard policy, preserving the v48 executor and v50 selector.
+    pub const PIT_AVOIDANCE_V52_STANDARD: Self =
+        Self::profile(CpuPolicy::UtilityV52, CpuDifficulty::Standard);
+    pub const PIT_AVOIDANCE_V52_EASY: Self =
+        Self::profile(CpuPolicy::UtilityV52, CpuDifficulty::Easy);
+    pub const HARD_V53: Self = Self::profile(CpuPolicy::UtilityV53, CpuDifficulty::Hard);
 }

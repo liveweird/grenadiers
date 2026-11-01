@@ -4,6 +4,7 @@ use crate::game::{BlastKind, CellId, SeatId};
 
 use super::super::{SearchMap, cell_index};
 use super::{Candidate, DistanceMap, FirstStepMap};
+use crate::cpu::policy::pit_avoidance::PitMask;
 
 const MAX_PRESSURE_WORK: u32 = 4_096;
 const MAX_ORIGIN_PROBES: usize = 32;
@@ -23,6 +24,7 @@ pub(super) fn candidates(
     distance: &DistanceMap,
     first_step: &FirstStepMap,
     map: &SearchMap,
+    pit_sites: &PitMask,
     work: &mut WorkBudget,
 ) -> Vec<Candidate> {
     let allowance = pressure_allowance(work.remaining());
@@ -59,6 +61,7 @@ pub(super) fn candidates(
             distance,
             first_step,
             map,
+            pit_sites,
             &geometry,
             &mut rival_work,
         ) {
@@ -75,6 +78,7 @@ pub(super) fn add_legacy_candidates(
     actor: &VisibleActor,
     distance: &DistanceMap,
     first_step: &FirstStepMap,
+    pit_sites: &PitMask,
     candidates: &mut Vec<Candidate>,
 ) {
     for observed in &observation.parts().actors {
@@ -91,6 +95,7 @@ pub(super) fn add_legacy_candidates(
                 1,
                 distance,
                 first_step,
+                pit_sites,
                 candidates,
                 None,
             );
@@ -108,6 +113,7 @@ fn nearest(
     distance: &DistanceMap,
     first_step: &FirstStepMap,
     map: &SearchMap,
+    pit_sites: &PitMask,
     geometry: &crate::cpu::survival::ObservedBlastGeometry<'_>,
     work: &mut WorkBudget,
 ) -> Option<Candidate> {
@@ -132,6 +138,7 @@ fn nearest(
             if let (Some(distance), Some(first_step)) =
                 (distance[cell_index], first_step[cell_index])
                 && map.transitable(observation, cell)
+                && !pit_sites.contains(observation, cell)
                 && plausibly_threatens(cell, range, kind, &target_cells)
             {
                 origins.push((distance, cell, first_step));

@@ -21,6 +21,7 @@ pub(super) fn plan(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     origin: &PlantEscapeOrigin,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
     plan_inner(
@@ -30,6 +31,7 @@ pub(super) fn plan(
         memory,
         origin,
         false,
+        avoid_pits,
         work,
     )
     .map(|plan| plan.survival)
@@ -41,6 +43,7 @@ pub(super) fn plan_lairs(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     origin: &PlantEscapeOrigin,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let plan = plan_inner(
@@ -50,6 +53,7 @@ pub(super) fn plan_lairs(
         memory,
         origin,
         true,
+        avoid_pits,
         work,
     )?;
     Some(LairSurvivalPlan {
@@ -66,6 +70,7 @@ fn plan_inner(
     memory: &UtilityMemory,
     origin: &PlantEscapeOrigin,
     lairs: bool,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<OriginPlan> {
     origin.retain_stopped(observation)?;
@@ -77,6 +82,7 @@ fn plan_inner(
         memory,
         origin,
         lairs,
+        avoid_pits,
         work,
     )
 }
@@ -89,6 +95,7 @@ fn plan_with_forecast(
     memory: &UtilityMemory,
     origin: &PlantEscapeOrigin,
     lairs: bool,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<OriginPlan> {
     let actor = super::compatibility::actor(observation)?;
@@ -143,6 +150,11 @@ fn plan_with_forecast(
                 };
                 (lease, None)
             };
+            if avoid_pits
+                && !crate::cpu::routing::pit_clear(observation, &lease, work).unwrap_or(false)
+            {
+                continue;
+            }
             let score = super::steering::score(&lease, target);
             if score >= current_distance {
                 continue;
@@ -179,6 +191,7 @@ pub(super) fn plan_lairs_with_forecast(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     origin: &PlantEscapeOrigin,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let plan = plan_with_forecast(
@@ -188,6 +201,7 @@ pub(super) fn plan_lairs_with_forecast(
         memory,
         origin,
         true,
+        avoid_pits,
         work,
     )?;
     Some(LairSurvivalPlan {
@@ -202,6 +216,7 @@ pub(super) fn plan_disabled_with_forecast(
     settled_stop_tick: Tick,
     memory: &UtilityMemory,
     origin: &PlantEscapeOrigin,
+    avoid_pits: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let plan = plan_with_forecast(
@@ -211,6 +226,7 @@ pub(super) fn plan_disabled_with_forecast(
         memory,
         origin,
         false,
+        avoid_pits,
         work,
     )?;
     Some(LairSurvivalPlan {

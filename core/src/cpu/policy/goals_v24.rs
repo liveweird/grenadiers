@@ -26,6 +26,12 @@ use validation::validate_previous;
 #[path = "goals_v24_farm.rs"]
 mod farm;
 
+#[path = "goals_v24_versions.rs"]
+mod versions;
+pub(in crate::cpu::policy) use versions::{
+    select, select_pits, select_v25, select_v28, select_v38,
+};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(in crate::cpu::policy) struct GuidanceV24 {
     pub first_step: CellId,
@@ -46,65 +52,6 @@ struct Candidate {
 pub(in crate::cpu::policy) type DistanceMap = [Option<u16>; ARENA_CELL_COUNT];
 pub(in crate::cpu::policy) type FirstStepMap = [Option<CellId>; ARENA_CELL_COUNT];
 
-pub(in crate::cpu::policy) fn select(
-    observation: &Observation,
-    actor: &VisibleActor,
-    current: CellId,
-    memory: &UtilityMemory,
-    work: &mut WorkBudget,
-) -> Option<GuidanceV24> {
-    select_inner(
-        observation,
-        actor,
-        current,
-        memory,
-        work,
-        false,
-        false,
-        false,
-    )
-}
-
-pub(in crate::cpu::policy) fn select_v25(
-    observation: &Observation,
-    actor: &VisibleActor,
-    current: CellId,
-    memory: &UtilityMemory,
-    work: &mut WorkBudget,
-) -> Option<GuidanceV24> {
-    select_inner(
-        observation,
-        actor,
-        current,
-        memory,
-        work,
-        true,
-        false,
-        false,
-    )
-}
-
-pub(in crate::cpu::policy) fn select_v28(
-    observation: &Observation,
-    actor: &VisibleActor,
-    current: CellId,
-    memory: &UtilityMemory,
-    work: &mut WorkBudget,
-) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, true, true, false)
-}
-
-pub(in crate::cpu::policy) fn select_v38(
-    observation: &Observation,
-    actor: &VisibleActor,
-    current: CellId,
-    memory: &UtilityMemory,
-    work: &mut WorkBudget,
-    hard: bool,
-) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, true, hard, true)
-}
-
 #[allow(
     clippy::too_many_arguments,
     reason = "Keep archived goal and opt-in recovery switches explicit"
@@ -118,11 +65,20 @@ fn select_inner(
     failed_plant_recovery: bool,
     range_aware_pressure: bool,
     farm_origin_recovery: bool,
+    avoid_pits: bool,
 ) -> Option<GuidanceV24> {
-    let map = search_map(observation, actor, current, !range_aware_pressure, work)?;
+    let mut map = search_map(observation, actor, current, !range_aware_pressure, work)?;
+    let pit_sites = if avoid_pits {
+        super::super::pit_avoidance::block_search_map(observation, &mut map, work)?
+    } else {
+        super::super::pit_avoidance::PitMask::EMPTY
+    };
     let (distance, first_step) = reachable(observation, current, &map, work)?;
     let mut candidates = Vec::new();
     for pickup in &observation.parts().pickups {
+        if pit_sites.contains(observation, pickup.cell) {
+            continue;
+        }
         let index = cell_index(observation, pickup.cell)?;
         let Some(score) = pickup_value(observation, actor, pickup.kind) else {
             continue;
@@ -155,6 +111,7 @@ fn select_inner(
             2,
             &distance,
             &first_step,
+            &pit_sites,
             &mut candidates,
             failed_farm_approach,
         );
@@ -166,10 +123,18 @@ fn select_inner(
             &distance,
             &first_step,
             &map,
+            &pit_sites,
             work,
         ));
     }
-    pressure::add_legacy_candidates(observation, actor, &distance, &first_step, &mut candidates);
+    pressure::add_legacy_candidates(
+        observation,
+        actor,
+        &distance,
+        &first_step,
+        &pit_sites,
+        &mut candidates,
+    );
     candidates.sort_unstable_by_key(|candidate| {
         (
             std::cmp::Reverse(candidate.score),

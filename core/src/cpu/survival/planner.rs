@@ -6,10 +6,11 @@ use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, for
 use crate::cpu::policy::{ControlPlan, PolicyError, UtilityMemory};
 use crate::cpu::routing::{
     PulseRequest, RouteLimits, RouteMode, RouteRequest, RouteStep, certify_pulse,
-    certify_respawn_pulse, plan_respawn_route, plan_route,
+    certify_respawn_pulse, pit_clear, plan_respawn_route, plan_route,
 };
 use crate::cpu::{CpuRng, Intent, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
+
 pub fn plan(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -62,6 +63,7 @@ pub fn plan_with_origin(
         false,
         false,
         RefugeGuidance::default(),
+        false,
     )
 }
 #[allow(clippy::too_many_arguments)]
@@ -83,6 +85,7 @@ pub(super) fn plan_inner(
     counter_pressure: bool,
     pickup_progress: bool,
     refuge_guidance: RefugeGuidance,
+    avoid_pits: bool,
 ) -> Result<SurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if memory.key().world != parts.world
@@ -117,6 +120,7 @@ pub(super) fn plan_inner(
             settled_stop_tick,
             memory,
             origin,
+            avoid_pits,
             work,
         )
         .unwrap_or_else(stop);
@@ -136,6 +140,7 @@ pub(super) fn plan_inner(
         failed_plant_recovery,
         hard_tactics,
         false,
+        avoid_pits,
     )?;
     let storm_enabled = observation.environment().is_some_and(|environment| {
         environment.storm_cloud_config() == crate::game::StormCloudConfig::Single
@@ -207,6 +212,7 @@ pub(super) fn plan_inner(
             end,
             settled_stop_tick,
             pickup_progress,
+            avoid_pits,
             work,
         )
     {
@@ -256,7 +262,9 @@ pub(super) fn plan_inner(
             } else {
                 certify_pulse(observation, &forecast, request, work)
             };
-            if let Ok(lease) = certified {
+            if let Ok(lease) = certified
+                && (!avoid_pits || pit_clear(observation, &lease, work) == Ok(true))
+            {
                 let score = super::steering::score(&lease, target);
                 let candidate = SurvivalPlan {
                     control: ControlPlan {

@@ -316,3 +316,21 @@ fn multiple_teleporter_profiles_preserve_the_previous_pair() {
     );
     assert_eq!(CpuProfile::HARD_V51.difficulty, CpuDifficulty::Hard);
 }
+
+#[test]
+fn pit_avoidance_profiles_extend_without_relabeling_the_previous_pair() {
+    assert_eq!(CpuProfile::PIT_AVOIDANCE_V52_STANDARD.policy.version(), 52);
+    assert_eq!(CpuProfile::PIT_AVOIDANCE_V52_EASY.policy.version(), 52);
+    assert_eq!(CpuProfile::HARD_V53.policy.version(), 53);
+    assert_eq!(
+        CpuProfile::PIT_AVOIDANCE_V52_STANDARD.difficulty,
+        CpuDifficulty::Standard
+    );
+    assert_eq!(
+        CpuProfile::PIT_AVOIDANCE_V52_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::HARD_V53.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::TELEPORTER_V50_STANDARD.policy.version(), 50);
+    assert_eq!(CpuProfile::HARD_V51.policy.version(), 51);
+}

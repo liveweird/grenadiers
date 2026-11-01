@@ -59,6 +59,7 @@ pub fn plan_lairs_with_origin(
         false,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -93,6 +94,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v23(
         false,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -127,6 +129,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v24(
         false,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }
 
@@ -161,5 +164,6 @@ pub(in crate::cpu::survival) fn plan_lairs_v25(
         false,
         false,
         ContactTopology::Disabled,
+        false,
     )
 }

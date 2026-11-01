@@ -39,7 +39,11 @@ pub(super) struct Outcome {
     pub worker: PumpReport,
     pub admission: AdmissionTrace,
     pub result_phase: MatchPhase,
-    pub plan_probe: PlanProbe,
+    pub plan_probe: Option<PlanProbe>,
+    pub plant: Option<Tick>,
+    pub completed_escape: bool,
+    pub destroyed: bool,
+    pub opponent_defeated: bool,
 }
 
 #[derive(Debug)]
@@ -56,13 +60,19 @@ pub(super) struct PlanProbe {
 }
 
 pub(super) fn run(ticks: usize) -> Outcome {
-    let (mut owner, planner) = scenario_driver_for_cpus(
-        CpuProfile::HARD_V51,
-        &[CPU],
-        controlled_scene,
-        None,
-        [47; 32],
-    );
+    run_with_profile(CpuProfile::HARD_V51, ticks)
+}
+
+pub(super) fn run_with_profile(profile: CpuProfile, ticks: usize) -> Outcome {
+    run_scene(profile, ticks, controlled_scene)
+}
+
+pub(super) fn run_with_open_route(profile: CpuProfile, ticks: usize) -> Outcome {
+    run_scene(profile, ticks, |basis| controlled_scene_inner(basis, true))
+}
+
+fn run_scene(profile: CpuProfile, ticks: usize, scene: fn(&State) -> State) -> Outcome {
+    let (mut owner, planner) = scenario_driver_for_cpus(profile, &[CPU], scene, None, [47; 32]);
     let world = WorldId {
         room_instance: INSTANCE,
         physical_round: 1,
@@ -78,14 +88,43 @@ pub(super) fn run(ticks: usize) -> Outcome {
         .collect();
     let mut worker = PumpReport::default();
     let mut samples = Vec::with_capacity(ticks);
+    let initial_blocks = owner
+        .runtime
+        .state_for_test()
+        .unwrap()
+        .world()
+        .arena()
+        .blocks()
+        .clone();
+    let mut plant = None;
+    let mut finish = None;
     let mut plan_probe = None;
     for _ in 0..ticks {
         let report = planner.pump_for_test_inspecting(usize::MAX, |basis| {
-            inspect_first_plan(basis, &mut plan_probe);
+            if profile == CpuProfile::HARD_V51 {
+                inspect_first_plan(basis, &mut plan_probe);
+            }
         });
         merge(&mut worker, report);
         owner.tick(Instant::now()).unwrap();
+        assert_eq!(
+            owner.runtime.lifecycle().round_attempt(),
+            1,
+            "witness must remain in its physical round"
+        );
         let state = owner.runtime.state_for_test().unwrap();
+        if plant.is_none()
+            && let Some(bomb) = state
+                .world()
+                .bombs()
+                .values()
+                .find(|bomb| bomb.owner() == EntityId(3))
+        {
+            plant = Some(bomb.placed_at());
+            finish = bomb
+                .detonates_at()
+                .map(|tick| Tick(tick.0 + state.rules().flame_ticks() + 1));
+        }
         let actor = state.actor(CPU).unwrap();
         samples.push(Sample {
             tick: state.tick(),
@@ -100,17 +139,31 @@ pub(super) fn run(ticks: usize) -> Outcome {
             intent: owner.cpus[0].intent_debug_summary_for(world),
             controller: owner.cpus[0].controller_state_for_test(),
         });
-        if owner.runtime.lifecycle().phase() != MatchPhase::Running {
+        if owner.runtime.lifecycle().phase() != MatchPhase::Running
+            || (profile != CpuProfile::HARD_V51 && finish.is_some_and(|tick| state.tick() >= tick))
+        {
             break;
         }
     }
+    let state = owner.runtime.state_for_test().unwrap();
+    let opponent_defeated = SeatId::ALL
+        .into_iter()
+        .filter(|seat| *seat != CPU)
+        .any(|seat| !state.actor(seat).unwrap().alive());
     Outcome {
         initial_pits,
         samples,
         worker,
         admission: owner.cpus[0].admission_trace_for_test(),
         result_phase: owner.runtime.lifecycle().phase(),
-        plan_probe: plan_probe.expect("the first CPU plan must be inspected"),
+        plan_probe,
+        plant,
+        completed_escape: state.actor(CPU).unwrap().alive()
+            && (opponent_defeated || finish.is_some_and(|tick| state.tick() >= tick)),
+        destroyed: initial_blocks
+            .iter()
+            .any(|cell| !state.world().arena().blocks().contains(cell)),
+        opponent_defeated,
     }
 }
 
@@ -151,6 +204,10 @@ fn inspect_first_plan(basis: PlanningBasis<'_>, captured: &mut Option<PlanProbe>
 }
 
 fn controlled_scene(basis: &State) -> State {
+    controlled_scene_inner(basis, false)
+}
+
+fn controlled_scene_inner(basis: &State, open_route: bool) -> State {
     let fixed = fixed_arena();
     let terrain = std::array::from_fn(|index| {
         fixed
@@ -165,7 +222,8 @@ fn controlled_scene(basis: &State) -> State {
         (6,7),(7,7),(8,7),(9,7),(10,7),(12,7),(13,7),(1,8),(5,8),(7,8),
         (9,8),(13,8),(1,9),(3,9),(5,9),(6,9),(8,9),(9,9),(11,9),(13,9),
         (7,10),(3,11),(4,11),(5,11),(7,11),(9,11),(10,11),(11,11)]
-        .into_iter().map(|(column,row)| CellId::new(column,row)).collect();
+        .into_iter().map(|(column,row)| CellId::new(column,row))
+        .filter(|cell| !open_route || *cell != CellId::new(3,9)).collect();
     let arena = Arena::new(
         terrain,
         blocks,

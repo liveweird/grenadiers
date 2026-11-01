@@ -50,7 +50,7 @@ struct Reached {
 pub(super) struct SearchMap {
     values: [u8; ARENA_CELL_COUNT],
     blocked: [bool; ARENA_CELL_COUNT],
-    forbidden: [bool; ARENA_CELL_COUNT],
+    pub(super) forbidden: [bool; ARENA_CELL_COUNT],
     pub(super) highest_value: u8,
 }
 

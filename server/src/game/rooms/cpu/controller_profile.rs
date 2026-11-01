@@ -19,6 +19,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V47
                         | grenadiers_core::room::CpuProfile::HARD_V49
                         | grenadiers_core::room::CpuProfile::HARD_V51
+                        | grenadiers_core::room::CpuProfile::HARD_V53
                 );
         }
         match rules_version {
@@ -77,6 +78,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::TELEPORTER_V48_EASY
                     | grenadiers_core::room::CpuProfile::TELEPORTER_V50_STANDARD
                     | grenadiers_core::room::CpuProfile::TELEPORTER_V50_EASY
+                    | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_STANDARD
+                    | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
             ),
             _ => false,
         }
@@ -94,6 +97,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V47
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
+                | grenadiers_core::room::CpuProfile::HARD_V53
         )
     }
 
@@ -116,8 +120,11 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V48_EASY
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_STANDARD
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_EASY
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_STANDARD
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
+                | grenadiers_core::room::CpuProfile::HARD_V53
         )
     }
 
@@ -137,8 +144,11 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V48_EASY
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_STANDARD
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_EASY
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_STANDARD
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
+                | grenadiers_core::room::CpuProfile::HARD_V53
         )
     }
 
@@ -155,8 +165,11 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V48_EASY
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_STANDARD
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_EASY
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_STANDARD
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
+                | grenadiers_core::room::CpuProfile::HARD_V53
         )
     }
 
@@ -170,8 +183,11 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V48_EASY
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_STANDARD
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_EASY
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_STANDARD
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
+                | grenadiers_core::room::CpuProfile::HARD_V53
         )
     }
 
@@ -182,8 +198,11 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V48_EASY
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_STANDARD
                 | grenadiers_core::room::CpuProfile::TELEPORTER_V50_EASY
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_STANDARD
+                | grenadiers_core::room::CpuProfile::PIT_AVOIDANCE_V52_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V49
                 | grenadiers_core::room::CpuProfile::HARD_V51
+                | grenadiers_core::room::CpuProfile::HARD_V53
         )
     }
 }
@@ -223,6 +242,7 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V47).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V49).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V51).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V53).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -240,6 +260,7 @@ mod tests {
             CpuPolicy::UtilityV46,
             CpuPolicy::UtilityV48,
             CpuPolicy::UtilityV50,
+            CpuPolicy::UtilityV52,
         ] {
             let forged = controller(CpuProfile {
                 policy,
@@ -263,6 +284,7 @@ mod tests {
             CpuPolicy::UtilityV47,
             CpuPolicy::UtilityV49,
             CpuPolicy::UtilityV51,
+            CpuPolicy::UtilityV53,
         ] {
             for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
                 let forged = controller(CpuProfile { policy, difficulty });
@@ -290,6 +312,8 @@ mod tests {
             CpuProfile::TELEPORTER_V48_STANDARD,
             CpuProfile::TELEPORTER_V50_STANDARD,
             CpuProfile::TELEPORTER_V50_EASY,
+            CpuProfile::PIT_AVOIDANCE_V52_STANDARD,
+            CpuProfile::PIT_AVOIDANCE_V52_EASY,
         ] {
             assert!(controller(profile).profile_supports(10));
             assert!(!controller(profile).profile_supports(9));
@@ -303,6 +327,7 @@ mod tests {
         assert!(controller(CpuProfile::HARD_V47).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V49).supports_refuge_handoff());
         assert!(controller(CpuProfile::HARD_V51).supports_refuge_handoff());
+        assert!(controller(CpuProfile::HARD_V53).supports_refuge_handoff());
         assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
         assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD).supports_contact_topology());
         assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_EASY).supports_contact_topology());
@@ -330,6 +355,9 @@ mod tests {
             CpuProfile::TELEPORTER_V48_EASY,
             CpuProfile::HARD_V49,
             CpuProfile::HARD_V51,
+            CpuProfile::PIT_AVOIDANCE_V52_STANDARD,
+            CpuProfile::PIT_AVOIDANCE_V52_EASY,
+            CpuProfile::HARD_V53,
         ] {
             let current = controller(profile);
             assert!(current.supports_contact_topology());

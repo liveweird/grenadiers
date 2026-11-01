@@ -34,6 +34,8 @@ fn opted_in_profiles_preserve_the_ordinary_fallback_without_a_target() {
         CpuPolicy::UtilityV49,
         CpuPolicy::UtilityV50,
         CpuPolicy::UtilityV51,
+        CpuPolicy::UtilityV52,
+        CpuPolicy::UtilityV53,
     ] {
         let planner = CpuPlanner::without_workers();
         let (job, result) = spike_job(policy);
@@ -57,6 +59,8 @@ fn opted_in_worker_emits_a_bounded_typed_approach_for_an_exposed_target() {
         CpuPolicy::UtilityV49,
         CpuPolicy::UtilityV50,
         CpuPolicy::UtilityV51,
+        CpuPolicy::UtilityV52,
+        CpuPolicy::UtilityV53,
     ] {
         let planner = CpuPlanner::without_workers();
         let (mut job, result) = spike_job(policy);

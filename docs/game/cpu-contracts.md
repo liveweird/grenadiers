@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `TELEPORTER_V50_STANDARD` or `TELEPORTER_V50_EASY` and `HARD_V51`;
-private replay25 binds those identities. Named archive constants preserve historical replay
+Two. Live selection uses `PIT_AVOIDANCE_V52_STANDARD` or `PIT_AVOIDANCE_V52_EASY` and `HARD_V53`;
+private replay26 binds those identities. Named archive constants preserve historical replay
 identities. Policy identity describes decision semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
@@ -366,8 +366,9 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU50 and Hard
-selects CPU51. Their ordinary fallback is computed first and preserves exactly CPU44/45's result,
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU52 and Hard
+selects CPU53. Their ordinary planning adds the pit-avoidance rules below. Archived CPU50/51
+compute their ordinary fallback first and preserve exactly CPU44/45's result,
 memory and RNG; only the typed Teleporter selector consumes additional remaining work. Confirmed-
 origin continuation delegates unchanged to CPU44/45. The selected profiles retain the same shared
 65,536-work budget and full planting, route, mob-contact and admission proofs. Hard keeps CPU45's
@@ -401,11 +402,31 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay25 binds CPU50/51; archived replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
+Private replay26 binds CPU52/53; archived replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
 private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
 contact modes. Older policy/replay contracts remain isolated.
+
+## Voluntary pit avoidance
+
+CPU52/53 exclude every observed pit site, regardless of phase, from ordinary search maps before
+reachability. Pickup, wall-farming and rival-pressure approaches also reject pit cells, including
+retained goals and routes. An already-on-pit search root cannot become a new pit approach merely
+because reachability seeds the current cell. No-pit scenes retain their corresponding tactical
+base: farm38/39 with lairs, spike26/hard28 without them.
+
+Before accepting an ordinary short pulse, pickup handoff, opening move or origin-recovery pulse,
+check its complete swept footprint envelope for new pit contact. Refusal happens while selecting
+candidates so safe alternatives remain available. All checks consume the existing shared work
+allowance. Fully certified planting and continuation routes retain their complete time-dependent
+pit proofs and can cross pits safely; this restriction does not replace them. A CPU already on a
+pit retains checked recovery behavior, with no promise that forced placement is escapable.
+
+The multi-Teleporter selector and physical executor are retained. Their existing proof already
+excludes pit sites from movement prefixes and landing regions. Foreign-bomb planting support,
+future-loot and contact obligations remain unchanged. Archived policies and replay formats retain
+their earlier behavior.
 
 ## Typed Teleporter recovery
 

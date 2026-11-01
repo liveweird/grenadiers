@@ -42,6 +42,46 @@ pub fn plan_lairs(
     origin: &PlantEscapeOrigin,
     work: &mut WorkBudget,
 ) -> Option<OriginRecoveryChoice> {
+    plan_lairs_inner(
+        observation,
+        history,
+        settled_stop_tick,
+        memory,
+        origin,
+        work,
+        false,
+    )
+}
+
+pub fn plan_lairs_avoiding_pits(
+    observation: &Observation,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: &PlantEscapeOrigin,
+    work: &mut WorkBudget,
+) -> Option<OriginRecoveryChoice> {
+    plan_lairs_inner(
+        observation,
+        history,
+        settled_stop_tick,
+        memory,
+        origin,
+        work,
+        true,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn plan_lairs_inner(
+    observation: &Observation,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: &PlantEscapeOrigin,
+    work: &mut WorkBudget,
+    avoid_pits: bool,
+) -> Option<OriginRecoveryChoice> {
     let allowance = work.remaining() / 2;
     let mut attempt = WorkBudget::new(allowance);
     let prepared = prepare(
@@ -67,6 +107,7 @@ pub fn plan_lairs(
         settled_stop_tick,
         memory,
         origin,
+        avoid_pits,
         work,
     )?;
     plan.survival.control.next_memory = continuation_recovery_memory(memory);

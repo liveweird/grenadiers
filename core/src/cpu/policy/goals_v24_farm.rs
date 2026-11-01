@@ -3,6 +3,7 @@ use crate::game::CellId;
 
 use super::{Candidate, DistanceMap, FirstStepMap, cell_index};
 use crate::cpu::policy::movement::{STEPS, offset};
+use crate::cpu::policy::pit_avoidance::PitMask;
 use crate::cpu::policy::{StrategicObjectiveKind, StrategicTarget};
 
 #[allow(clippy::too_many_arguments)]
@@ -14,6 +15,7 @@ pub(super) fn add_firing_candidates(
     score: u8,
     distance: &DistanceMap,
     first_step: &FirstStepMap,
+    pit_sites: &PitMask,
     candidates: &mut Vec<Candidate>,
     failed_approach: Option<CellId>,
 ) {
@@ -26,6 +28,9 @@ pub(super) fn add_firing_candidates(
             continue;
         };
         if failed_approach == Some(approach) {
+            continue;
+        }
+        if pit_sites.contains(observation, approach) {
             continue;
         }
         let (Some(distance), Some(first_step)) = (distance[index], first_step[index]) else {

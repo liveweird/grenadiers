@@ -195,7 +195,7 @@ targets. Unselected pickups must remain unchanged at admission and completion. C
 their exact-one-target contract; CPU50/51 reuse their physical executor.
 
 
-CPU50 serves Easy/Standard and CPU51 serves Hard under private replay25. Their ordinary fallback
+Archived CPU50 serves Easy/Standard and CPU51 serves Hard under private replay25. Their ordinary fallback
 is exactly CPU44/45's result, memory and RNG; only the additional selector work is charged. An
 active confirmed-origin record bypasses the new selector and retains CPU44/45 continuation
 behavior. The existing planting, pulse and contact-topology guards still reject exposed
@@ -310,3 +310,16 @@ on the plant's observed scene assumptions: withdrawal at the first mismatched pu
 not predict arbitrary unseen rival actions.
 Physical tests, natural-spawn tests, real queued-owner execution and independent review are
 required alongside geometric separation tests.
+
+## Ordinary pit avoidance
+
+Live CPU52/53 retain the same fair observation, shared work limit and multi-Teleporter recovery,
+while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
+pulse check covers swept footprint contact, including partial overlaps; a rejected candidate can
+fall through to another checked direction. This prevents choosing a locally safe approach that
+leaves the CPU standing on a pit when its warning expires.
+
+Complete planting and continuation routes keep their time-dependent pit proofs and may cross
+pits when the entire escape is certified. Already-on-pit recovery remains checked and can still
+be impossible. Private replay26 binds these profiles; older formats retain their original policy
+identities. See the [pit contract](cpu-contracts.md#voluntary-pit-avoidance).

@@ -5,6 +5,8 @@ mod execution;
 mod goals;
 mod hazards;
 mod movement;
+mod pit_avoidance;
+mod pit_planner;
 mod placement;
 mod planner;
 mod teleporter_guidance;
@@ -12,6 +14,10 @@ mod teleporter_guidance_v50;
 mod types;
 
 pub use execution::{EscapeExecution, follow_checked_escape, follow_committed_escape};
+pub use pit_planner::{
+    plan_farm_pits_v52, plan_hard_farm_pits_v53, plan_hard_pits_cautious_v53,
+    plan_spike_pits_cautious_v52,
+};
 pub use planner::plan;
 pub(crate) use planner::{
     plan_farm_v38, plan_hard_farm_v39, plan_hard_v28, plan_lairs, plan_respawn, plan_respawn_v23,
@@ -40,6 +46,8 @@ mod goal_tests;
 mod hard_v28_goal_tests;
 #[cfg(test)]
 mod ordinary_turn_tests;
+#[cfg(test)]
+mod pit_avoidance_tests;
 #[cfg(test)]
 mod rules_v9_goal_tests;
 #[cfg(test)]

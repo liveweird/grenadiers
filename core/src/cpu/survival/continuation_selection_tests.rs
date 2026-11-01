@@ -126,6 +126,7 @@ fn reduced_attempt_preserves_same_forecast_legacy_fallback() {
         Tick(196),
         &memory,
         &scene.origin,
+        false,
         &mut WorkBudget::new(20_000),
     )
     .expect("legacy origin recovery remains available");
@@ -160,6 +161,7 @@ fn no_lair_reduced_attempt_preserves_disabled_predecessor_fallback() {
         Tick(196),
         &memory,
         &scene.origin,
+        false,
         &mut WorkBudget::new(20_000),
     )
     .expect("disabled origin recovery remains available");

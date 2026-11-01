@@ -125,6 +125,37 @@ impl PlantEscapeOrigin {
     pub(super) const fn bomb_id(&self) -> EntityId {
         self.actual_id
     }
+
+    pub(super) fn continuation_hint(
+        &self,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> Option<(crate::game::CellId, Direction)> {
+        let route = self.certificate.route();
+        let lane_count = route
+            .start_window()
+            .end
+            .0
+            .checked_sub(route.start_window().start.0)?;
+        let units = u32::try_from(route.steps().len())
+            .ok()?
+            .checked_add(u32::try_from(lane_count).ok()?)?
+            .checked_add(1)?;
+        work.try_take(units).ok()?;
+        let first_axis = route.steps().iter().find_map(|step| match step {
+            crate::cpu::routing::RouteStep::Move { direction, .. } => Some(*direction),
+            crate::cpu::routing::RouteStep::Wait { .. } => None,
+        })?;
+        let final_tick = Tick(route.survive_until().0.checked_sub(1)?);
+        let mut refuge = None;
+        for first in route.start_window().start.0..route.start_window().end.0 {
+            let cell = route.lane(Tick(first))?.pose_at(final_tick)?.0.cell()?;
+            if refuge.is_some_and(|previous| previous != cell) {
+                return None;
+            }
+            refuge = Some(cell);
+        }
+        Some((refuge?, first_axis))
+    }
 }
 
 pub(super) fn valid_origin(origin: &PlantEscapeOrigin, current: &Observation) -> bool {

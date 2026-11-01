@@ -1,6 +1,15 @@
 //! Bounded time-aware routing over recipient-visible hazard forecasts.
 
 mod bracelet_guard;
+// Explicitly inactive proof checkpoint. Remove these narrow allowances when
+// the bounded planner/executor callers land, before gameplay activation.
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation;
+mod continuation_candidates;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_proof;
+#[cfg_attr(not(test), allow(dead_code))]
+mod continuation_types;
 mod motion;
 mod pickup_pulse;
 mod plant;
@@ -35,6 +44,12 @@ pub use spike_pits::SpikePitGuard;
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
 
 pub(crate) use bracelet_guard::BraceletGuard;
+#[allow(unused_imports)] // Inactive survival adapter is exercised by focused tests.
+pub(crate) use continuation::certify_continuation;
+#[cfg(test)]
+pub(crate) use continuation::certify_nominal_for_test;
+pub(crate) use continuation_candidates::continuation_candidates;
+pub(crate) use continuation_types::{ContinuationCertificate, ContinuationRequest, NominalLeg};
 
 pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};
 pub(crate) use plant::{
@@ -70,6 +85,9 @@ mod route_terminal_tests;
 #[cfg(test)]
 #[path = "motion_regression_tests.rs"]
 mod motion_regression_tests;
+
+#[cfg(test)]
+mod continuation_tests;
 
 #[cfg(test)]
 #[path = "plant_tests.rs"]

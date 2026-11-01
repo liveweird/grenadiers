@@ -1,4 +1,6 @@
-use crate::cpu::forecast::{ForecastLimits, ObservedHazardMemory, TickWindow, forecast};
+use crate::cpu::forecast::{
+    ForecastLimits, HazardForecast, ObservedHazardMemory, TickWindow, forecast,
+};
 use crate::cpu::policy::{ControlPlan, UtilityMemory};
 use crate::cpu::routing::{
     PulseOriginGrace, PulseRequest, RouteMode, certify_escape_pulse, certify_lair_escape_pulse,
@@ -68,8 +70,29 @@ fn plan_inner(
 ) -> Option<OriginPlan> {
     origin.retain_stopped(observation)?;
     let forecast = forecast(observation, history, None, ForecastLimits::default(), work).ok()?;
+    plan_with_forecast(
+        observation,
+        &forecast,
+        settled_stop_tick,
+        memory,
+        origin,
+        lairs,
+        work,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn plan_with_forecast(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: &PlantEscapeOrigin,
+    lairs: bool,
+    work: &mut WorkBudget,
+) -> Option<OriginPlan> {
     let actor = super::compatibility::actor(observation)?;
-    let target = super::steering::origin_target(observation, &forecast, origin.cell(), work)?;
+    let target = super::steering::origin_target(observation, forecast, origin.cell(), work)?;
     let current_distance = super::steering::distance(actor.position, target);
     let basis = observation.parts().tick.0;
     let start_window = TickWindow {
@@ -108,13 +131,13 @@ fn plan_inner(
             };
             let (lease, contact) = if lairs {
                 let Ok((lease, contact)) =
-                    certify_lair_escape_pulse(observation, &forecast, request, grace, work)
+                    certify_lair_escape_pulse(observation, forecast, request, grace, work)
                 else {
                     continue;
                 };
                 (lease, Some(contact))
             } else {
-                let Ok(lease) = certify_escape_pulse(observation, &forecast, request, grace, work)
+                let Ok(lease) = certify_escape_pulse(observation, forecast, request, grace, work)
                 else {
                     continue;
                 };
@@ -148,4 +171,27 @@ fn plan_inner(
         }
     }
     best.map(|(_, plan)| plan)
+}
+
+pub(super) fn plan_lairs_with_forecast(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    settled_stop_tick: Tick,
+    memory: &UtilityMemory,
+    origin: &PlantEscapeOrigin,
+    work: &mut WorkBudget,
+) -> Option<LairSurvivalPlan> {
+    let plan = plan_with_forecast(
+        observation,
+        forecast,
+        settled_stop_tick,
+        memory,
+        origin,
+        true,
+        work,
+    )?;
+    Some(LairSurvivalPlan {
+        survival: plan.survival,
+        contact: plan.contact,
+    })
 }

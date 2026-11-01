@@ -20,6 +20,16 @@ pub(super) struct Motion {
     storm_deadlines: Option<super::storm::DeadlineBounds>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct MotionSnapshot {
+    pub(super) position: Position,
+    pub(super) heading: Direction,
+    pub(super) residual: u16,
+    pub(super) pending: Option<(Direction, i32)>,
+    pub(super) reversed: bool,
+    pub(super) storm_deadlines: Option<super::storm::DeadlineBounds>,
+}
+
 impl Motion {
     pub(super) fn stopped(context: &Context<'_>, tick: Tick) -> Self {
         Self {
@@ -41,6 +51,17 @@ impl Motion {
 
     pub(super) const fn storm_deadlines(&self) -> Option<super::storm::DeadlineBounds> {
         self.storm_deadlines
+    }
+
+    pub(super) const fn snapshot(&self) -> MotionSnapshot {
+        MotionSnapshot {
+            position: self.position,
+            heading: self.heading,
+            residual: self.residual,
+            pending: self.pending,
+            reversed: self.reversed,
+            storm_deadlines: self.storm_deadlines,
+        }
     }
 }
 

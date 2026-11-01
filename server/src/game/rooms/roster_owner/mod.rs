@@ -170,6 +170,12 @@ mod pit_entry_owner_support;
 #[cfg(test)]
 mod pit_entry_owner_tests;
 #[cfg(test)]
+mod range_three_escape_diagnostics;
+#[cfg(test)]
+mod range_three_escape_owner_support;
+#[cfg(test)]
+mod range_three_escape_owner_tests;
+#[cfg(test)]
 mod tests;
 
 #[cfg(test)]

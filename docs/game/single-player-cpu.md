@@ -180,6 +180,43 @@ binds the continuation identities. A [scheduling fixture](../history/cpu-recover
 using synthetic grants establishes timing only; it is not a safety certificate. Remaining
 improvements and broader scene support stay in the [backlog](../../BACKLOG.md#single-player).
 
+## Intentional Teleporter collection boundary
+
+Current planting and ordinary pulse guards reject exposed Teleporters. The collection extension
+must use a separate typed `TeleporterStep` certificate rather than weakening those guards or
+making curses ordinary pickup goals. Its work is tracked only in the [backlog](../../BACKLOG.md#single-player).
+
+Each step authorizes one movement update, an unconditional Stop on the next physical update,
+and a fresh confirmed stopped observation before further movement. Ordinary checked navigation
+approaches a neighboring cell center. A target-specific **Approach** step may overlap the named
+Teleporter with the footprint while every possible final center remains outside its cell.
+Repeated Approach steps end at a pose where **Collect** enters that cell in one update.
+Do not snap positions or infer a stopped residual from a public screenshot.
+
+For a stopped basis `B`, check every start in `[B+1, B+8)` and safety through exclusive `B+18`.
+Cover partial or blocked movement, no collection, refused swap, consumed-without-swap and every
+possible live partner without reading private randomness. Swap has two endpoints and no connecting
+sweep; it resets both actors' residual and pending turn, preserves headings and leaves the
+partner's held input active. The root's Stop never stops the partner.
+
+Bound arbitrary rival movement, unknown residual and contested collection. Check complete landing
+footprints and post-teleport mob, pit, mine and storm consequences. Initially require one exposed
+Teleporter, a complete visible living roster, visible empty bombs and no flames, Oil, active origin
+or unsupported immediate weapons, forced motion or reachable effects. New bomb blocking remains
+possible; a short proof window can exclude detonation only with a checked minimum-fuse argument.
+Reject unsupported landing regions rather than treating engine destination validity as safety.
+
+Retain the ordinary fallback's result, memory and RNG. Attempt new recovery only from the remaining
+shared 65,536 work, initially capped at 32,768; charge generation, forecasts, every start/partner
+branch and failures. Admission has one shared bounded allowance without fresh search. Bind actual
+world/seat/actor, stopped pose, settings, capabilities/effects/markers, pickup, topology, hazards
+and the full living roster. Rejected or stale submission cannot commit authority.
+
+Acceptance requires normal adjacent-center approach, actual collection, physical Stop confirmation
+and a subsequent independently certified productive action through the live roster owner. The
+legacy owner is test-only and keeps its archived profile/rejection regressions. A handcrafted
+edge pose is insufficient. Archived policy behavior and existing Teleporter refusals remain closed.
+
 ## Plant-bound contact topology
 
 The contact-envelope refinement uses public barriers to exclude unreachable space while

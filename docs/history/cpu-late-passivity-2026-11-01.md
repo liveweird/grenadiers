@@ -30,6 +30,12 @@ and `lair_contact_topology.rs` excludes it from topology certificates. Pickup gu
 `cpu/policy/goals.rs` gives Teleporter no collection value and forbids deliberate transit across it.
 This confirms a support boundary behind the passivity, not a completed alternative safe route.
 
+The fixture and focused tests in `core/src/cpu/lair_contact_v139_teleporter_*` preserve sample 99.
+Default/all-items admission settings and settled-Stop/execution ticks remain explicit assumptions.
+The exposed Teleporter rejects the plant contact proof after eight charged scans; removing only
+that pickup permits the same contact certificate. This isolates the support guard, without
+claiming actual collection or a physical trajectory from the captured match.
+
 Do not remove those guards without a replacement proof. Intentional collection would need to
 cover every possible live partner, both endpoints, retained motion and post-teleport mob/hazard
 contacts without observing private partner-selection randomness. Destruction would need to

@@ -97,69 +97,70 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.14 — 2026-11-01
+## v1.3.15 — 2026-11-01
 
-CPUs can resume checked movement after simultaneous bomb plants when a supported forecast
-exceeds the old preparation allowance. The previous selector spent its 32,768-unit half-budget
-and returned before pulse fallback, despite the same forecast fitting the full shared budget.
+CPU farmers can use a lateral escape when their usual retreat points into a hard wall or lair.
+Two checked refuge hints make the demonstrated short clear planting window useful near an arena
+border. This requires a current committed adjacent Farm approach, visible-empty bombs and no
+flames. Geometry is only guidance; complete planting, route, usefulness and mob-contact proofs
+still authorize the action within the existing `min(8,192, remaining / 8)` child and 65,536 total.
 
-CPU54/55 prepare one forecast first. Preparation that fits the original allowance retains
-identical continuation/fallback choices and work; more expensive preparation reserves at least
-half the remainder for the existing checked fallback. The 65,536 total limit, candidate caps,
-RNG, physical Stop, contact, Oil, pit and strict publication guards remain unchanged. Non-origin
-planning delegates to CPU52/53. Private replay27 binds Easy/Standard54 and Hard55; previous
-policies and replays remain isolated.
+Easy/Standard use CPU56, Hard uses CPU57 and private replay28 binds those identities. Archived
+policies and replay27 remain unchanged. Pit avoidance, strict publication admission, shared
+continuation preparation and multi-Teleporter recovery are retained. The separate foreign-bomb
+and future-loot support guard is unchanged; this is a clear-window farming improvement.
 
-The controlled owner witness preserves three CPU53 deaths at tick 1042. All six new difficulty
-and Oil combinations reproduce the same natural three-way range-three wave at 862, survive its
-detonation/flames, then remain alive through a fixed tick 2180 bomb cohort's computed blast
-horizon. Later bombs do not extend that finite cohort. Actual old queued bases also select a
-certified Pulse within budget. Inputs, upgrades and stopped clocks arise through real owner
-execution. Concealed contents and fresh seed/history are explicit controlled assumptions.
+The controlled three-CPU comparison retains CPU55's no-plant episode. On every new difficulty,
+Two naturally plants at (11,1)/439, destroys its committed block at detonation 619, and survives
+the actual flames through 649. All three CPUs remain alive through the 600-update episode
+(ticks 180–780), with other CPUs still active and no worker/admission failures. On its exact
+queued clear basis, the complete planner spends 4,239 work instead of the previous 58,041
+movement-only result. This is a bounded before/after result, not a claim that all tactics or
+future unsupported item combinations are solved.
 
-Completed rules10 pulses also wait for a fresh publication before strict admission, within the
-existing age/start-window limits. A captured 837-refusal native stall identifies the missing
-historical pit guard; the controller now retains the result without granting input. Changed
-pit state and pose still reject, and Core admission remains fail-closed. Existing journal
-playback is preserved; newly played matches can accept input at different ticks.
-
-This repairs the demonstrated recovery bottlenecks. The separate foreign-bomb planting/future-
-loot guard and broader tactical tuning remain in the backlog. No UI, art, protocol, physics,
-dependency or database changes; restart ends in-memory matches.
+No frontend, artwork, transport, physics, external dependency or database changes. Restart ends
+in-memory matches.
 
 ### Verification
 
-Accepted source: `a5d723f995dee228a048f89136d91f4a02f2a7cb`.
-Accepted image:
-`sha256:ee8e02ce832b5ffb67dd26fc8de432bfca88470d30cf4305f2c2bffe27081842`.
-Subsequent changes update release documentation/backlog only; Docker build inputs are unchanged.
+Accepted source: `7a014a636f01f4a21cc8a60e23ac3d0c959a7f71`.
+Accepted image: `sha256:995727bbd14426822208171423518a677aa52d636ddacb4b68f535ffe6031238`.
+Subsequent release documentation/backlog changes leave Docker build inputs unchanged.
 
-- Independent Core, runtime, replay, owner and CI reviews are clear. Successful-preparation
-  equivalence, allowance boundaries, partly spent budgets and fail-closed cases pass.
-- The frozen local Rust gate passes in 988 seconds: 1,879 Core and 759 server tests per
-  profile (755 ordinary plus four isolated native cases). All 4,194,304 item masks pass in
+- Independent Core and server/profile/replay reviews are clear. Actual queued-basis provenance,
+  archived results/work, geometry, negative cases and exact allocation boundaries pass. The
+  full planner's real child allowance is 8,149 after 343 parent work; total allowance 31,511
+  permits the plant and 31,510 declines without manufacturing authority.
+- The clean local Rust gate passes in 934 seconds: 1,898 Core and 766 server tests per
+  profile (762 ordinary plus four isolated native cases). All 4,194,304 item masks pass in
   debug, release and coverage with 32 partitions, four workers and zero retries. Official
-  coverage is 68,411/73,249 lines (93.40%), above the unchanged 90% floor; all 40 raw profiles,
-  including the native cohort, contribute to the report. Formatting, strict Clippy, build,
-  repository and runner-contract checks pass. The earlier coverage failure and its exact
-  missing-guard diagnostic remain separate; no clocks, assertions or work limits were relaxed.
+  coverage is 69,330/74,195 lines (93.44%), above the unchanged 90% floor; all 40 raw profiles
+  contribute to the report. Formatting, strict Clippy, build, repository and runner contracts
+  pass. Earlier sandbox-only listener failures are retained separately from the authorized
+  successful checks.
 - Linux x86_64 workspace units and doctests pass in debug/release
-  ([run 41351629226](https://github.com/liveweird/grenadiers/actions/runs/41351629226)).
-  Local and Linux runners share one timing catalog; all four native cases execute once
-  serially after ordinary tests, retaining coverage where applicable.
+  ([run 41357540109](https://github.com/liveweird/grenadiers/actions/runs/41357540109)) on
+  the exact accepted source. No duplicate portable remote matrix is required.
 - Exact-image Compose authentication/keyboard duel/three-CPU play and restricted Kubernetes
-  acceptance pass. Pinned Trivy reports zero fixable high/critical findings. Dependency
-  policies/audits pass the configured threshold with existing moderate tooling advisories.
-- All five web assets match v1.3.13 byte-for-byte. Unchanged frontend inputs reuse
-  accepted checks. Dependency audits reuse the unchanged manifest/lockfile inputs.
+  acceptance pass. Every CPU moves and bombs are planted, without browser errors. Temporary
+  acceptance projects/namespaces are removed.
+- Pinned Trivy reports zero fixable high/critical image vulnerabilities. Rust advisories,
+  bans, licenses and sources pass. npm audits pass their configured high-severity threshold
+  with unchanged moderate findings (20 in web, 12 in E2E; dependency trees overlap).
+- All five frontend assets equal v1.3.14 byte-for-byte. Unchanged frontend inputs reuse their
+  accepted checks; no art update or artist-bundle regeneration is needed.
 
 ### Operation
 
 The exact accepted image is running on localhost:8085. Image/source labels, restricted container
-settings, health/readiness, security headers, CSP/cache and all five served assets pass. Fresh
-three-Hard-CPU play shows all three moving and CPU bombs, without browser errors.
-The immutable v1.3.13 image/override remain available for rollback. This is a source/local-runtime
-release; no hosted service or production registry is configured. The artist bundle is unchanged.
+settings, health/readiness, security headers, CSP/cache and all five served assets pass. A fresh
+three-Hard-CPU match shows all three moving and CPU bombs, without browser errors.
+The immutable v1.3.14 image/override remain available for rollback. This publishes source and
+an accepted local runtime; no hosted service or production registry is configured. The artist
+bundle is unchanged.
+
+<a id="v1314--2026-11-01"></a>
+The [v1.3.14 record](history/releases.md#v1314--2026-11-01) is preserved in release history.
 
 <a id="v1313--2026-11-01"></a>
 The [v1.3.13 record](history/releases.md#v1313--2026-11-01) is preserved in release history.

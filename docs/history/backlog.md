@@ -437,3 +437,12 @@ three difficulties with and without Oil. Core guards, recorded-journal playback 
 planning contracts remain intact. See the [investigation](cpu-late-passivity-2026-11-01.md) and
 [release record](../releases.md#v1314--2026-11-01). Foreign-bomb farming support and broader Hard
 tactics remain separate entries in the root backlog.
+
+## CPU farming in a clear window — 2026-11-01
+
+Version 1.3.15 adds a version-isolated lateral refuge hint when a committed farming approach
+faces a hard wall or lair. The real three-CPU comparison plants, destroys its target and
+survives complete flames on every difficulty, while archived CPU55 retains its no-plant
+witness. Work, route/contact/pit and publication limits remain; foreign-bomb support is a
+separate proof obligation. See the [refuge contract](../game/cpu-contracts.md#farming-when-the-usual-retreat-is-blocked),
+[investigation](cpu-late-passivity-2026-11-01.md) and [release](../releases.md#v1315--2026-11-01).

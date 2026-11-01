@@ -19,20 +19,16 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — use the verified clear farming window.** CPU55 still fails to
-  plant during the controlled 600-update interaction episode. The exact foreign-bomb tick 234
-  proof exhausts its allowance; keep that support guard unchanged. A later actual clear
-  basis at tick 432 admits a useful complete route through refuge(13,3), while existing away-first
-  hints point outside the arena. Add a version-isolated lateral hint within the existing
-  child/shared budgets, then prove natural useful planting and complete flame survival with
-  other CPUs still active. Preserve archived choices/work, pit checks, publication admission,
-  v54 continuation recovery, v50 Teleporter recovery and accepted-input replay.
-  The [investigation](docs/history/cpu-late-passivity-2026-11-01.md) retains exact queued
-  observations, memory and provenance. Future foreign-bomb planting support still requires
-  complete future-loot, arbitrary-partner-swap and contact/renewal proofs; no guard relaxation
-  is justified by the current raw cost failures or controlled empty hidden loot.
+- [todo] **CPU-RELIABILITY — extend foreign-bomb support only from complete witnesses.**
+  Version 1.3.15 delivers useful planting in the demonstrated clear farming window. Preserve
+  its natural owner planting/flame survival, archived choices/work, pit/publication checks,
+  v54 continuation and v50 Teleporter recovery. The exact foreign-bomb tick-234 raw proof
+  exhausts its allowance; relaxing its support guard is not justified by that result or by
+  controlled empty hidden loot. Further support needs a useful complete plant with future
+  loot, arbitrary partner swaps, contact and renewal obligations covered under the unchanged
+  work ceiling. See the [investigation](docs/history/cpu-late-passivity-2026-11-01.md).
 
-- [todo] **HARD-CPU — deepen fair tactics.** Improve productive farming,
+- [next] **HARD-CPU — deepen fair tactics.** Improve productive farming,
   pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
   observations, bounded planning and unchanged physics. Require authoritative before/after
   witnesses and independent review; preserve archived policies and complete seeded episodes.

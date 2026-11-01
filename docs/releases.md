@@ -97,52 +97,63 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.2.4 — 2026-11-01
+## v1.2.5 — 2026-11-01
 
-Mobs can escape corridors whose first few cells remain inside a future timed blast. Live
-navigation3 finds bounded, time-aware routes to refuge, checking whole footprints against fuse
-and chain deadlines. It rechecks changed obstacles and hazards; uncertain bomb models retain
-conservative avoidance. See [lair navigation](game/lairs.md#movement-and-combat).
+CPU players can certify useful bomb placement while an Oil barrel keeps burning. The previous
+Teleporter support guard could prohibit planting globally for the rest of the round. CPU27
+models static Oil through the existing persistent lethal-cell forecast instead. With Teleporter
+enabled it still requires visible empty bomb knowledge, no finite flames and no exposed
+Teleporter. Full escape, selected-target usefulness, mob-contact and bounded-work proofs remain
+required. See [CPU support boundaries](game/multiplayer-cpu.md#persistent-burning-oil).
 
-Historical navigation and CPU identities remain unchanged. Private replay11 binds rules10,
-CPU26 and navigation3; production recording/export remains disabled. Wire18 and the paired web
-client are unchanged. Conservative Oil forecasts can refuse possible routes; this is not a
-claim that every mob can escape every bomb.
+Easy and Standard select CPU27 with their existing cadence. Historical CPU26 behavior and
+navigation policies remain immutable. Private replay12 binds rules10/CPU27/navigation3 and
+rejects mixed provenance; production recording/export remains disabled. Wire18 is unchanged.
 
 ### Verification
 
-Accepted image source: `a335555afbeee8d1a85c84cc3fd840c7bc81c665`.
-Independent review is clear. Later release-record changes do not alter image build inputs.
+Accepted image source: `6e322f2fce8208e7e03e75c0c9a0b8a27cea057c`.
+Independent core and cross-component activation reviews are clear. Later release-record edits
+do not change image build inputs.
 
-- Full local parallel Rust gate passes: debug, release, Clippy, formatting, build and coverage.
-  Core: 1,672 passed and one ignored; server: 601 passed and 15 ignored, plus the separately
-  partitioned exhaustive 22-item catalogue test. All 4,194,304 masks run in each of debug,
-  release and coverage, with four workers, 32 partitions and no retries. The complete gate
-  takes 729 seconds; line coverage is 52,661/56,934 (92.49%), above the unchanged 90% floor.
-- Navigation fixtures cover chain deadlines, multi-cell transit, changing obstacles,
-  whole-footprint safety, bounded work, conservative Oil states and historical-policy isolation.
-  An actual rules10 State with all items/environment enabled survives the corridor where
-  navigation2 waits and dies. Replay11 rejects mixed policy identities.
-- Distinct Linux ARM64 release checks pass: 38 mob, 70 lair and six replay10/11 tests.
-- Exact-image Compose authentication/duel: two passed. A three-CPU all-features match moves
-  all CPUs and plants bombs without browser errors. A two-human match verifies both lairs
-  spawning one mob each and suspending their respawn timers. Random blocked spawn exits
-  retain the documented next-tick retry behavior.
-- Exact-image Kubernetes authentication/duel and restricted runtime pass. Acceptance stacks
-  and namespace are removed. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities.
-  All five image web files equal the accepted v1.2.3 build.
-
-Reuse v1.2.3 full web/native camera acceptance, bundle budgets and v1.2.2 artwork/audio
-acceptance: those inputs and dependencies did not change.
+- Actual State-derived lairs-enabled/disabled fixtures show CPU26 refusing and CPU27 certifying
+  a useful bomb in the identical scene. Authoritative execution destroys the selected block
+  and survives the complete escape interval. Guard-isolation, lethal escape Oil, visible bombs,
+  finite flames, unavailable bomb knowledge, exposed Teleporter, scene invalidation and hidden
+  item-reveal controls pass. Per-job work remains at most 65,536.
+- A production-paced three-CPU episode records each seat moving and placing its own bomb,
+  with worker delivery/admission accounting; cancellation and guarded admission refusals remain
+  diagnostic scheduling outcomes, rather than prohibited events. It is operational evidence, not a guarantee that
+  productive planting is always available. An earlier accelerated-tick farming-stall hypothesis
+  was rejected after identical-input plant proofs showed no omitted productive certificate.
+- Native Rust debug/release suites pass: 1,678 core and 609 server tests, plus the separately
+  partitioned exhaustive catalogue test. After test-only scheduling corrections, both native
+  worker tests and the complete fresh instrumented workspace are rerun. Line coverage is
+  53,089/57,336 (92.59%), above the unchanged 90% floor. All 4,194,304 masks run in debug,
+  release and coverage with four workers, 32 partitions and no retries. Clippy, formatting,
+  build and repository checks pass.
+- Distinct Linux ARM64 release checks pass: six Oil proofs, one worker-dispatch test, two
+  exact-profile tests and nine replay10–12 tests. The final image retains the exact same
+  filesystem layers as that Linux-accepted candidate; only test scheduling and provenance
+  labels changed.
+- Exact-image Compose authentication/duel: two passed; an all-features three-CPU match moves
+  all CPUs and plants bombs without browser errors. Exact-image Kubernetes authentication/duel
+  and restricted runtime pass. Owned acceptance stacks and namespaces are removed.
+- Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL vulnerabilities. All five image web files
+  equal the accepted v1.2.3 production build. Reuse that full web/native camera acceptance and
+  v1.2.2 artwork/audio acceptance; these inputs and dependencies did not change.
 
 ### Operation
 
 Accepted local image:
-`sha256:7e11ff44f5a46148c7deba65a4209add092f7c22155c8a8df9d9fd3390086924`.
-The exact accepted image is promoted to localhost:8085; v1.2.3 remains available for rollback.
+`sha256:fbca836651065065bcd9222ec6333efb1e36a8b33f9938ab5c0f44db1169735b`.
+The exact accepted image is promoted to localhost:8085; v1.2.4 remains available for rollback.
 This is a source/local-runtime release without a hosted service or production registry.
 The unchanged artwork remains in the
 [v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
+<a id="v124--2026-11-01"></a>
+The [v1.2.4 record](history/releases.md#v124--2026-11-01) is preserved in release history.
 
 <a id="v123--2026-11-01"></a>
 The [v1.2.3 record](history/releases.md#v123--2026-11-01) is preserved in release history.

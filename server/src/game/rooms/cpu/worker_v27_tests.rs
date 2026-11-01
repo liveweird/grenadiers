@@ -114,7 +114,11 @@ fn queued_worker_dispatches_refuge_profiles_with_identical_core_control_rng_and_
         WorkBudget,
         survival::{plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin},
     };
-    for policy in [CpuPolicy::UtilityV33, CpuPolicy::UtilityV34] {
+    for policy in [
+        CpuPolicy::UtilityV33,
+        CpuPolicy::UtilityV34,
+        CpuPolicy::UtilityV35,
+    ] {
         let planner_fn = if policy == CpuPolicy::UtilityV33 {
             plan_refuge_guidance_v33_with_origin
         } else {

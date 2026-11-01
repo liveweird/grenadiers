@@ -104,7 +104,11 @@ Format16 retains gameplay19/rules10/navigation3 and binds CPU33 on Easy/Standard
 CPU34 on Hard. Header, body and per-seat provenance must agree. Format15 retains CPU31/32 and
 rejects future metadata; production recording/export remains disabled.
 
-Formats6/7/8/9/10/11/12/13/14/15/16 normalize their closed operations into shared executors rather than duplicating
+Format17 retains gameplay19/rules10/navigation3 and binds CPU33 on Easy/Standard (or no CPU),
+CPU35 on Hard. Header, body and per-seat provenance must agree. Format16 rejects future Hard35
+metadata; production recording/export remains disabled.
+
+Formats6/7/8/9/10/11/12/13/14/15/16/17 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

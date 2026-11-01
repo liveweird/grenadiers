@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.4 — 2026-11-01
+
+- Allow Hard35 to make one optional, fully certified second-bomb attempt from a stopped refuge while retaining the original hold.
+- Retain all urgent-job ordering, bounded worker/queue/work limits, and complete survival, contact and usefulness proofs.
+- Bind live Easy/Standard33 and Hard35 to private replay17 while retaining replay16's CPU33/34 identities.
+
 ## 1.3.3 — 2026-11-01
 
 - Fix escape guidance at the traversable-cell footprint boundary while retaining all lethal/contact/admission guards.

@@ -79,11 +79,12 @@ mod tests {
                 profile,
             )
         };
-        let hard = controller(CpuProfile::HARD_V34);
+        let hard = controller(CpuProfile::HARD_V35);
         assert!(hard.profile_supports(10));
         assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
         assert!(controller(CpuProfile::HARD_V32).profile_supports(10));
+        assert!(controller(CpuProfile::HARD_V34).profile_supports(10));
         for rules in 5..10 {
             assert!(!hard.profile_supports(rules));
         }
@@ -107,6 +108,7 @@ mod tests {
             CpuPolicy::UtilityV29,
             CpuPolicy::UtilityV32,
             CpuPolicy::UtilityV34,
+            CpuPolicy::UtilityV35,
         ] {
             for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
                 let forged = controller(CpuProfile { policy, difficulty });

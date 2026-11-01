@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy33 on Easy/Standard and policy34 on Hard for every live
+The live environment CPU implementation uses policy33 on Easy/Standard and policy35 on Hard for every live
 two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -20,7 +20,7 @@ or a private arena/simulation random stream.
 ## Policies and controller ownership
 
 `CpuProfile::REFUGE_V33_STANDARD` and `REFUGE_V33_EASY` select Utility33 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V34` selects Utility34 for Hard rooms with the same observation boundary.
+`CpuProfile::HARD_V35` selects Utility35 for Hard rooms with the same observation boundary.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
@@ -91,7 +91,20 @@ when an ordinary longer movement pulse must stop before collection. The short ha
 complete hazard forecast, spike/storm checks and mob-contact proof; it does not enable ordinary
 uncertified movement on rules10. Teleporter and Diarrhea retain their existing exclusions.
 Easy keeps its normal clear-navigation cadence. Old policies27–32 remain unchanged; replay15
-retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34.
+retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34; replay17 binds
+Easy/Standard33 and Hard35.
+
+## Safe second bombs
+
+After a Hard bot reaches a confirmed stopped refuge from its first bomb and has spare capacity, it may
+queue one optional attempt to replace its stationary hold with a useful full new Stop+Bomb plant
+certificate. The old route and contact proof remain installed while planning; the attempt uses job-local
+Reengage memory and RNG and commits live state only after the owner accepts Stop+Bomb. A shared absent/present
+survival horizon must cover the old deadline. Queue refusal, stale or failed proof, non-plant result,
+displacement or submission refusal retain the old hold. Optional jobs follow every seat's urgent jobs.
+The existing two workers, 32-job queue, 65,536-work limit and all forecast, motion, contact and usefulness
+proofs remain unchanged. Hard35 reuses the Core34 planner; Teleporter counter-pressure still requires
+globally clear soft blocks and its prior support rules.
 
 ## Footprint-boundary recovery
 

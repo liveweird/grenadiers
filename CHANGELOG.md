@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.12 — 2026-11-01
+
+- Recover deliberately from multiple exposed Teleporters when every unselected pickup stays outside every living actor’s full proof-window reach, including post-swap movement.
+- Reuse one path search/forecast, stable target commitment and existing work limits; demonstrate two real collections followed by useful farming or a winning attack.
+- Select Easy/Standard50 and Hard51 with private replay25, preserving previous policy/replay contracts and sharing accepted-input recording/validation.
+
 ## 1.3.11 — 2026-11-01
 
 - Fix repeated Teleporter recovery refusals after a player dies; unchanged dead roster members no longer block admitted movement.

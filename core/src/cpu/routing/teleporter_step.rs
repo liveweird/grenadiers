@@ -16,6 +16,25 @@ pub fn certify_teleporter_step(
     request: TeleporterStepRequest,
     work: &mut WorkBudget,
 ) -> Result<TeleporterStep, RouteFailure> {
+    certify(observation, forecast, request, false, work)
+}
+
+pub fn certify_teleporter_step_v50(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: TeleporterStepRequest,
+    work: &mut WorkBudget,
+) -> Result<TeleporterStep, RouteFailure> {
+    certify(observation, forecast, request, true, work)
+}
+
+fn certify(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: TeleporterStepRequest,
+    allow_distant_teleporters: bool,
+    work: &mut WorkBudget,
+) -> Result<TeleporterStep, RouteFailure> {
     let basis = observation.parts().tick;
     let start_window = TickWindow {
         start: checked_tick(basis, 1)?,
@@ -24,7 +43,13 @@ pub fn certify_teleporter_step(
     let safe_until = checked_tick(basis, EXCLUSIVE_HORIZON)?;
     charge_validation_scan(observation, work)?;
     let context = validation::validate(observation, forecast, start_window, safe_until)?;
-    validate_scene(observation, request, safe_until, work)?;
+    validate_scene(
+        observation,
+        request,
+        safe_until,
+        allow_distant_teleporters,
+        work,
+    )?;
     // Nominal phase is based on the unobstructed root update. Arbitrary rival
     // motion and newly planted blocking bombs are represented by every partial
     // endpoint of these segments in the proof below.
@@ -88,6 +113,7 @@ pub fn certify_teleporter_step(
         phase,
         safe_until,
         nominal: &nominal,
+        allow_distant_teleporters,
         work,
     })?;
     charge_observation_clone(observation, work)?;
@@ -113,6 +139,7 @@ fn validate_scene(
     observation: &Observation,
     request: TeleporterStepRequest,
     safe_until: Tick,
+    allow_distant_teleporters: bool,
     work: &mut WorkBudget,
 ) -> Result<(), RouteFailure> {
     let parts = observation.parts();
@@ -130,14 +157,16 @@ fn validate_scene(
         return Err(RouteFailure::Unsupported);
     }
     take(work, usize_to_work(parts.pickups.len())?)?;
-    if parts
+    let teleporters = parts
         .pickups
         .iter()
         .filter(|pickup| pickup.kind == PickupKind::Teleporter)
-        .map(|pickup| pickup.cell)
-        .collect::<Vec<_>>()
-        != [request.target]
-    {
+        .map(|pickup| pickup.cell);
+    if if allow_distant_teleporters {
+        teleporters.filter(|cell| *cell == request.target).count() != 1
+    } else {
+        teleporters.collect::<Vec<_>>() != [request.target]
+    } {
         return Err(RouteFailure::InvalidRequest);
     }
     take(work, usize_to_work(parts.actors.len())?)?;

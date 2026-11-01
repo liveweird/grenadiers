@@ -259,6 +259,22 @@ pub(super) fn test_driver(
     lairs: bool,
     native: bool,
 ) -> (Driver, CpuPlanner) {
+    test_driver_with_pickups(
+        profile,
+        difficulty,
+        lairs,
+        native,
+        BTreeMap::from([(TELEPORTER, PickupKind::Teleporter)]),
+    )
+}
+
+pub(super) fn test_driver_with_pickups(
+    profile: CpuProfile,
+    difficulty: CpuDifficulty,
+    lairs: bool,
+    native: bool,
+    pickups: BTreeMap<CellId, PickupKind>,
+) -> (Driver, CpuPlanner) {
     let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
     let configuration = RoomConfiguration::new(
         &[SeatControl::Human, SeatControl::Cpu],
@@ -301,7 +317,7 @@ pub(super) fn test_driver(
         runtime.settle_boundary([None; 4]).unwrap();
     }
     let basis = runtime.state_for_test().unwrap();
-    let scene = controlled_state(basis);
+    let scene = controlled_state(basis, pickups);
     let notice = runtime.install_running_scene_for_test(scene).unwrap();
     let planner = if native {
         CpuPlanner::new().unwrap()
@@ -328,7 +344,7 @@ pub(super) fn test_driver(
     (owner, planner)
 }
 
-fn controlled_state(basis: &State) -> State {
+fn controlled_state(basis: &State, pickups: BTreeMap<CellId, PickupKind>) -> State {
     let fixed = fixed_arena();
     let terrain = std::array::from_fn(|index| {
         fixed
@@ -341,13 +357,7 @@ fn controlled_state(basis: &State) -> State {
         [CellId::new(1, 1), CellId::new(13, 11)],
     )
     .unwrap();
-    let world = World::with_pickups(
-        arena,
-        BTreeMap::new(),
-        BTreeMap::new(),
-        BTreeMap::from([(TELEPORTER, PickupKind::Teleporter)]),
-    )
-    .unwrap();
+    let world = World::with_pickups(arena, BTreeMap::new(), BTreeMap::new(), pickups).unwrap();
     let actors = [actor(1, SeatId::One, HUMAN_START), actor(2, CPU, CPU_START)];
     State::new_at_tick_with_assignment_and_seed(
         *basis.rules(),

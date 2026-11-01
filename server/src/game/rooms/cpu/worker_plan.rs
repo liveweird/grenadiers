@@ -26,7 +26,9 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
             | CpuPolicy::UtilityV46
             | CpuPolicy::UtilityV47
             | CpuPolicy::UtilityV48
+            | CpuPolicy::UtilityV50
             | CpuPolicy::UtilityV49
+            | CpuPolicy::UtilityV51
     ) && let Some(origin) = job.escape_origin.as_ref()
     {
         return Ok(
@@ -81,7 +83,9 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV46
                 | CpuPolicy::UtilityV47
                 | CpuPolicy::UtilityV48
+                | CpuPolicy::UtilityV50
                 | CpuPolicy::UtilityV49
+                | CpuPolicy::UtilityV51
         )
     {
         let plan = if matches!(
@@ -90,6 +94,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV44
                 | CpuPolicy::UtilityV46
                 | CpuPolicy::UtilityV48
+                | CpuPolicy::UtilityV50
         ) {
             plan_blocked_births_v42_with_origin(
                 &job.observation,
@@ -106,6 +111,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV45
                 | CpuPolicy::UtilityV47
                 | CpuPolicy::UtilityV49
+                | CpuPolicy::UtilityV51
         ) {
             plan_hard_blocked_births_v43_with_origin(
                 &job.observation,
@@ -274,9 +280,17 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 CpuPolicy::UtilityV46
                     | CpuPolicy::UtilityV47
                     | CpuPolicy::UtilityV48
+                    | CpuPolicy::UtilityV50
                     | CpuPolicy::UtilityV49
+                    | CpuPolicy::UtilityV51
             ) {
-                match select_teleporter_recovery(
+                let selector =
+                    if matches!(job.policy, CpuPolicy::UtilityV50 | CpuPolicy::UtilityV51) {
+                        grenadiers_core::cpu::survival::select_teleporter_recovery_v50
+                    } else {
+                        select_teleporter_recovery
+                    };
+                match selector(
                     &job.observation,
                     &job.hazard_memory,
                     job.settled_stop_tick,

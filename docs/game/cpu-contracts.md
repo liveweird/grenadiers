@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `TELEPORTER_V48_STANDARD` or `TELEPORTER_V48_EASY` and `HARD_V49`;
-private replay24 binds those identities. Named archive constants preserve historical replay
+Two. Live selection uses `TELEPORTER_V50_STANDARD` or `TELEPORTER_V50_EASY` and `HARD_V51`;
+private replay25 binds those identities. Named archive constants preserve historical replay
 identities. Policy identity describes decision semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
@@ -366,8 +366,8 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU48 and Hard
-selects CPU49. Their ordinary fallback is computed first and preserves exactly CPU44/45's result,
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU50 and Hard
+selects CPU51. Their ordinary fallback is computed first and preserves exactly CPU44/45's result,
 memory and RNG; only the typed Teleporter selector consumes additional remaining work. Confirmed-
 origin continuation delegates unchanged to CPU44/45. The selected profiles retain the same shared
 65,536-work budget and full planting, route, mob-contact and admission proofs. Hard keeps CPU45's
@@ -385,13 +385,13 @@ flames or exposed Teleporter, visible unpaused timed bombs and no soft blocks. E
 farming retains its prior support. This changes a Teleporter support precondition, not the
 route proof, public observation facts or work limit; all conservative motion checks remain.
 
-CPU48/49 inherit CPU44/45 and CPU42/43's one-update pickup handoff on rules10 even though
+CPU50/51 inherit CPU44/45 and CPU42/43's one-update pickup handoff on rules10 even though
 ordinary clear navigation is disabled there. Full forecast, spike/storm, contact, confirmed Stop
 and fresh observation requirements remain. The longer ordinary pulse still rejects physics-
 changing collection; Teleporter and Diarrhea remain outside this handoff. Archived CPU27–29 are
 unchanged.
 
-CPU48/49 retain CPU44/45 and CPU42/43's refinement of a failed mob-contact envelope for an
+CPU50/51 retain CPU44/45 and CPU42/43's refinement of a failed mob-contact envelope for an
 ordinary plant when public barriers separate every source from the complete certified escape.
 Potentially destroyed blocks are treated as open throughout. The opaque plant-bound certificate
 retains scene, bomb-presence, source and barrier checks at admission and each publication;
@@ -401,16 +401,29 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay24 binds CPU48/49; archived replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
-private replay21; replay20 retains CPU40/41. CPU48/49 ordinary fallback delegates exactly to
+Private replay25 binds CPU50/51; archived replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
+private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
 contact modes. Older policy/replay contracts remain isolated.
 
 ## Typed Teleporter recovery
 
+Multiple exposed Teleporters are supported only when every unselected pickup is beyond the
+maximum full-window travel bound of every visible living actor’s basis position, including the
+root. Swapping permutes occupied positions and resets movement residual; checking all origins
+therefore also excludes another activation after a partner lands at the root’s former position.
+Other reachable pickups, contested collection and unsafe landings remain unsupported.
+
+Guidance builds one map/BFS, scans charged neighboring approaches and keeps a valid prior target.
+Otherwise it chooses reachable approach distance, then target row/column. It freezes one target
+and two movement candidates before the single forecast/proof attempt; failure does not try more
+targets. Unselected pickups must remain unchanged at admission and completion. CPU48/49 retain
+their exact-one-target contract; CPU50/51 reuse their physical executor.
+
+
 Planting, ordinary pulse and contact-topology guards continue to reject exposed Teleporters.
-CPU48/49 may instead remove exactly one exposed Teleporter with a separate `TeleporterStep` after
+CPU50/51 may instead remove one selected exposed Teleporter with a separate `TeleporterStep` after
 the ordinary CPU44/45 fallback has already been computed. Existing `SearchMap`/BFS navigation
 approaches a stable neighboring center without giving curses positive global value or using a
 Teleporter as ordinary transit. Target-specific Approach steps permit footprint overlap only with
@@ -438,7 +451,7 @@ Sealed marker-aware contact containment permits natural births and deaths withou
 observations. The guarantee is root safety under observed supported facts, not the partner's future
 self-survival or protection from unseen future enemy input.
 
-Eligibility requires exactly one exposed Teleporter, the complete visible living roster, visible
+Eligibility requires the selected Teleporter, the complete visible living roster, visible
 empty bombs, no flames or Oil, and no Bracelet, unsupported effects, immediate Remote or Landmine,
 active origin, or reachable invalidating pickup. Both lair modes are checked honestly. New bomb
 blocking and other changed facts can still invalidate the proof.

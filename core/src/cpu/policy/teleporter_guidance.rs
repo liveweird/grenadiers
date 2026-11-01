@@ -36,21 +36,7 @@ pub(crate) fn teleporter_guidance(
     work: &mut WorkBudget,
 ) -> Option<TeleporterGuidance> {
     let parts = observation.parts();
-    work.try_take(1).ok()?;
-    let key = memory.key();
-    if key.world != parts.world || key.cpu_seat != parts.recipient {
-        return None;
-    }
-    work.try_take(u32::try_from(parts.actors.len()).ok()?)
-        .ok()?;
-    let actor = parts.actors.iter().find_map(|candidate| match candidate {
-        ObservedActor::Visible(actor) if actor.seat == parts.recipient => Some(actor),
-        _ => None,
-    })?;
-    if !actor.alive || actor.voluntary_actions_frozen {
-        return None;
-    }
-    let current = actor.position.cell()?;
+    let (actor, current) = recipient_actor(observation, memory, work)?;
 
     work.try_take(u32::try_from(parts.pickups.len()).ok()?)
         .ok()?;
@@ -65,7 +51,50 @@ pub(crate) fn teleporter_guidance(
 
     let map = search_map(observation, actor, current, false, work)?;
     let (distance, first_step) = super::goals::v24::reachable(observation, current, &map, work)?;
-    let retained = retained_approach(*memory, target);
+    let approaches = reachable_approaches(observation, target, &map, &distance, work)?;
+    guidance_for_target(
+        observation,
+        memory,
+        work,
+        actor,
+        current,
+        target,
+        approaches,
+        &distance,
+        &first_step,
+    )
+}
+
+pub(super) fn recipient_actor<'a>(
+    observation: &'a Observation,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+) -> Option<(&'a crate::cpu::VisibleActor, CellId)> {
+    let parts = observation.parts();
+    work.try_take(1).ok()?;
+    let key = memory.key();
+    if key.world != parts.world || key.cpu_seat != parts.recipient {
+        return None;
+    }
+    work.try_take(u32::try_from(parts.actors.len()).ok()?)
+        .ok()?;
+    let actor = parts.actors.iter().find_map(|candidate| match candidate {
+        ObservedActor::Visible(actor) if actor.seat == parts.recipient => Some(actor),
+        _ => None,
+    })?;
+    if !actor.alive || actor.voluntary_actions_frozen {
+        return None;
+    }
+    Some((actor, actor.position.cell()?))
+}
+
+pub(super) fn reachable_approaches(
+    observation: &Observation,
+    target: CellId,
+    map: &super::goals::SearchMap,
+    distance: &[Option<u16>; crate::game::arena::ARENA_CELL_COUNT],
+    work: &mut WorkBudget,
+) -> Option<Vec<CellId>> {
     let mut approaches = Vec::with_capacity(4);
     for (_, dc, dr) in STEPS {
         work.try_take(1).ok()?;
@@ -79,6 +108,22 @@ pub(crate) fn teleporter_guidance(
             approaches.push(cell);
         }
     }
+    Some(approaches)
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn guidance_for_target(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+    actor: &crate::cpu::VisibleActor,
+    current: CellId,
+    target: CellId,
+    mut approaches: Vec<CellId>,
+    distance: &[Option<u16>; crate::game::arena::ARENA_CELL_COUNT],
+    first_step: &[Option<CellId>; crate::game::arena::ARENA_CELL_COUNT],
+) -> Option<TeleporterGuidance> {
+    let retained = retained_approach(*memory, target);
     approaches.sort_unstable_by_key(|cell| {
         let index = cell_index(observation, *cell).unwrap_or(0);
         (
@@ -96,8 +141,8 @@ pub(crate) fn teleporter_guidance(
         actor,
         previous,
         &approaches,
-        &distance,
-        &first_step,
+        distance,
+        first_step,
     )?;
     let approach = approach_choice.cell;
     let approach_index = cell_index(observation, approach)?;
@@ -113,7 +158,7 @@ pub(crate) fn teleporter_guidance(
     work.try_take(u32::try_from(candidates.iter().flatten().count()).ok()?)
         .ok()?;
 
-    let tick = parts.tick;
+    let tick = observation.parts().tick;
     let intent = approach_choice.retained.map_or_else(
         || {
             new_intent(

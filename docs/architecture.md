@@ -31,8 +31,8 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. Live two-to-four-seat matches use CPU48 on Easy/Standard and
-CPU49 on Hard, rules10 physics and mob navigation3; cloud, lair and spike-pit settings may be
+ceiling, not a connection limit. Live two-to-four-seat matches use CPU50 on Easy/Standard and
+CPU51 on Hard, rules10 physics and mob navigation3; cloud, lair and spike-pit settings may be
 enabled or disabled per room. These policies add the typed Teleporter recovery to CPU44/45's
 unchanged ordinary result, memory and RNG behavior. Confirmed-origin continuation still delegates
 to CPU44/45, and older profiles retain their historical policies and rules. The board

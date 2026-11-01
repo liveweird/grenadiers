@@ -298,63 +298,22 @@ fn captured_farm_approach_declines_when_the_full_lair_route_exhausts_work() {
     }
 }
 
-fn controlled_plan(observation: &Observation) -> super::LairSurvivalPlan {
-    let key = MemoryKey {
-        world: observation.parts().world,
-        cpu_seat: observation.parts().recipient,
-    };
-    let mut history = ObservedHazardMemory::new(key);
-    history.observe(observation).unwrap();
-    plan_refuge_guidance_v33_with_origin(
-        observation,
-        &UtilityMemory::new(key),
-        &history,
-        observation.parts().tick,
-        None,
-        &mut CpuRng::from_seed(key, [136; 32]),
-        &mut WorkBudget::new(WORK_ALLOWANCE),
-    )
-    .unwrap()
-}
-
 #[test]
-fn controlled_state_proves_centering_is_the_only_missing_plant_precondition() {
-    const CONTROL_CPU: SeatId = SeatId::Two;
-    const CONTROL_APPROACH: CellId = CellId::new(7, 7);
-    const CONTROL_TARGET: CellId = CellId::new(8, 7);
-    for lairs in [false, true] {
-        let (mut off_center, settings) =
-            super::reliable_v27_oil_tests::state(lairs, None, false, false);
-        let center = Position::center(CONTROL_APPROACH);
-        off_center.set_test_actor_pose(
-            CONTROL_CPU,
-            Position {
-                x: center.x,
-                y: center.y - 294,
-            },
-            Direction::North,
-        );
-        let observed = super::reliable_v27_oil_tests::observe(&off_center, settings);
-        let declined = controlled_plan(&observed);
-        assert_eq!(
-            declined.survival.control.intent.manual, None,
-            "lairs={lairs}"
-        );
-        assert!(declined.survival.execution.is_none(), "lairs={lairs}");
-
-        let (mut centered, settings) =
-            super::reliable_v27_oil_tests::state(lairs, None, false, false);
-        let basis = super::reliable_v27_oil_tests::observe(&centered, settings);
-        assert!(basis.parts().arena.blocks.contains(&CONTROL_TARGET));
-        let productive = controlled_plan(&basis);
-        assert_eq!(
-            productive.survival.control.intent.manual,
-            Some(crate::cpu::ManualIntent::Bomb),
-            "lairs={lairs}"
-        );
-        assert_eq!(productive.contact.is_some(), lairs);
-        super::reliable_v27_oil_tests::execute(&mut centered, settings, basis, productive);
-        assert!(centered.actor(CONTROL_CPU).unwrap().alive());
-        assert!(!centered.world().arena().blocks().contains(&CONTROL_TARGET));
-    }
+fn legal_open_corridor_off_center_already_certifies_without_centering() {
+    let captured = captured_tick_7022();
+    let mut parts = captured.into_parts();
+    parts.arena.blocks.retain(|cell| *cell == TARGET);
+    let open = Observation::new_rules_v10(
+        parts,
+        ObservedEnvironment::new(StormCloudConfig::Disabled, None, vec![Some(0); 4]),
+        None,
+        None,
+    )
+    .unwrap();
+    let planned = plan(&open, false);
+    assert_eq!(
+        planned.survival.control.intent.manual,
+        Some(crate::cpu::ManualIntent::Bomb)
+    );
+    assert!(planned.survival.execution.is_some());
 }

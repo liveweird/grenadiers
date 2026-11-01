@@ -172,3 +172,29 @@ publications, changed bombs, displacement, origin re-entry and exhausted work. A
 using synthetic grants establishes timing only; it is not a safety certificate. Keep
 new policy/replay identities opt-in and every archived contract unchanged. Work sequencing remains
 in the [backlog](../../BACKLOG.md#single-player).
+
+## Contact topology refinement boundary
+
+A contact-envelope refinement may use public barriers to exclude unreachable space while
+retaining the existing distance envelope wherever separation is not proved. Use conservative
+eight-neighbor connectivity and a one-cell eight-neighbor dilation of every source component.
+Compare every cell touched by the complete swept actor footprint, not only its center.
+Freezing, occupancy, likely mob death and presumed fire avoidance cannot close reachable space.
+
+Initially constrain the proof to an ordinary full plant certificate with visible empty initial
+bombs, no finite flames or Oil, no exposed Teleporter and completed running updates. Use shared
+standard-blast geometry for its hypothetical placement. Open every potentially removed block
+from the beginning; retain only separators proved intact throughout the whole horizon. A blocked
+birth location may be omitted only when its block is retained; potentially opened birth cells
+contribute from their original earliest birth time.
+
+Clipped authority must retain the plant certificate, presence mapping and separator evidence.
+Check the plant's scene match and retained barriers at admission and every publication: the
+existing contact lease alone does not bind terrain. Unexpected bombs, displaced/replaced bombs,
+separator loss, unsupported observations or exhausted work withdraw the refinement. Do not
+apply this projection to an observed owned bomb merely because it belongs to the CPU.
+
+Charge construction, birth/source scans, every footprint query and each later validation.
+Unsupported evidence keeps the old conservative result. A geometric experiment does not establish
+a complete route, real spawning behavior, safe physical planting, publication-latency safety or
+production authority. Those witnesses and independent review remain prerequisites to activation.

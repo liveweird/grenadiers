@@ -182,6 +182,10 @@ The batch's instrumented raw profile remains in the ordinary baseline used by th
 and execution proof. Do not overlap this cohort with ordinary or mask workers, retry it, relax its
 assertions, or raise its timing limits.
 
+The automatic Linux platform job uses `scripts/native-cpu-tests.py` (and `--release`) to apply the
+same catalog and scheduling helper while retaining its unique workspace unit and doctest scope.
+That thin wrapper does not run replay masks, coverage reporting, or the full local verification.
+
 The parallel runner checks Cargo-owned coverage-cache cleanup before expensive execution and
 fails immediately if Cargo rejects an existing cache. Preserve the complete cache metadata when
 restoring a cache; do not bypass an invalid ownership marker. Instrumented workspace executables

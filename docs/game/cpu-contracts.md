@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `PIT_AVOIDANCE_V52_STANDARD` or `PIT_AVOIDANCE_V52_EASY` and `HARD_V53`;
-private replay26 binds those identities. Named archive constants preserve historical replay
+Two. Live selection uses `RECOVERY_V54_STANDARD` or `RECOVERY_V54_EASY` and `HARD_V55`;
+private replay27 binds those identities. Named archive constants preserve historical replay
 identities. Policy identity describes decision semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
@@ -366,11 +366,13 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU52 and Hard
-selects CPU53. Their ordinary planning adds the pit-avoidance rules below. Archived CPU50/51
+Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU54 and Hard
+selects CPU55. Without a retained origin, they delegate exactly to CPU52/53, including ordinary
+planning, pit avoidance, multi-Teleporter selection, work and RNG. Confirmed-origin recovery uses
+the shared preparation rules below. Archived CPU50/51
 compute their ordinary fallback first and preserve exactly CPU44/45's result,
 memory and RNG; only the typed Teleporter selector consumes additional remaining work. Confirmed-
-origin continuation delegates unchanged to CPU44/45. The selected profiles retain the same shared
+origin continuation for those archived profiles delegates unchanged to CPU44/45. The selected profiles retain the same shared
 65,536-work budget and full planting, route, mob-contact and admission proofs. Hard keeps CPU45's
 range-aware firing positions against visible rivals and does not receive hidden positions,
 concealed loot, private seeds or faster physics.
@@ -402,15 +404,34 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay26 binds CPU52/53; archived replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
+Private replay27 binds CPU54/55; archived replay26 binds CPU52/53, replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
 private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
 contact modes. Older policy/replay contracts remain isolated.
 
+## Shared escape preparation
+
+CPU54/55 validate the actual retained plant origin and build one unchanged default forecast
+against the shared remaining work before attempting optional continuation. A forecast that
+exceeds the old half allowance can therefore still support a checked recovery pulse.
+
+Let incoming remaining work be `A`, its old half allowance `H = floor(A/2)`, and common
+preparation cost `C`. When `C <= H`, optional continuation receives exactly `H-C`, preserving
+the old successful-preparation choices and work. Otherwise it receives at most half the
+post-preparation remainder. Generation retains its existing cap and two frozen proof slots.
+Charge all failed attempts, then reuse the same forecast for the existing pit-safe pulse
+fallback. No work is refunded, no second forecast or RNG draw is introduced, and the total
+decision ceiling remains 65,536.
+
+Common preparation or fallback exhaustion fails closed. Actual Stop, scene, bomb, contact,
+Oil, pit and publication checks remain unchanged; Oil still excludes full continuation where
+it did previously. CPU44–53 retain their original allocation and results. This does not relax
+the separate foreign-bomb planting/future-loot support guard.
+
 ## Voluntary pit avoidance
 
-CPU52/53 exclude every observed pit site, regardless of phase, from ordinary search maps before
+CPU54/55 inherit CPU52/53's exclusion of every observed pit site, regardless of phase, from ordinary search maps before
 reachability. Pickup, wall-farming and rival-pressure approaches also reject pit cells, including
 retained goals and routes. An already-on-pit search root cannot become a new pit approach merely
 because reachability seeds the current cell. No-pit scenes retain their corresponding tactical

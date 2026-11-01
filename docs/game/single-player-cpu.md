@@ -313,7 +313,7 @@ required alongside geometric separation tests.
 
 ## Ordinary pit avoidance
 
-Live CPU52/53 retain the same fair observation, shared work limit and multi-Teleporter recovery,
+Live CPU54/55 inherit CPU52/53's fair observation, shared work limit and multi-Teleporter recovery,
 while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
 pulse check covers swept footprint contact, including partial overlaps; a rejected candidate can
 fall through to another checked direction. This prevents choosing a locally safe approach that
@@ -321,5 +321,14 @@ leaves the CPU standing on a pit when its warning expires.
 
 Complete planting and continuation routes keep their time-dependent pit proofs and may cross
 pits when the entire escape is certified. Already-on-pit recovery remains checked and can still
-be impossible. Private replay26 binds these profiles; older formats retain their original policy
+be impossible. Private replay27 binds these profiles; older formats retain their original policy
 identities. See the [pit contract](cpu-contracts.md#voluntary-pit-avoidance).
+
+## Shared preparation for interrupted escapes
+
+CPU54/55 build the common forecast before reserving optional continuation work. Preparation
+that fits the historical half allowance retains its exact previous continuation/fallback
+allocation. More expensive supported forecasts can use the shared allowance, with at least
+half the remaining work reserved for the existing checked pulse fallback. Both paths reuse
+one forecast and retain the 65,536-work ceiling, actual Stop and origin provenance, contact,
+Oil and pit guards. See the [allocation contract](cpu-contracts.md#shared-escape-preparation).

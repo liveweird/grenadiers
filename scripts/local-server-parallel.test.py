@@ -11,6 +11,34 @@ HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("local_server_parallel", HERE / "local-server-parallel.py")
 module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
 
+wrapper_spec = importlib.util.spec_from_file_location("native_cpu_tests", HERE / "native-cpu-tests.py")
+wrapper = importlib.util.module_from_spec(wrapper_spec); wrapper_spec.loader.exec_module(wrapper)
+
+
+class WrapperRunner:
+    def __init__(self): self.calls = []
+    def select_binary(self, release):
+        self.calls.append(("select", release))
+        return Path("release-server" if release else "debug-server")
+    def execute_ordinary_and_isolated(self, profile, binary, *, release):
+        self.calls.append(("execute", profile, binary, release))
+
+
+debug_wrapper = WrapperRunner(); wrapper.main([], debug_wrapper)
+assert debug_wrapper.calls == [
+    ("select", False), ("execute", "debug", Path("debug-server"), False)]
+release_wrapper = WrapperRunner(); wrapper.main(["--release"], release_wrapper)
+assert release_wrapper.calls == [
+    ("select", True), ("execute", "release", Path("release-server"), True)]
+invalid_wrapper = WrapperRunner()
+try:
+    wrapper.main(["--unknown"], invalid_wrapper)
+except SystemExit as error:
+    assert error.code == 2
+else:
+    raise AssertionError("unknown native CPU runner argument accepted")
+assert invalid_wrapper.calls == []
+
 
 with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temporary:
     binary = Path(temporary) / "server-libtest"

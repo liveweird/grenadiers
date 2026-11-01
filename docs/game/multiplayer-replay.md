@@ -80,7 +80,12 @@ binds navigation3. Its reader rejects navigation2, previous outer versions and m
 format10 remains navigation2. The new identity changes only deterministic mob decisions, not public
 observations, ordinary input submission, lifecycle or recording/export availability.
 
-Formats6/7/8/9/10/11 normalize their closed operations into shared executors rather than duplicating
+Format12 retains rules10/navigation3 and binds CPU27, including its persistent-burning-Oil
+plant support. Format11 remains CPU26. The closed reader rejects older outer versions and
+mixed CPU provenance while reusing the same accepted-operation executor; it does not rerun
+planners or enable production recording/export.
+
+Formats6/7/8/9/10/11/12 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

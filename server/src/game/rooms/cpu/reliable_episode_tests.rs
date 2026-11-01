@@ -67,7 +67,11 @@ fn run(lairs: bool, profile: CpuProfile, pacing_ms: u64) -> RealWorkerOutcome {
             Ok(())
         }),
         Arc::new(|epoch| Ok(SimulationSeed::new([73_u8.wrapping_add(epoch as u8); 32]))),
-        grenadiers_core::game::MobNavigationPolicy::EscapeV2,
+        if profile.policy == grenadiers_core::room::CpuPolicy::UtilityV27 {
+            grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3
+        } else {
+            grenadiers_core::game::MobNavigationPolicy::EscapeV2
+        },
     )
     .unwrap();
     let admission = runtime.prepare_join(SeatId::One).unwrap();

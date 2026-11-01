@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.2.5 — 2026-11-01
+
+- Let CPU players certify useful bomb placement with persistent burning Oil, while retaining
+  Teleporter, visible-bomb, flame, full escape and mob-contact safety boundaries.
+- Add production-paced worker/admission diagnostics and bind live CPU27/navigation3 in private replay12.
+
 ## 1.2.4 — 2026-11-01
 
 - Let mobs escape across multiple future blast cells before stationary timed bombs detonate,

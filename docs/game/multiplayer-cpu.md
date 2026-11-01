@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy26 on rules10 for every live two-to-four-seat
+The live environment CPU implementation uses policy27 on rules10 for every live two-to-four-seat
 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -19,7 +19,8 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::SPIKE_PITS_STANDARD` and `SPIKE_PITS_EASY` select Utility26 for live rules10 rooms.
+`CpuProfile::RELIABLE_V27_STANDARD` and `RELIABLE_V27_EASY` select Utility27 for live rules10 rooms.
+`SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
 `RESPAWN_V23_STANDARD`/`RESPAWN_V23_EASY` retain Utility23 with goal-cell persistence.
 `RESPAWN_V22_STANDARD`/`RESPAWN_V22_EASY` retain Utility22 with certified pickup handoffs.
@@ -40,6 +41,18 @@ Punch and Bracelet proofs inspect all relevant visible rivals and third-party bl
 Unknown hidden rivals withdraw proofs that cannot be certified. Bracelet also rejects
 third-party Bracelet threats that could counter-shove the CPU off its certified approach.
 These additional multiplayer guards do not change rules-5 admission semantics.
+
+## Persistent burning Oil
+
+CPU27 can certify a useful bomb while static burning Oil exists. With Teleporter enabled,
+planting still requires visible, empty bomb knowledge, no finite flames and no exposed
+Teleporter. Oil remains a persistent lethal forecast cell; full escape, selected-target
+usefulness, mob-contact and the 65,536-work limit still apply. CPU26 keeps its original refusal.
+
+This removes a global planting prohibition after an Oil barrel burns; it does not authorize
+bombing in every Teleporter scene or guarantee safety against arbitrary later rival actions.
+Changed hazards invalidate a committed route. Newly revealed items require fresh observation.
+Private replay12 binds CPU27/navigation3; earlier readers retain their original identities.
 
 ## Retained storm profile
 

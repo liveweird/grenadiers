@@ -44,7 +44,7 @@ commands remain limited to 4,096 bytes. Upgrade or restart ends process-local ma
 no cross-version resume.
 
 Replay format10 privately binds rules10, CPU26, mob navigation2, spike-pit layout1 and exact
-spike timing. Format11 binds navigation3 with the same public rules and CPU26. Neither widens
-retained readers or enables production replay recording. See
+spike timing. Format11 binds navigation3 with CPU26; format12 retains navigation3 and binds
+live CPU27. These private versions do not widen retained readers or enables production replay recording. See
 [spike pits](spike-pits.md), [lairs](lairs.md), [protocol consumers](protocol-consumers.md) and
 the [historical v17 contract](protocol-v17.md).

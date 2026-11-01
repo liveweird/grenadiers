@@ -67,6 +67,8 @@ struct PlannerInner {
     sender: Mutex<Option<SyncSender<PlanJob>>>,
     workers: Mutex<Vec<JoinHandle<()>>>,
     _receiver: Arc<Mutex<Receiver<PlanJob>>>,
+    #[cfg(test)]
+    trace: Arc<Mutex<PumpReport>>,
 }
 
 impl Drop for PlannerInner {
@@ -93,12 +95,21 @@ impl CpuPlanner {
     fn with_worker_count(worker_count: usize) -> Result<Self, ()> {
         let (sender, receiver) = sync_channel(QUEUE_CAPACITY);
         let receiver = Arc::new(Mutex::new(receiver));
+        #[cfg(test)]
+        let trace = Arc::new(Mutex::new(PumpReport::default()));
         let mut workers = Vec::with_capacity(worker_count);
         for index in 0..worker_count {
             let receiver = Arc::clone(&receiver);
+            #[cfg(test)]
+            let trace = Arc::clone(&trace);
             let worker = thread::Builder::new()
                 .name(format!("grenadiers-cpu-{index}"))
-                .spawn(move || worker_loop(&receiver))
+                .spawn(move || {
+                    #[cfg(test)]
+                    worker_loop(&receiver, &trace);
+                    #[cfg(not(test))]
+                    worker_loop(&receiver);
+                })
                 .map_err(|_| ())?;
             workers.push(worker);
         }
@@ -107,6 +118,8 @@ impl CpuPlanner {
                 sender: Mutex::new(Some(sender)),
                 workers: Mutex::new(workers),
                 _receiver: receiver,
+                #[cfg(test)]
+                trace,
             }),
         })
     }
@@ -156,22 +169,22 @@ impl CpuPlanner {
                     | std::sync::mpsc::TryRecvError::Disconnected,
                 ) => break,
             };
-            report.dequeued += 1;
-            let (status, spent, intent, planner_time) = execute_job(job, true);
-            report.planner_times.extend(planner_time);
-            match status {
-                JobStatus::Delivered => report.delivered += 1,
-                JobStatus::Cancelled => report.cancelled += 1,
-                JobStatus::Failed => report.failed += 1,
-                JobStatus::Dropped => report.dropped += 1,
-            }
-            report.work.push(spent);
-            report.planned_intents.extend(intent);
+            record(&mut report, execute_job(job, true));
         }
         report
     }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn trace_for_test(&self) -> PumpReport {
+        self.inner
+            .trace
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .clone()
+    }
 }
 
+#[cfg(not(test))]
 fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
     loop {
         let job = receiver
@@ -183,6 +196,46 @@ fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>) {
         };
         let _ = execute_job(job, false);
     }
+}
+
+#[cfg(test)]
+fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>, trace: &Arc<Mutex<PumpReport>>) {
+    loop {
+        let job = receiver
+            .lock()
+            .unwrap_or_else(|error| error.into_inner())
+            .recv();
+        let Ok(job) = job else {
+            return;
+        };
+        let result = execute_job(job, true);
+        record(
+            &mut trace.lock().unwrap_or_else(|error| error.into_inner()),
+            result,
+        );
+    }
+}
+
+#[cfg(test)]
+fn record(
+    report: &mut PumpReport,
+    (status, spent, intent, planner_time): (
+        JobStatus,
+        u32,
+        Option<grenadiers_core::cpu::Intent>,
+        Option<std::time::Duration>,
+    ),
+) {
+    report.dequeued += 1;
+    report.planner_times.extend(planner_time);
+    match status {
+        JobStatus::Delivered => report.delivered += 1,
+        JobStatus::Cancelled => report.cancelled += 1,
+        JobStatus::Failed => report.failed += 1,
+        JobStatus::Dropped => report.dropped += 1,
+    }
+    report.work.push(spent);
+    report.planned_intents.extend(intent);
 }
 
 fn execute_job(

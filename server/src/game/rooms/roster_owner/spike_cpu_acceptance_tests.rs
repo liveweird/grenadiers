@@ -359,3 +359,6 @@ fn compact_easy_cpu26_plants_with_default_all_on_rules() {
     assert!(outcome.first_bomb_tick.is_some(), "{outcome:?}");
     assert!(outcome.max_work <= WORK_ALLOWANCE, "{outcome:?}");
 }
+
+#[path = "../cpu/reliable_episode_tests.rs"]
+mod real_worker_tests;

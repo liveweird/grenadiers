@@ -4,7 +4,7 @@ use grenadiers_core::cpu::{
 };
 use grenadiers_core::game::{SeatId, Tick};
 
-use super::{CpuController, StopAdmission, derive_round_seed};
+use super::{CpuController, StopAdmission, seed::derive_round_seed};
 
 impl CpuController {
     pub(in crate::game::rooms) const fn seat(&self) -> SeatId {
@@ -50,6 +50,10 @@ impl CpuController {
         self.escape_origin_epoch = None;
         self.cadence = super::CadenceState::default();
         self.strategic_blast = None;
+        #[cfg(test)]
+        {
+            self.admission_trace = super::admission::AdmissionTrace::default();
+        }
     }
 
     pub(in crate::game::rooms) fn accept_observation(&mut self, observation: &Observation) -> bool {

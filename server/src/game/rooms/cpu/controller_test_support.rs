@@ -2,7 +2,7 @@ use std::sync::{Arc, atomic::AtomicBool, mpsc::sync_channel};
 
 use grenadiers_core::cpu::{DecisionId, Observation, survival::SurvivalPlan};
 
-use super::{CpuController, Pending};
+use super::{AcceptedPlan, CpuController, Pending};
 use crate::game::rooms::cpu::worker::PlanResult;
 
 impl CpuController {
@@ -37,5 +37,11 @@ impl CpuController {
             live: Arc::new(AtomicBool::new(true)),
             completed: None,
         });
+    }
+}
+
+impl AcceptedPlan {
+    pub(in crate::game::rooms) fn has_certificate_for_test(&self) -> bool {
+        self.committed_pulse.is_some() || self.committed_route.is_some()
     }
 }

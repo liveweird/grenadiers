@@ -4,6 +4,66 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.2 — 2026-11-01
+
+CPU players now finish supported pickup approaches instead of repeatedly stopping outside a
+drop, timing out their goal and turning toward another drop. A longer movement pulse still
+refuses collection that changes actor state. The existing certified one-update pickup handoff
+can now be selected on rules10, followed by Stop and a fresh observation.
+
+The full forecast, stopped suffix, spike/storm trajectory, static geometry and mob-contact
+checks remain authoritative. Teleporter and Diarrhea remain excluded. This changes a coarse
+navigation precondition, without relaxing those proofs. See
+[pickup progress](../game/multiplayer-cpu.md#rules10-pickup-progress).
+
+### Compatibility and limits
+
+Easy/Standard select CPU31; Hard selects CPU32 with its existing pressure/counter-pressure
+behavior. All older policies remain unchanged. Private replay15 binds that exact pair with
+gameplay19/rules10/navigation3, including human-only rooms; replay14 rejects the newer identities.
+Network contracts, simulation physics, artwork, UI and external dependencies are unchanged.
+Restart ends process-local matches. Production replay export remains disabled.
+
+The separately reproduced footprint-boundary escape reversal remains under repair. This release
+does not claim to resolve every CPU stall, guarantee survival or establish a difficulty ranking.
+
+### Verification
+
+Accepted image source: `65058755a66e2a2128de0453d4ea5ec6e90282e2`.
+Independent core and activation/replay reviews are clear; later release-record edits do not
+change image build inputs.
+
+- Full frozen-source Rust gate passes in 654 seconds: 1,711 core and 639 server tests, plus
+  all 4,194,304 item masks separately in debug, release and coverage. Four workers, 32 partitions,
+  no retries; formatting, strict Clippy, build and repository checks pass. Fresh coverage is
+  55,723/60,178 lines (92.60%), above the unchanged 90% floor.
+- Exact captured public facts reproduce old27/29 Stop versus new31/32 West with a one-update
+  certified lease. Physical State cases collect capacity/range with Press/Release stops; existing
+  pulse tests separately cover admission and Stop execution. Flame, blocking mob, prohibited
+  pickup and warning/raised pit controls retain refusals for both new policies.
+- Distinct Linux ARM64 release checks pass: 343 CPU, 26 replay10–15, four dispatch and three
+  current Hard episode tests. Human-only replay and consistently forged future-policy rejection
+  are covered; old readers retain their identities.
+- Exact-image Compose authentication/duel passes both scenarios. Three Hard CPUs move and plant
+  with all features enabled, with diagnostics and no browser errors. The same three-CPU smoke
+  passes restricted Kubernetes CPU/memory limits; owned test resources are removed.
+- An additional 77-second all-on round records actual range upgrades for all three bots, a speed
+  upgrade, 25 distinct owned bombs and a natural round result without browser errors. It uses a
+  different generated arena from the original capture, so it is not a balance or causal comparison.
+- All five image web assets are byte-identical to accepted v1.3.0. Web/contracts/renderer inputs
+  are unchanged, so its 7,426-test full web gate and native renderer acceptance are reused.
+  External dependency versions are unchanged. Pinned Trivy 0.74 finds zero fixable HIGH/CRITICAL
+  vulnerabilities in the exact accepted image.
+
+### Operation
+
+Accepted local image:
+`sha256:5fbadaef1fe190b2832c7c8ea0c782bf0a1a53c637c6c8630a2b73cc7002c913`.
+The exact accepted image is promoted to localhost:8085; v1.3.1 remains available for rollback.
+This is a source/local-runtime release without a hosted service or production registry.
+The unchanged artwork remains in the
+[v1.2.2 artist ZIP](https://github.com/liveweird/grenadiers/releases/download/v1.2.2/grenadiers-artist-v1.2.2.zip).
+
 ## v1.3.1 — 2026-11-01
 
 Hard CPUs can now attempt useful counter-pressure while visible timed bombs remain in a clear

@@ -19,6 +19,7 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temp
         "target": {"name": "grenadiers_server", "kind": ["lib"]},
         "profile": {"test": True}, "executable": str(binary)}) + "\n"
     original_run = module.run
+    original_isolated = module.ISOLATED_TEST
 
     def fake_run(command, **kwargs):
         if command[0] == "cargo":
@@ -26,13 +27,23 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-cargo-json-stream-") as temp
             return subprocess.CompletedProcess(command, 0, stdout=cargo_message)
         if command[0] == str(binary.resolve()):
             return subprocess.CompletedProcess(command, 0, stdout=
-                f"{module.HEAVY_TEST}: test\n{module.INSTRUMENTATION_PROBE_TEST}: test\n")
+                f"{module.HEAVY_TEST}: test\n{original_isolated}: test\n"
+                f"{module.INSTRUMENTATION_PROBE_TEST}: test\n")
         raise AssertionError(f"unexpected command: {command}")
 
     module.run = fake_run
     try:
         assert module.select_binary(False) == binary.resolve()
+        module.ISOLATED_TEST = "missing::isolated"
+        try:
+            module.select_binary(False)
+        except ValueError as error:
+            assert "missing or duplicated" in str(error)
+        else:
+            raise AssertionError("missing isolated test accepted")
+        module.ISOLATED_TEST = original_isolated
     finally:
+        module.ISOLATED_TEST = original_isolated
         module.run = original_run
 
     inherited = {"CARGO_LLVM_COV": "1", "CARGO_LLVM_COV_TARGET_DIR": "/stale-target",
@@ -71,7 +82,8 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-workspace-artifacts-") as te
         listed_commands.append(command)
         if command[0] == str(binaries[1].resolve()):
             return subprocess.CompletedProcess(command, 0, stdout=
-                f"{module.HEAVY_TEST}: test\n{module.INSTRUMENTATION_PROBE_TEST}: test\n")
+                f"{module.HEAVY_TEST}: test\n{module.ISOLATED_TEST}: test\n"
+                f"{module.INSTRUMENTATION_PROBE_TEST}: test\n")
         if command[0] in {str(binaries[0].resolve()), str(binaries[2].resolve())}:
             return subprocess.CompletedProcess(command, 0, stdout="unrelated: test\n")
         raise AssertionError(f"unexpected command: {command}")
@@ -118,6 +130,47 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-workspace-artifacts-") as te
 progress = "import sys; print('{\"reason\":\"build-finished\",\"success\":true}'); print('Finished test profile', file=sys.stderr)"
 captured = module.run(["python3", "-c", progress], capture=True, merge_stderr=False)
 assert json.loads(captured.stdout)["success"] is True and "Finished" not in captured.stdout
+
+with tempfile.TemporaryDirectory(prefix="grenadiers-isolated-profile-") as temporary:
+    root = Path(temporary)
+    binary = root / "server-libtest"; binary.write_text("fixture")
+    raw = root / "baseline"; raw.mkdir()
+    profile_pattern = str(raw / "%p-%18m.profraw")
+    profile_env = {"LLVM_PROFILE_FILE": profile_pattern, "PRESERVED": "yes"}
+    calls = []
+    original_run = module.run
+
+    def fake_profile_run(command, **kwargs):
+        calls.append((command, kwargs.get("env")))
+        assert kwargs.get("env") is profile_env
+        if command[0] == "cargo":
+            assert command.count("--skip") == 2
+            assert module.HEAVY_TEST in command and module.ISOLATED_TEST in command
+            (raw / "ordinary.profraw").write_bytes(b"ordinary")
+        elif command[0] == str(binary):
+            assert command == [str(binary), module.ISOLATED_TEST, "--exact", "--show-output",
+                               "--test-threads=1"]
+            (raw / "isolated.profraw").write_bytes(b"isolated")
+        else:
+            raise AssertionError(f"unexpected command: {command}")
+        return subprocess.CompletedProcess(command, 0)
+
+    module.run = fake_profile_run
+    try:
+        isolated = module.execute_ordinary_and_isolated(
+            "coverage", binary, env=profile_env, raw_dir=raw)
+        assert len(calls) == 2 and isolated["executions"] == 1
+        assert isolated["profile"] == "coverage"
+        assert isolated["concurrentOrdinaryOrMaskWork"] is False
+        assert isolated["rawProfileCount"] == 1
+        assert profile_env == {"LLVM_PROFILE_FILE": profile_pattern, "PRESERVED": "yes"}
+        assert {path.name for path in raw.glob("*.profraw")} == {
+            "ordinary.profraw", "isolated.profraw"}
+        inventory = module.raw_profile_inventory([raw])
+        assert {Path(item["path"]).name for item in inventory[0]["files"]} == {
+            "ordinary.profraw", "isolated.profraw"}
+    finally:
+        module.run = original_run
 
 
 def plan(count):
@@ -193,6 +246,7 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
         "#[cfg(test)] mod test_support;\n"
         "#[cfg(test)] mod tests { use super::*;\n"
         "#[test] fn heavy() { assert_eq!(covered(), 1); }\n"
+        "#[test] fn isolated() { assert_eq!(covered(), 1); }\n"
         "#[test] fn blank_database_url_disables_postgres() { "
         "assert_eq!(test_support::helper(), 7); } }\n"
     )
@@ -213,9 +267,11 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
 
     original_root = module.ROOT
     original_heavy = module.HEAVY_TEST
+    original_isolated = module.ISOLATED_TEST
     original_probe = module.INSTRUMENTATION_PROBE_TEST
     module.ROOT = fixture
     module.HEAVY_TEST = "tests::heavy"
+    module.ISOLATED_TEST = "tests::isolated"
     module.INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"
     try:
         manifest = str(fixture / "Cargo.toml")
@@ -438,5 +494,6 @@ with tempfile.TemporaryDirectory(prefix="grenadiers-llvm-cov-discovery-") as tem
     finally:
         module.ROOT = original_root
         module.HEAVY_TEST = original_heavy
+        module.ISOLATED_TEST = original_isolated
         module.INSTRUMENTATION_PROBE_TEST = original_probe
 print("LOCAL_SERVER_PARALLEL_TESTS_PASS")

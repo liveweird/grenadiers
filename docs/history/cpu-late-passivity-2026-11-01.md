@@ -302,3 +302,29 @@ All three difficulty profiles plant at 235, destroy a block and remain alive thr
 expiry at 446. Every pre-plant actor footprint avoids every pit. This distinct fixture confirms
 that the restriction still permits useful play when a checked alternative exists; it is not
 presented as the identical captured scene. No safety obligation or work allowance is relaxed.
+
+## Controlled concurrent-escape preparation starvation
+
+A fresh CPU53 browser capture contains three range-three plants at tick 944 and three deaths
+at detonation 1124. Unlit Oil is visible, but a public capture cannot identify private authority
+or reconstruct its original queued inputs.
+
+The controlled seed47 owner episode retains its public 81-block layout and normal spawns.
+Three concealed range upgrades and two optional concealed Oil barrels are declared fixture
+contents; other concealed contents, fresh clocks and controller histories are assumptions.
+Natural inputs and pickups produce synchronized range-three bombs at 862, due at 1042.
+Both Oil and no-Oil worlds lose all three CPUs at 1042. Result-state physics freezes there;
+the witness does not fabricate later flame expiry.
+
+The actual queue retains origins after route withdrawal at 864 and has confirmed Stop at 867.
+Immutable copies of each real planning basis show the old selector returning no recovery after
+spending its 32,768 preparation allowance. The identical default forecast succeeds under the
+full allowance at 41,524 work with Oil and 41,124 without it. Forecast construction alone
+therefore cannot fit the old sub-budget; common preparation exits before pulse fallback.
+The first successful selector basis is 972 and its pulse is applied at 973. Both episodes
+deliver exactly 594 jobs without worker or admission failures. This distinguishes delivered
+work from useful movement, and rules out missing-origin and Oil-only explanations.
+
+These records establish the old failure and its preparation bottleneck, not complete success
+of any alternative allocation. A repair needs actual survival through bomb flames and must
+retain the shared work ceiling, contact/pit checks and archived policy behavior.

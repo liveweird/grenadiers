@@ -97,55 +97,61 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.12 — 2026-11-01
+## v1.3.13 — 2026-11-01
 
-CPUs can deliberately collect one selected Teleporter while other exposed Teleporters remain
-outside every living actor’s full proof-window reach. The all-origin check includes the root’s
-former position, so a swapped partner cannot activate another pickup unnoticed. The old
-exact-one support boundary could otherwise halt farming after two simultaneous drops.
+CPUs exclude pit sites from ordinary pickup, farming and attack approaches, retained routes
+and short movement pulses. The pulse check covers swept footprint bounds, including partial
+contact, before selecting a candidate so alternatives remain available. Complete planting and
+continuation routes retain their time-dependent proofs and can still cross pits safely.
 
-Easy/Standard select CPU50, Hard selects CPU51 and private replay25 binds those identities.
-CPU48/49 and replay24 retain their contracts. Recording/validation implementation is shared
-through format-local module instantiation; two reviewed declaration-level Clippy expectations
-state that deliberate reuse. No blanket suppression or lowered floor is introduced.
+Easy/Standard use CPU52, Hard uses CPU53 and private replay26 binds those identities.
+Archived policies/replays, multi-Teleporter recovery, Easy cadence and work limits are preserved.
+The queued-owner regression retains CPU51's pit entry and death at tick 242. All current
+difficulties avoid that trap; a separate one-wall-open variant plants at 235, destroys a wall and
+survives through flame expiry at 446.
 
-Guidance reuses one map/BFS and forecast, keeps a valid target, freezes one target and two
-candidates, and retains the existing 32,768 recovery/65,536 shared work limits. An owner episode
-clears two pickups on separate updates without fences. Hard then wins with a bomb;
-Standard/Easy destroy a wall and survive flame expiry. A preserved four-player public scene
-selects a certified, productive South Approach at 26,168 total planning work.
-
-This remains bounded support. Other reachable pickups, contested collection and unsafe swap
-landings still reject recovery. Earlier farming and interrupted-escape cases remain in BACKLOG.md.
-No UI, artwork, transport, physics, dependency or database changes; restart ends in-memory games.
+This is bounded pit prevention. A boxed CPU can still wait when the existing prover cannot
+certify escape; already-on-pit rescue is not guaranteed. Foreign-bomb farming and the new
+simultaneous-plant/Oil escape capture remain in the backlog. No UI, art, protocol, physics,
+dependency or database changes. Restart ends in-memory matches.
 
 ### Verification
 
-Accepted application source: `02cfd7e729e2bf85f3aee07081ac61d65f305f0e`.
-Accepted image: `sha256:56369daf35feb6124dc7a63dfe75bd8e242efe9f362ebb477923987ff98f717c`.
+Application/image source: `f87e0d729be1c2eacb8007867931b2078102e1d5`.
+Final full-gate source: `7a1320dad094564b7df4fc0e745b48592d33eb6f`; subsequent differences
+are confined to test-only fixtures/shutdown synchronization, local runner scheduling and testing
+documentation. Production application code is unchanged. Accepted image:
+`sha256:a15d4244059bd05640493010318acd6dfb962dccc8e4ad6b52c29e4bb6358b7e`.
 
-- Independent proof, selector, owner and compatibility review clear. Exact/one-short work,
-  distance boundary, unselected-pickup/root-origin reach, unsafe landings, legacy isolation,
-  stable target, cadence, dispatch and private replay25 tests pass.
-- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes pass.
-- Dependency security checks pass at the configured threshold with the existing moderate
-  npm tooling advisories; pinned Trivy 0.74.0 reports zero fixable high/critical image findings.
-- All five web assets are byte-identical to accepted v1.3.11/v1.3.0; unchanged frontend/native
-  inputs reuse accepted checks.
-- Unique Linux x86_64 debug/release workspace units and doctests pass
-  ([run 41333203493](https://github.com/liveweird/grenadiers/actions/runs/41333203493)).
-- Frozen local Rust gate passes in 985 seconds: 1,858 Core and 738 ordinary server tests pass
-  in debug/release, and all 4,194,304 item masks pass independently in debug, release and
-  coverage (32 partitions, four workers, zero retries in the accepted run). Coverage is
-  68,643/73,792 lines (93.02%), above the unchanged 90% floor. Formatting, strict Clippy,
-  build and repository checks pass. The initial preflight lint failure is retained separately.
+- Independent policy, pulse, identity, replay, owner and shutdown-test reviews are clear.
+  Exact/one-short pit work and no-pit base parity pass. A direct valid origin-fallback pit-entry
+  fixture remains a coverage gap; flag propagation is reviewed and full continuation regressions
+  remain unchanged.
+- The clean local Rust gate passes in 840 seconds: 1,871 Core and 748 server tests per
+  profile (744 ordinary plus four isolated timing cases). All 4,194,304 item masks pass in debug,
+  release and coverage, with 32 partitions, four workers and zero retries in the accepted run.
+  Official coverage is 67,865/72,671 lines (93.39%), above the unchanged 90% floor. Formatting,
+  strict Clippy, build, repository and runner-contract checks pass. Earlier candidates exposed
+  stale profile fixtures, a paused-clock shutdown-test race and native timing contention;
+  corrected runs retain every assertion and raw coverage profile. Failure logs remain separate.
+- Linux x86_64 debug/release units and doctests pass
+  ([run 41340023695](https://github.com/liveweird/grenadiers/actions/runs/41340023695)) on
+  `c08413b6`; the later portable test-only synchronization correction passes locally.
+- Exact-image Compose authentication/keyboard duel/three-CPU smoke and restricted Kubernetes
+  acceptance pass. Pinned Trivy reports zero fixable high/critical findings. Dependency audits
+  pass the configured threshold with the existing moderate npm tooling advisories.
+- All five web assets match v1.3.12 byte-for-byte; unchanged frontend/native inputs reuse
+  accepted checks. No repeated portable remote matrix is required.
 
 ### Operation
 
-The accepted image is promoted to localhost:8085 with health/readiness, security headers,
-CSP/cache, all five served assets and a fresh three-Hard-CPU smoke check. The immutable
-v1.3.11 image/override remain available for rollback. This is a source/local-runtime release;
-no hosted service or production registry is configured. The artist bundle remains unchanged.
+The accepted image is running on localhost:8085. Exact image/source labels, health/readiness,
+security headers, CSP/cache, all five served assets and fresh three-Hard-CPU play pass.
+The immutable v1.3.12 image/override remain available for rollback. This is a source/local-runtime
+release; no hosted service or production registry is configured. The artist bundle is unchanged.
+
+<a id="v1312--2026-11-01"></a>
+The [v1.3.12 record](history/releases.md#v1312--2026-11-01) is preserved in release history.
 
 <a id="v1311--2026-11-01"></a>
 The [v1.3.11 record](history/releases.md#v1311--2026-11-01) is preserved in release history.

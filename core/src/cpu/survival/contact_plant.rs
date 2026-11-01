@@ -7,6 +7,13 @@ use crate::game::Direction;
 use super::compatibility::plant_actor_compatible_charged;
 use super::{ExecutionCertificate, LairSurvivalPlan, SurvivalPlan};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum ContactTopology {
+    Disabled,
+    ExistingSources,
+    BlockedBirths,
+}
+
 #[allow(clippy::too_many_arguments)]
 pub(super) fn certified_candidates(
     observation: &Observation,
@@ -15,6 +22,7 @@ pub(super) fn certified_candidates(
     memory: &UtilityMemory,
     ordinary: &ControlPlan,
     strategic: bool,
+    topology: ContactTopology,
     support: super::plant_tactic::PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
@@ -93,7 +101,7 @@ pub(super) fn certified_candidates(
                 .control
                 .next_memory
                 .carry_progress(ordinary.next_memory);
-            authorize_lair_plant(observation, planned, true, &mut child)
+            authorize_lair_plant(observation, planned, topology, &mut child)
         });
         work.try_take(child.spent()).ok()?;
         if planned.is_some() {
@@ -112,11 +120,11 @@ pub(super) fn certified_lair_candidate(
     ordinary: &ControlPlan,
     opportunistic: bool,
     strategic: bool,
-    topology: bool,
+    topology: ContactTopology,
     support: super::plant_tactic::PlantSupport,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
-    if opportunistic && topology {
+    if opportunistic && topology != ContactTopology::Disabled {
         return certified_candidates(
             observation,
             history,
@@ -124,6 +132,7 @@ pub(super) fn certified_lair_candidate(
             memory,
             ordinary,
             strategic,
+            topology,
             support,
             work,
         );
@@ -151,7 +160,7 @@ pub(super) fn certified_lair_candidate(
             work,
         )
     };
-    plant.and_then(|plant| authorize_lair_plant(observation, plant, false, work))
+    plant.and_then(|plant| authorize_lair_plant(observation, plant, topology, work))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -163,7 +172,7 @@ pub struct PlantContactCertificate {
 pub(super) fn authorize_lair_plant(
     observation: &Observation,
     mut plant: SurvivalPlan,
-    topology: bool,
+    topology: ContactTopology,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     let ExecutionCertificate::Plant(certificate) = plant.execution.as_ref()? else {
@@ -174,8 +183,18 @@ pub(super) fn authorize_lair_plant(
             survival: plant,
             contact: Some(contact),
         }),
-        Err(crate::cpu::routing::RouteFailure::NoRoute) if topology => {
-            let proof = PlantContactProof::certify(observation, certificate, work)?;
+        Err(crate::cpu::routing::RouteFailure::NoRoute)
+            if topology != ContactTopology::Disabled =>
+        {
+            let proof = match topology {
+                ContactTopology::BlockedBirths => {
+                    PlantContactProof::certify_blocked_births(observation, certificate, work)?
+                }
+                ContactTopology::ExistingSources => {
+                    PlantContactProof::certify(observation, certificate, work)?
+                }
+                ContactTopology::Disabled => return None,
+            };
             let Some(ExecutionCertificate::Plant(certificate)) = plant.execution.take() else {
                 return None;
             };
@@ -204,6 +223,13 @@ impl PlantContactCertificate {
     #[must_use]
     pub fn route(&self) -> &RouteCertificate {
         self.plant.route()
+    }
+
+    /// Whether this certificate uses the opt-in proof that every possible
+    /// birth origin remains physically blocked.
+    #[must_use]
+    pub const fn requires_blocked_birth_support(&self) -> bool {
+        self.proof.requires_blocked_birth_support()
     }
 
     pub(crate) fn into_parts(self) -> (PlantCertificate, PlantContactProof) {

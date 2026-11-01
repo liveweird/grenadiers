@@ -242,15 +242,41 @@ fn queued_worker_dispatches_contact_topology_profiles_with_direct_parity() {
     use grenadiers_core::cpu::{
         WorkBudget,
         survival::{
-            plan_contact_topology_v40_with_origin, plan_hard_contact_topology_v41_with_origin,
+            plan_blocked_births_v42_with_origin, plan_contact_topology_v40_with_origin,
+            plan_hard_blocked_births_v43_with_origin, plan_hard_contact_topology_v41_with_origin,
         },
     };
-    for policy in [CpuPolicy::UtilityV40, CpuPolicy::UtilityV41] {
+    for policy in [
+        CpuPolicy::UtilityV40,
+        CpuPolicy::UtilityV41,
+        CpuPolicy::UtilityV42,
+        CpuPolicy::UtilityV43,
+    ] {
         let planner = CpuPlanner::without_workers();
         let (job, result) = spike_job(policy);
         let mut rng = job.rng.clone();
         let mut work = WorkBudget::new(WORK_ALLOWANCE);
-        let direct = if policy == CpuPolicy::UtilityV40 {
+        let direct = if policy == CpuPolicy::UtilityV42 {
+            plan_blocked_births_v42_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut rng,
+                &mut work,
+            )
+        } else if policy == CpuPolicy::UtilityV43 {
+            plan_hard_blocked_births_v43_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut rng,
+                &mut work,
+            )
+        } else if policy == CpuPolicy::UtilityV40 {
             plan_contact_topology_v40_with_origin(
                 &job.observation,
                 &job.memory,

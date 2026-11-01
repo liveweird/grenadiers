@@ -1,4 +1,8 @@
 mod admissions;
+#[cfg(test)]
+mod blocked_birth_owner_support;
+#[cfg(test)]
+mod blocked_birth_owner_tests;
 mod cpu_debug;
 #[cfg(test)]
 mod cpu_debug_tests;
@@ -79,10 +83,10 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::CONTACT_TOPOLOGY_V40_EASY)
+            Some(CpuProfile::BLOCKED_BIRTHS_V42_EASY)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD)
+            Some(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) => Some(CpuProfile::RELIABLE_V27_EASY),
         (Some(_), _, _, _, Some(CpuDifficulty::Standard)) => {
@@ -106,7 +110,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
-            Some(CpuProfile::HARD_V41)
+            Some(CpuProfile::HARD_V43)
         }
         (_, _, _, _, Some(CpuDifficulty::Hard)) => {
             return Err(super::roster_runtime::RosterRuntimeError::UnsupportedConfiguration);

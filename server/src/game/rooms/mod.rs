@@ -65,6 +65,9 @@ mod replay_v19;
 #[allow(dead_code)] // Current contact-topology pairing; production export remains disabled.
 mod replay_v20;
 #[cfg(test)]
+#[allow(dead_code)] // Current blocked-birth pairing; production export remains disabled.
+mod replay_v21;
+#[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]

@@ -314,7 +314,7 @@ pub(super) fn plan_spike_policy(
         super::steering::RefugeGuidance::default(),
         false,
         false,
-        false,
+        super::contact_plant::ContactTopology::Disabled,
     )
 }
 
@@ -368,6 +368,6 @@ fn plan_respawn_policy(
         super::steering::RefugeGuidance::default(),
         false,
         false,
-        false,
+        super::contact_plant::ContactTopology::Disabled,
     )
 }

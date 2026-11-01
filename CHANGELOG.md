@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.8 — 2026-11-01
+
+- Fix CPU farming refusals when every possible monster birth stays blocked by retained soft walls, while preserving full plant and scene proofs.
+- Gate the refinement behind Easy/Standard42 and Hard43 with private replay21; retain CPU40/41 and no-lair behavior unchanged.
+
 ## 1.3.7 — 2026-11-01
 
 - Let CPUs certify useful ordinary bomb plants when retained walls keep naturally spawned mobs outside the complete escape, with plant-bound scene and contact renewal checks.

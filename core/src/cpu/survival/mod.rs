@@ -46,8 +46,9 @@ pub use planner::{plan, plan_with_origin};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
 pub use refuge_guidance::{
-    plan_contact_topology_v40_with_origin, plan_farm_origins_v38_with_origin,
-    plan_farm_refuges_v36_with_origin, plan_hard_contact_topology_v41_with_origin,
+    plan_blocked_births_v42_with_origin, plan_contact_topology_v40_with_origin,
+    plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
+    plan_hard_blocked_births_v43_with_origin, plan_hard_contact_topology_v41_with_origin,
     plan_hard_farm_origins_v39_with_origin, plan_hard_farm_refuges_v37_with_origin,
     plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
 };

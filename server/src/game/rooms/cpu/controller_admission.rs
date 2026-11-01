@@ -167,6 +167,12 @@ impl CpuController {
         if topology_contact && !self.supports_contact_topology() {
             return self.reject(AdmissionRejection::InvalidShape);
         }
+        if execution.as_ref().is_some_and(|certificate| {
+            certificate.contact_plant_requires_blocked_birth_support() == Some(true)
+        }) && !self.supports_blocked_birth_contact()
+        {
+            return self.reject(AdmissionRejection::InvalidShape);
+        }
         let contact_required = (result.basis.parts().rules.version == 8
             || (matches!(result.basis.parts().rules.version, 9 | 10)
                 && result.basis.respawn_lairs().is_some()))

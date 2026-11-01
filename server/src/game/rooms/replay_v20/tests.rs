@@ -100,3 +100,20 @@ fn replay20_rejects_archived_policy_pairs() {
         assert_eq!(replay(&bad), Err(ReplayError::InvalidHeader));
     }
 }
+
+#[test]
+fn replay20_rejects_future_blocked_birth_policy_pairs() {
+    for (difficulty, future) in [
+        (CpuDifficulty::Easy, 42),
+        (CpuDifficulty::Standard, 42),
+        (CpuDifficulty::Hard, 43),
+    ] {
+        let (_, journal) = recorder(Some(difficulty)).into_parts();
+        let mut bad = journal.clone();
+        bad.header.cpu_policy_version = future;
+        bad.body.header.cpu_policy_version = future;
+        bad.header.cpus[0].policy_version = future;
+        bad.body.header.cpus[0].policy_version = future;
+        assert_eq!(replay(&bad), Err(ReplayError::InvalidHeader));
+    }
+}

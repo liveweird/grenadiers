@@ -42,7 +42,7 @@ pub(super) fn plan_lairs_inner(
     refuge_guidance: RefugeGuidance,
     joint_refuges: bool,
     farm_origin_recovery: bool,
-    contact_topology: bool,
+    contact_topology: super::contact_plant::ContactTopology,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version

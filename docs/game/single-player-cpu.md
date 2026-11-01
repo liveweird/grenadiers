@@ -187,6 +187,12 @@ from the beginning; retain only separators proved intact throughout the whole ho
 birth location may be omitted only when its block is retained; potentially opened birth cells
 contribute from their original earliest birth time.
 
+An empty reachable source set is valid only when the original envelope is nonempty and every
+source is a possible birth whose soft block remains retained. Existing mobs cannot be omitted.
+This case needs no component-dilation or route sweep: there is no source that can reach it.
+Renewal still checks the plant scene and every retained barrier, and rejects any observed mob.
+This additional capability is opt-in; older profiles reject its certificate at admission.
+
 An opaque `PlantContactCertificate` binds the full plant certificate to its original contact
 envelope, source components and separator evidence. `ExecutionCertificate::ContactPlant` is
 admitted by Core before the owner can use it instead of the ordinary contact lease. Committed
@@ -206,8 +212,9 @@ then try alternate movements when a candidate fails. Planning retains its 65,536
 each admission/publication has one shared, fail-closed 8,192-work renewal allowance, with no
 fresh path search. Unsupported evidence keeps the old conservative result.
 
-Policy40/41 introduce this path without changing archived planners; lairs-disabled behavior
-delegates to policy38/39. Safety remains conditional on the plant's observed scene assumptions:
-withdrawal at the first mismatched publication does not predict arbitrary unseen rival actions.
+Policy42/43 retain the nonempty-source path and enable blocked-birth proofs without changing
+archived planners; lairs-disabled behavior delegates to policy40/41. Safety remains conditional
+on the plant's observed scene assumptions: withdrawal at the first mismatched publication does
+not predict arbitrary unseen rival actions.
 Physical tests, natural-spawn tests, real queued-owner execution and independent review are
 required alongside geometric separation tests.

@@ -5,6 +5,7 @@ use crate::game::Tick;
 
 use super::{LairSurvivalPlan, plan_lairs_inner};
 use crate::cpu::survival::PlantEscapeOrigin;
+use crate::cpu::survival::contact_plant::ContactTopology;
 
 /// Rules-v8 policy. It certifies navigation and stopped handoff before trying
 /// any optional tactic, so a failed tactic returns useful movement.
@@ -57,7 +58,7 @@ pub fn plan_lairs_with_origin(
         super::RefugeGuidance::default(),
         false,
         false,
-        false,
+        ContactTopology::Disabled,
     )
 }
 
@@ -91,7 +92,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v23(
         super::RefugeGuidance::default(),
         false,
         false,
-        false,
+        ContactTopology::Disabled,
     )
 }
 
@@ -125,7 +126,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v24(
         super::RefugeGuidance::default(),
         false,
         false,
-        false,
+        ContactTopology::Disabled,
     )
 }
 
@@ -159,6 +160,6 @@ pub(in crate::cpu::survival) fn plan_lairs_v25(
         super::RefugeGuidance::default(),
         false,
         false,
-        false,
+        ContactTopology::Disabled,
     )
 }

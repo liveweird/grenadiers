@@ -81,13 +81,18 @@ fn poll_through_manual_admission(owner: &mut super::driver::Driver, plan: &Survi
 }
 
 #[test]
-fn current_contact_topology_profiles_use_natural_mob_to_destroy_target_and_survive() {
+fn contact_profiles_use_nonempty_mob_topology_to_destroy_target_and_survive() {
     for (profile, difficulty) in [
         (
             CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD,
             CpuDifficulty::Standard,
         ),
         (CpuProfile::HARD_V41, CpuDifficulty::Hard),
+        (
+            CpuProfile::BLOCKED_BIRTHS_V42_STANDARD,
+            CpuDifficulty::Standard,
+        ),
+        (CpuProfile::HARD_V43, CpuDifficulty::Hard),
     ] {
         let outcome = run(profile, difficulty);
         assert_eq!(
@@ -100,6 +105,10 @@ fn current_contact_topology_profiles_use_natural_mob_to_destroy_target_and_survi
         assert!(
             outcome.observed_typed_contact,
             "{profile:?} never installed typed contact authority"
+        );
+        assert!(
+            !outcome.observed_blocked_birth_contact,
+            "{profile:?} mislabeled a nonempty-source proof"
         );
         assert!(outcome.target_destroyed, "{profile:?} retained block (9,7)");
         assert!(

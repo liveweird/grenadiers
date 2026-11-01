@@ -313,6 +313,7 @@ pub(super) fn plan_spike_policy(
         pickup_progress,
         super::steering::RefugeGuidance::default(),
         false,
+        false,
     )
 }
 
@@ -364,6 +365,7 @@ fn plan_respawn_policy(
         false,
         false,
         super::steering::RefugeGuidance::default(),
+        false,
         false,
     )
 }

@@ -298,6 +298,23 @@ impl CpuProfile {
         difficulty: CpuDifficulty::Hard,
     };
 
+    /// Farming refuges with bounded failed-approach memory.
+    pub const FARM_ORIGINS_V38_STANDARD: Self = Self {
+        policy: CpuPolicy::UtilityV38,
+        difficulty: CpuDifficulty::Standard,
+    };
+
+    pub const FARM_ORIGINS_V38_EASY: Self = Self {
+        policy: CpuPolicy::UtilityV38,
+        difficulty: CpuDifficulty::Easy,
+    };
+
+    /// Hard failed-approach memory with terminal-hold replacement retained.
+    pub const HARD_V39: Self = Self {
+        policy: CpuPolicy::UtilityV39,
+        difficulty: CpuDifficulty::Hard,
+    };
+
     /// Only the two current legacy profiles may be selected by the archived mode.
     #[must_use]
     pub const fn is_current(self) -> bool {

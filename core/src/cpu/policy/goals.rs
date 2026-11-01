@@ -19,7 +19,7 @@ pub(in crate::cpu::policy) use v23::select as select_v23;
 mod v24;
 #[cfg(test)]
 pub(in crate::cpu::policy) use v24::GuidanceV24;
-pub(in crate::cpu::policy) use v24::{select as select_v24, select_v25, select_v28};
+pub(in crate::cpu::policy) use v24::{select as select_v24, select_v25, select_v28, select_v38};
 
 #[path = "goal_pressure.rs"]
 mod pressure;

@@ -44,6 +44,7 @@ impl CpuController {
                 | CpuProfile::PICKUP_V31_EASY
                 | CpuProfile::REFUGE_V33_EASY
                 | CpuProfile::FARM_REFUGES_V36_EASY
+                | CpuProfile::FARM_ORIGINS_V38_EASY
         ) || !accepted.ordinary_navigation
             || actual.manual.is_some()
             || actual.movement == grenadiers_core::cpu::MovementIntent::Stop
@@ -74,6 +75,7 @@ impl CpuController {
                 | CpuProfile::PICKUP_V31_EASY
                 | CpuProfile::REFUGE_V33_EASY
                 | CpuProfile::FARM_REFUGES_V36_EASY
+                | CpuProfile::FARM_ORIGINS_V38_EASY
         ) || !is_clear_for_easy(observation)
         {
             self.cadence = CadenceState::default();

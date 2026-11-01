@@ -133,3 +133,42 @@ add hundreds of slow rounds or hardware-sensitive one-millisecond assertions to 
 change. Public acceptance includes human-versus-CPU start/result/rematch/reconnect, all-on item
 rules, privacy, localization and narrow-screen accessibility, with existing floors and no
 hidden retries.
+
+## Interrupted-escape continuation boundary
+
+The [controlled Short Fuse investigation](../history/cpu-short-fuse-investigation-2026-11-01.md)
+shows that repeated three-update movement pulses with intervening Stops can be too slow after
+simultaneous bombs invalidate an escape. A recovery extension must introduce a distinct conditional
+continuation contract; do not enlarge existing pulse/route authority or infer stationarity from
+bomb ownership.
+
+Separate a complete nominal trajectory from renewable movement grants. A fresh publication at
+`P` can authorize only updates `P+1…P+3`. Validation must run before the owner services `P+4`;
+missing, stale, duplicate or mismatched publications withdraw continuation. Admission binds an
+exact stopped basis and publication at `basis+6`, with the first movement at `basis+7`.
+Publication phase follows accumulated reports, so an early publication must revoke the initial
+contract rather than silently assuming a global tick modulo.
+
+Carry predicted motion, residual distance, pending turn assistance, reverse state and storm
+bounds across valid renewals. Preserve planned geometric-leg stops, consumed origin grace and
+the existing eight-leg limit. Re-entry cannot restore origin grace. Commit each grant only
+after mailbox submission succeeds; TTL cannot extend its authorized updates.
+
+Certify Stop branches after each authorized update, including early revocation after the first
+or second move. A regular grant's fallback Stop at `P+4` must cover the existing margin through
+`P+13` (exclusive horizon `P+14`). Complete nominal escape and every Stop branch need full
+footprint/hazard/contact checks within the unchanged work allowance. Renewal must have an
+explicit measured bound, without new path search or a global forecast on the owner tick.
+
+Retain default item support through fresh short-window Teleporter/contact obligations at every
+grant; a long-lease refusal cannot be bypassed. Initially constrain the extension to visible,
+unpaused standard timed bombs, completed running updates, supported effects and no initial finite
+flames, Oil or exposed Teleporter. Remaining soft blocks may exist. Unknown or changed hazards
+revoke the episode, and a revoked episode cannot resume from a late result.
+
+Before activation, require a separate reviewed Core proof, normal queued-owner integration, both
+Short Fuse CPUs planting and surviving, and negatives for intermediate unsafe Stops, stale
+publications, changed bombs, displacement, origin re-entry and exhausted work. A scheduling
+fixture using synthetic grants establishes timing only; it is not a safety certificate. Keep
+new policy/replay identities opt-in and every archived contract unchanged. Work sequencing remains
+in the [backlog](../../BACKLOG.md#single-player).

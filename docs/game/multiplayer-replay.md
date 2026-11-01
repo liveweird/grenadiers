@@ -113,7 +113,12 @@ CPU37 on Hard. Header, body and per-seat provenance must agree. Format17 retains
 rejects future CPU36/37 metadata, including internally consistent forged identities.
 Production recording/export remains disabled.
 
-Formats6/7/8/9/10/11/12/13/14/15/16/17/18 normalize their closed operations into shared executors rather than duplicating
+Format19 retains gameplay19/rules10/navigation3 and binds CPU38 on Easy/Standard (or no CPU),
+CPU39 on Hard. Format18 retains CPU36/37 and rejects future CPU38/39 metadata even when its
+header, body and provenance agree. This private format19 does not change live WebSocket19.
+Production recording/export remains disabled.
+
+Formats6/7/8/9/10/11/12/13/14/15/16/17/18/19 normalize their closed operations into shared executors rather than duplicating
 lifecycle mechanics. Their headers and accepted source/controller identities remain distinct;
 each reader accepts only the finite identity combinations defined for its profile.
 

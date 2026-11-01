@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.6 — 2026-11-01
+
+- Remember eligible refused farming approaches for a bounded interval in lair-enabled CPU planning, so a different wall target cannot immediately reuse the same failed bomb position.
+- Keep movement/plant proofs unchanged, preserve no-lair and archived behavior, and bind Easy/Standard38 and Hard39 to private replay19.
+
 ## 1.3.5 — 2026-11-01
 
 - Add bounded alternate-refuge candidates for CPU wall farming, retaining complete bomb escape, target-usefulness and monster-contact proofs.

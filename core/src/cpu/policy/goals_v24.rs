@@ -23,6 +23,9 @@ use order::{add_ticks, fallback, position_distance, target_order};
 mod validation;
 use validation::validate_previous;
 
+#[path = "goals_v24_farm.rs"]
+mod farm;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(in crate::cpu::policy) struct GuidanceV24 {
     pub first_step: CellId,
@@ -50,7 +53,16 @@ pub(in crate::cpu::policy) fn select(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, false, false)
+    select_inner(
+        observation,
+        actor,
+        current,
+        memory,
+        work,
+        false,
+        false,
+        false,
+    )
 }
 
 pub(in crate::cpu::policy) fn select_v25(
@@ -60,7 +72,16 @@ pub(in crate::cpu::policy) fn select_v25(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, true, false)
+    select_inner(
+        observation,
+        actor,
+        current,
+        memory,
+        work,
+        true,
+        false,
+        false,
+    )
 }
 
 pub(in crate::cpu::policy) fn select_v28(
@@ -70,9 +91,24 @@ pub(in crate::cpu::policy) fn select_v28(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<GuidanceV24> {
-    select_inner(observation, actor, current, memory, work, true, true)
+    select_inner(observation, actor, current, memory, work, true, true, false)
 }
 
+pub(in crate::cpu::policy) fn select_v38(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+    hard: bool,
+) -> Option<GuidanceV24> {
+    select_inner(observation, actor, current, memory, work, true, hard, true)
+}
+
+#[allow(
+    clippy::too_many_arguments,
+    reason = "Keep archived goal and opt-in recovery switches explicit"
+)]
 fn select_inner(
     observation: &Observation,
     actor: &VisibleActor,
@@ -81,6 +117,7 @@ fn select_inner(
     work: &mut WorkBudget,
     failed_plant_recovery: bool,
     range_aware_pressure: bool,
+    farm_origin_recovery: bool,
 ) -> Option<GuidanceV24> {
     let map = search_map(observation, actor, current, !range_aware_pressure, work)?;
     let (distance, first_step) = reachable(observation, current, &map, work)?;
@@ -104,8 +141,13 @@ fn select_inner(
             });
         }
     }
+    let failed_farm_approach = farm_origin_recovery
+        .then(|| memory.failed_farm_approach())
+        .flatten()
+        .filter(|(_, until)| observation.parts().tick < *until)
+        .map(|(cell, _)| cell);
     for &block in &observation.parts().arena.blocks {
-        add_firing_candidates(
+        farm::add_firing_candidates(
             observation,
             block,
             StrategicObjectiveKind::Farm,
@@ -114,6 +156,7 @@ fn select_inner(
             &distance,
             &first_step,
             &mut candidates,
+            failed_farm_approach,
         );
     }
     if range_aware_pressure {
@@ -328,49 +371,6 @@ fn reachable(
         }
     }
     Some((distance, first_step))
-}
-
-#[allow(clippy::too_many_arguments)]
-fn add_firing_candidates(
-    observation: &Observation,
-    target_cell: CellId,
-    objective: StrategicObjectiveKind,
-    target: StrategicTarget,
-    score: u8,
-    distance: &DistanceMap,
-    first_step: &FirstStepMap,
-    candidates: &mut Vec<Candidate>,
-) {
-    let mut best: Option<Candidate> = None;
-    for (_, dc, dr) in STEPS {
-        let Some(approach) = offset(target_cell, dc, dr) else {
-            continue;
-        };
-        let Some(index) = cell_index(observation, approach) else {
-            continue;
-        };
-        let (Some(distance), Some(first_step)) = (distance[index], first_step[index]) else {
-            continue;
-        };
-        let candidate = Candidate {
-            objective,
-            target,
-            approach,
-            score,
-            distance,
-            first_step,
-        };
-        if best.is_none_or(|old| {
-            (
-                candidate.distance,
-                candidate.approach.row,
-                candidate.approach.column,
-            ) < (old.distance, old.approach.row, old.approach.column)
-        }) {
-            best = Some(candidate);
-        }
-    }
-    candidates.extend(best);
 }
 
 #[cfg(test)]

@@ -100,3 +100,16 @@ fn replay18_rejects_archived_policy_pairs() {
         assert_eq!(replay(&bad), Err(ReplayError::InvalidHeader));
     }
 }
+
+#[test]
+fn replay18_rejects_future_farm_origin_policy_pairs() {
+    for future in [38, 39] {
+        let (_, journal) = recorder(Some(CpuDifficulty::Standard)).into_parts();
+        let mut bad = journal.clone();
+        bad.header.cpu_policy_version = future;
+        bad.body.header.cpu_policy_version = future;
+        bad.header.cpus[0].policy_version = future;
+        bad.body.header.cpus[0].policy_version = future;
+        assert_eq!(replay(&bad), Err(ReplayError::InvalidHeader));
+    }
+}

@@ -83,7 +83,7 @@ pub(super) fn add_legacy_candidates(
             && rival.alive
             && let Some(cell) = rival.position.cell()
         {
-            super::add_firing_candidates(
+            super::farm::add_firing_candidates(
                 observation,
                 cell,
                 crate::cpu::policy::StrategicObjectiveKind::Attack,
@@ -92,6 +92,7 @@ pub(super) fn add_legacy_candidates(
                 distance,
                 first_step,
                 candidates,
+                None,
             );
         }
     }

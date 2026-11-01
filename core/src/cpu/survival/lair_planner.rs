@@ -41,6 +41,7 @@ pub(super) fn plan_lairs_inner(
     pickup_progress: bool,
     refuge_guidance: RefugeGuidance,
     joint_refuges: bool,
+    farm_origin_recovery: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -107,6 +108,7 @@ pub(super) fn plan_lairs_inner(
             strategic_goals,
             failed_plant_recovery,
             hard_tactics,
+            farm_origin_recovery,
         )?
     };
     let Ok(hazards) = forecast(observation, history, None, ForecastLimits::default(), work) else {
@@ -136,6 +138,15 @@ pub(super) fn plan_lairs_inner(
         && super::strategic_recovery::attained_firing_position(observation, &ordinary);
     let plant_support =
         super::plant_tactic::PlantSupport::for_policy(persistent_burning_oil, counter_pressure);
+    let failed_farm_approach = farm_origin_recovery.then(|| {
+        super::joint_refuge::eligible_failed_farm_approach(
+            observation,
+            settled_stop_tick,
+            &ordinary,
+            plant_support,
+            work,
+        )
+    });
     if joint_refuges
         && let Some(plan) = super::joint_refuge::certified_farm_plant(
             observation,
@@ -364,6 +375,14 @@ pub(super) fn plan_lairs_inner(
         });
     }
     let mut fallback = fallback;
+    if let Some(cell) = failed_farm_approach.flatten() {
+        fallback.survival.control.next_memory = fallback
+            .survival
+            .control
+            .next_memory
+            .defer_farm_approach(cell, observation.parts().tick)
+            .without_execution_authority();
+    }
     if recovering_plant
         && super::strategic_recovery::pulse_progresses(&fallback.survival, actor.position)
     {

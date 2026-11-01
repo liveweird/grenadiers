@@ -67,7 +67,7 @@ explicitly selects navigation3; private replay11 binds CPU26 and replay12 binds 
 gameplay19 with CPU27 on Easy/Standard and CPU28 on Hard; replay14 retains navigation3
 and advances Hard to CPU29. Replay15 retains navigation3 and binds Easy/Standard31 or Hard32. Replay16 retains navigation3 and binds
 Easy/Standard33 or Hard34 with certified one-update pickup handoffs. Replay17 retains navigation3 and binds
-Easy/Standard33 or Hard35. Replay18 retains navigation3 and binds Easy/Standard36 or Hard37.
+Easy/Standard33 or Hard35. Replay18 retains navigation3 and binds Easy/Standard36 or Hard37. Replay19 binds Easy/Standard38 or Hard39 with the same navigation3 identity.
 Settings changes, rounds and rematches
 preserve that selection. These policies share the same speed, collision/contact and recipient
 facts; gameplay18/19 carry no hidden navigation data. Production replay recording remains disabled.

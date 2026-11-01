@@ -8,7 +8,8 @@ use crate::room::{RespawnLairConfig, SpikePitConfig};
 
 use super::farm_progress_tests::{captured_tick_7022, key, north_farm_memory};
 use super::{
-    ExecutionCertificate, WORK_ALLOWANCE, plan_farm_refuges_v36_with_origin,
+    ExecutionCertificate, WORK_ALLOWANCE, plan_farm_origins_v38_with_origin,
+    plan_farm_refuges_v36_with_origin, plan_hard_farm_origins_v39_with_origin,
     plan_hard_farm_refuges_v37_with_origin, plan_refuge_guidance_v33_with_origin,
     plan_refuge_guidance_v34_with_origin,
 };
@@ -91,56 +92,84 @@ fn discovered_joint_refuge_executes_a_useful_plant_and_survives_its_flames() {
     let memory = north_farm_memory(&observed);
     let mut history = ObservedHazardMemory::new(key);
     history.observe(&observed).unwrap();
-    let mut work = WorkBudget::new(WORK_ALLOWANCE);
-    let planned = plan_farm_refuges_v36_with_origin(
-        &observed,
-        &memory,
-        &history,
-        observed.parts().tick,
-        None,
-        &mut CpuRng::from_seed(key, [136; 32]),
-        &mut work,
-    )
-    .unwrap();
-    assert_eq!(
-        planned.survival.control.intent.manual,
-        Some(ManualIntent::Bomb)
-    );
-    let Some(ExecutionCertificate::Plant(certificate)) = planned.survival.execution else {
-        panic!("joint-refuge policy did not return a plant certificate");
-    };
-    let first = certificate.route().start_window().start;
-    let lane = certificate.route().lane(first).unwrap();
-    let mut state = controlled_state();
-    while state.tick().0 + 1 < first.0 {
-        state.step(&[]).unwrap();
-    }
-    while state.tick() < certificate.route().survive_until() {
-        let update = Tick(state.tick().0 + 1);
-        let movement = certificate
-            .route()
-            .steps()
-            .iter()
-            .enumerate()
-            .find_map(|(index, step)| {
-                let start = lane.step_start(index)?;
-                let stop = lane.stop_update(index)?;
-                (start <= update && update < stop).then_some(match step {
-                    crate::cpu::routing::RouteStep::Move { direction, .. } => Some(*direction),
-                    crate::cpu::routing::RouteStep::Wait { .. } => None,
+    for version in [36_u8, 38, 39] {
+        let mut work = WorkBudget::new(WORK_ALLOWANCE);
+        let mut rng = CpuRng::from_seed(key, [version; 32]);
+        let planned = match version {
+            36 => plan_farm_refuges_v36_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut rng,
+                &mut work,
+            ),
+            38 => plan_farm_origins_v38_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut rng,
+                &mut work,
+            ),
+            39 => plan_hard_farm_origins_v39_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut rng,
+                &mut work,
+            ),
+            _ => unreachable!(),
+        }
+        .unwrap();
+        assert_eq!(
+            planned.survival.control.intent.manual,
+            Some(ManualIntent::Bomb)
+        );
+        assert_eq!(
+            planned.survival.control.next_memory.failed_farm_approach(),
+            None
+        );
+        let Some(ExecutionCertificate::Plant(certificate)) = planned.survival.execution else {
+            panic!("joint-refuge policy did not return a plant certificate");
+        };
+        let first = certificate.route().start_window().start;
+        let lane = certificate.route().lane(first).unwrap();
+        let mut state = controlled_state();
+        while state.tick().0 + 1 < first.0 {
+            state.step(&[]).unwrap();
+        }
+        while state.tick() < certificate.route().survive_until() {
+            let update = Tick(state.tick().0 + 1);
+            let movement = certificate
+                .route()
+                .steps()
+                .iter()
+                .enumerate()
+                .find_map(|(index, step)| {
+                    let start = lane.step_start(index)?;
+                    let stop = lane.stop_update(index)?;
+                    (start <= update && update < stop).then_some(match step {
+                        crate::cpu::routing::RouteStep::Move { direction, .. } => Some(*direction),
+                        crate::cpu::routing::RouteStep::Wait { .. } => None,
+                    })
                 })
-            })
-            .flatten();
-        state
-            .step(&input(
-                movement,
-                update == certificate.placement().placed_at,
-            ))
-            .unwrap();
-        assert!(state.actor(CPU).unwrap().alive());
+                .flatten();
+            state
+                .step(&input(
+                    movement,
+                    update == certificate.placement().placed_at,
+                ))
+                .unwrap();
+            assert!(state.actor(CPU).unwrap().alive());
+        }
+        assert!(!state.world().arena.blocks().contains(&CellId::new(3, 7)));
+        assert_eq!(state.live_bomb_count(CPU), 0);
     }
-    assert!(!state.world().arena.blocks().contains(&CellId::new(3, 7)));
-    assert_eq!(state.live_bomb_count(CPU), 0);
 }
 
 #[test]
@@ -236,7 +265,7 @@ fn exhausted_hint_allowance_preserves_a_nonplant_fallback() {
 }
 
 #[test]
-fn no_lair_v36_and_v37_delegate_to_their_archived_base_policies() {
+fn no_lair_v36_through_v39_preserve_their_archived_base_policies() {
     let observed = captured_tick_7022()
         .map_parts(|parts| {
             let ObservedActor::Visible(cpu) = &mut parts.actors[CPU.index()] else {
@@ -259,8 +288,10 @@ fn no_lair_v36_and_v37_delegate_to_their_archived_base_policies() {
     for hard in [false, true] {
         let mut old_rng = CpuRng::from_seed(key, [137 + u8::from(hard); 32]);
         let mut new_rng = old_rng.clone();
+        let mut recovery_rng = old_rng.clone();
         let mut old_work = WorkBudget::new(WORK_ALLOWANCE);
         let mut new_work = WorkBudget::new(WORK_ALLOWANCE);
+        let mut recovery_work = WorkBudget::new(WORK_ALLOWANCE);
         let old = if hard {
             plan_refuge_guidance_v34_with_origin(
                 &observed,
@@ -305,10 +336,38 @@ fn no_lair_v36_and_v37_delegate_to_their_archived_base_policies() {
             )
         }
         .unwrap();
+        let recovery = if hard {
+            plan_hard_farm_origins_v39_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut recovery_rng,
+                &mut recovery_work,
+            )
+        } else {
+            plan_farm_origins_v38_with_origin(
+                &observed,
+                &memory,
+                &history,
+                observed.parts().tick,
+                None,
+                &mut recovery_rng,
+                &mut recovery_work,
+            )
+        }
+        .unwrap();
         assert_eq!(new.survival, old.survival);
         assert_eq!(new.contact, old.contact);
+        assert_eq!(recovery.survival, new.survival);
+        assert_eq!(recovery.contact, new.contact);
         assert_eq!(new_work, old_work);
+        assert_eq!(recovery_work, new_work);
         assert_eq!(new_rng.draws(), old_rng.draws());
-        assert_eq!(new_rng.bounded_u32(1_000), old_rng.bounded_u32(1_000));
+        assert_eq!(recovery_rng.draws(), new_rng.draws());
+        let expected = old_rng.bounded_u32(1_000);
+        assert_eq!(new_rng.bounded_u32(1_000), expected);
+        assert_eq!(recovery_rng.bounded_u32(1_000), expected);
     }
 }

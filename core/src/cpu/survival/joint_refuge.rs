@@ -1,6 +1,8 @@
 //! Opt-in farm planting through a jointly route- and contact-safe refuge hint.
 
-use crate::cpu::policy::{ControlPlan, StrategicTarget, UtilityMemory};
+use crate::cpu::policy::{
+    ControlPlan, StrategicObjectiveKind, StrategicPhase, StrategicTarget, UtilityMemory,
+};
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant_to_refuge};
 use crate::cpu::{Intent, ManualIntent, MobContactLease, MovementIntent, Observation, WorkBudget};
 use crate::game::{CellId, Direction, Tick};
@@ -10,6 +12,109 @@ use super::plant_tactic::PlantSupport;
 use super::{ExecutionCertificate, LairSurvivalPlan, SurvivalPlan};
 
 const MAX_HINT_WORK: u32 = 8_192;
+
+pub(super) fn eligible_failed_farm_approach(
+    observation: &Observation,
+    settled_stop_tick: Tick,
+    ordinary: &ControlPlan,
+    support: PlantSupport,
+    work: &mut WorkBudget,
+) -> Option<CellId> {
+    let actor = actor(observation)?;
+    let intent = ordinary.next_memory.strategic_intent()?;
+    let StrategicTarget::Block { cell: target } = intent.target else {
+        return None;
+    };
+    if intent.objective != StrategicObjectiveKind::Farm
+        || !matches!(
+            intent.phase,
+            StrategicPhase::Approach | StrategicPhase::Reengage
+        )
+        || !matches!(
+            &observation.parts().bombs,
+            crate::cpu::BombKnowledge::Visible(_)
+        )
+    {
+        return None;
+    }
+    let approach = intent.approach_cell?;
+    let parts = observation.parts();
+    let scans = [
+        parts.pickups.len(),
+        parts.flames.len(),
+        parts.oil.len(),
+        parts.arena.blocks.len(),
+        actor.effects.len(),
+    ]
+    .into_iter()
+    .try_fold(1_usize, usize::checked_add)?;
+    work.try_take(u32::try_from(scans).ok()?).ok()?;
+    let adjacent = approach.column.abs_diff(target.column) + approach.row.abs_diff(target.row) == 1;
+    let globally_supported = teleporter_preconditions(observation, support, work);
+    (settled_stop_tick <= parts.tick
+        && ordinary.intent.movement == MovementIntent::Stop
+        && ordinary.intent.manual.is_none()
+        && actor.position.cell() == Some(approach)
+        && actor.weapon.is_none()
+        && actor.live_bomb_count < actor.bomb_capacity
+        && !actor.voluntary_actions_frozen
+        && !actor.effects.iter().any(|effect| {
+            matches!(
+                effect.kind,
+                crate::game::EffectKind::Diarrhea | crate::game::EffectKind::Stopwatch
+            )
+        })
+        && parts.arena.blocks.contains(&target)
+        && adjacent
+        && globally_supported)
+        .then_some(approach)
+}
+
+fn teleporter_preconditions(
+    observation: &Observation,
+    support: PlantSupport,
+    work: &mut WorkBudget,
+) -> bool {
+    let parts = observation.parts();
+    if !parts.rules.settings.enabled_items().contains_teleporter() {
+        return true;
+    }
+    if !parts.flames.is_empty()
+        || parts
+            .pickups
+            .iter()
+            .any(|pickup| pickup.kind == crate::game::PickupKind::Teleporter)
+    {
+        return false;
+    }
+    let crate::cpu::BombKnowledge::Visible(bombs) = &parts.bombs else {
+        return false;
+    };
+    match support {
+        PlantSupport::PersistentBurningOil => bombs.is_empty(),
+        PlantSupport::Strict => {
+            bombs.is_empty()
+                && parts
+                    .oil
+                    .iter()
+                    .all(|oil| oil.state != crate::game::OilBarrelState::Burning)
+        }
+        PlantSupport::ClearArenaCounterPressure => {
+            if parts.rules.running_updates == 0 {
+                return false;
+            }
+            bombs.is_empty()
+                || (parts.arena.blocks.is_empty()
+                    && bombs.iter().all(|bomb| {
+                        work.try_take(1).is_ok()
+                            && matches!(
+                                bomb.trigger,
+                                crate::cpu::ObservedBombTrigger::Timed { paused: false, .. }
+                            )
+                    }))
+        }
+    }
+}
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn certified_farm_plant(

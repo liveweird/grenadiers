@@ -307,6 +307,7 @@ impl Driver {
             return;
         };
         let epoch = self.runtime.lifecycle().round_attempt();
+        let mut urgent_candidates = vec![false; observations.len()];
         let mut refuge_candidates = vec![false; observations.len()];
         for (index, observation) in observations.iter().enumerate() {
             let seat = self.cpus[index].seat();
@@ -361,13 +362,28 @@ impl Driver {
             if self.cpu_stationary[seat.index()] && self.cpus[index].needs_stop_confirmation() {
                 self.cpu_stop_at[seat.index()] = Some(self.runtime.lifecycle().tick());
             } else if self.cpu_stationary[seat.index()] && !self.cpus[index].has_pending() {
+                urgent_candidates[index] = true;
+            }
+        }
+        self.submit_cpu_candidates(&observations, &urgent_candidates, &refuge_candidates, epoch);
+    }
+
+    fn submit_cpu_candidates(
+        &mut self,
+        observations: &[grenadiers_core::cpu::Observation],
+        urgent: &[bool],
+        refuge: &[bool],
+        epoch: u64,
+    ) {
+        for (index, observation) in observations.iter().enumerate() {
+            if urgent[index] {
                 let _ = self.cpus[index].submit(observation.clone(), epoch);
             }
         }
         // Refuge replacement is opportunistic. Every seat's ordinary/urgent
         // work gets first access to the bounded shared queue.
         for (index, observation) in observations.iter().enumerate() {
-            if refuge_candidates[index] {
+            if refuge[index] {
                 let _ = self.cpus[index].submit_refuge_handoff(observation.clone(), epoch);
             }
         }
@@ -407,3 +423,15 @@ const fn wire_seat(seat: SeatId) -> v14::Seat {
         SeatId::Four => v14::Seat::Four,
     }
 }
+
+#[cfg(test)]
+#[path = "../refuge_handoff_observation_support.rs"]
+mod refuge_handoff_observation_support;
+
+#[cfg(test)]
+#[path = "../refuge_handoff_owner_support.rs"]
+mod refuge_handoff_owner_support;
+
+#[cfg(test)]
+#[path = "../refuge_handoff_owner_tests.rs"]
+mod refuge_handoff_owner_tests;

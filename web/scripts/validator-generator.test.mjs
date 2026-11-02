@@ -33,8 +33,10 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v18.schema.json'), join(checkout, 'api', 'gameplay-v18.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v19.schema.json'), join(checkout, 'api', 'gameplay-v19.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v20.schema.json'), join(checkout, 'api', 'gameplay-v20.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v21.schema.json'), join(checkout, 'api', 'gameplay-v21.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
+    cp(join(import.meta.dirname, 'validator-definitions.mjs'), join(checkout, 'web', 'scripts', 'validator-definitions.mjs')),
     cp(join(import.meta.dirname, '..', 'src', 'validation', 'validatorOptions.ts'),
       join(checkout, 'web', 'src', 'validation', 'validatorOptions.ts')),
   ])
@@ -85,6 +87,7 @@ test('canonical options optimize the bounded current validators', () => {
   assert.deepEqual(validatorOptions('gameplay-v20'), {
     allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
   })
+  assert.deepEqual(validatorOptions('gameplay-v21'), { allErrors: true })
   assert.notEqual(validatorOptions('gameplay-v18'), validatorOptions('gameplay-v18'))
 })
 

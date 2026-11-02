@@ -48,14 +48,26 @@ main { min-height: 100vh; }
   gap: 1.5rem;
   padding-bottom: clamp(1.25rem, 3vw, 2.25rem);
 }
-.site-header h1 {
-  color: var(--color-text-primary);
-  font-size: clamp(2rem, 5vw, 3.6rem);
-  font-weight: 900;
-  letter-spacing: -.055em;
-  line-height: .92;
+.brand-copy { min-width: 0; }
+.brand-heading { line-height: 0; }
+.brand-art {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: clamp(12rem, 25vw, 18rem);
+  aspect-ratio: 315 / 58;
+}
+.brand-art img {
+  position: absolute;
+  top: -32.759%;
+  left: -10.476%;
+  width: 121.905%;
+  max-width: none;
+  height: auto;
+  image-rendering: pixelated;
 }
 .site-header p { margin-top: .6rem; max-width: 32rem; color: var(--color-text-secondary); font-size: clamp(1rem, 2vw, 1.2rem); }
+.language-control { flex: 0 0 auto; }
 .game-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(16rem, 21rem);
@@ -241,8 +253,10 @@ main { min-height: 100vh; }
 .diagnostic-realtime { border-top: 1px solid #c3d0d5; padding-top: 1rem; }
 
 @media (max-width: 760px) {
-  .site-header { align-items: stretch; flex-direction: column; }
-  .site-header > div:last-child { align-self: flex-start; }
+  .site-header { gap: .5rem; }
+  .brand-art { width: clamp(8rem, 42vw, 16rem); aspect-ratio: 31 / 5; }
+  .brand-art img { top: -30%; left: -1.613%; width: 103.226%; }
+  .site-header p { margin-top: .35rem; font-size: .9rem; line-height: 1.25; }
   .game-shell { grid-template-columns: 1fr; }
   .control-column { min-height: 0; box-shadow: .3rem .3rem 0 var(--color-panel-shadow); }
 }

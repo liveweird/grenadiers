@@ -97,57 +97,51 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.16 — 2026-11-02
+## v1.3.17 — 2026-11-02
 
-Hard CPUs prefer equally close firing positions whose exact blast covers more of a visible
-rival’s currently open adjacent terrain branches. They retain every rival’s existing nearest
-baseline before optional ranking. Ties, unsupported scenes and incomplete comparisons keep that
-baseline. The metric uses public terrain, the rival’s enabled equipment and placement-time
-Standard/Piercing/Power geometry; it does not predict controls or guarantee a kill.
+The supplied gold pixel logo, compact wordmark and browser icons now identify Grenadiers.
+Desktop uses the combined logo; compact layouts use the wordmark. The translated image
+alternative remains the accessible page heading, and English/Polish controls are unchanged.
+CSS removes only transparent display padding and preserves crisp pixel scaling. Desktop header
+height matches the previous layout within rounding; mobile headers are substantially smaller.
+The separate full-screen/no-scroll layout task remains in the backlog.
 
-All baseline and optional pressure work stays within the existing `min(4096, remaining / 8)`
-pool and 32 probes per rival. Optional work also respects that rival’s unused original share.
-Complete useful planting, absent/present escape, contact, pit and publication proofs remain
-required. Easy/Standard56 and archived Hard57 remain unchanged; private replay29 binds 56/58.
-
-The real queued-owner comparison naturally collects range, changes north to west at equal
-travel distance, plants at 232, detonates at 412 and survives the full flame horizon 442. Its actual
-blast covers two open branches instead of one; all admission counters are zero. Work is 21,876
-versus archived 21,691 in this controlled query. An active-pit control preserves the old already-
-correct choice. This is a tactical witness, not a measured win-rate or general difficulty claim.
+All four original files retain their bytes in `web/src/assets/branding/`, with replacement
+instructions in its README. The redundant root copies are removed. Vite emits hashed PNG/ICO
+URLs; production serving verifies correct image MIME, immutable caching and exact original bytes.
+Arena artwork, gameplay, CPU policies and replay identities are unchanged.
 
 ### Verification
 
-- The clean full local gate at `b87fe0fc4208024b820a09e3fd0035ba94330699` passes in 916 seconds:
-  1,918 Core and 773 server tests per profile, including four isolated native cases. All 4,194,304
-  item masks pass in debug/release/coverage with 32 partitions, four workers and zero retries.
-  Official coverage is 70,369/75,272 lines (93.49%) against the unchanged 90% floor; 40 raw profiles.
-- Linux caught a test-module path depending on an untracked empty local directory. Final source
-  `416df4a639d3f920f944da4fcbd96c29dcbc0362` only relocates that unchanged test file, fixes its path
-  and updates contributor/backlog documentation. Its 20 affected tests pass in debug/release,
-  with formatting, strict workspace Clippy and repository checks. Independent review confirms
-  unchanged test logic/catalog and justifies reuse of the full matrix above.
-- Linux x86_64 workspace units and doctests pass in debug/release on the exact final source
-  ([run41363833754](https://github.com/liveweird/grenadiers/actions/runs/41363833754)).
-- The before/after images have identical content-addressed runtime filesystem layers. The final
-  executable is byte-identical, and all five frontend files also match v1.3.15. No renderer,
-  artwork, transport, dependency or physics change.
-- Exact-image Compose authentication/keyboard duel/three-CPU and restricted Kubernetes acceptance
-  pass without browser errors. Temporary stacks/namespaces are removed. Trivy reports zero
-  fixable high/critical findings; Rust dependency policies and npm high-threshold audits pass.
-  Moderate findings remain 20 web/12 E2E, in overlapping dependency trees.
+- The complete web gate passes: 169 files/7,426 tests, 95.57% line coverage, 92.54% statements,
+  91.73% functions and 88.95% branches, above the existing floors. API/runtime/generated-contract
+  checks, lint, Knip and production build pass. Compressed JS is 399,897/400,000 bytes and CSS
+  15,568/20,000; no limit was raised. JS has little headroom for future eager UI additions.
+- Real browser checks at 1440×900, 1024×768, 390×844 and 320×568 pass in English/Polish, with no
+  horizontal overflow or browser errors. Responsive selection, heading semantics, image decode
+  and all four assets’ production MIME/cache/bytes pass. Independent UI review is clear.
+- Rust gameplay/server logic is unchanged from v1.3.16; only product-version metadata and the
+  already verified test-only farming diagnostics differ. Its full Rust mask/native/coverage and
+  distinct Linux evidence are reused. Metadata/repository checks, Rust formatting and the new
+  Linux/arm64 production image build pass; no duplicate portable matrix is required.
+- The exact image passes Compose authentication, rendered keyboard duel and three-CPU play,
+  plus restricted Kubernetes and three CPUs. Temporary stacks/namespaces are removed. Pinned
+  Trivy reports zero fixable high/critical findings. Rust dependency policies and npm configured
+  high-severity audits pass; moderate findings remain 20 web/12 E2E in overlapping trees.
 
 ### Artifact and operation
 
-Accepted image: `sha256:381e031f36a894ba4c2f2ea62ac6c3ac454f68c99dd367376a8352ad0c72fb39`.
-The exact image runs on localhost:8085. Source/version labels, container restrictions, health,
-readiness, headers, CSP/cache and served assets pass. A fresh three-Hard-CPU match moves and
-plants bombs without browser errors. The immutable v1.3.15 override/image remain for rollback.
+Accepted source: `7b8f8eb238b36e3092a8e3c88961c1fc8f2fcee0`.
+Accepted image: `sha256:b6008924d7517151758d3f12f62f21f27188dc30176eda5205bd603e573d4877`.
 
-The separate foreign-bomb/future-loot support boundary remains unchanged. Further tactics and
-new viewport, lair placement, spike defaults, drop frequency and contact-Punch work remain in
-the backlog. The artist bundle is unchanged. Source release and local runtime only; no hosted
-service or production registry is configured.
+The exact image runs on localhost:8085. Version/source labels, restricted container settings,
+health/readiness, headers/CSP/cache and all nine served assets pass. A fresh three-Hard-CPU game
+moves and plants bombs without browser errors. The v1.3.16 immutable image/override remain
+available for rollback. This publishes source and an accepted local runtime, with no hosted
+service or production registry. The arena artist bundle is unchanged.
+
+<a id="v1316--2026-11-02"></a>
+The [v1.3.16 record](history/releases.md#v1316--2026-11-02) is preserved in release history.
 
 <a id="v1315--2026-11-01"></a>
 The [v1.3.15 record](history/releases.md#v1315--2026-11-01) is preserved in release history.

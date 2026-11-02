@@ -23,6 +23,7 @@ const INSTANCE: u64 = 5_461;
 #[derive(Clone, Copy)]
 pub(super) enum Environment {
     Active,
+    ActiveWithFormerSpikeTiming,
     Disabled,
 }
 
@@ -87,6 +88,11 @@ fn configured_driver(
             StormCloudConfig::Single,
             RespawnLairTuning::new(true, RespawnLairSettings::DEFAULT),
             SpikePitTuning::new(true, SpikePitSettings::DEFAULT),
+        ),
+        Environment::ActiveWithFormerSpikeTiming => (
+            StormCloudConfig::Single,
+            RespawnLairTuning::new(true, RespawnLairSettings::DEFAULT),
+            SpikePitTuning::new(true, SpikePitSettings::new(36, 180).unwrap()),
         ),
         Environment::Disabled => (
             StormCloudConfig::Disabled,

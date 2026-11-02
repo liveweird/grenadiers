@@ -38,10 +38,10 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
         ),
         (
             CpuDifficulty::Hard,
+            CpuProfile::HARD_V64,
             CpuProfile::HARD_V63,
-            CpuProfile::HARD_V59,
             CpuProfile::RECOVERY_V62_STANDARD,
-            CpuProfile::HARD_V47,
+            CpuProfile::HARD_V59,
         ),
     ] {
         let configuration = RoomConfiguration::new(

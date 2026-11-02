@@ -4,6 +4,49 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.18 — 2026-11-02
+
+Hard CPUs prefer a more productive approach to the same selected farming block when the
+navigation distance is equal and the exact visible blast destroys strictly more soft blocks.
+Ties, unsupported scenes and partial comparisons keep the baseline. Eligible retained approaches
+stay stable; real navigation/subcell progress can refresh the existing deadline, reevaluation alone
+cannot. The comparison reuses the unused original pressure allowance and geometry, without new
+RNG, hidden-loot knowledge, target priority or planting authority.
+
+The controlled real queued-owner comparison changes West to South and the early plant from
+`(3,5)` to `(5,7)`, destroying both relevant walls instead of one. Planning work increases by ten
+units. The actual bomb detonates, flames appear and clear, and the CPU survives the entire window.
+See the [comparison](history/cpu-farming-yield-2026-11-02.md) for the paired archived witness.
+Easy/Standard56 and archived Hard58 remain unchanged; private replay30 binds CPU56/59.
+
+### Verification
+
+- Full local Rust gate passes on frozen source: debug/release/coverage, 1,934 Core tests plus
+  two doctests, 774 ordinary server tests and four isolated native worker cases per profile.
+  All 4,194,304 item masks pass in every profile, with 32 partitions/four workers and no retries.
+  Line coverage is 73,435/78,756 (93.24%), above the unchanged 90% floor; 40 raw profiles
+  feed the official report. The complete gate took 1,009.947 seconds. Formatting, strict workspace
+  Clippy, build and repository checks pass. Independent Core/server integration reviews are clear.
+- Distinct Linux debug/release workspace units and doctests pass in run
+  [41373139270](https://github.com/liveweird/grenadiers/actions/runs/41373139270).
+- Frontend/API/art/E2E inputs are unchanged from v1.3.17. Its complete 7,426-test web gate and
+  static E2E evidence are reused; all nine built/served frontend files are byte-identical.
+- The exact image passes Compose authentication, rendered keyboard duel and three-CPU play,
+  plus restricted Kubernetes and three CPUs. Temporary stacks/namespaces are removed. Pinned
+  Trivy reports zero fixable high/critical findings. Rust dependency policies and configured
+  npm high-severity audits pass; moderate findings remain 20 web/12 E2E in overlapping trees.
+
+### Artifact and operation
+
+Accepted source: `4d19b0de5007b8737ee8429f5adf2e0702390d9d`.
+Accepted image: `sha256:2d25ee6dc670bc4598e839055823b20aff5bdd6f8322b793daa4a62477c3747b`.
+
+The exact image runs on localhost:8085. Version/source labels, restricted container settings,
+health/readiness, headers/CSP/cache and all nine served files pass. A fresh three-Hard-CPU game
+moves and plants without browser errors. The v1.3.17 immutable image/override remain available
+for rollback. This publishes source and an accepted local runtime, with no hosted service or
+production registry. Arena artwork and the artist bundle are unchanged.
+
 ## v1.3.17 — 2026-11-02
 
 The supplied gold pixel logo, compact wordmark and browser icons now identify Grenadiers.

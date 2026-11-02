@@ -7,6 +7,7 @@ fn sequenced_commands() -> [Value; 9] {
         "turnAssistUnits": 256,
         "winsToFinish": 3,
         "bombFuseTicks": 180,
+        "bombCapacityDropMultiplier": 5,
         "enabledItems": [],
         "environment": {
             "stormCloud": true,
@@ -73,8 +74,8 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     let (url, server) = start_server(state).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 20).await,
-        json!({"type":"authenticated", "protocolVersion":20})
+        authenticate(&mut socket, &token, 21).await,
+        json!({"type":"authenticated", "protocolVersion":21})
     );
 
     let room_id = "00000000000000000000000000000001";
@@ -84,7 +85,7 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
             "type":"updateSettings", "sequence":19, "roomId":room_id, "roundId":29,
             "settingsRevision":39, "settings":{
                 "startingSpeedLevel":0, "turnAssistUnits":256, "winsToFinish":3,
-                "bombFuseTicks":180, "enabledItems":[],
+                "bombFuseTicks":180, "bombCapacityDropMultiplier":5, "enabledItems":[],
                 "environment":{
                     "stormCloud":true,
                     "lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1},
@@ -139,7 +140,7 @@ async fn retired_equipment_is_rejected_before_the_session_is_claimed() {
 
     let mut fresh = connect(&url).await;
     assert_eq!(
-        authenticate(&mut fresh, &token, 20).await["type"],
+        authenticate(&mut fresh, &token, 21).await["type"],
         "authenticated"
     );
     server.abort();

@@ -14,6 +14,10 @@ impl BoundPublication {
     pub(crate) const fn base(&self) -> &crate::protocol::v20::BoundPublication {
         &self.base
     }
+
+    pub(crate) const fn room(&self) -> &RoomView {
+        &self.room
+    }
 }
 
 pub fn capture_expanded(

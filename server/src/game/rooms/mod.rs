@@ -32,6 +32,8 @@ mod registry_lookup;
 #[cfg(test)]
 mod replay;
 #[cfg(test)]
+mod replay_legacy_settings;
+#[cfg(test)]
 #[allow(dead_code)]
 mod replay_v10;
 #[cfg(test)]
@@ -109,6 +111,8 @@ mod replay_v30;
     reason = "Private replay31 retains the shared recording facade; production export remains disabled"
 )]
 mod replay_v31;
+#[cfg(test)]
+mod replay_v32;
 #[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;

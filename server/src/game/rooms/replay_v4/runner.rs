@@ -335,6 +335,7 @@ fn validate_operation(header: &ReplayV4Header, operation: Operation) -> Result<(
                 ..
             }
         )
+        || matches!(action, ReplayAction::UpdateSettings { settings, .. } if !crate::game::rooms::replay_legacy_settings::settings_are_legacy(settings))
     {
         return Err(ReplayError::InvalidOperation);
     }

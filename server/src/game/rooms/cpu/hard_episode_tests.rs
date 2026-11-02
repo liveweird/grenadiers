@@ -6,7 +6,7 @@ use grenadiers_core::room::{BoardSize, CpuDifficulty, CpuProfile};
 use support::{Case, assert_operational, current_profile, run};
 
 #[test]
-fn current_v20_profile_matrix_is_labeled_and_productive() {
+fn current_v21_weighted_profile_matrix_is_labeled_and_productive() {
     for (label, difficulty, profile, seed) in [
         (
             "current-easy-v60",

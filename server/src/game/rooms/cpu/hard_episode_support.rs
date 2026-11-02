@@ -17,7 +17,7 @@ use crate::{
     game::rooms::{
         RandomFill,
         cpu::{AdmissionTrace, CpuController, CpuPlanner, PumpReport},
-        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime},
+        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, SpikeRuntimeEnvironment},
     },
     round_seed::RoundSeedSource,
 };
@@ -77,17 +77,24 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
         case.board,
     )
     .unwrap();
-    let mut runtime = RosterRuntime::new_spike_v20_with_navigation(
+    let mut runtime = RosterRuntime::new_spike_v21_with_navigation(
         RosterIdentity {
             id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
             code: RoomCode::new("ABCDEFGH").unwrap(),
             registry_serial: ROOM_INSTANCE,
             configuration,
         },
-        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
-        StormCloudConfig::Single,
-        RespawnLairTuning::new(case.lairs, RespawnLairSettings::DEFAULT),
-        SpikePitTuning::new(true, SpikePitSettings::DEFAULT),
+        RoomSettings::DEFAULT
+            .with_enabled_items(EnabledItems::ALL)
+            .with_bomb_capacity_drop_multiplier(
+                grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT,
+            ),
+        SpikeRuntimeEnvironment {
+            cloud: StormCloudConfig::Single,
+            lairs: RespawnLairTuning::new(case.lairs, RespawnLairSettings::DEFAULT),
+            spike_pits: SpikePitTuning::new(true, SpikePitSettings::DEFAULT),
+            navigation: MobNavigationPolicy::TimedEscapeV3,
+        },
         RoundSeedSource::with_entropy(move |bytes| {
             bytes.fill(case.seed);
             Ok(())
@@ -97,7 +104,6 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
                 [case.seed.wrapping_add(epoch as u8); 32],
             ))
         }),
-        MobNavigationPolicy::TimedEscapeV3,
     )
     .unwrap();
     let admission = runtime.prepare_join(SeatId::One).unwrap();
@@ -134,8 +140,28 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
         .collect::<Vec<_>>();
     assert!(cpus.iter().all(|cpu| cpu.profile() == profile));
     assert_eq!(validate_cpus(&runtime, &cpus), Ok(()));
+    let pre_driver = runtime.replay_inspection();
+    assert_eq!(
+        pre_driver
+            .lifecycle
+            .settings()
+            .bomb_capacity_drop_multiplier(),
+        grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT
+    );
+    assert_eq!(
+        pre_driver.simulation.as_ref().unwrap().generation.version(),
+        grenadiers_core::game::WEIGHTED_GENERATOR_VERSION
+    );
     let notice = runtime.current_notice().unwrap();
-    assert!(notice.spike_v20_cpu_publication().is_some());
+    assert!(notice.spike_v21_cpu_publication().is_some());
+    assert_eq!(
+        notice
+            .spike_v21_room()
+            .unwrap()
+            .settings
+            .bomb_capacity_drop_multiplier(),
+        grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT
+    );
     let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));
     drop(receiver);
     let random_fill: Arc<RandomFill> = Arc::new(|bytes| {

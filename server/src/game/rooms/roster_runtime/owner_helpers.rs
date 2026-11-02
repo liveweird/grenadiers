@@ -34,6 +34,22 @@ impl RosterRuntime {
         )
     }
 
+    pub(in crate::game::rooms) const fn uses_contact_cpu_profiles(&self) -> bool {
+        matches!(
+            self.spike_publication,
+            super::runtime::SpikePublicationVersion::V20
+                | super::runtime::SpikePublicationVersion::V21
+        )
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn uses_gameplay21(&self) -> bool {
+        matches!(
+            self.spike_publication,
+            super::runtime::SpikePublicationVersion::V21
+        )
+    }
+
     pub(in crate::game::rooms) fn submit_cpu_intent(
         &mut self,
         seat: SeatId,

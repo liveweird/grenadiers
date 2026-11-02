@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":20, "token":token
+            "type":"authenticate", "protocolVersion":21, "token":token
         }),
     )
     .await;
@@ -116,7 +116,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         created["room"]["settings"],
         json!({
             "startingSpeedLevel":0, "turnAssistUnits":256,
-            "winsToFinish":3, "bombFuseTicks":180, "enabledItems":available_items.clone(),
+            "winsToFinish":3, "bombFuseTicks":180, "bombCapacityDropMultiplier":5,
+            "enabledItems":available_items.clone(),
             "environment":{
                 "stormCloud":true,
                 "lairs":{"enabled":false,"spawnSeconds":10,"maxLivingMobs":1},
@@ -172,7 +173,8 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     .await;
     let settings = json!({
         "startingSpeedLevel":2, "turnAssistUnits":64,
-        "winsToFinish":2, "bombFuseTicks":90, "enabledItems":[],
+        "winsToFinish":2, "bombFuseTicks":90, "bombCapacityDropMultiplier":10,
+        "enabledItems":[],
         "environment":{
             "stormCloud":false,
             "lairs":{"enabled":false,"spawnSeconds":42,"maxLivingMobs":1},

@@ -1,7 +1,7 @@
 use super::{
     error::RosterRuntimeError,
     publication_v15, publication_v16, publication_v17, publication_v18, publication_v19,
-    publication_v20,
+    publication_v20, publication_v21,
     runtime::{EnvironmentProfile, RosterRuntime, SpikePublicationVersion},
     types::RosterNotice,
 };
@@ -73,6 +73,15 @@ impl RosterRuntime {
                 self.settings_authority_locked(),
             )
             .map(publication_v20::view_notice),
+            SpikePublicationVersion::V21 => publication_v21::room_view(
+                &self.identity,
+                &self.lifecycle,
+                profile,
+                self.revision,
+                self.settings_revision,
+                self.settings_authority_locked(),
+            )
+            .map(publication_v21::view_notice),
         }
     }
 }

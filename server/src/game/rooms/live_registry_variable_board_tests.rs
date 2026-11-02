@@ -29,6 +29,10 @@ async fn all_board_and_count_profiles_dispatch_to_the_required_owner() {
                 assert!(matches!(admission, LiveAdmission::Roster(_)));
                 assert_eq!(personal(&admission)["room"]["rulesVersion"], 10);
                 assert_eq!(
+                    personal(&admission)["room"]["settings"]["bombCapacityDropMultiplier"],
+                    5
+                );
+                assert_eq!(
                     personal(&admission)["room"]["settings"]["environment"]["stormCloud"],
                     environment == StormCloudConfig::Single
                 );
@@ -75,6 +79,10 @@ async fn every_cpu_board_and_count_uses_spike_policy_for_both_environments() -> 
                         .unwrap();
                     assert!(matches!(admission, LiveAdmission::Roster(_)));
                     assert_eq!(personal(&admission)["room"]["rulesVersion"], 10);
+                    assert_eq!(
+                        personal(&admission)["room"]["settings"]["bombCapacityDropMultiplier"],
+                        5
+                    );
                     assert_eq!(
                         personal(&admission)["room"]["configuration"]["cpuDifficulty"],
                         archived_difficulty_name(difficulty)?

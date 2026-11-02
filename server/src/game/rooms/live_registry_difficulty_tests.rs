@@ -1,7 +1,7 @@
 use super::*;
 
 #[tokio::test]
-async fn all_live_cpu_tiers_publish_only_gameplay20_with_room_wide_identity() {
+async fn all_live_cpu_tiers_publish_gameplay21_with_weighted_room_identity() {
     for (difficulty, wire) in [
         (CpuDifficulty::Easy, "easy"),
         (CpuDifficulty::Standard, "standard"),
@@ -31,6 +31,7 @@ async fn all_live_cpu_tiers_publish_only_gameplay20_with_room_wide_identity() {
         assert_eq!(frame["type"], "admitted");
         let room = &frame["room"];
         assert_eq!(room["configuration"]["cpuDifficulty"], wire);
+        assert_eq!(room["settings"]["bombCapacityDropMultiplier"], 5);
         for row in &room["seats"].as_array().unwrap()[1..] {
             assert_eq!(
                 row["controller"],

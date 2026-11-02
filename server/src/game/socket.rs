@@ -8,8 +8,8 @@ use axum::{
     http::{HeaderMap, StatusCode, Uri, header::RETRY_AFTER},
     response::Response,
 };
-use grenadiers_core::protocol::v20::MAX_CLIENT_MESSAGE_BYTES;
-use grenadiers_core::protocol::v20::{
+use grenadiers_core::protocol::v21::MAX_CLIENT_MESSAGE_BYTES;
+use grenadiers_core::protocol::v21::{
     ErrorCode, GAMEPLAY_PROTOCOL_VERSION, GameServerMessage, GameplayVersion,
     encode_server_message, parse_client_message,
 };

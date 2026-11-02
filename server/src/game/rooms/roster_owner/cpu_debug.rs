@@ -7,7 +7,7 @@ use grenadiers_core::{
         },
     },
     game::SeatId,
-    protocol::{Cell, v14::ResumeToken, v18, v19, v20},
+    protocol::{Cell, v14::ResumeToken, v18, v19, v20, v21},
     room::RosterParticipant,
 };
 
@@ -42,8 +42,13 @@ impl Driver {
 
         let room = self
             .last
-            .spike_v20_room()
+            .spike_v21_room()
             .map(|room| (&room.room_id, room.round_id, room.tick, room.revision))
+            .or_else(|| {
+                self.last
+                    .spike_v20_room()
+                    .map(|room| (&room.room_id, room.round_id, room.tick, room.revision))
+            })
             .or_else(|| {
                 self.last
                     .spike_v19_room()
@@ -72,7 +77,11 @@ impl Driver {
                 .collect(),
         };
         let recipient = wire_seat(seat);
-        let state = if let Some(publication) = self.last.spike_v20_cpu_publication() {
+        let state = if let Some(publication) = self.last.spike_v21_cpu_publication() {
+            v21::project_recipient(publication, recipient)
+                .map_err(|_| CpuDebugQueryError::Unavailable)?
+                .state
+        } else if let Some(publication) = self.last.spike_v20_cpu_publication() {
             v20::project_recipient(publication, recipient)
                 .map_err(|_| CpuDebugQueryError::Unavailable)?
                 .state

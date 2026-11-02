@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::v20::{
+use grenadiers_core::protocol::v21::{
     GameClientMessage, ManualActionKind, ResumeToken, RoomSettings,
 };
 use grenadiers_core::protocol::{
@@ -192,7 +192,7 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v20::parse_client_message;
+    use grenadiers_core::protocol::v21::parse_client_message;
 
     use super::{Command, InboundMessage};
 

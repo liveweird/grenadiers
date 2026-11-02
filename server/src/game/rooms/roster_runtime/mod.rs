@@ -16,12 +16,14 @@ mod publication_v17;
 mod publication_v18;
 mod publication_v19;
 mod publication_v20;
+mod publication_v21;
 mod round;
 mod runtime;
 mod runtime_helpers;
 mod runtime_publication;
 mod seat_wire;
 mod types;
+mod types_v21;
 
 #[cfg(test)]
 mod test_scene;
@@ -30,6 +32,7 @@ mod test_scene;
 mod replay_inspection;
 
 pub(in crate::game::rooms) use admission::PreparedRosterAdmission;
+pub(in crate::game::rooms) use environment_spike::SpikeRuntimeEnvironment;
 pub(in crate::game::rooms) use error::RosterRuntimeError;
 #[cfg(test)]
 pub(in crate::game::rooms) use replay_inspection::RosterRuntimeInspection;
@@ -55,3 +58,5 @@ mod spike_settings_tests;
 mod terminal_transport_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod weighted_settings_tests;

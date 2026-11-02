@@ -30,12 +30,22 @@ pub fn observe_cpu_recipient(
     recipient: Seat,
     world: crate::cpu::WorldId,
 ) -> Result<crate::cpu::Observation, ProjectionError> {
+    let settings = publication
+        .room()
+        .settings
+        .domain()
+        .map_err(|()| ProjectionError::InvalidRules)?;
     crate::protocol::v19::observe_cpu_recipient_with_punch_activation(
         publication.base(),
         recipient,
         world,
         crate::game::PunchActivationPolicy::ContactV2,
     )
+    .and_then(|observation| {
+        observation
+            .map_parts(|parts| parts.rules.settings = settings)
+            .map_err(|_| ProjectionError::InvalidRules)
+    })
 }
 pub use server::{GameServerMessage, GameplayVersion, RoomView};
 

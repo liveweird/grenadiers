@@ -11,6 +11,7 @@ use crate::round_seed::RoundSeedSource;
 use super::{
     CpuProvenance, RecordingRosterRuntime, ReplayAction, ReplayHeader, replay, verify_exact,
 };
+use crate::game::rooms::replay_v4::runner::ReplayError;
 
 fn configuration() -> LairRoomConfiguration {
     LairRoomConfiguration::new(
@@ -152,6 +153,56 @@ fn replay8_header_is_closed_to_rules9_supported_cpu_profiles_and_cap_one() {
         )
         .is_err()
     );
+}
+
+#[test]
+fn replay8_rejects_weighted_initial_and_updated_settings_at_validation() {
+    let weighted = RoomSettings::DEFAULT.with_bomb_capacity_drop_multiplier(
+        grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT,
+    );
+    let mut header = ReplayHeader::new(
+        configuration(),
+        RoomSettings::DEFAULT,
+        [false; 4],
+        vec![CpuProvenance::new(
+            SeatId::Two,
+            CpuDifficulty::Standard,
+            [8; 32],
+        )],
+    )
+    .unwrap();
+    header.initial_settings = weighted;
+    let forged_header = super::record::Journal::new(header);
+    assert_eq!(replay(&forged_header), Err(ReplayError::InvalidHeader));
+
+    let mut recording = recorder();
+    recording.admit(SeatId::One, false).unwrap();
+    recording
+        .human_action(
+            SeatId::One,
+            1,
+            ReplayAction::UpdateSettings {
+                settings_revision: 1,
+                settings: RoomSettings::DEFAULT,
+                cloud: StormCloudConfig::Single,
+                tuning: RespawnLairTuning::new(true, RespawnLairSettings::new(5).unwrap()),
+            },
+        )
+        .unwrap();
+    let (_, mut forged_update) = recording.into_parts();
+    let settings = forged_update
+        .records
+        .iter_mut()
+        .find_map(|record| match &mut record.operation {
+            super::record::Operation::Action {
+                action: ReplayAction::UpdateSettings { settings, .. },
+                ..
+            } => Some(settings),
+            _ => None,
+        })
+        .unwrap();
+    *settings = weighted;
+    assert_eq!(replay(&forged_update), Err(ReplayError::InvalidOperation));
 }
 
 #[test]

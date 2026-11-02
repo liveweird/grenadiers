@@ -44,6 +44,7 @@ pub(super) fn plan_lairs_inner(
     farm_origin_recovery: bool,
     contact_topology: super::contact_plant::ContactTopology,
     avoid_pits: bool,
+    initial_demolition: bool,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let parts = observation.parts();
     if parts.rules.version != rules_version
@@ -180,6 +181,7 @@ pub(super) fn plan_lairs_inner(
             strategic_goals,
             pickup_progress,
             avoid_pits,
+            initial_demolition,
             work,
         )
     {

@@ -1,3 +1,5 @@
+#[path = "layout_v64_demolition_tests.rs"]
+mod demolition;
 #[path = "layout_recovery_horizon_tests.rs"]
 mod horizon;
 #[path = "layout_episode_trace.rs"]

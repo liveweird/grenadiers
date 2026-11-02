@@ -276,6 +276,7 @@ fn opening_and_pickup_handoff_refuse_the_unsafe_ordinary_pulse() {
             true,
             true,
             false,
+            false,
             &mut WorkBudget::new(WORK_ALLOWANCE),
         )
         .is_some()
@@ -294,6 +295,7 @@ fn opening_and_pickup_handoff_refuse_the_unsafe_ordinary_pulse() {
             true,
             true,
             true,
+            false,
             &mut WorkBudget::new(WORK_ALLOWANCE),
         )
         .is_none()

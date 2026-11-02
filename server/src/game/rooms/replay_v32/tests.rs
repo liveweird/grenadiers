@@ -77,7 +77,7 @@ fn replay32_binds_clearance_profile_and_current_policy_pairs_on_every_board() {
             (None, 62),
             (Some(CpuDifficulty::Easy), 62),
             (Some(CpuDifficulty::Standard), 62),
-            (Some(CpuDifficulty::Hard), 63),
+            (Some(CpuDifficulty::Hard), 64),
         ] {
             let mut recording = recorder(difficulty, board);
             start(&mut recording);

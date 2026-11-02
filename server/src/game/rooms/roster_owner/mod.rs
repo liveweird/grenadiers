@@ -116,7 +116,7 @@ fn validate_cpus(
         }
         (_, _, _, _, None) => None,
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay20() => {
-            Some(CpuProfile::HARD_V63)
+            Some(CpuProfile::HARD_V64)
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
             Some(CpuProfile::HARD_V59)

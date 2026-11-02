@@ -64,7 +64,7 @@ pub(super) const fn current_profile(difficulty: CpuDifficulty) -> CpuProfile {
     match difficulty {
         CpuDifficulty::Easy => CpuProfile::RECOVERY_V62_EASY,
         CpuDifficulty::Standard => CpuProfile::RECOVERY_V62_STANDARD,
-        CpuDifficulty::Hard => CpuProfile::HARD_V63,
+        CpuDifficulty::Hard => CpuProfile::HARD_V64,
     }
 }
 

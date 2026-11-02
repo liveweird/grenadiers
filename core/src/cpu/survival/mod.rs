@@ -29,10 +29,12 @@ mod pickup_handoff;
 mod pickup_progress;
 mod pit_avoidance;
 mod planner;
+mod plant_demolition;
 mod plant_tactic;
 mod plant_value;
 mod punch_tactic;
 mod refuge_guidance;
+mod refuge_guidance_policy;
 mod refuge_handoff;
 mod respawn_disabled;
 mod respawn_v22;
@@ -67,7 +69,8 @@ pub use continuation_selection_v62::plan_lairs_v62 as plan_continuation_lairs_v6
 pub use corner_refuges::{
     plan_contact_punch_v60_with_origin, plan_corner_refuges_v56_with_origin,
     plan_hard_contact_punch_v61_with_origin, plan_hard_corner_refuges_v57_with_origin,
-    plan_hard_exit_pressure_v58_with_origin, plan_hard_farm_yield_v59_with_origin,
+    plan_hard_demolition_v64_with_origin, plan_hard_exit_pressure_v58_with_origin,
+    plan_hard_farm_yield_v59_with_origin,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};

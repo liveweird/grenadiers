@@ -4,7 +4,7 @@ use grenadiers_core::{
         policy::PolicyError,
         survival::{
             LairSurvivalPlan, plan_contact_punch_v60_with_origin,
-            plan_hard_contact_punch_v61_with_origin,
+            plan_hard_contact_punch_v61_with_origin, plan_hard_demolition_v64_with_origin,
         },
     },
     room::CpuPolicy,
@@ -19,7 +19,8 @@ pub(super) fn plan(
     let planner = match job.policy {
         CpuPolicy::UtilityV60 | CpuPolicy::UtilityV62 => plan_contact_punch_v60_with_origin,
         CpuPolicy::UtilityV61 | CpuPolicy::UtilityV63 => plan_hard_contact_punch_v61_with_origin,
-        _ => unreachable!("contact-punch dispatch is closed to policies 60-63"),
+        CpuPolicy::UtilityV64 => plan_hard_demolition_v64_with_origin,
+        _ => unreachable!("contact-punch dispatch is closed to policies 60-64"),
     };
     planner(
         &job.observation,

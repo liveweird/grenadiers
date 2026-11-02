@@ -160,7 +160,7 @@ fn runtime_from_header(
 fn cpu_policy_version(configuration: &SpikeRoomConfiguration) -> u16 {
     use grenadiers_core::room::CpuDifficulty;
     match configuration.base().base().cpu_difficulty() {
-        Some(CpuDifficulty::Hard) => 63,
+        Some(CpuDifficulty::Hard) => 64,
         None | Some(CpuDifficulty::Easy | CpuDifficulty::Standard) => 62,
     }
 }

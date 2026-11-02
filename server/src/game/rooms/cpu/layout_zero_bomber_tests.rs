@@ -106,6 +106,7 @@ fn hard_v63_zero_bomber_reports_first_attack_plant_refusal_and_death() {
     assert_eq!(counterfactuals.len(), 1);
     let (counter_basis, counterfactual) = counterfactuals[0];
     assert_eq!(counter_basis.observation.parts().tick, Tick(183));
+    assert_eq!(counter_basis.memory.strategic_intent(), None);
     assert_eq!(counterfactual.block, CellId::new(11, 3));
     assert_eq!(counterfactual.visible_yield, 1);
     assert_eq!(counterfactual.useful, Some(true));

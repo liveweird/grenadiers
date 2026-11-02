@@ -5,6 +5,7 @@ use crate::game::Tick;
 
 use super::contact_plant::ContactTopology;
 use super::joint_refuge::FarmRefugeMode;
+pub(super) use super::refuge_guidance_policy::plan_policy;
 use super::steering::RefugeGuidance;
 use super::{LairSurvivalPlan, PlantEscapeOrigin};
 
@@ -305,78 +306,5 @@ pub fn plan_hard_farm_origins_v39_with_origin(
         true,
         ContactTopology::Disabled,
         false,
-    )
-}
-
-#[allow(clippy::too_many_arguments)]
-pub(super) fn plan_policy(
-    observation: &Observation,
-    memory: &UtilityMemory,
-    history: &ObservedHazardMemory,
-    settled_stop_tick: Tick,
-    origin: Option<&PlantEscapeOrigin>,
-    rng: &mut CpuRng,
-    work: &mut WorkBudget,
-    persistent_burning_oil: bool,
-    goal_modes: crate::cpu::policy::GoalModes,
-    counter_pressure: bool,
-    pickup_progress: bool,
-    refuge_guidance: RefugeGuidance,
-    farm_refuges: FarmRefugeMode,
-    farm_origin_recovery: bool,
-    contact_topology: ContactTopology,
-    avoid_pits: bool,
-) -> Result<LairSurvivalPlan, PolicyError> {
-    if observation.parts().rules.version != 10 {
-        return Err(PolicyError::InvalidObservation);
-    }
-    if observation.respawn_lairs().is_none() {
-        return super::planner::plan_inner(
-            observation,
-            memory,
-            history,
-            settled_stop_tick,
-            origin,
-            rng,
-            work,
-            true,
-            true,
-            true,
-            true,
-            true,
-            persistent_burning_oil,
-            goal_modes,
-            counter_pressure,
-            pickup_progress,
-            refuge_guidance,
-            avoid_pits,
-        )
-        .map(|survival| LairSurvivalPlan {
-            survival,
-            contact: None,
-        });
-    }
-    super::lair_planner::plan_lairs_inner(
-        observation,
-        memory,
-        history,
-        settled_stop_tick,
-        origin,
-        rng,
-        work,
-        10,
-        true,
-        true,
-        true,
-        true,
-        persistent_burning_oil,
-        goal_modes,
-        counter_pressure,
-        pickup_progress,
-        refuge_guidance,
-        farm_refuges,
-        farm_origin_recovery,
-        contact_topology,
-        avoid_pits,
     )
 }

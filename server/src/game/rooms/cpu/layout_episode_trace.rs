@@ -1,7 +1,10 @@
 use std::{collections::BTreeSet, sync::Arc};
 
+#[path = "layout_episode_trace_profile.rs"]
+mod profile;
 #[path = "layout_episode_witness.rs"]
 pub(super) mod witness;
+pub(super) use profile::{run_zero_bomber_trace, run_zero_bomber_trace_with_profile};
 use witness::{
     PlanSnapshot, StationaryPreflight, StepReplayWitness, death_witness, digest, merge,
     record_events, trace_identity, update_lifecycles,
@@ -72,7 +75,8 @@ pub(super) struct DynamicFrame {
     pub tick: Tick,
     pub actors: Vec<grenadiers_core::game::ActorView>,
     pub bombs: Vec<BombView>,
-    flames: Vec<grenadiers_core::game::FlameView>,
+    pub(super) blocks: Vec<CellId>,
+    pub(super) flames: Vec<grenadiers_core::game::FlameView>,
     oil: Vec<grenadiers_core::game::OilBarrelView>,
     pickups: Vec<grenadiers_core::game::PickupView>,
     cloud: Option<StormCloudView>,
@@ -149,16 +153,6 @@ pub(super) fn run_layout_trace_with_profile(
     )
 }
 
-pub(super) fn run_zero_bomber_trace(case: LayoutCase, ticks: usize, seat: SeatId) -> LayoutTrace {
-    run_layout_trace_inner(
-        case,
-        ticks,
-        CpuProfile::HARD_V63,
-        Some((seat, Tick(0), Tick(840))),
-        true,
-    )
-}
-
 fn run_layout_trace_inner(
     case: LayoutCase,
     ticks: usize,
@@ -230,8 +224,13 @@ fn run_layout_trace_inner(
         })
         .into_iter()
         .collect::<Vec<_>>();
-    if profile == CpuProfile::HARD_V63 {
+    if profile == CpuProfile::HARD_V64 {
         assert_eq!(validate_cpus(&runtime, &cpus), Ok(()));
+    } else if profile == CpuProfile::HARD_V63 {
+        assert_eq!(
+            validate_cpus(&runtime, &cpus),
+            Err(crate::game::rooms::roster_runtime::RosterRuntimeError::UnsupportedConfiguration)
+        );
     }
     let notice = runtime.current_notice().unwrap();
     let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));
@@ -344,6 +343,7 @@ fn run_layout_trace_inner(
             tick: state.tick(),
             actors: public.actors,
             bombs: public.bombs,
+            blocks: public.arena.blocks,
             flames: public.flames,
             oil: public.oil_barrels,
             pickups: public.pickups,

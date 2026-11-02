@@ -23,7 +23,7 @@ fn current_v20_profile_matrix_is_labeled_and_productive() {
         (
             "current-hard-v61",
             CpuDifficulty::Hard,
-            CpuProfile::HARD_V63,
+            CpuProfile::HARD_V64,
             73,
         ),
     ] {
@@ -63,7 +63,7 @@ fn pumped_hard_v61_is_deterministic_and_productive_on_every_board_and_lair_mode(
             let first = run(case, 840);
             let second = run(case, 840);
             assert_eq!(first, second, "board={board:?} lairs={lairs}");
-            assert_eq!(first.profile, CpuProfile::HARD_V63);
+            assert_eq!(first.profile, CpuProfile::HARD_V64);
             assert_operational(&first);
         }
     }
@@ -83,7 +83,7 @@ fn native_hard_v61_seed73_progresses_with_two_workers_at_production_pacing() {
             },
             840,
         );
-        assert_eq!(outcome.profile, CpuProfile::HARD_V63);
+        assert_eq!(outcome.profile, CpuProfile::HARD_V64);
         assert_operational(&outcome);
     }
 }

@@ -354,6 +354,7 @@ fn crossing_recovery_profiles_preserve_the_contact_punch_ordinary_pair() {
         ),
         (CpuProfile::RECOVERY_V62_EASY, 62, CpuDifficulty::Easy),
         (CpuProfile::HARD_V63, 63, CpuDifficulty::Hard),
+        (CpuProfile::HARD_V64, 64, CpuDifficulty::Hard),
     ] {
         assert_eq!(profile.policy.version(), policy);
         assert_eq!(profile.difficulty, difficulty);

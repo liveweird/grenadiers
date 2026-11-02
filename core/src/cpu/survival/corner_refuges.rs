@@ -142,6 +142,29 @@ pub fn plan_hard_contact_punch_v61_with_origin(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+pub fn plan_hard_demolition_v64_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    require_contact_punch(observation)?;
+    super::refuge_guidance_policy::plan_policy_v64(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        GoalModes::visible_yield(),
+    )
+}
+
 fn require_contact_punch(observation: &Observation) -> Result<(), PolicyError> {
     (observation.parts().rules.version == 10
         && observation.parts().rules.punch_activation_policy

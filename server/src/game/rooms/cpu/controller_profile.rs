@@ -30,6 +30,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                         | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                         | grenadiers_core::room::CpuProfile::HARD_V63
+                        | grenadiers_core::room::CpuProfile::HARD_V64
                 );
         }
         match rules_version {
@@ -126,6 +127,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
+                | grenadiers_core::room::CpuProfile::HARD_V64
         )
     }
 
@@ -167,6 +169,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
+                | grenadiers_core::room::CpuProfile::HARD_V64
         )
     }
 
@@ -205,6 +208,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
+                | grenadiers_core::room::CpuProfile::HARD_V64
         )
     }
 
@@ -240,6 +244,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
+                | grenadiers_core::room::CpuProfile::HARD_V64
         )
     }
 
@@ -272,6 +277,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
+                | grenadiers_core::room::CpuProfile::HARD_V64
         )
     }
 
@@ -301,6 +307,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
+                | grenadiers_core::room::CpuProfile::HARD_V64
         )
     }
 }

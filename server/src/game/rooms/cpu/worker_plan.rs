@@ -74,6 +74,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV61
                 | CpuPolicy::UtilityV62
                 | CpuPolicy::UtilityV63
+                | CpuPolicy::UtilityV64
         )
     {
         let plan = if matches!(
@@ -82,6 +83,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV61
                 | CpuPolicy::UtilityV62
                 | CpuPolicy::UtilityV63
+                | CpuPolicy::UtilityV64
         ) {
             contact_punch::plan(job, work)
         } else if job.policy == CpuPolicy::UtilityV59 {

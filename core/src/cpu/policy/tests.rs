@@ -40,6 +40,7 @@ pub(crate) fn observation(position: CellId) -> Observation {
         recipient: SeatId::Two,
         rules: ObservedRules {
             version: 5,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 10,
             remaining_ticks: 1_000,

@@ -42,6 +42,8 @@ Run independent checks and isolated test groups in parallel. Reuse dependency/bu
 verified artifacts, while retaining assertions, coverage floors, source identity and failure
 reporting. Keep latency measurements isolated from competing test workloads. Retain each running command's
 session ID and log; resume it when execution yields instead of launching another copy.
+Do not rebuild shared-target executables while partition workers still launch them; keep Cargo
+ownership exclusive until those partitions finish, or use a separate target directory.
 
 Record the tested commit, commands, outcomes, environment and deployed image digest concisely.
 Repeat checks for relevant changes, failures or an identified coverage gap. Do not add repeated

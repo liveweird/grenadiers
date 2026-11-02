@@ -1,15 +1,16 @@
 import {
   controlActions, defaultKeyboardBindings, freezeBindings,
-  isAllowedControlCode, supportedControlCodes, type ControlAction, type KeyboardBindings,
+  isAllowedControlCode, type ControlAction, type KeyboardBindings,
 } from '../arena/bindings'
 
-export const CONTROLS_STORAGE_KEY = 'grenadiers.controls.v2'
+export const CONTROLS_STORAGE_KEY = 'grenadiers.controls.v3'
+export const V2_CONTROLS_STORAGE_KEY = 'grenadiers.controls.v2'
 export const LEGACY_CONTROLS_STORAGE_KEY = 'grenadiers.controls.v1'
 const MAX_STORED_LENGTH = 2_048
 const MAX_CODES_PER_ACTION = 2
 
-type StoredControls = { version: 2; bindings: Record<ControlAction, string[]> }
-const legacyActions = controlActions.filter((action) => action !== 'equipment')
+type StoredControls = { version: 3; bindings: Record<ControlAction, string[]> }
+const v2Actions = [...controlActions, 'equipment'] as const
 
 function addUniqueCodes(value: unknown, seen: Set<string>): value is string[] {
   if (!Array.isArray(value) || value.length === 0 || value.length > MAX_CODES_PER_ACTION) return false
@@ -20,61 +21,40 @@ function addUniqueCodes(value: unknown, seen: Set<string>): value is string[] {
   return true
 }
 
-function parseStoredControls(raw: string): KeyboardBindings | null {
+function parseBindings(
+  raw: string, version: 1 | 2 | 3, actions: readonly string[],
+): KeyboardBindings | null {
   if (raw.length === 0 || raw.length > MAX_STORED_LENGTH) return null
   let value: unknown
   try { value = JSON.parse(raw) } catch { return null }
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null
   const record = value as Record<string, unknown>
-  if (Object.keys(record).length !== 2 || record.version !== 2
+  if (Object.keys(record).length !== 2 || record.version !== version
     || !record.bindings || typeof record.bindings !== 'object' || Array.isArray(record.bindings)) return null
   const bindings = record.bindings as Record<string, unknown>
-  if (Object.keys(bindings).length !== controlActions.length
-    || !controlActions.every((action) => Object.hasOwn(bindings, action))) return null
+  if (Object.keys(bindings).length !== actions.length
+    || !actions.every((action) => Object.hasOwn(bindings, action))) return null
   const seen = new Set<string>()
   const parsed = {} as Record<ControlAction, string[]>
-  for (const action of controlActions) {
+  for (const action of actions) {
     const codes = bindings[action]
     if (!addUniqueCodes(codes, seen)) return null
-    parsed[action] = [...codes]
+    if (action !== 'equipment') parsed[action as ControlAction] = [...codes]
   }
-  return freezeBindings(parsed)
-}
-
-function migrateLegacyControls(raw: string): KeyboardBindings | null {
-  if (raw.length === 0 || raw.length > MAX_STORED_LENGTH) return null
-  let value: unknown
-  try { value = JSON.parse(raw) } catch { return null }
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
-  const record = value as Record<string, unknown>
-  if (Object.keys(record).length !== 2 || record.version !== 1
-    || !record.bindings || typeof record.bindings !== 'object' || Array.isArray(record.bindings)) return null
-  const bindings = record.bindings as Record<string, unknown>
-  if (Object.keys(bindings).length !== legacyActions.length
-    || !legacyActions.every((action) => Object.hasOwn(bindings, action))) return null
-  const seen = new Set<string>()
-  const parsed = {} as Record<ControlAction, string[]>
-  for (const action of legacyActions) {
-    const codes = bindings[action]
-    if (!addUniqueCodes(codes, seen)) return null
-    parsed[action] = [...codes]
-  }
-  // Prefer the familiar E/F/Q equipment keys, then the documented supported-code order.
-  const candidates = ['KeyE', 'KeyF', 'KeyQ', ...supportedControlCodes]
-  const equipment = candidates.find((code) => !seen.has(code))
-  if (!equipment) return null
-  parsed.equipment = [equipment]
   return freezeBindings(parsed)
 }
 
 export function loadControlBindings(storage?: Pick<Storage, 'getItem'> | null): KeyboardBindings {
   try {
     const target = storage === undefined ? window.localStorage : storage
-    const raw = target?.getItem(CONTROLS_STORAGE_KEY)
-    const current = raw ? parseStoredControls(raw) : null
-    if (current) return current
+    const current = target?.getItem(CONTROLS_STORAGE_KEY)
+    const parsed = current ? parseBindings(current, 3, controlActions) : null
+    if (parsed) return parsed
+    const v2 = target?.getItem(V2_CONTROLS_STORAGE_KEY)
+    const migrated = v2 ? parseBindings(v2, 2, v2Actions) : null
+    if (migrated) return migrated
     const legacy = target?.getItem(LEGACY_CONTROLS_STORAGE_KEY)
-    return legacy ? migrateLegacyControls(legacy) ?? defaultKeyboardBindings : defaultKeyboardBindings
+    return legacy ? parseBindings(legacy, 1, controlActions) ?? defaultKeyboardBindings : defaultKeyboardBindings
   } catch { return defaultKeyboardBindings }
 }
 
@@ -86,7 +66,7 @@ export function saveControlBindings(
     const target = storage === undefined ? window.localStorage : storage
     const serializable = Object.fromEntries(controlActions.map((action) => [action, [...bindings[action]]]))
     const stored: StoredControls = {
-      version: 2,
+      version: 3,
       bindings: serializable as Record<ControlAction, string[]>,
     }
     target?.setItem(CONTROLS_STORAGE_KEY, JSON.stringify(stored))

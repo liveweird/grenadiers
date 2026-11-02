@@ -2,7 +2,8 @@ use grenadiers_core::cpu::{
     Intent, Observation, WorkBudget,
     policy::StrategicIntent,
     survival::{
-        TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_hard_corner_refuges_v57_with_origin,
+        TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_contact_punch_v60_with_origin,
+        plan_hard_contact_punch_v61_with_origin, plan_hard_corner_refuges_v57_with_origin,
         plan_hard_exit_pressure_v58_with_origin, plan_hard_farm_yield_v59_with_origin,
         select_teleporter_recovery_v50,
     },
@@ -27,6 +28,8 @@ pub(super) fn inspect(basis: &PlanningBasis<'_>) -> QueuedPlanProbe {
         CpuPolicy::UtilityV57 => plan_hard_corner_refuges_v57_with_origin,
         CpuPolicy::UtilityV58 => plan_hard_exit_pressure_v58_with_origin,
         CpuPolicy::UtilityV59 => plan_hard_farm_yield_v59_with_origin,
+        CpuPolicy::UtilityV60 => plan_contact_punch_v60_with_origin,
+        CpuPolicy::UtilityV61 => plan_hard_contact_punch_v61_with_origin,
         _ => panic!("unsupported queued-plan witness profile"),
     };
     let mut rng = basis.rng.clone();

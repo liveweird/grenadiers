@@ -16,6 +16,12 @@ pub enum MobNavigationPolicy {
     TimedEscapeV3,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PunchActivationPolicy {
+    ManualV1,
+    ContactV2,
+}
+
 impl MobNavigationPolicy {
     #[must_use]
     pub const fn version(self) -> u16 {
@@ -52,6 +58,7 @@ pub struct RulesConfig {
     lair_config: LairConfig,
     spike_pit_config: SpikePitConfig,
     mob_navigation_policy: MobNavigationPolicy,
+    punch_activation_policy: PunchActivationPolicy,
 }
 
 impl RulesConfig {
@@ -76,6 +83,7 @@ impl RulesConfig {
             lair_config: LairConfig::Disabled,
             spike_pit_config: SpikePitConfig::Disabled,
             mob_navigation_policy: MobNavigationPolicy::LegacyV1,
+            punch_activation_policy: PunchActivationPolicy::ManualV1,
         }
     }
 
@@ -224,6 +232,22 @@ impl RulesConfig {
     #[must_use]
     pub const fn mob_navigation_policy(self) -> MobNavigationPolicy {
         self.mob_navigation_policy
+    }
+
+    #[must_use]
+    pub const fn with_punch_activation_policy(
+        self,
+        punch_activation_policy: PunchActivationPolicy,
+    ) -> Self {
+        Self {
+            punch_activation_policy,
+            ..self
+        }
+    }
+
+    #[must_use]
+    pub const fn punch_activation_policy(self) -> PunchActivationPolicy {
+        self.punch_activation_policy
     }
 
     #[must_use]

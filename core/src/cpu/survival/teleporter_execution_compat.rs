@@ -84,6 +84,7 @@ fn scene_fits(
     if old.world != new.world
         || old.recipient != new.recipient
         || old.rules.version != new.rules.version
+        || old.rules.punch_activation_policy != new.rules.punch_activation_policy
         || old.rules.tick_rate != new.rules.tick_rate
         || old.rules.settings != new.rules.settings
         || old.arena != new.arena

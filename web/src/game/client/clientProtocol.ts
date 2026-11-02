@@ -1,6 +1,6 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v19/schema'
-import { validateGameplayV19ServerMessage } from '../v19/validation'
+  RoomView, Seat, V14ErrorCode } from '../v20/schema'
+import { validateGameplayV20ServerMessage } from '../v20/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -27,7 +27,7 @@ export type Capability = { roomId: string; seat: Seat; token: string }
 export type RoomCommand =
   | { type: 'ready'; ready: boolean; settingsRevision: number }
   | { type: 'movement'; direction: Direction | null }
-  | { type: 'manualAction'; actionId: number; action: 'bomb' | 'equipment' }
+  | { type: 'manualAction'; actionId: number; action: 'bomb' }
   | { type: 'rematch'; ready: boolean }
 export type ControlCommand = { sequence: number; roomId: string; roundId: number; revision: number }
 export type PendingSettings = {
@@ -85,7 +85,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV19ServerMessage(value)
+  const result = validateGameplayV20ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 

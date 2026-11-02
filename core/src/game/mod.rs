@@ -88,7 +88,7 @@ pub(crate) use punch_geometry::{
     landing_candidates_for_board as punch_landing_candidates_for_board,
     landing_is_open as punch_landing_is_open,
 };
-pub use rules::{MobNavigationPolicy, RulesConfig, StormCloudConfig};
+pub use rules::{MobNavigationPolicy, PunchActivationPolicy, RulesConfig, StormCloudConfig};
 pub use simulation::{
     Actor, ActorInit, DrawReason, InputAction, RoundActorInit, RoundResult,
     SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, STORM_CLOUD_HALF_EXTENT,

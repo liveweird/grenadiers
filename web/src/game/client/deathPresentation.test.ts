@@ -3,7 +3,7 @@ import type { GameClientState } from './clientTypes'
 import { initialGameClientState } from './clientTypes'
 import { DeathPresentationTracker } from './deathPresentation'
 import { room, snapshot } from './testSupport'
-import type { Seat, Snapshot, VisibleActorView } from '../v19/schema'
+import type { Seat, Snapshot, VisibleActorView } from '../v20/schema'
 
 const baseline = { roomId: 'b'.repeat(32), revision: 1, tick: 1, physicalTick: 1 }
 

@@ -13,6 +13,11 @@ pub(super) fn certified_punch(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
 ) -> Option<SurvivalPlan> {
+    if observation.parts().rules.punch_activation_policy
+        != crate::game::PunchActivationPolicy::ManualV1
+    {
+        return None;
+    }
     let execution_tick = observation.parts().tick.0.checked_add(7).map(Tick)?;
     // Keep at least half the remaining allowance for ordinary survival if this
     // optional tactic cannot prove a complete escape. All child work is charged.

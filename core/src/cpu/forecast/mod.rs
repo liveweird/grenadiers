@@ -9,6 +9,8 @@ mod punch;
 mod stationary;
 mod uncertainty;
 
+use std::collections::BTreeMap;
+
 use crate::game::{BlastKind, CellId, EntityId, Tick};
 use crate::room::BoardSize;
 
@@ -69,9 +71,80 @@ pub struct HazardForecast {
     basis_tick: Tick,
     horizon_end: Tick,
     cells: Vec<CellForecast>,
+    bomb_occupancy: BombOccupancyIndex,
     stationary_assumptions: Vec<EntityId>,
     evolution: ForecastEvolution,
     hypothetical_id: Option<EntityId>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct BombOccupancy {
+    pub(super) id: EntityId,
+    pub(super) cell: CellId,
+    pub(super) window: TickWindow,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct IndexedOccupancy {
+    start: Tick,
+    end: Tick,
+    id: EntityId,
+    prefix_end: Tick,
+    prefix_id: EntityId,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(super) struct BombOccupancyIndex {
+    by_cell: BTreeMap<CellId, Vec<IndexedOccupancy>>,
+    by_id: BTreeMap<EntityId, TickWindow>,
+}
+
+impl BombOccupancyIndex {
+    pub(super) fn len(&self) -> usize {
+        self.by_id.len()
+    }
+
+    pub(super) fn insert(&mut self, occupancy: BombOccupancy) {
+        self.by_cell
+            .entry(occupancy.cell)
+            .or_default()
+            .push(IndexedOccupancy {
+                start: occupancy.window.start,
+                end: occupancy.window.end,
+                id: occupancy.id,
+                prefix_end: occupancy.window.end,
+                prefix_id: occupancy.id,
+            });
+        self.by_id.insert(occupancy.id, occupancy.window);
+    }
+
+    pub(super) fn finish(&mut self) {
+        for entries in self.by_cell.values_mut() {
+            entries.sort_unstable_by_key(|entry| (entry.start, entry.end, entry.id));
+            let mut best = None;
+            for entry in entries {
+                if best.is_none_or(|(end, _)| entry.end > end) {
+                    best = Some((entry.end, entry.id));
+                }
+                let (end, id) = best.expect("cell occupancy contains current entry");
+                entry.prefix_end = end;
+                entry.prefix_id = id;
+            }
+        }
+    }
+
+    fn blocker(&self, cell: CellId, window: TickWindow) -> Option<EntityId> {
+        let entries = self.by_cell.get(&cell)?;
+        let upper = entries.partition_point(|entry| entry.start < window.end);
+        let candidate = upper.checked_sub(1).and_then(|index| entries.get(index))?;
+        (candidate.prefix_end > window.start).then_some(candidate.prefix_id)
+    }
+
+    fn contains(&self, id: EntityId, window: TickWindow) -> bool {
+        self.by_id
+            .get(&id)
+            .is_some_and(|occupancy| intersects(*occupancy, window))
+    }
 }
 
 impl HazardForecast {
@@ -112,6 +185,14 @@ impl HazardForecast {
         &self.cells
     }
 
+    pub(crate) fn bomb_blocker(&self, cell: CellId, window: TickWindow) -> Option<EntityId> {
+        self.bomb_occupancy.blocker(cell, window)
+    }
+
+    pub(crate) fn punchable_bomb(&self, id: EntityId, window: TickWindow) -> bool {
+        self.bomb_occupancy.contains(id, window)
+    }
+
     #[must_use]
     pub fn stationary_assumptions(&self) -> &[EntityId] {
         &self.stationary_assumptions
@@ -134,6 +215,7 @@ impl HazardForecast {
         basis_tick: Tick,
         horizon_end: Tick,
         cells: Vec<CellForecast>,
+        bomb_occupancy: BombOccupancyIndex,
         stationary_assumptions: Vec<EntityId>,
         evolution: ForecastEvolution,
         hypothetical_id: Option<EntityId>,
@@ -141,6 +223,7 @@ impl HazardForecast {
     ) -> Result<Self, ForecastFailure> {
         if horizon_end.0 <= basis_tick.0
             || cells.len() != board.cell_count()
+            || bomb_occupancy.len() > evolution.bomb_limit()
             || stationary_assumptions.len()
                 > evolution
                     .bomb_limit()
@@ -159,11 +242,16 @@ impl HazardForecast {
             basis_tick,
             horizon_end,
             cells,
+            bomb_occupancy,
             stationary_assumptions,
             evolution,
             hypothetical_id,
         })
     }
+}
+
+fn intersects(left: TickWindow, right: TickWindow) -> bool {
+    left.start < right.end && right.start < left.end
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -202,6 +290,63 @@ pub enum ForecastFailure {
     ClockOverflow,
     WorkExhausted,
     IntervalCapacity,
+}
+
+#[cfg(test)]
+mod contact_punch_occupancy_index_tests {
+    use super::*;
+
+    #[test]
+    fn dense_overlapping_cell_and_entity_queries_use_the_finished_indexes() {
+        let cell = CellId::new(5, 5);
+        let mut index = BombOccupancyIndex::default();
+        index.insert(BombOccupancy {
+            id: EntityId(0),
+            cell,
+            window: TickWindow {
+                start: Tick(0),
+                end: Tick(500),
+            },
+        });
+        for value in 1..195 {
+            index.insert(BombOccupancy {
+                id: EntityId(value),
+                cell,
+                window: TickWindow {
+                    start: Tick(u64::from(value)),
+                    end: Tick(u64::from(value + 1)),
+                },
+            });
+        }
+        index.finish();
+
+        assert_eq!(
+            index.blocker(
+                cell,
+                TickWindow {
+                    start: Tick(300),
+                    end: Tick(301),
+                }
+            ),
+            Some(EntityId(0))
+        );
+        assert!(index.contains(
+            EntityId(194),
+            TickWindow {
+                start: Tick(194),
+                end: Tick(195),
+            }
+        ));
+        assert!(!index.contains(
+            EntityId(194),
+            TickWindow {
+                start: Tick(195),
+                end: Tick(196),
+            }
+        ));
+        assert_eq!(index.by_cell[&cell].len(), 195);
+        assert_eq!(index.by_id.len(), 195);
+    }
 }
 
 #[cfg(test)]

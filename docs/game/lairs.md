@@ -1,7 +1,7 @@
 # Lair and mob simulation
 
-Live rules10/gameplay19 gives each lair exactly one living mob. A lair waits for its mob to die,
-then starts a fresh respawn delay. See [the wire contract](protocol-v18.md) and
+Live rules10/gameplay20 gives each lair exactly one living mob. A lair waits for its mob to die,
+then starts a fresh respawn delay. See [the wire contract](protocol-v20.md) and
 [CPU boundaries](multiplayer-cpu.md#lair-profile-boundaries).
 
 ## Configuration and lifecycle

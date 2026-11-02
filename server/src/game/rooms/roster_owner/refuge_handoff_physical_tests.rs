@@ -34,7 +34,7 @@ fn running_scene_installation_is_fresh_reset_and_transactional() {
     assert!(notice.spike_v19_cpu_publication().is_some());
     assert_eq!(
         runtime.publication_caches_for_test(),
-        [false, false, false, false, false, true]
+        [false, false, false, false, false, true, false]
     );
     assert_eq!(runtime.pending_report_count_for_test(), 0);
     runtime.settle_boundary([None; 4]).unwrap();

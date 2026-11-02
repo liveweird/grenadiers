@@ -1,6 +1,6 @@
 use grenadiers_core::{
     game::SeatId,
-    protocol::{v14, v15, v16, v17, v18, v19},
+    protocol::{v14, v15, v16, v17, v18, v19, v20},
 };
 
 macro_rules! seat_conversion {
@@ -38,3 +38,4 @@ seat_conversion!(domain_seat_v16, wire_seat_v16, v16);
 seat_conversion!(domain_seat_v17, wire_seat_v17, v17);
 seat_conversion!(domain_seat_v18, wire_seat_v18, v18);
 seat_conversion!(domain_seat_v19, wire_seat_v19, v19);
+seat_conversion!(domain_seat_v20, wire_seat_v20, v20);

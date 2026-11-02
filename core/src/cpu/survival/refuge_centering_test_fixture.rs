@@ -55,6 +55,7 @@ pub(crate) fn captured_scene(recipient: SeatId) -> Observation {
         recipient,
         rules: ObservedRules {
             version: 10,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 339,
             remaining_ticks: 10_461,

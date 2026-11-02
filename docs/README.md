@@ -8,7 +8,7 @@ the time; they do not add approval steps to the current workflow.
 | Install, run and contribute | [Project README](../README.md), [conventions](../CONTRIBUTING.md) |
 | Understand the boundaries | [Architecture](architecture.md), [design decisions](decisions/README.md) |
 | Change gameplay | [Rules](game/rules.md), [headless participants](game/multiplayer-core.md), [multiplayer generation](game/multiplayer-generation.md), [board geometry](game/board-sizes.md), [storm simulation](game/storm-cloud.md), [spike pits](game/spike-pits.md), [roster runtime](game/multiplayer-runtime.md), [multiplayer replay checks](game/multiplayer-replay.md), [multiplayer CPU foundation](game/multiplayer-cpu.md), [adding an item](game/adding-items.md), [future-track boundaries](game/implementation-plan.md#expansion-tracks-after-the-two-player-baseline) |
-| Change a transport contract | [API guidelines](../api-guidelines/API-GUIDELINES.md), [gameplay protocol](game/protocol.md), [current difficulty contract](game/protocol-v19.md), [spike-pit contract (historical)](game/protocol-v18.md), [respawn contract (historical)](game/protocol-v17.md), [protocol consumer inventory](game/protocol-consumers.md) |
+| Change a transport contract | [API guidelines](../api-guidelines/API-GUIDELINES.md), [gameplay protocol](game/protocol.md), [current contact-Punch contract](game/protocol-v20.md), [spike-pit contract (historical)](game/protocol-v18.md), [respawn contract (historical)](game/protocol-v17.md), [protocol consumer inventory](game/protocol-consumers.md) |
 | Understand the 3D arena and shared textures | [Modern retro arena](game/arena-3d.md), [cosmetic blood pools](game/blood-pools.md) |
 | Understand arena hazards | [Spike pits](game/spike-pits.md) |
 | Inspect CPU objectives | [Persistent intent and developer overlay](game/cpu-intent.md) |
@@ -51,5 +51,5 @@ in its authoritative document and link to it. Read the relevant guide before cha
 Keep local-first verification and existing authorization rules in [CONTRIBUTING](../CONTRIBUTING.md).
 Historical protocol/ADR links and `history/` records retain their compatibility role.
 
-The current live gameplay contract is [v19](game/protocol-v19.md); retained version guides
+The current live gameplay contract is [v20](game/protocol-v20.md); retained version guides
 remain documented in the [consumer inventory](game/protocol-consumers.md).

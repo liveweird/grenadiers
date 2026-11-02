@@ -84,6 +84,32 @@ impl RosterRuntime {
         Ok(runtime)
     }
 
+    #[allow(clippy::too_many_arguments)]
+    pub(in crate::game::rooms) fn new_spike_v20_with_navigation(
+        identity: RosterIdentity,
+        settings: RoomSettings,
+        cloud: StormCloudConfig,
+        lairs: RespawnLairTuning,
+        spike_pits: SpikePitTuning,
+        round_seed_source: RoundSeedSource,
+        simulation_seed: Arc<SimulationSeedDerivation>,
+        navigation: MobNavigationPolicy,
+    ) -> Result<Self, RosterRuntimeError> {
+        let mut runtime = Self::new_spike_with_navigation(
+            identity,
+            settings,
+            cloud,
+            lairs,
+            spike_pits,
+            round_seed_source,
+            simulation_seed,
+            navigation,
+        )?;
+        runtime.spike_publication = SpikePublicationVersion::V20;
+        runtime.punch_activation = grenadiers_core::game::PunchActivationPolicy::ContactV2;
+        Ok(runtime)
+    }
+
     pub(in crate::game::rooms) const fn spike_tuning(&self) -> Option<SpikePitTuning> {
         match self.environment_profile {
             Some(EnvironmentProfile::SpikeV10 { spike_pits, .. }) => Some(spike_pits),

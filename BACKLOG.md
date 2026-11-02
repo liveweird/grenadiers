@@ -30,7 +30,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
   sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
   preserve deterministic generation and player spawn safety.
-- [todo] **SPIKE-DEFAULTS — use a 1-second warning and 5-second raised phase.** Change new-game
+- [next] **SPIKE-DEFAULTS — use a 1-second warning and 5-second raised phase.** Change new-game
   defaults from the current 0.6/3 seconds to 1/5 seconds (60/300 ticks at 60 Hz). Update UI/default
   examples and tests while preserving explicitly configured durations and historical replay.
 
@@ -92,9 +92,3 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Further art.** Beyond the walking, bomb and death frames, consider idle
   animation, environment detail, layered authoring sources, accessibility and measured effects
   budgets. Follow the [artist handoff](assets/art/README.md).
-- [next] **AUTO-PUNCH — punch bombs by walking into them.** Activate Punch on attempted
-  movement into an adjacent bomb’s tile. Punch is currently the only manual Equipment action
-  (default E); preserve the existing punch flight, cooldown and one
-  activation per contact. Remove the separate Equipment key from gameplay controls and update
-  bindings/help. Preserve archived replay and verify human/CPU movement, contact and bomb-flight
-  interactions; do not trigger repeatedly from an unchanged held contact.

@@ -4,7 +4,7 @@ use std::sync::Arc;
 use grenadiers_core::protocol::Seat;
 use grenadiers_core::{
     game::SeatId,
-    protocol::{RoomId, v14, v15, v16, v17, v18, v19},
+    protocol::{RoomId, v14, v15, v16, v17, v18, v19, v20},
 };
 use tokio::sync::{oneshot, watch};
 
@@ -184,6 +184,16 @@ fn roster_frame(notice: &RosterNotice, seat: SeatId) -> Result<Arc<str>, RoomErr
                     .contains(seat)
             })
         })
+        .or_else(|| {
+            notice.spike_v20_room().map(|room| {
+                room.configuration
+                    .domain()
+                    .base()
+                    .base()
+                    .player_count()
+                    .contains(seat)
+            })
+        })
         .ok_or(RoomError::CapacityReached)?;
     if !contains_seat {
         return Err(RoomError::CapacityReached);
@@ -226,6 +236,14 @@ fn roster_frame(notice: &RosterNotice, seat: SeatId) -> Result<Arc<str>, RoomErr
     if let Some(room) = notice.spike_v19_room() {
         v19::validate_room_view(room).map_err(|_| RoomError::CapacityReached)?;
         return v19::encode_server_message(&v19::GameServerMessage::RoomState {
+            room: room.clone(),
+        })
+        .map(Arc::from)
+        .map_err(|_| RoomError::CapacityReached);
+    }
+    if let Some(room) = notice.spike_v20_room() {
+        v20::validate_room_view(room).map_err(|_| RoomError::CapacityReached)?;
+        return v20::encode_server_message(&v20::GameServerMessage::RoomState {
             room: room.clone(),
         })
         .map(Arc::from)

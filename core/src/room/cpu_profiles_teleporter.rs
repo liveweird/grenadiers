@@ -56,5 +56,12 @@ impl CpuProfile {
     /// Farm-origin yield ranking, retaining the Hard58 recovery and pressure stack.
     pub const HARD_V59: Self = Self::profile(CpuPolicy::UtilityV59, CpuDifficulty::Hard);
 
+    /// Contact-punch aware live profiles, retaining the archived v56/v59 strategy stack.
+    pub const CONTACT_PUNCH_V60_STANDARD: Self =
+        Self::profile(CpuPolicy::UtilityV60, CpuDifficulty::Standard);
+    pub const CONTACT_PUNCH_V60_EASY: Self =
+        Self::profile(CpuPolicy::UtilityV60, CpuDifficulty::Easy);
+    pub const HARD_V61: Self = Self::profile(CpuPolicy::UtilityV61, CpuDifficulty::Hard);
+
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

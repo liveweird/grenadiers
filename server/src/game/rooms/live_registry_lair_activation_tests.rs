@@ -21,7 +21,7 @@ async fn advance_ticks(count: usize) {
 }
 
 #[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn live_lair_cpu_progresses_through_checked_v19_snapshots() {
+async fn live_lair_cpu_progresses_through_checked_v20_snapshots() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let mut admission = rooms

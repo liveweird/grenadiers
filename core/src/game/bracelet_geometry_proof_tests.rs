@@ -43,6 +43,7 @@ fn outcome(
         original_budget: budget,
         forward_segment,
         blocking_player: None,
+        punch_contact: None,
     }
 }
 

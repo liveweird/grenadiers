@@ -70,7 +70,7 @@ function applyOwnedRenderer(
 }
 
 export function GameArena(props: GameArenaProps) {
-  const { snapshot, enabled, bindings, onDirection, onBomb, onEquipment } = props
+  const { snapshot, enabled, bindings, onDirection, onBomb } = props
   const host = useRef<HTMLDivElement>(null)
   const owner = useRef<RendererOwner | null>(null)
   const latest = useRef(snapshot)
@@ -80,14 +80,14 @@ export function GameArena(props: GameArenaProps) {
   const [failed, setFailed] = useState(false)
   const [rendererLifecycle] = useState<RendererLifecycle>(() => ({ owner, latest, activation, setFailed }))
   const [controls] = useState(() => new ArenaControls({
-    enabled, bindings, onDirection, onBomb, onEquipment,
+    enabled, bindings, onDirection, onBomb,
   }))
   const hasSnapshot = snapshot !== null
   const active = enabled && !failed
 
   useLayoutEffect(() => {
-    controls.configure({ enabled: active, bindings, onDirection, onBomb, onEquipment })
-  }, [active, bindings, onDirection, onBomb, onEquipment, controls])
+    controls.configure({ enabled: active, bindings, onDirection, onBomb })
+  }, [active, bindings, onDirection, onBomb, controls])
 
   useLayoutEffect(() => {
     latest.current = snapshot

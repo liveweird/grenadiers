@@ -23,6 +23,7 @@ impl Actor {
             effects: TimedEffects::default(),
             damage_grace: None,
             last_successful_punch_tick: None,
+            contact_punch_latches: BTreeSet::new(),
             last_successful_shove_tick: None,
             last_teleport_tick: None,
             storm_slow_until: None,
@@ -42,6 +43,7 @@ impl Actor {
         self.residual = 0;
         self.pending_turn = None;
         self.inventory.clear();
+        self.contact_punch_latches.clear();
         self.soft_wall_grace.clear();
         self.unlit_oil_grace.clear();
         self.effects.clear();

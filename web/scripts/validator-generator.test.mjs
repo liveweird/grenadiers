@@ -32,6 +32,7 @@ async function temporaryCheckout(nested = false) {
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v17.schema.json'), join(checkout, 'api', 'gameplay-v17.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v18.schema.json'), join(checkout, 'api', 'gameplay-v18.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v19.schema.json'), join(checkout, 'api', 'gameplay-v19.schema.json')),
+    cp(join(import.meta.dirname, '..', '..', 'api', 'gameplay-v20.schema.json'), join(checkout, 'api', 'gameplay-v20.schema.json')),
     cp(join(import.meta.dirname, '..', '..', 'api', 'realtime.schema.json'), join(checkout, 'api', 'realtime.schema.json')),
     cp(join(import.meta.dirname, 'validator-generator.mjs'), join(checkout, 'web', 'scripts', 'validator-generator.mjs')),
     cp(join(import.meta.dirname, '..', 'src', 'validation', 'validatorOptions.ts'),
@@ -72,13 +73,16 @@ test('checked-in validators and declarations are reproducible and executable', a
   }
 })
 
-test('canonical options optimize only v18 and the dormant v19 validator', () => {
+test('canonical options optimize the bounded current validators', () => {
   assert.deepEqual(validatorOptions('gameplay-v17'), { allErrors: true })
   assert.deepEqual(validatorOptions('realtime'), { allErrors: true })
   assert.deepEqual(validatorOptions('gameplay-v18'), {
     allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
   })
   assert.deepEqual(validatorOptions('gameplay-v19'), {
+    allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
+  })
+  assert.deepEqual(validatorOptions('gameplay-v20'), {
     allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
   })
   assert.notEqual(validatorOptions('gameplay-v18'), validatorOptions('gameplay-v18'))

@@ -163,7 +163,7 @@
     "spikePitRaisedSeconds": "Raised time (seconds)",
     "spikePitsInvalid": "Use 0.1–2 seconds of warning and 1–10 seconds raised.",
     "kickDescription": "Permanent equipment that kicks a stationary timed or remote bomb when you walk into it. The bomb moves one tile on the next update, then every 10 updates until blocked; its owner and fuse stay unchanged. Contact mines cannot be kicked, and another equipment pickup replaces Kick.",
-    "punchDescription": "Permanent equipment. Press your Equipment key to punch the bomb directly ahead to the next open floor cell in its three-tile path. After a successful punch, Punch has a fixed 0.2 second cooldown; another equipment pickup replaces Punch.",
+    "punchDescription": "Permanent equipment. Walk into a stationary timed or remote bomb to punch it to the next open floor cell in its three-tile path. After a successful punch, Punch has a fixed 0.2 second cooldown; contact mines cannot be punched, and another equipment pickup replaces Punch.",
     "braceletDescription": "Permanent equipment. Moving forward into the other player shoves them up to 1 tile. After a successful shove, Bracelet has a 0.5 second cooldown and must separate before it can shove again; another equipment pickup replaces Bracelet.",
     "wallPassDescription": "Permanent equipment that lets you move through breakable blocks. Hard walls and bombs still block you, explosions still hurt, and another equipment pickup replaces it. After replacement, you may leave a block you already overlap but cannot re-enter it.",
     "heartDescription": "Absorbs one lethal blast, then grants a brief damage grace period.",
@@ -214,7 +214,7 @@
     "failure": "The courtyard could not be drawn. Leave the room and try again.",
     "focusHint": "Select the courtyard to control your player.",
     "remoteHint": "Remote bomb armed. Select the courtyard and press {{bomb}} to detonate it.",
-    "punchHint": "Punch equipped. Select the courtyard and press {{equipment}} to punch the bomb ahead.",
+    "punchHint": "Punch equipped. Select the courtyard, then walk into a bomb to punch it ahead.",
     "blindBombHint": "Bombs are hidden. Select the courtyard and press {{bomb}} to place a bomb or trigger your remote bomb.",
     "instructions": "Move with the arrow keys or W A S D. Place a bomb with Space. Controls work only during a live round."
   },
@@ -289,8 +289,7 @@
       "east": "East",
       "south": "South",
       "west": "West",
-      "bomb": "Bomb",
-      "equipment": "Equipment"
+      "bomb": "Bomb"
     },
     "keys": {
       "ArrowUp": "Up arrow",
@@ -300,7 +299,7 @@
       "Space": "Space",
       "Enter": "Enter"
     },
-    "instructions": "Move with {{movement}}. Place a bomb with {{bomb}}. Use Punch equipment with {{equipment}}. Controls work only during a live round."
+    "instructions": "Move with {{movement}}. Place a bomb with {{bomb}}. With Punch equipped, walk into a bomb to punch it. Controls work only during a live round."
   },
   "audio": {
     "enable": "Enable sound",

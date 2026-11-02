@@ -1,7 +1,8 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy56 on Easy/Standard and policy59 on Hard for every live
-two-to-four-seat rules10 room. Policy58 remains the archived Hard identity for replay29, while
+The live environment CPU implementation uses policy60 on Easy/Standard and policy61 on Hard for every live
+two-to-four-seat gameplay20/rules10 room. Policy56/59 remains the archived replay30 pair and policy58
+remains the archived Hard identity for replay29, while
 the legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
@@ -13,16 +14,17 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v19::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v20::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::CORNER_REFUGES_V56_STANDARD` and `CORNER_REFUGES_V56_EASY` select Utility56 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V59` selects Utility59 for Hard rooms with the same observation boundary.
-Private replay30 binds this exact current pair; replay29 retains CPU56/58.
+`CpuProfile::CONTACT_PUNCH_V60_STANDARD` and `CONTACT_PUNCH_V60_EASY` select Utility60
+for live rules10 Easy/Standard rooms. `CpuProfile::HARD_V61` selects Utility61 for Hard rooms
+with the same observation boundary. Private replay31 binds this exact current pair and ContactV2;
+replay30 retains CPU56/59 with ManualV1.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
@@ -45,6 +47,21 @@ Punch and Bracelet proofs inspect all relevant visible rivals and third-party bl
 Unknown hidden rivals withdraw proofs that cannot be certified. Bracelet also rejects
 third-party Bracelet threats that could counter-shove the CPU off its certified approach.
 These additional multiplayer guards do not change rules-5 admission semantics.
+
+## Contact Punch routing
+
+CPU60/61 do not intentionally emit the archived manual Equipment action or use an intentional
+contact-Punch tactic. Because ContactV2 can relocate a bomb on movement contact, every certified
+forward segment checks the immediate swept contact cells for a visible bomb or a forecasted
+punchable moving bomb. Any possible unmodelled relocation rejects that route. Exact retained
+origin grace permits departure from an existing overlap without activating Punch. A fresh
+observation may make another route certifiable.
+
+The guard uses the existing hazard forecasts and their indexed per-cell bomb-motion facts. Its
+actor scan and candidate-by-forecast checks debit the same shared work allowance; it adds no search,
+forecast, worker, RNG draw or planting proof. The simulation remains authoritative about cooldown,
+trigger type, landing conflicts and the contact latch. Archived CPU56/59 keep their ManualV1
+behavior and archived manual Punch tactic unchanged.
 
 ## Persistent burning Oil
 
@@ -72,8 +89,8 @@ analysis falls back to collect/farm guidance. Hard has no hidden information, fa
 larger bomb inventory, extra planning workers or immunity. Easy keeps its navigation pause and
 Standard remains the default. See [Solo difficulty](single-player.md#difficulty).
 
-For one selected visible block target, Hard59 can compare eligible adjacent farming approaches
-at the baseline navigation distance and prefer a strictly larger visible soft-block yield under
+For one selected visible block target, Hard61 retains Hard59's comparison of eligible adjacent
+farming approaches at the baseline navigation distance and prefers a strictly larger visible soft-block yield under
 the existing timed blast geometry. Ties keep the stable approach and farther origins cannot win.
 This reuses the unchanged optional pressure allowance and does not reveal concealed drops, reorder
 block targets, add RNG, or authorize a bomb. The ordinary complete planting, escape, contact and
@@ -103,8 +120,8 @@ Easy keeps its normal clear-navigation cadence. Old policies27–32 remain uncha
 retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34; replay17 binds
 Easy/Standard33 and Hard35. Replay18 binds Easy/Standard36 and Hard37; earlier replay versions retain
 their exact policy identities. Replay19 binds archived Easy/Standard38 and Hard39, without
-changing gameplay19. Later private formats advance closed CPU identities; current replay30 binds
-Easy/Standard56 and Hard59.
+changing gameplay19. Later private formats advance closed CPU identities; current replay31 binds
+Easy/Standard60 and Hard61 with ContactV2.
 
 ## Alternate farming refuges
 
@@ -150,7 +167,7 @@ survival horizon must cover the old deadline. Queue refusal, stale or failed pro
 displacement or submission refusal retain the old hold. Optional jobs follow every seat's urgent jobs.
 The existing two workers, 32-job queue, 65,536-work limit and all forecast, motion, contact and usefulness
 proofs remain unchanged. Hard35 reuses the Core34 planner; archived Hard39 adds the bounded
-farming refuges above, and current Hard59 retains them. Teleporter counter-pressure still requires
+farming refuges above, and current Hard61 retains them. Teleporter counter-pressure still requires
 globally clear soft blocks and its prior support rules.
 
 ## Footprint-boundary recovery
@@ -279,7 +296,7 @@ CPU21–24 retain their historical selection and memory-reset paths.
 
 Run `cargo test -p grenadiers-core cpu:: --lib` and
 `cargo test -p grenadiers-server game::rooms::cpu:: --lib` for planner/controller regressions.
-The v18/v19 adapter tests compare CPU facts with human recipient projections. Additional cases
+The v18/v19/v20 adapter tests compare CPU facts with human recipient projections. Additional cases
 cover forecast capacity, rival interference, all three difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.

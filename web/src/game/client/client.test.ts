@@ -52,7 +52,7 @@ describe('v12 admission and authoritative baselines', () => {
     const value = harness()
     const socket = await authenticate(value, { type: 'join', roomCode: 'ABCDEFGH' })
     expect(messages(socket)).toEqual([
-      { type: 'authenticate', protocolVersion: 19, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 20, token: sessionToken },
       { type: 'joinRoom', sequence: 1, roomCode: 'ABCDEFGH' },
     ])
     socket.message(admitted())
@@ -77,7 +77,7 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 19 })
+    resumed.message({ type: 'authenticated', protocolVersion: 20 })
     const baseline = multiplayerAdmission(seat, 2)
     baseline.room.settings.enabledItems = ['teleporter']
     if (!baseline.state) throw new Error('resume fixture must contain state')
@@ -115,41 +115,10 @@ describe('v12 admission and authoritative baselines', () => {
     })
     expect(value.client.placeBomb()).toBe(true)
     expect(messages(socket).at(-1)).toMatchObject({ type: 'manualAction', action: 'bomb', actionId: 42 })
-    const punchEnabled = snapshot(5)
-    punchEnabled.room.settings.enabledItems = ['punch']
-    punchEnabled.room.settingsRevision = 2
-    socket.message(punchEnabled)
-    expect(value.client.useEquipment()).toBe(true)
-    expect(messages(socket).at(-1)).toMatchObject({
-      type: 'manualAction', action: 'equipment', actionId: 43,
-    })
-  })
-
-  it('guards Equipment by Punch settings without consuming the shared manual-action ID', async () => {
-    const value = harness()
-    const socket = await authenticate(value)
-    const baseline = admitted(1, 8)
-    baseline.room.settings.enabledItems = baseline.room.settings.enabledItems
-      .filter((item) => item !== 'punch')
-    socket.message(baseline)
-    expect(value.client.useEquipment()).toBe(false)
-    expect(messages(socket).some((message) => message.action === 'equipment')).toBe(false)
-
-    const passive = snapshot(2)
-    passive.room.settings.enabledItems = ['bracelet']
-    passive.room.settingsRevision = 2
-    socket.message(passive)
-    expect(value.client.useEquipment()).toBe(false)
-    expect(messages(socket).some((message) => message.action === 'equipment')).toBe(false)
-
-    const enabled = snapshot(3)
-    enabled.room.settings.enabledItems = ['punch']
-    enabled.room.settingsRevision = 3
-    socket.message(enabled)
-    expect(value.client.useEquipment()).toBe(true)
-    expect(messages(socket).at(-1)).toMatchObject({ action: 'equipment', actionId: 9 })
     expect(value.client.placeBomb()).toBe(true)
-    expect(messages(socket).at(-1)).toMatchObject({ action: 'bomb', actionId: 10 })
+    expect(messages(socket).at(-1)).toMatchObject({ action: 'bomb', actionId: 43 })
+    expect(messages(socket).filter((message) => message.type === 'manualAction'))
+      .toHaveLength(2)
   })
 
   it('keeps MAX manual action exhaustion and never resends an action after reconnect', async () => {
@@ -164,9 +133,9 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 19 })
+    resumed.message({ type: 'authenticated', protocolVersion: 20 })
     expect(messages(resumed)).toEqual([
-      { type: 'authenticate', protocolVersion: 19, token: sessionToken },
+      { type: 'authenticate', protocolVersion: 20, token: sessionToken },
       { type: 'resumeRoom', sequence: 1, roomId, resumeToken },
     ])
     expect(messages(resumed).some((message) => message.type === 'manualAction')).toBe(false)
@@ -183,7 +152,7 @@ describe('v12 admission and authoritative baselines', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 19 })
+    resumed.message({ type: 'authenticated', protocolVersion: 20 })
     resumed.message({ type: 'roomState', room: room(6, { type: 'running' }) })
     resumed.message(snapshot(7))
     expect(value.client.getState().snapshot).toBe(retained)
@@ -269,7 +238,7 @@ describe('v12 recovery lifecycle', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 19 })
+    resumed.message({ type: 'authenticated', protocolVersion: 20 })
     stop(resumed)
     expect(value.client.getState()).toMatchObject({
       connection: 'disconnected', room: null, snapshot: null, youSeat: null,

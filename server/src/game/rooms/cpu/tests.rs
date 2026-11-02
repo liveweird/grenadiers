@@ -52,6 +52,7 @@ pub(super) fn observation_for(cpu_seat: SeatId) -> Observation {
         tick: Tick(20),
         recipient: cpu_seat,
         rules: ObservedRules {
+            punch_activation_policy: grenadiers_core::game::PunchActivationPolicy::ManualV1,
             version: 5,
             tick_rate: 60,
             running_updates: 20,

@@ -1,7 +1,7 @@
 use super::*;
 
 #[tokio::test]
-async fn all_live_cpu_tiers_publish_only_gameplay19_with_room_wide_identity() {
+async fn all_live_cpu_tiers_publish_only_gameplay20_with_room_wide_identity() {
     for (difficulty, wire) in [
         (CpuDifficulty::Easy, "easy"),
         (CpuDifficulty::Standard, "standard"),

@@ -46,6 +46,7 @@ pub(crate) fn observation_parts(
         tick,
         recipient: domain_seat(recipient),
         rules: ObservedRules {
+            punch_activation_policy: rules.punch_activation_policy(),
             version: rules_version,
             tick_rate: rules.tick_rate(),
             running_updates: state.running_updates,

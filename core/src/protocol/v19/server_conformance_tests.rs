@@ -36,7 +36,7 @@ fn environment(enabled: bool) -> Environment {
     }
 }
 
-fn room(tick: u64, phase: RoomPhase, spike_enabled: bool) -> RoomView {
+pub(crate) fn room(tick: u64, phase: RoomPhase, spike_enabled: bool) -> RoomView {
     let base = DomainConfiguration::new(
         &[SeatControl::Human, SeatControl::Cpu],
         Some(CpuDifficulty::Hard),
@@ -138,6 +138,20 @@ fn runtime(
     empty: bool,
     phase: DomainPhase,
 ) -> (crate::game::State, crate::game::GenerationRecord) {
+    runtime_with_activation(
+        spike_enabled,
+        empty,
+        phase,
+        crate::game::PunchActivationPolicy::ManualV1,
+    )
+}
+
+pub(crate) fn runtime_with_activation(
+    spike_enabled: bool,
+    empty: bool,
+    phase: DomainPhase,
+    punch_activation: crate::game::PunchActivationPolicy,
+) -> (crate::game::State, crate::game::GenerationRecord) {
     let generated = generate_multiplayer_arena(
         [18; 32],
         EnabledItems::EMPTY,
@@ -172,7 +186,8 @@ fn runtime(
         StormCloudConfig::Disabled,
         RespawnLairConfig::Disabled,
         config,
-    );
+    )
+    .with_punch_activation_policy(punch_activation);
     let mut state = crate::game::State::new(rules, world, actors).unwrap();
     if matches!(phase, DomainPhase::Warning | DomainPhase::Raised) {
         let pit = state.spike_pits().unwrap()[0].cell;
@@ -240,13 +255,13 @@ impl FixtureCase {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct FixtureCorpus {
+pub(crate) struct FixtureCorpus {
     producer: &'static str,
     valid_messages: Vec<FixtureCase>,
     invalid_messages: Vec<FixtureCase>,
 }
 
-fn corpus() -> FixtureCorpus {
+pub(crate) fn corpus() -> FixtureCorpus {
     let lobby = room(0, RoomPhase::Waiting, true);
     let lobby_frame = encode_server_message(&GameServerMessage::RoomState {
         room: lobby.clone(),

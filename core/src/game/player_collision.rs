@@ -89,6 +89,23 @@ pub fn clip_player_segment(
     }
 }
 
+pub(crate) fn player_contact_distance(
+    seat: SeatId,
+    start: Position,
+    direction: Direction,
+    requested: i32,
+    obstacles: &[PlayerObstacle],
+) -> Option<i32> {
+    let requested = requested.max(0);
+    obstacles
+        .iter()
+        .filter(|obstacle| obstacle.seat != seat)
+        .filter_map(|obstacle| footprint_distance(start, direction, obstacle.segment))
+        .map(|candidate| candidate.max(0))
+        .filter(|candidate| *candidate <= requested)
+        .min()
+}
+
 fn footprint_distance(
     start: Position,
     direction: Direction,

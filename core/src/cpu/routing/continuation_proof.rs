@@ -36,6 +36,14 @@ pub(super) fn advance_checked(
 ) -> Result<ContinuationCheckpoint, RouteFailure> {
     super::storm::charge_tick(proof.context.storm, work)?;
     let segments = advance(proof.context, &mut state.motion, movement, tick)?;
+    super::contact_punch_guard::check_motion(
+        proof.context.observation,
+        &[proof.forecast],
+        &state.motion,
+        tick,
+        state.origin_active.then_some(proof.origin.cell),
+        work,
+    )?;
     state
         .pits
         .advance(tick, segments[0].start(), &segments, work)?;

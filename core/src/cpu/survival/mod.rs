@@ -62,7 +62,8 @@ pub use continuation_selection::{
     plan_lairs_v54 as plan_continuation_lairs_v54,
 };
 pub use corner_refuges::{
-    plan_corner_refuges_v56_with_origin, plan_hard_corner_refuges_v57_with_origin,
+    plan_contact_punch_v60_with_origin, plan_corner_refuges_v56_with_origin,
+    plan_hard_contact_punch_v61_with_origin, plan_hard_corner_refuges_v57_with_origin,
     plan_hard_exit_pressure_v58_with_origin, plan_hard_farm_yield_v59_with_origin,
 };
 pub use execution::{CommittedPulse, PulseStatus};

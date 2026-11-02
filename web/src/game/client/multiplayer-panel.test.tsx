@@ -12,7 +12,7 @@ function actions(): GameActions {
   return {
     admit: vi.fn(() => true), ready: vi.fn(() => true), updateSettings: vi.fn(() => true),
     rematch: vi.fn(() => true), movement: vi.fn(() => true), placeBomb: vi.fn(() => true),
-    useEquipment: vi.fn(() => true), leave: vi.fn(() => true),
+    leave: vi.fn(() => true),
   }
 }
 

@@ -23,7 +23,7 @@ it('labels Bracelet as passive equipment without an action hint or cooldown time
   const action = vi.fn(() => true)
   const actions: GameActions = {
     admit: action, ready: action, updateSettings: action, rematch: action,
-    movement: action, placeBomb: action, useEquipment: action, leave: action,
+    movement: action, placeBomb: action, leave: action,
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
   const stats = screen.getByLabelText('Your items')

@@ -65,6 +65,8 @@ pub enum CpuPolicy {
     UtilityV57,
     UtilityV58,
     UtilityV59,
+    UtilityV60,
+    UtilityV61,
 }
 
 impl CpuPolicy {
@@ -129,6 +131,8 @@ impl CpuPolicy {
             Self::UtilityV57 => 57,
             Self::UtilityV58 => 58,
             Self::UtilityV59 => 59,
+            Self::UtilityV60 => 60,
+            Self::UtilityV61 => 61,
         }
     }
 }
@@ -179,3 +183,7 @@ impl RoomMode {
 #[cfg(test)]
 #[path = "participants_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "cpu_policy_identity_tests.rs"]
+mod policy_identity_tests;

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { SpikePitView } from '../v19/schema'
+import type { SpikePitView } from '../v20/schema'
 import {
   admitted, authenticate, harness, room, snapshot, SocketStub,
 } from './testSupport'
@@ -53,7 +53,7 @@ describe('v18 spike-pit client history', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(2))
     const resumed = value.sockets[1]
     resumed.emit('open')
-    resumed.message({ type: 'authenticated', protocolVersion: 19 })
+    resumed.message({ type: 'authenticated', protocolVersion: 20 })
     const reconnect = admitted(8)
     reconnect.state!.spikePits = layoutA('warning', 12)
     resumed.message(reconnect)

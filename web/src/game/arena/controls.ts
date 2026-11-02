@@ -7,7 +7,6 @@ type Configuration = {
   bindings?: KeyboardBindings | undefined
   onDirection: (direction: Direction | null) => void
   onBomb: () => void
-  onEquipment: () => void
 }
 
 export class ArenaControls {
@@ -15,9 +14,7 @@ export class ArenaControls {
   private readonly physicalDown = new Set<string>()
   private readonly blockedUntilKeyUp = new Set<string>()
   private direction: Direction | null = null
-  private readonly manualHeld = new Map<'bomb' | 'equipment', Set<string>>([
-    ['bomb', new Set()], ['equipment', new Set()],
-  ])
+  private readonly bombHeld = new Set<string>()
   private focused = false
   private configuration: Configuration
 
@@ -46,12 +43,10 @@ export class ArenaControls {
     event.preventDefault()
     this.physicalDown.add(code)
     if (event.repeat || this.blockedUntilKeyUp.has(code)) return
-    if (action === 'bomb' || action === 'equipment') {
-      const held = this.manualHeld.get(action)!
-      if (!held.has(code)) {
-        held.add(code)
-        if (action === 'bomb') this.configuration.onBomb()
-        else this.configuration.onEquipment()
+    if (action === 'bomb') {
+      if (!this.bombHeld.has(code)) {
+        this.bombHeld.add(code)
+        this.configuration.onBomb()
       }
     } else if (!this.held.has(code)) {
       this.held.set(code, action)
@@ -64,8 +59,8 @@ export class ArenaControls {
     this.releasePhysicalKey(code)
     if (!this.configuration.enabled || !this.focused) return
     const action = this.actionFor(code)
-    if (action === 'bomb' || action === 'equipment') {
-      this.manualHeld.get(action)!.delete(code)
+    if (action === 'bomb') {
+      this.bombHeld.delete(code)
       event.preventDefault()
     } else if (action) {
       event.preventDefault()
@@ -82,7 +77,7 @@ export class ArenaControls {
 
   clear(): void {
     this.held.clear()
-    for (const held of this.manualHeld.values()) held.clear()
+    this.bombHeld.clear()
     if (this.direction !== null) {
       this.direction = null
       this.configuration.onDirection(null)
@@ -92,7 +87,7 @@ export class ArenaControls {
   releasePhysicalKey(code: string): void {
     this.physicalDown.delete(code)
     this.blockedUntilKeyUp.delete(code)
-    for (const held of this.manualHeld.values()) held.delete(code)
+    this.bombHeld.delete(code)
   }
 
   private publishDirection(): void {
@@ -103,10 +98,9 @@ export class ArenaControls {
     }
   }
 
-  private actionFor(code: string): Direction | 'bomb' | 'equipment' | undefined {
+  private actionFor(code: string): Direction | 'bomb' | undefined {
     const bindings = this.configuration.bindings ?? defaultKeyboardBindings
     if (bindings.bomb.includes(code)) return 'bomb'
-    if (bindings.equipment.includes(code)) return 'equipment'
     return (['north', 'east', 'south', 'west'] as const)
       .find((direction) => bindings[direction].includes(code))
   }

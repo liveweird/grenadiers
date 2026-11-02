@@ -68,5 +68,6 @@ fn stationary_outcome(position: super::Position) -> MovementOutcome {
         original_budget: 0,
         forward_segment: None,
         blocking_player: None,
+        punch_contact: None,
     }
 }

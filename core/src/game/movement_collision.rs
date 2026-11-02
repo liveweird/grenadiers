@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use super::arena::Terrain;
 use super::geometry::{boundary_distance, distance_to_blocking_cell, position_overlaps_cell};
 use super::input::Direction;
-use super::player_collision::{PlayerObstacle, clip_player_segment};
+use super::player_collision::{PlayerObstacle, clip_player_segment, player_contact_distance};
 use super::simulation::Actor;
 use super::types::{CellId, EntityId, HALF_FOOTPRINT, Position, SeatId, UNITS_PER_CELL};
 use super::world::World;
@@ -12,6 +12,7 @@ use super::world::World;
 pub(crate) struct Collision {
     pub(crate) distance: i32,
     pub(crate) bomb: Option<EntityId>,
+    pub(crate) bomb_contact: Option<EntityId>,
     pub(crate) ambiguous: bool,
     pub(crate) physical_contact: Option<SeatId>,
 }
@@ -94,6 +95,8 @@ pub(crate) fn allowed_distance_with_players(
     let mut bomb = None;
     let mut ambiguous = boundary < allowed;
     let mut physical_contact = None;
+    let mut contact = (boundary < requested.max(0)).then_some((boundary, None));
+    let mut contact_ambiguous = false;
     allowed = allowed.min(boundary);
     for (cell, bomb_id, soft, oil) in blocking_cells(world) {
         if bomb_id.is_some_and(|id| bomb_grace.contains(&id))
@@ -105,6 +108,17 @@ pub(crate) fn allowed_distance_with_players(
         let Some(candidate) = distance_to_blocking_cell(position, direction, cell) else {
             continue;
         };
+        if candidate <= requested.max(0) {
+            match contact {
+                None => contact = Some((candidate, bomb_id)),
+                Some((distance, _)) if candidate < distance => {
+                    contact = Some((candidate, bomb_id));
+                    contact_ambiguous = false;
+                }
+                Some((distance, _)) if candidate == distance => contact_ambiguous = true,
+                Some(_) => {}
+            }
+        }
         if candidate < allowed {
             allowed = candidate;
             bomb = bomb_id;
@@ -115,6 +129,22 @@ pub(crate) fn allowed_distance_with_players(
     }
     if let Some((seat, obstacles)) = players {
         let player = clip_player_segment(seat, position, direction, requested, obstacles);
+        let player_contact =
+            player_contact_distance(seat, position, direction, requested, obstacles)
+                .into_iter()
+                .chain((player.distance < requested.max(0)).then_some(player.distance))
+                .min();
+        if let Some(player_distance) = player_contact {
+            match contact {
+                None => contact = Some((player_distance, None)),
+                Some((distance, _)) if player_distance < distance => {
+                    contact = Some((player_distance, None));
+                    contact_ambiguous = false;
+                }
+                Some((distance, _)) if player_distance == distance => contact_ambiguous = true,
+                Some(_) => {}
+            }
+        }
         if player.distance < allowed {
             allowed = player.distance;
             bomb = None;
@@ -126,9 +156,15 @@ pub(crate) fn allowed_distance_with_players(
             physical_contact = player.physical_contact;
         }
     }
+    let bomb_contact = if contact_ambiguous {
+        None
+    } else {
+        contact.and_then(|(_, bomb)| bomb)
+    };
     Collision {
         distance: allowed.max(0),
         bomb,
+        bomb_contact,
         ambiguous,
         physical_contact,
     }

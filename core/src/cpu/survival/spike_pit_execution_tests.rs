@@ -48,6 +48,7 @@ fn observed_with_settings(
         recipient: SeatId::Two,
         rules: ObservedRules {
             version: 10,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: u16::try_from(tick).unwrap(),
             remaining_ticks: u16::try_from(1_000 - tick).unwrap(),

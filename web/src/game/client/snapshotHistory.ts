@@ -1,4 +1,4 @@
-import type { GameState, RoomView, Snapshot } from '../v19/schema'
+import type { GameState, RoomView, Snapshot } from '../v20/schema'
 import { preservesTeleportHistory } from './teleportHistory'
 import { preservesSpikePitLayout } from './spikePitHistory'
 

@@ -4,7 +4,7 @@ use grenadiers_core::{
         policy::EscapeExecution,
         survival::{PulseStatus, RouteStatus},
     },
-    protocol::{v14, v15, v16, v17, v18, v19},
+    protocol::{v14, v15, v16, v17, v18, v19, v20},
     room::MatchPhase,
 };
 
@@ -40,7 +40,14 @@ impl Driver {
             physical_round,
         };
         let observations: Vec<Option<_>> =
-            if let Some(publication) = notice.spike_v19_cpu_publication() {
+            if let Some(publication) = notice.spike_v20_cpu_publication() {
+                self.cpus
+                    .iter()
+                    .map(|cpu| {
+                        v20::observe_cpu_recipient(publication, wire_seat(cpu.seat()), world).ok()
+                    })
+                    .collect()
+            } else if let Some(publication) = notice.spike_v19_cpu_publication() {
                 self.cpus
                     .iter()
                     .map(|cpu| {

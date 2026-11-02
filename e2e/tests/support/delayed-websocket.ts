@@ -1,6 +1,6 @@
 import { performance } from 'node:perf_hooks'
 import type { Page, WebSocketRoute } from '@playwright/test'
-import type { Direction, GameServerMessage, Position } from '../../../web/src/game/v19/schema'
+import type { Direction, GameServerMessage, Position } from '../../../web/src/game/v20/schema'
 
 export type DelayScheduler = {
   now: () => number

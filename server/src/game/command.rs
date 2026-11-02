@@ -1,4 +1,4 @@
-use grenadiers_core::protocol::v19::{
+use grenadiers_core::protocol::v20::{
     GameClientMessage, ManualActionKind, ResumeToken, RoomSettings,
 };
 use grenadiers_core::protocol::{
@@ -192,7 +192,7 @@ impl From<GameClientMessage> for InboundMessage {
 
 #[cfg(test)]
 mod tests {
-    use grenadiers_core::protocol::v19::parse_client_message;
+    use grenadiers_core::protocol::v20::parse_client_message;
 
     use super::{Command, InboundMessage};
 
@@ -256,7 +256,7 @@ mod tests {
         assert_eq!(settings_revision.get(), 33);
 
         let manual = parse_client_message(
-            r#"{"type":"manualAction","sequence":44,"roomId":"00000000000000000000000000000001","roundId":55,"actionId":66,"action":"equipment"}"#,
+            r#"{"type":"manualAction","sequence":44,"roomId":"00000000000000000000000000000001","roundId":55,"actionId":66,"action":"bomb"}"#,
         )
         .unwrap();
         let InboundMessage::Command(manual) = InboundMessage::from(manual) else {

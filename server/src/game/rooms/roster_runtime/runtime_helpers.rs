@@ -87,6 +87,7 @@ impl RosterRuntime {
         self.respawn_cpu_publication = None;
         self.spike_cpu_publication = None;
         self.spike_v19_cpu_publication = None;
+        self.spike_v20_cpu_publication = None;
         self.inputs.reset_round();
     }
 }

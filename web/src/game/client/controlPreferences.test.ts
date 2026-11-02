@@ -2,15 +2,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { defaultKeyboardBindings, freezeBindings } from '../arena/bindings'
 import {
   CONTROLS_STORAGE_KEY, LEGACY_CONTROLS_STORAGE_KEY, loadControlBindings, saveControlBindings,
+  V2_CONTROLS_STORAGE_KEY,
 } from './controlPreferences'
 
-const bindingsV2 = {
-  north: ['KeyI'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'],
-  bomb: ['Enter'], equipment: ['KeyE'],
+const bindings = {
+  north: ['KeyI'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'],
 }
-const valid = JSON.stringify({ version: 2, bindings: bindingsV2 })
-const legacy = (bindings: Record<string, string[]>) => JSON.stringify({ version: 1, bindings })
-const legacyBindings = {
+const stored = (version: number, value: Record<string, string[]>) => JSON.stringify({ version, bindings: value })
+const v2Bindings = { ...bindings, equipment: ['KeyE'] }
+const v1Bindings = {
   north: ['ArrowUp', 'KeyW'], east: ['ArrowRight', 'KeyD'], south: ['ArrowDown', 'KeyS'],
   west: ['ArrowLeft', 'KeyA'], bomb: ['Space'],
 }
@@ -19,47 +19,46 @@ const storage = (values: Record<string, string | null>) => ({
 })
 
 describe('keyboard control preferences', () => {
-  it('prefers and freezes a valid six-action v2 preference', () => {
-    const bindings = loadControlBindings(storage({
-      [CONTROLS_STORAGE_KEY]: valid,
-      [LEGACY_CONTROLS_STORAGE_KEY]: legacy(legacyBindings),
+  it('prefers and freezes a valid five-action v3 preference', () => {
+    const result = loadControlBindings(storage({
+      [CONTROLS_STORAGE_KEY]: stored(3, bindings),
+      [V2_CONTROLS_STORAGE_KEY]: stored(2, v2Bindings),
     }))
-    expect(bindings).toEqual(bindingsV2)
-    expect(Object.isFrozen(bindings)).toBe(true)
-    expect(Object.isFrozen(bindings.north)).toBe(true)
+    expect(result).toEqual(bindings)
+    expect(Object.isFrozen(result)).toBe(true)
+    expect(Object.isFrozen(result.north)).toBe(true)
   })
 
-  it('preserves every v1 binding and assigns E when it is free', () => {
+  it('migrates custom v2 keys by dropping only Equipment', () => {
     expect(loadControlBindings(storage({
-      [LEGACY_CONTROLS_STORAGE_KEY]: legacy(legacyBindings),
-    }))).toEqual({ ...legacyBindings, equipment: ['KeyE'] })
+      [V2_CONTROLS_STORAGE_KEY]: stored(2, v2Bindings),
+    }))).toEqual(bindings)
   })
 
-  it('uses the first free migration key when E is already bound', () => {
-    const occupiedE = { ...legacyBindings, east: ['ArrowRight', 'KeyE'] }
+  it('keeps E when v2 assigned it to movement and frees the retired Equipment key', () => {
+    const occupiedE = { ...v2Bindings, east: ['KeyE'], equipment: ['KeyF'] }
     expect(loadControlBindings(storage({
-      [LEGACY_CONTROLS_STORAGE_KEY]: legacy(occupiedE),
-    }))).toEqual({ ...occupiedE, equipment: ['KeyF'] })
+      [V2_CONTROLS_STORAGE_KEY]: stored(2, occupiedE),
+    }))).toEqual({ ...bindings, east: ['KeyE'] })
   })
 
-  it('falls back from invalid v2 to an exact valid v1 migration', () => {
+  it('falls through malformed v2 to an exact valid v1 migration', () => {
     expect(loadControlBindings(storage({
-      [CONTROLS_STORAGE_KEY]: JSON.stringify({ version: 2, bindings: { ...bindingsV2, extra: ['KeyQ'] } }),
-      [LEGACY_CONTROLS_STORAGE_KEY]: legacy(legacyBindings),
-    }))).toEqual({ ...legacyBindings, equipment: ['KeyE'] })
+      [CONTROLS_STORAGE_KEY]: '{',
+      [V2_CONTROLS_STORAGE_KEY]: stored(2, { ...v2Bindings, equipment: ['Tab'] }),
+      [LEGACY_CONTROLS_STORAGE_KEY]: stored(1, v1Bindings),
+    }))).toEqual(v1Bindings)
   })
 
   it.each([
-    '', '{', JSON.stringify({ version: 1, bindings: {} }),
-    JSON.stringify({ version: 2, bindings: { ...bindingsV2, north: [] } }),
-    JSON.stringify({ version: 2, bindings: { ...bindingsV2, north: ['Tab'] } }),
-    JSON.stringify({ version: 2, bindings: { ...bindingsV2, north: ['KeyI', 'KeyI'] } }),
-    JSON.stringify({ version: 2, bindings: { ...bindingsV2, east: ['KeyI'] } }),
-    JSON.stringify({ version: 2, bindings: { ...bindingsV2, extra: ['KeyQ'] } }),
-    ' '.repeat(2_049),
-  ])('uses defaults when both stored versions are invalid', (raw) => {
+    '', '{', JSON.stringify({ version: 3, bindings: {} }),
+    stored(3, { ...bindings, north: [] }), stored(3, { ...bindings, north: ['Tab'] }),
+    stored(3, { ...bindings, north: ['KeyI', 'KeyI'] }), stored(3, { ...bindings, east: ['KeyI'] }),
+    stored(3, { ...bindings, extra: ['KeyQ'] }), ' '.repeat(2_049),
+  ])('uses defaults when all stored versions are invalid', (raw) => {
     expect(loadControlBindings(storage({
       [CONTROLS_STORAGE_KEY]: raw,
+      [V2_CONTROLS_STORAGE_KEY]: '{',
       [LEGACY_CONTROLS_STORAGE_KEY]: '{',
     }))).toBe(defaultKeyboardBindings)
   })
@@ -71,9 +70,9 @@ describe('keyboard control preferences', () => {
     })).not.toThrow()
   })
 
-  it('stores only the versioned six-action map under the v2 key', () => {
+  it('stores only the versioned five-action map under the v3 key', () => {
     const setItem = vi.fn()
-    saveControlBindings(freezeBindings(bindingsV2), { setItem })
-    expect(setItem).toHaveBeenCalledWith(CONTROLS_STORAGE_KEY, valid)
+    saveControlBindings(freezeBindings(bindings), { setItem })
+    expect(setItem).toHaveBeenCalledWith(CONTROLS_STORAGE_KEY, stored(3, bindings))
   })
 })

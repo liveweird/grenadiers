@@ -121,12 +121,17 @@ Production recording/export remains disabled.
 Formats20 through 27 retain gameplay19/rules10/navigation3 while advancing their closed CPU
 pairs through CPU40/41, 42/43, 44/45, 46/47, 48/49, 50/51, 52/53 and 54/55 respectively.
 Format28 binds CPU56 on Easy/Standard and CPU57 on Hard. Archived format29 retains CPU56/58;
-current private format30 binds CPU56/59. Every reader requires exact agreement among its header,
-body and per-seat provenance, and an older reader rejects later policy identities even when all
+archived format30 binds gameplay19, CPU56/59 and ManualV1 Punch activation. Current private
+format31 binds gameplay20, CPU60/61 and explicit Punch activation version2. Every reader requires
+exact agreement among its header, body and per-seat provenance, and an older reader rejects later policy identities even when all
 forged metadata agrees. Accepted inputs are replayed directly; planners are not rerun. These
-private formats do not change live WebSocket19 or enable production recording/export.
+private formats do not select the live socket or enable production recording/export.
 
-Formats6 through 30 normalize their closed operations into shared executors rather than
+Format31 records accepted movement and Bomb actions, not an invented Equipment action for contact
+Punch. Exact inspection compares the complete private State, including each actor's contact latch
+and cooldown history, so reconstruction must reproduce the same contact, landing and latch expiry.
+
+Formats6 through 31 normalize their closed operations into shared executors rather than
 duplicating lifecycle mechanics. Their headers and accepted source/controller identities remain
 distinct; each reader accepts only the finite identity combinations defined for its profile.
 

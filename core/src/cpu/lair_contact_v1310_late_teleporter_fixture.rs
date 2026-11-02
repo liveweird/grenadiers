@@ -51,6 +51,7 @@ pub(crate) fn captured_tick_5461() -> Observation {
         recipient: CPU,
         rules: ObservedRules {
             version: 10,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 5_256,
             remaining_ticks: 5_544,

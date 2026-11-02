@@ -82,6 +82,12 @@ fn validate_cpus(
         runtime.environment(),
         identity.configuration.cpu_difficulty(),
     ) {
+        (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay20() => {
+            Some(CpuProfile::CONTACT_PUNCH_V60_EASY)
+        }
+        (Some(_), _, _, _, Some(CpuDifficulty::Standard)) if runtime.uses_gameplay20() => {
+            Some(CpuProfile::CONTACT_PUNCH_V60_STANDARD)
+        }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_gameplay19() => {
             Some(CpuProfile::CORNER_REFUGES_V56_EASY)
         }
@@ -109,6 +115,9 @@ fn validate_cpus(
             Some(CpuProfile::MULTIPLAYER_STANDARD)
         }
         (_, _, _, _, None) => None,
+        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay20() => {
+            Some(CpuProfile::HARD_V61)
+        }
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_gameplay19() => {
             Some(CpuProfile::HARD_V59)
         }

@@ -29,12 +29,14 @@ test('custom controls persist and drive only their assigned native keys', async 
     await changeKey(one, 'East', 'KeyL')
     await changeKey(one, 'Bomb', 'Enter')
     await expect(one.getByRole('dialog', { name: 'Keyboard controls' })).toContainText('L')
+    await expect(one.getByRole('dialog', { name: 'Keyboard controls' })).not.toContainText('Equipment')
     expect((await new AxeBuilder({ page: one }).analyze()).violations).toEqual([])
     await one.getByRole('button', { name: 'Done', exact: true }).click()
     await expect(one.getByText(/East: L/)).toBeVisible()
     await one.reload()
     await expect(one.getByText(/East: L/)).toBeVisible()
     await expect(one.getByText(/bomb with Enter/)).toBeVisible()
+    await expect(one.getByText(/With Punch equipped, walk into a bomb/)).toBeVisible()
 
     await two.getByText('Polski', { exact: true }).click()
     await two.getByRole('button', { name: 'Sterowanie klawiaturą', exact: true }).click()
@@ -56,6 +58,12 @@ test('custom controls persist and drive only their assigned native keys', async 
     await two.getByRole('button', { name: 'Gotowy', exact: true }).click()
     await expect.poll(() => latestSnapshot(games[0])?.room.phase.type).toBe('running')
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
+
+    const beforeE = games[0].commands.length
+    const eRevision = latestSnapshot(games[0])!.room.revision
+    await one.keyboard.press('KeyE')
+    await expect.poll(() => latestSnapshot(games[0])!.room.revision).toBeGreaterThan(eRevision)
+    expect(games[0].commands).toHaveLength(beforeE)
 
     const beforeOldKey = firstActor(games[0]).position.x
     const beforeRevision = latestSnapshot(games[0])!.room.revision

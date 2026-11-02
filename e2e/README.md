@@ -121,8 +121,8 @@ observations; source checks do not claim native acceptance.
 
 The Punch source route uses the shared override with the mode-0444
 `core/tests/fixtures/arena-v2-punch.seed`:
-`E2E_PUNCH_FIXTURE=arena-v3-punch npm run test:punch`. It remaps and uses the actual Equipment key,
-uses native movement/Bomb input and observes both public recipient streams without injection or
+`E2E_PUNCH_FIXTURE=arena-v3-punch npm run test:punch`. It uses native contact movement/Bomb input,
+confirms the retired Equipment key is inert, and observes both public recipient streams without injection or
 direct gameplay messages. Source checks do not claim native acceptance.
 
 The Bracelet source route uses the shared override with the mode-0444

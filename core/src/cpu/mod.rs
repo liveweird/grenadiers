@@ -23,7 +23,7 @@ pub mod survival;
 mod work;
 
 pub(crate) fn rules_config(observation: &Observation) -> Option<crate::game::RulesConfig> {
-    match observation.parts().rules.version {
+    let rules = match observation.parts().rules.version {
         5 => Some(crate::game::RulesConfig::expanded_v5(
             observation.parts().rules.settings,
         )),
@@ -61,7 +61,8 @@ pub(crate) fn rules_config(observation: &Observation) -> Option<crate::game::Rul
                 .map_or(crate::room::SpikePitConfig::Disabled, |pits| pits.config()),
         )),
         _ => None,
-    }
+    }?;
+    Some(rules.with_punch_activation_policy(observation.parts().rules.punch_activation_policy))
 }
 
 pub(crate) const fn observed_bomb_capacity(rules_version: u16) -> usize {

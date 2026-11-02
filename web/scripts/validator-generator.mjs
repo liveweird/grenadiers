@@ -25,6 +25,26 @@ export default validate
 `,
     compile: (ajv, schema) => ajv.compile(schema),
   },
+  'gameplay-v20': {
+    schema: '../api/gameplay-v20.schema.json',
+    declaration: `import type { ErrorObject } from 'ajv'
+import type { GameServerMessage } from '../../game/v20/schema'
+
+declare const validate: {
+  (value: unknown): value is GameServerMessage
+  errors?: ErrorObject[] | null
+}
+
+export default validate
+`,
+    compile(ajv, schema) {
+      ajv.addSchema(schema)
+      const reference = `${schema.$id}#/$defs/GameServerMessage`
+      const validate = ajv.getSchema(reference)
+      if (!validate) throw new Error(`AJV did not resolve ${reference}`)
+      return validate
+    },
+  },
   'gameplay-v19': {
     schema: '../api/gameplay-v19.schema.json',
     declaration: `import type { ErrorObject } from 'ajv'

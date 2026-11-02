@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type BrowserContextOptions, type Page } from '@playwright/test'
-import type { BoardSize, Difficulty, Seat } from '../../web/src/game/v19/schema'
+import type { BoardSize, Difficulty, Seat } from '../../web/src/game/v20/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'

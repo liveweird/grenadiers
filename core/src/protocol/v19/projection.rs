@@ -16,6 +16,10 @@ impl BoundPublication {
     pub(crate) const fn physical_round(&self) -> u64 {
         self.physical_round
     }
+
+    pub(crate) const fn room(&self) -> &RoomView {
+        &self.room
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -36,6 +40,22 @@ pub fn bind_expanded(
     state_epoch: Counter,
     capture: &ExpandedCapture,
     generation: GenerationRecord,
+) -> Result<BoundPublication, ProjectionError> {
+    bind_expanded_with_punch_activation(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        crate::game::PunchActivationPolicy::ManualV1,
+    )
+}
+
+pub(crate) fn bind_expanded_with_punch_activation(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<BoundPublication, ProjectionError> {
     super::room_validation::validate_room_view(room)?;
     let facts = &capture.base;
@@ -72,7 +92,7 @@ pub fn bind_expanded(
         }
         _ => false,
     };
-    if facts.rules != expected_rules(room, facts.rules.mob_navigation_policy())?
+    if facts.rules != expected_rules(room, facts.rules.mob_navigation_policy(), punch_activation)?
         || facts.world.rules_version != 10
         || facts.world.actors.len() != base.controllers().len()
         || u16::from(facts.world.arena.width) != width
@@ -206,6 +226,7 @@ pub fn prepare_snapshots(
 fn expected_rules(
     room: &RoomView,
     navigation: crate::game::MobNavigationPolicy,
+    punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<RulesConfig, ProjectionError> {
     let settings = &room.settings.base;
     let speed = [
@@ -242,5 +263,6 @@ fn expected_rules(
         lairs.config(),
         spike_pits.config(),
         navigation,
-    ))
+    )
+    .with_punch_activation_policy(punch_activation))
 }

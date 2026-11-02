@@ -173,6 +173,7 @@ pub(crate) fn observe_with_lairs(
         recipient: CPU,
         rules: ObservedRules {
             version: 10,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: u16::try_from(view.running_updates).unwrap(),
             remaining_ticks: u16::try_from(view.remaining_ticks).unwrap(),

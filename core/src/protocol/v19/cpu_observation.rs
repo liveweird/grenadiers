@@ -10,6 +10,20 @@ pub fn observe_cpu_recipient(
     recipient: Seat,
     world: WorldId,
 ) -> Result<Observation, ProjectionError> {
+    observe_cpu_recipient_with_punch_activation(
+        publication,
+        recipient,
+        world,
+        game::PunchActivationPolicy::ManualV1,
+    )
+}
+
+pub(crate) fn observe_cpu_recipient_with_punch_activation(
+    publication: &BoundPublication,
+    recipient: Seat,
+    world: WorldId,
+    punch_activation: game::PunchActivationPolicy,
+) -> Result<Observation, ProjectionError> {
     if world.physical_round != publication.physical_round() {
         return Err(ProjectionError::InvalidExpandedBinding);
     }
@@ -26,7 +40,8 @@ pub fn observe_cpu_recipient(
         environment_config,
         tuning.config(),
         spike_tuning.config(),
-    );
+    )
+    .with_punch_activation_policy(punch_activation);
     let timers = projected
         .state
         .actors

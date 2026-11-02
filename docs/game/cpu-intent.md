@@ -1,6 +1,6 @@
 # CPU intent and developer diagnostics
 
-Live Easy/Standard CPU56 and Hard CPU59 retain CPU26's persistent objective model and checked
+Live Easy/Standard CPU60 and Hard CPU61 retain CPU56/59 and CPU26's persistent objective model and checked
 spike-pit execution. A subject is an exact exposed
 pickup (cell and kind), destructible block, or visible opponent seat. Firing/approach cells can
 change without changing that subject. When no productive subject is available, the CPU explicitly
@@ -44,7 +44,7 @@ make no diagnostic requests. Changing the server flag requires a restart, ending
 
 The flag defaults to false, including Compose and Kubernetes. It grants the read-only view to
 connected human room participants; it does not introduce developer accounts or a spectator mode.
-The authenticated `POST /api/v1/game/cpu-debug` contract is separate from gameplay19 and the
+The authenticated `POST /api/v1/game/cpu-debug` contract is separate from gameplay20 and the
 anonymous diagnostic socket. Its [schema](../../api/cpu-debug.schema.json) and
 [OpenAPI](../../api/openapi.json) are authoritative.
 

@@ -18,6 +18,14 @@ mod bracelet_tests;
 mod constructor_tests;
 #[path = "cpu_punch_route_tests.rs"]
 mod cpu_punch_route_tests;
+#[path = "contact_punch_tests.rs"]
+mod contact_punch_tests;
+#[path = "contact_punch_edge_tests.rs"]
+mod contact_punch_edge_tests;
+#[path = "contact_punch_lifecycle_tests.rs"]
+mod contact_punch_lifecycle_tests;
+#[path = "contact_punch_latch_tests.rs"]
+mod contact_punch_latch_tests;
 #[path = "damage_tests.rs"]
 mod damage_tests;
 #[path = "flame_tests.rs"]

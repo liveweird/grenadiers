@@ -259,11 +259,11 @@ the largest contributors on failure; Vite's existing per-chunk warning remains v
 `api-guidelines/spectral.yaml`; it retains the standard and custom rules without the CLI's
 glob dependency. Parser/load errors and error-severity diagnostics fail the command.
 `check:api`, `check:realtime`, and `check:gameplay` compare generated
-contracts without modifying them. Gameplay generation/drift checks cover live v19
-and historical v2–v18; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
+contracts without modifying them. Gameplay generation/drift checks cover live v20
+and historical v2–v19; parity tests compare unchanged physical definitions. AJV validates runtime WebSocket payloads. EN/PL locale
 parity is tested. ESLint/SonarJS and Knip must report no findings.
 
-Live gameplay-v19 and realtime browser consumers use generated standalone Ajv validators and
+Live gameplay-v20 and realtime browser consumers use generated standalone Ajv validators and
 the actual server-projection corpus. Its room
 fixtures derive from the roster lifecycle, and mutations check phase/history/readiness,
 physical tick binding, metadata and recipient privacy. Archived validators retain their own
@@ -397,7 +397,7 @@ assertions and evidence for each suite.
 | `npm --prefix e2e run test:cpu-pickup` | [Shared Compose fixture](../e2e/compose/fixture.yaml), [`arena-v3-cpu-pickup.seed`](../core/tests/fixtures/arena-v3-cpu-pickup.seed), `E2E_CPU_PICKUP_FIXTURE=arena-v3-cpu-pickup`, and [scenario](../e2e/scenarios/cpu-pickup.md) | Three Standard CPUs approach exposed Golden Flame with storm/lairs enabled; public collection followed by later physical movement. |
 | <a id="cpu-item-source-scenario"></a>`npm --prefix e2e run test:cpu-item` | [Shared Compose fixture](../e2e/compose/fixture.yaml), [`arena-v2-cpu-wall-pass.seed`](../core/tests/fixtures/arena-v2-cpu-wall-pass.seed), `E2E_CPU_ITEM_FIXTURE=arena-v3-cpu-wall-pass`, and [scenario](../e2e/scenarios/cpu-item.md) | Real CPU Wall Pass collection with all items enabled, public inventory and rendered gear; private AI randomness stays independent. |
 | <a id="kick-source-scenario"></a>`npm --prefix e2e run test:kick` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-kick.seed`](../core/tests/fixtures/arena-v2-kick.seed), and [scenario](../e2e/scenarios/kick.md) | Same bomb identity/fuse across native kick movement and the retained pre-input timeline. |
-| <a id="punch-source-scenario"></a>`npm --prefix e2e run test:punch` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-punch.seed`](../core/tests/fixtures/arena-v2-punch.seed), and [scenario](../e2e/scenarios/punch.md) | Remapped Equipment input, wrapped bomb movement, action-ID successor, public parity, and natural detonation. |
+| <a id="punch-source-scenario"></a>`npm --prefix e2e run test:punch` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-punch.seed`](../core/tests/fixtures/arena-v2-punch.seed), and [scenario](../e2e/scenarios/punch.md) | Forward-contact Punch, wrapped bomb movement, Bomb action-ID successor, public parity, reconnect fuse integrity and natural detonation. |
 | <a id="bracelet-source-scenario"></a>`npm --prefix e2e run test:bracelet` | [Shared Compose fixture](../e2e/compose/fixture.yaml), exact [`arena-v2-bracelet.seed`](../core/tests/fixtures/arena-v2-bracelet.seed), and [scenario](../e2e/scenarios/bracelet.md) | One-tile stationary-rival shove with no victim command, equipment action, public event, or private marker. |
 | <a id="oil-barrel-production-seed-scenario"></a>`npm --prefix e2e run test:oil-barrel` | [Oil Barrel fixture](deployment.md#reproduce-opt-in-oil-barrel-reveal-and-persistent-fire) | Pending privacy, unlit collision, legal ignition/escape, finite and persistent fire, rendering, and reconnect retention. |
 | `npm --prefix e2e run test:renderer-diagnostics` | [Renderer lifecycle scenario](../e2e/scenarios/renderer-diagnostics.md) | Six real Pixi lifecycle cells, cross-origin blocking, accessibility/fit, capture stability, and bounded cleanup diagnostics. |

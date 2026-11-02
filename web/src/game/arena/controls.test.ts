@@ -5,10 +5,9 @@ import { defaultKeyboardBindings, freezeBindings } from './bindings'
 function setup(enabled = true) {
   const onDirection = vi.fn()
   const onBomb = vi.fn()
-  const onEquipment = vi.fn()
-  const controls = new ArenaControls({ enabled, onDirection, onBomb, onEquipment })
+  const controls = new ArenaControls({ enabled, onDirection, onBomb })
   controls.setFocused(true)
-  return { controls, onDirection, onBomb, onEquipment }
+  return { controls, onDirection, onBomb }
 }
 
 function key(code: string, repeat = false): KeyboardEvent {
@@ -66,7 +65,7 @@ describe('arena keyboard ownership', () => {
   })
 
   it('clears on focus loss and never buffers disabled or unfocused keys', () => {
-    const { controls, onDirection, onBomb, onEquipment } = setup()
+    const { controls, onDirection, onBomb } = setup()
     controls.keyDown(key('KeyA'))
     controls.setFocused(false)
     controls.keyDown(key('KeyD'))
@@ -79,24 +78,24 @@ describe('arena keyboard ownership', () => {
     controls.refresh()
     expect(onDirection).toHaveBeenLastCalledWith(null)
     controls.keyDown(key('KeyS'))
-    controls.configure({ enabled: false, onDirection, onBomb, onEquipment })
+    controls.configure({ enabled: false, onDirection, onBomb })
     controls.keyDown(key('KeyW'))
     controls.keyUp(key('KeyS'))
     controls.refresh()
     expect(onDirection).toHaveBeenLastCalledWith(null)
-    controls.configure({ enabled: true, onDirection, onBomb, onEquipment })
+    controls.configure({ enabled: true, onDirection, onBomb })
     controls.refresh()
     expect(onDirection).toHaveBeenLastCalledWith(null)
     controls.clear()
   })
 
   it('supports browsers without a physical code and updates callbacks without clearing held keys', () => {
-    const { controls, onDirection, onBomb, onEquipment } = setup(false)
+    const { controls, onDirection, onBomb } = setup(false)
     controls.keyDown(key('ArrowLeft'))
     controls.keyUp(key('ArrowLeft'))
     expect(onDirection).not.toHaveBeenCalled()
     const replacement = vi.fn()
-    controls.configure({ enabled: true, onDirection: replacement, onBomb, onEquipment })
+    controls.configure({ enabled: true, onDirection: replacement, onBomb })
     controls.keyDown(new KeyboardEvent('keydown', { key: 'D' }))
     controls.keyUp(new KeyboardEvent('keyup', { key: 'D' }))
     controls.keyDown(new KeyboardEvent('keydown', { key: ' ' }))
@@ -108,11 +107,10 @@ describe('arena keyboard ownership', () => {
   it('uses custom directions and bomb keys once per fresh physical press', () => {
     const onDirection = vi.fn()
     const onBomb = vi.fn()
-    const onEquipment = vi.fn()
     const bindings = freezeBindings({
-      north: ['KeyI'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'], equipment: ['KeyE'],
+      north: ['KeyI'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'],
     })
-    const controls = new ArenaControls({ enabled: true, bindings, onDirection, onBomb, onEquipment })
+    const controls = new ArenaControls({ enabled: true, bindings, onDirection, onBomb })
     controls.setFocused(true)
     controls.keyDown(key('KeyL'))
     controls.keyUp(key('KeyL'))
@@ -124,13 +122,13 @@ describe('arena keyboard ownership', () => {
   })
 
   it('releases old input before installing bindings and waits for a held key to be released', () => {
-    const { controls, onDirection, onBomb, onEquipment } = setup()
+    const { controls, onDirection, onBomb } = setup()
     controls.keyDown(key('KeyD'))
     const replacement = vi.fn()
     const bindings = freezeBindings({
-      north: ['KeyD'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'], equipment: ['KeyE'],
+      north: ['KeyD'], east: ['KeyL'], south: ['KeyK'], west: ['KeyJ'], bomb: ['Enter'],
     })
-    controls.configure({ enabled: true, bindings, onDirection: replacement, onBomb, onEquipment })
+    controls.configure({ enabled: true, bindings, onDirection: replacement, onBomb })
     controls.keyDown(key('KeyD'))
     controls.keyDown(key('KeyD', true))
     expect(onDirection.mock.calls.map(([direction]) => direction)).toEqual(['east', null])
@@ -144,43 +142,33 @@ describe('arena keyboard ownership', () => {
     expect(defaultKeyboardBindings).toMatchObject({
       north: ['ArrowUp', 'KeyW'], east: ['ArrowRight', 'KeyD'],
       south: ['ArrowDown', 'KeyS'], west: ['ArrowLeft', 'KeyA'], bomb: ['Space'],
-      equipment: ['KeyE'],
     })
   })
 
-  it('tracks Bomb and Equipment presses independently and clears both on disable', () => {
-    const { controls, onBomb, onEquipment, onDirection } = setup()
+  it('deduplicates Bomb presses and leaves E native by default', () => {
+    const { controls, onBomb } = setup()
     controls.keyDown(key('Space'))
-    controls.keyDown(key('KeyE'))
     controls.keyDown(key('Space'))
-    controls.keyDown(key('KeyE', true))
     expect(onBomb).toHaveBeenCalledOnce()
-    expect(onEquipment).toHaveBeenCalledOnce()
-    controls.configure({ enabled: false, onDirection, onBomb, onEquipment })
-    controls.keyUp(key('Space'))
-    controls.keyUp(key('KeyE'))
-    controls.configure({ enabled: true, onDirection, onBomb, onEquipment })
-    controls.keyDown(key('KeyE'))
-    expect(onEquipment).toHaveBeenCalledTimes(2)
+    const equipment = key('KeyE')
+    controls.keyDown(equipment)
+    controls.keyUp(equipment)
+    expect(equipment.defaultPrevented).toBe(false)
   })
 
-  it('tracks alternate manual bindings by physical key without cross-action suppression', () => {
+  it('tracks alternate Bomb bindings by physical key', () => {
     const onDirection = vi.fn()
     const onBomb = vi.fn()
-    const onEquipment = vi.fn()
     const bindings = freezeBindings({
       north: ['ArrowUp'], east: ['ArrowRight'], south: ['ArrowDown'], west: ['ArrowLeft'],
-      bomb: ['Space', 'Enter'], equipment: ['KeyE', 'KeyF'],
+      bomb: ['Space', 'Enter'],
     })
-    const controls = new ArenaControls({ enabled: true, bindings, onDirection, onBomb, onEquipment })
+    const controls = new ArenaControls({ enabled: true, bindings, onDirection, onBomb })
     controls.setFocused(true)
     controls.keyDown(key('Space')); controls.keyDown(key('Enter'))
-    controls.keyDown(key('KeyE')); controls.keyDown(key('KeyF'))
     expect(onBomb).toHaveBeenCalledTimes(2)
-    expect(onEquipment).toHaveBeenCalledTimes(2)
-    controls.keyUp(key('Space')); controls.keyUp(key('KeyE'))
-    controls.keyDown(key('Enter', true)); controls.keyDown(key('KeyF', true))
+    controls.keyUp(key('Space'))
+    controls.keyDown(key('Enter', true))
     expect(onBomb).toHaveBeenCalledTimes(2)
-    expect(onEquipment).toHaveBeenCalledTimes(2)
   })
 })

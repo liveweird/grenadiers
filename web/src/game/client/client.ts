@@ -1,5 +1,5 @@
 import { controllersAvailable } from './roomControllers'
-import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V14ErrorCode } from '../v19/schema'
+import type { Direction, GameClientMessage, GameServerMessage, GameSettings, RoomView, Snapshot, V14ErrorCode } from '../v20/schema'
 import { initialGameClientState, type AdmissionIntent, type GameClientState, type GameFailure } from './clientTypes'
 import { ClientRecovery } from './clientRecovery'
 import { preservesSnapshotHistory } from './snapshotHistory'
@@ -80,16 +80,12 @@ export class GameClient {
   }
   movement(direction: Direction | null): boolean {
     return canControl(this.state) && this.sendRoomCommand({ type: 'movement', direction }) }
-  placeBomb(): boolean { return this.manualAction('bomb') }
-  useEquipment(): boolean {
-    return Boolean(this.state.room?.settings.enabledItems.includes('punch') && this.manualAction('equipment'))
-  }
-  private manualAction(action: 'bomb' | 'equipment'): boolean {
+  placeBomb(): boolean {
     if (!canControl(this.state) || this.nextAction > MAX_COUNTER) {
       if (this.nextAction > MAX_COUNTER) this.update({ failure: 'sequenceExhausted' })
       return false
     }
-    if (!this.sendRoomCommand({ type: 'manualAction', actionId: this.nextAction, action })) return false
+    if (!this.sendRoomCommand({ type: 'manualAction', actionId: this.nextAction, action: 'bomb' })) return false
     this.nextAction += 1
     return true
   }
@@ -146,7 +142,7 @@ export class GameClient {
     socket.addEventListener('open', () => {
       if (!isCurrentConnection(generation, socket, this.generation, this.socket)) return
       this.update({ connection: 'authenticating' })
-      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 19, token: credential }))
+      socket.send(JSON.stringify({ type: 'authenticate', protocolVersion: 20, token: credential }))
       credential = ''
     })
     socket.addEventListener('message', (event) => this.receive(generation, socket, event.data))

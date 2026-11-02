@@ -8,8 +8,9 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `CORNER_REFUGES_V56_STANDARD` or `CORNER_REFUGES_V56_EASY` and
-`HARD_V59`; private replay30 binds those identities. Archived replay29 retains CPU56/58. Named
+Two. Live selection uses `CONTACT_PUNCH_V60_STANDARD` or `CONTACT_PUNCH_V60_EASY` and
+`HARD_V61`; private replay31 binds those identities and ContactV2. Archived replay30 retains
+CPU56/59 with ManualV1, and replay29 retains CPU56/58. Named
 archive constants preserve historical replay identities. Policy identity describes decision
 semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
@@ -20,13 +21,16 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-Equipment intent. Intent carries no credentials, seat authority, readiness, settings mutation
-or manual action ID. The server allocates those IDs and uses ordinary input
+archived Equipment intent. Current CPU60/61 do not intentionally request Equipment or contact
+Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
+forward bomb contact. Intent carries no credentials, seat authority, readiness,
+settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
 validation; tests exercise accepted actions through the existing runtime and replay path.
 
 ## Information boundary
 
-The current-protocol adapter converts the already filtered v19 recipient projection. It must
+The current-protocol adapter converts the already filtered v20 recipient projection and records
+the closed ContactV2 activation identity. It must
 never feed the policy `State::public_view` or reconstruct an authoritative `State`. A cloaked
 rival exposes only identity, seat and alive status. Invisible Bombs makes all bomb knowledge
 unavailable, including the observer's bombs; unavailable differs from an empty visible list.
@@ -367,8 +371,9 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 
 ## Live difficulty profiles
 
-Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU56 and Hard
-selects CPU59. They retain CPU52/53's ordinary planning and pit avoidance, adding the bounded
+Gameplay20 retains the same rules10/navigation3 observation boundary and implies ContactV2.
+Easy/Standard select CPU60 and Hard selects CPU61. They retain CPU56/59's complete behavior,
+including CPU52/53's ordinary planning and pit avoidance and the bounded
 blocked-away refuge hints described below. Multi-Teleporter selection and confirmed-origin
 shared preparation remain unchanged. Archived CPU54/55 delegate their non-origin planning
 exactly to CPU52/53. Archived CPU50/51
@@ -406,7 +411,8 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay30 binds CPU56/59; archived replay29 binds CPU56/58; replay28 binds CPU56/57;
+Private replay31 binds CPU60/61 and activation2; archived replay30 binds CPU56/59 and ManualV1;
+replay29 binds CPU56/58; replay28 binds CPU56/57;
 replay27 binds CPU54/55; replay26 binds CPU52/53; replay25 binds CPU50/51; replay24 retains
 CPU48/49; and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside
 CPU42/43 and private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
@@ -414,10 +420,25 @@ CPU44/45, including confirmed-origin continuation, while its new selector is ina
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
 contact modes. Older policy/replay contracts remain isolated.
 
+## ContactV2 self-contact guard
+
+CPU60/61 treat holding Punch as movement-affecting under ContactV2. Every forward route segment
+checks its immediate swept contact cells against each existing hazard forecast. A visible bomb
+blocker, or indexed bomb-motion uncertainty naming a punchable bomb during that one-update window,
+withdraws the route before execution. The only exception is the exact retained origin-grace cell
+while the starting footprint still overlaps it; this preserves an already certified escape
+as a safe departure and does not activate Punch or authorize a new contact.
+
+The guard charges the actor scan and candidate-by-forecast probes to the existing shared work
+budget. It creates no new forecast, planting certificate, intentional Punch tactic or RNG draw.
+Cooldown, trigger support, landing conflicts and the private contact latch remain simulation facts,
+so a CPU cannot infer that a speculative collision will succeed. Archived CPU56/59 and replay30
+remain ManualV1 and keep their prior route and manual Equipment behavior exactly.
+
 ## Shared escape preparation
 
-CPU54/55 and CPU56/57/58/59 validate the actual retained plant origin and build one unchanged default forecast
-against the shared remaining work before attempting optional continuation. A forecast that
+CPU54/55 and CPU56/57/58/59/60/61 validate the actual retained plant origin and build one
+unchanged default forecast against the shared remaining work before attempting optional continuation. A forecast that
 exceeds the old half allowance can therefore still support a checked recovery pulse.
 
 Let incoming remaining work be `A`, its old half allowance `H = floor(A/2)`, and common
@@ -442,7 +463,7 @@ input journals retain their contracts; newly played matches can accept input at 
 
 ## Farming when the usual retreat is blocked
 
-CPU56/57/58/59 can use a lateral refuge when the cell directly away from an adjacent farming target
+CPU56/57/58/59/60/61 can use a lateral refuge when the cell directly away from an adjacent farming target
 is an indestructible wall, lair or outside the board. This requires the CPU to occupy its current
 committed Farm approach, visible empty bombs and no flames. Two deterministic candidates move
 sideways first, then use refuges offset by the observed bomb range both sideways and toward the
@@ -560,7 +581,8 @@ rival. Incomplete or unsupported comparisons retain the baseline. No extra RNG, 
 commitment change, faster physics or larger decision budget is introduced. The selected approach
 still requires the full useful planting, absent/present escape, contact and fresh-publication
 checks before any bomb action is admitted. Archived Hard57 retains its original choice and work,
-while archived replay29 freezes Hard58's exit-coverage output.
+while archived replay29 freezes Hard58's exit-coverage output. Current Hard61 inherits the Hard59
+selection unchanged before applying its ContactV2 route guard.
 
 ## Equal-distance visible block yield
 
@@ -583,4 +605,5 @@ stable while eligible; genuine navigation or subcell progress may refresh its pr
 but reevaluation alone does not. If the approach becomes invalid,
 progress is measured against the replacement rather than the stale origin. Every actual bomb
 still requires the unchanged usefulness, absent/present escape, contact, admission and fresh-
-publication checks. Archived Hard58/replay29 keep the coordinate-selected farming approach.
+publication checks. Archived Hard58/replay29 keep the coordinate-selected farming approach;
+current Hard61 inherits Hard59's selected approach unchanged.

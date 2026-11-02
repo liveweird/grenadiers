@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
-import type { GameServerMessage, StormCloudView } from '../../web/src/game/v19/schema'
+import type { GameServerMessage, StormCloudView } from '../../web/src/game/v20/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
 

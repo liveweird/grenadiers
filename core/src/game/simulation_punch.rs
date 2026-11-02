@@ -1,6 +1,8 @@
 use super::{Direction, State};
 use crate::game::bombs::BombTrigger;
 use crate::game::movement;
+use crate::game::movement::MovementOutcome;
+use crate::game::rules::PunchActivationPolicy;
 use crate::game::types::{CellId, EntityId, SeatId, Tick};
 use std::collections::BTreeSet;
 
@@ -23,9 +25,74 @@ impl State {
         let claims: Vec<_> = requests
             .iter()
             .filter_map(|request| {
-                request.and_then(|seat| self.punch_claim(seat, tick, remote_reservations))
+                request.and_then(|seat| self.manual_punch_claim(seat, tick, remote_reservations))
             })
             .collect();
+        self.apply_punch_claims(&claims, tick);
+    }
+
+    pub(super) fn latch_contact_punches(
+        &mut self,
+        outcomes: &[MovementOutcome],
+    ) -> Vec<Option<(EntityId, Direction)>> {
+        if self.rules.punch_activation_policy() != PunchActivationPolicy::ContactV2 {
+            return vec![None; self.actors.len()];
+        }
+        self.actors
+            .iter_mut()
+            .zip(outcomes)
+            .map(|(actor, outcome)| {
+                let request = outcome.punch_contact.filter(|(id, _)| {
+                    actor.alive
+                        && !actor.contact_punch_latches.contains(id)
+                        && actor.inventory.can_punch()
+                });
+                if let Some((id, _)) = request {
+                    actor.contact_punch_latches.insert(id);
+                }
+                request
+            })
+            .collect()
+    }
+
+    pub(super) fn resolve_contact_punches(
+        &mut self,
+        requests: &[Option<(EntityId, Direction)>],
+        tick: Tick,
+        remote_targets: &[Option<EntityId>],
+    ) {
+        let remote_reservations = remote_targets.iter().flatten().copied().collect();
+        let claims: Vec<_> = requests
+            .iter()
+            .enumerate()
+            .filter_map(|(index, request)| {
+                let seat = self.actors[index].seat;
+                request.and_then(|(id, direction)| {
+                    self.contact_punch_claim(seat, id, direction, tick, &remote_reservations)
+                })
+            })
+            .collect();
+        self.apply_punch_claims(&claims, tick);
+    }
+
+    pub(super) fn reconcile_contact_punch_latches(&mut self) {
+        let world = &self.world;
+        for actor in &mut self.actors {
+            if !actor.alive {
+                actor.contact_punch_latches.clear();
+                continue;
+            }
+            let position = actor.position;
+            actor.contact_punch_latches.retain(|id| {
+                world
+                    .bombs
+                    .get(id)
+                    .is_some_and(|bomb| actor_touches_cell(position, bomb.cell()))
+            });
+        }
+    }
+
+    fn apply_punch_claims(&mut self, claims: &[PunchClaim], tick: Tick) {
         let priority: Vec<_> = self.assignment.priority_order(self.player_count).collect();
         let mut retained = Vec::new();
         for seat in priority {
@@ -63,7 +130,7 @@ impl State {
         }
     }
 
-    fn punch_claim(
+    fn manual_punch_claim(
         &self,
         seat: SeatId,
         tick: Tick,
@@ -89,6 +156,47 @@ impl State {
             .bombs
             .values()
             .find(|bomb| bomb.cell() == target)?;
+        self.punch_claim_for_bomb(seat, bomb.id(), actor.heading, tick, remote_reservations)
+    }
+
+    fn contact_punch_claim(
+        &self,
+        seat: SeatId,
+        id: EntityId,
+        direction: Direction,
+        tick: Tick,
+        remote_reservations: &BTreeSet<EntityId>,
+    ) -> Option<PunchClaim> {
+        let actor = &self.actors[seat.index()];
+        let bomb = self.world.bombs.get(&id)?;
+        (crate::game::geometry::distance_to_blocking_cell(actor.position, direction, bomb.cell())
+            == Some(0))
+        .then_some(())?;
+        self.punch_claim_for_bomb(seat, id, direction, tick, remote_reservations)
+    }
+
+    fn punch_claim_for_bomb(
+        &self,
+        seat: SeatId,
+        id: EntityId,
+        direction: Direction,
+        tick: Tick,
+        remote_reservations: &BTreeSet<EntityId>,
+    ) -> Option<PunchClaim> {
+        let actor = &self.actors[seat.index()];
+        let ready = actor.last_successful_punch_tick.is_none_or(|last| {
+            tick.0
+                .checked_sub(last.0)
+                .is_some_and(|elapsed| elapsed >= PUNCH_COOLDOWN_TICKS)
+        });
+        if !actor.alive
+            || !self.rules.enabled_items().contains_punch()
+            || !actor.inventory.can_punch()
+            || !ready
+        {
+            return None;
+        }
+        let bomb = self.world.bombs.get(&id)?;
         let source = bomb.cell();
         let source_burning = self.world.has_fire(source, tick);
         let due =
@@ -100,7 +208,7 @@ impl State {
         {
             return None;
         }
-        let landing = self.punch_landing(bomb.id(), source, actor.heading)?;
+        let landing = self.punch_landing(bomb.id(), source, direction)?;
         Some(PunchClaim {
             seat,
             bomb: bomb.id(),
@@ -132,4 +240,18 @@ impl State {
         }
         None
     }
+}
+
+fn actor_touches_cell(position: crate::game::Position, cell: CellId) -> bool {
+    movement::position_overlaps_cell(position, cell)
+        || [
+            Direction::North,
+            Direction::East,
+            Direction::South,
+            Direction::West,
+        ]
+        .into_iter()
+        .any(|direction| {
+            crate::game::geometry::distance_to_blocking_cell(position, direction, cell) == Some(0)
+        })
 }

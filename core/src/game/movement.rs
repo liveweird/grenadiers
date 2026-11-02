@@ -18,6 +18,7 @@ pub(crate) struct MovementOutcome {
     pub(crate) original_budget: i32,
     pub(crate) forward_segment: Option<MovementSegment>,
     pub(crate) blocking_player: Option<(super::SeatId, Direction)>,
+    pub(crate) punch_contact: Option<(EntityId, Direction)>,
 }
 
 #[derive(Default)]
@@ -25,6 +26,7 @@ struct MovementCapture {
     kick: Option<(EntityId, Direction)>,
     forward_segment: Option<MovementSegment>,
     blocking_player: Option<(super::SeatId, Direction)>,
+    punch_contact: Option<(EntityId, Direction)>,
 }
 
 #[derive(Clone, Copy)]
@@ -60,6 +62,7 @@ pub(crate) fn advance_actor(
             original_budget: 0,
             forward_segment: capture.forward_segment,
             blocking_player: capture.blocking_player,
+            punch_contact: capture.punch_contact,
         };
     };
     let direction = if actor.effects().reverses_controls(config.tick) {
@@ -103,6 +106,7 @@ pub(crate) fn advance_actor(
             original_budget,
             forward_segment: capture.forward_segment,
             blocking_player: capture.blocking_player,
+            punch_contact: capture.punch_contact,
         };
     }
     if same_axis(actor.heading, direction) {
@@ -125,6 +129,7 @@ pub(crate) fn advance_actor(
             original_budget,
             forward_segment: capture.forward_segment,
             blocking_player: capture.blocking_player,
+            punch_contact: capture.punch_contact,
         };
     }
 
@@ -137,6 +142,7 @@ pub(crate) fn advance_actor(
             original_budget,
             forward_segment: capture.forward_segment,
             blocking_player: capture.blocking_player,
+            punch_contact: capture.punch_contact,
         };
     }
     let correction = target - coordinate;
@@ -161,6 +167,7 @@ pub(crate) fn advance_actor(
                 original_budget,
                 forward_segment: capture.forward_segment,
                 blocking_player: capture.blocking_player,
+                punch_contact: capture.punch_contact,
             };
         }
         let turn = TurnAssist { direction, target };
@@ -195,6 +202,7 @@ pub(crate) fn advance_actor(
         original_budget,
         forward_segment: capture.forward_segment,
         blocking_player: capture.blocking_player,
+        punch_contact: capture.punch_contact,
     }
 }
 
@@ -295,6 +303,11 @@ fn move_actor(
         };
     if request.forward {
         capture.kick = kick;
+        capture.punch_contact = if request.distance > 0 && !collision.ambiguous {
+            collision.bomb_contact.map(|id| (id, request.direction))
+        } else {
+            None
+        };
         capture.blocking_player = collision
             .physical_contact
             .map(|seat| (seat, request.direction));

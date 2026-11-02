@@ -8,7 +8,6 @@ use crate::game::types::CellId;
 use crate::game::types::Tick;
 #[cfg(test)]
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 
 impl State {
     pub fn step(&mut self, inputs: &[SeatInput]) -> Result<StepReport, StepError> {
@@ -105,6 +104,7 @@ impl State {
         for actor in &mut self.actors {
             actor.bomb_grace.retain(|id| !motion.moved.contains(id));
         }
+        self.reconcile_contact_punch_latches();
         let manual_actions = self.apply_inputs(inputs);
         self.clear_frozen_movement(&stopwatch.frozen);
         let (mob_contact_targets, mut contact_damaged) = match self.advance_lair_phase(
@@ -129,6 +129,7 @@ impl State {
             .collect();
         let (outcomes, kick_requests) =
             self.move_living(next_tick, &stopwatch.frozen, &motion.moving_at_start);
+        let contact_punches = self.latch_contact_punches(&outcomes);
         let traces: Vec<_> = outcomes
             .iter()
             .map(|outcome| outcome.trace.clone())
@@ -168,6 +169,7 @@ impl State {
         );
         let remote_targets =
             self.resolve_manual_actions(&manual_actions, next_tick, &stopwatch, &mut events);
+        self.resolve_contact_punches(&contact_punches, next_tick, &remote_targets);
         self.resolve_explosions(
             next_tick,
             &remote_targets,
@@ -175,6 +177,7 @@ impl State {
             stopwatch.pause_timed,
             &mut events,
         )?;
+        self.reconcile_contact_punch_latches();
         if let Err(error) = self.kill_lairs_on_fire(next_tick) {
             if let Some(snapshot) = rollback {
                 *self = snapshot;
@@ -248,29 +251,6 @@ impl State {
             events,
             forced_movements,
         })
-    }
-
-    fn resolve_kick_requests(
-        &mut self,
-        requests: Vec<Option<(crate::game::EntityId, crate::game::Direction)>>,
-    ) {
-        let mut accepted = BTreeSet::new();
-        for seat in self.assignment.priority_order(self.player_count) {
-            let Some((id, direction)) = requests[seat.index()] else {
-                continue;
-            };
-            if !accepted.insert(id) {
-                continue;
-            }
-            let Some(bomb) = self.world.bombs.get_mut(&id) else {
-                continue;
-            };
-            if bomb.motion().is_none()
-                && !matches!(bomb.trigger(), crate::game::BombTrigger::Contact)
-            {
-                bomb.arm_kick(direction);
-            }
-        }
     }
 
     pub(super) fn kill_on_existing_flames(

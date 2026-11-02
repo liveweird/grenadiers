@@ -44,6 +44,7 @@ pub struct Actor {
     effects: TimedEffects,
     damage_grace: Option<DamageGrace>,
     last_successful_punch_tick: Option<Tick>,
+    contact_punch_latches: BTreeSet<EntityId>,
     last_successful_shove_tick: Option<Tick>,
     last_teleport_tick: Option<Tick>,
     storm_slow_until: Option<Tick>,
@@ -239,6 +240,8 @@ pub use random::{
     SIMULATION_RANDOMNESS_VERSION, SIMULATION_SEED_DERIVATION_VERSION, SimulationSeed,
 };
 pub(crate) use shove_geometry::{stationary_contact_entry, stationary_sweep_contact};
+#[path = "simulation_kick_requests.rs"]
+mod kick_requests;
 #[path = "simulation_step.rs"]
 mod step;
 #[path = "simulation_stopwatch.rs"]

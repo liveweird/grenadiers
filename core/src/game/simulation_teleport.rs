@@ -58,6 +58,7 @@ impl State {
         self.actors[requester.index()].position = to;
         self.actors[requester.index()].residual = 0;
         self.actors[requester.index()].pending_turn = None;
+        self.actors[requester.index()].contact_punch_latches.clear();
         self.actors[requester.index()].bomb_grace = requester_grace;
         self.actors[requester.index()].soft_wall_grace = requester_soft_grace;
         self.actors[requester.index()].unlit_oil_grace = requester_oil_grace;
@@ -65,6 +66,7 @@ impl State {
         self.actors[other.index()].position = from;
         self.actors[other.index()].residual = 0;
         self.actors[other.index()].pending_turn = None;
+        self.actors[other.index()].contact_punch_latches.clear();
         self.actors[other.index()].bomb_grace = other_grace;
         self.actors[other.index()].soft_wall_grace = other_soft_grace;
         self.actors[other.index()].unlit_oil_grace = other_oil_grace;

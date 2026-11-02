@@ -18,6 +18,7 @@ pub(crate) fn stationary_contact_entry(holder: MovementSegment, rival: super::Po
         original_budget: distance,
         forward_segment: Some(holder),
         blocking_player: None,
+        punch_contact: None,
     };
     let rival = MovementOutcome {
         trace: super::MovementTrace::new(rival),
@@ -25,6 +26,7 @@ pub(crate) fn stationary_contact_entry(holder: MovementSegment, rival: super::Po
         original_budget: 0,
         forward_segment: None,
         blocking_player: None,
+        punch_contact: None,
     };
     contact_entry(&holder, &rival).is_some()
 }

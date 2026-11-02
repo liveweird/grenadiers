@@ -6,8 +6,9 @@ use crate::cpu::routing::{
     plan_timed_weapon_plant,
 };
 use crate::cpu::{Intent, ManualIntent, MovementIntent, Observation, WorkBudget};
-use crate::game::{Direction, Position, Tick};
+use crate::game::{CellId, Direction, Position, Tick};
 
+use super::demolition_diagnostic::visible_soft_block_yield;
 use super::{PlantSupport, actor, teleporter_plant_supported};
 use crate::cpu::survival::{ExecutionCertificate, SurvivalPlan};
 
@@ -27,6 +28,9 @@ pub struct PlantCandidateDiagnostic {
     pub target_position: Option<Position>,
     pub usefulness_probe_spent: u32,
     pub derived_exact_usefulness: Option<bool>,
+    pub visible_soft_block: Option<CellId>,
+    pub visible_soft_block_yield: Option<u8>,
+    pub visible_yield_spent: u32,
     pub exact_usefulness: Option<bool>,
     pub outcome: PlantCandidateOutcome,
 }
@@ -169,6 +173,9 @@ pub(in crate::cpu::survival) fn diagnose_candidates(
             target_position: target.and_then(|target| target_position(observation, target)),
             usefulness_probe_spent: 0,
             derived_exact_usefulness: None,
+            visible_soft_block: None,
+            visible_soft_block_yield: None,
+            visible_yield_spent: 0,
             exact_usefulness: None,
             outcome: PlantCandidateOutcome::UsefulTargetWork,
         };
@@ -190,6 +197,26 @@ pub(in crate::cpu::survival) fn diagnose_candidates(
         };
         diagnostic.spent = spent;
         diagnostic.outcome = outcome;
+        if diagnostic.derived_exact_usefulness == Some(false)
+            && let Some(placement) = diagnostic.placement
+        {
+            if let Some(previous) = probe.candidates.iter().find(|candidate| {
+                candidate.placement.is_some_and(|prior| {
+                    prior.cell == placement.cell
+                        && prior.range == placement.range
+                        && prior.blast == placement.blast
+                })
+            }) {
+                diagnostic.visible_soft_block = previous.visible_soft_block;
+                diagnostic.visible_soft_block_yield = previous.visible_soft_block_yield;
+                diagnostic.visible_yield_spent = previous.visible_yield_spent;
+            } else {
+                let (block, yield_count, spent) = visible_soft_block_yield(observation, placement);
+                diagnostic.visible_soft_block = block;
+                diagnostic.visible_soft_block_yield = yield_count;
+                diagnostic.visible_yield_spent = spent;
+            }
+        }
         probe.candidates.push(diagnostic);
         if work.try_take(spent).is_err() {
             return probe;

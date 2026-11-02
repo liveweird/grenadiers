@@ -98,4 +98,6 @@ pub(super) fn opening(
 
 #[path = "lair_v23_diagnostic.rs"]
 mod diagnostic;
-pub use diagnostic::{HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant};
+pub use diagnostic::{
+    DemolitionCounterfactual, HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant,
+};

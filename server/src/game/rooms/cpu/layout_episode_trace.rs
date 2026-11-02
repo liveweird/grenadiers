@@ -285,7 +285,8 @@ fn run_layout_trace_inner(
                 if result.basis.observation.parts().recipient == seat
                     && (start..=end).contains(&result.basis.observation.parts().tick)
                 {
-                    plan_witnesses.push(PlanSnapshot::capture(result));
+                    let demolition_enabled = witness::demolition_enabled(&plan_witnesses);
+                    plan_witnesses.push(PlanSnapshot::capture(result, demolition_enabled));
                 }
             })
         } else {

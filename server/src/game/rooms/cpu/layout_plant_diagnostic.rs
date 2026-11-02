@@ -15,6 +15,7 @@ pub(in crate::game::rooms::roster_owner) struct FullProof {
 pub(super) fn capture(
     witness: &PlannedResultWitness<'_>,
     direct_spent: u32,
+    demolition_enabled: bool,
 ) -> (u32, Option<HardPlantDiagnostic>) {
     if witness.basis.escape_origin.is_some() || witness.plan.is_none() {
         return (witness.work_spent.saturating_sub(direct_spent), None);
@@ -31,6 +32,7 @@ pub(super) fn capture(
                 witness.basis.settled_stop_tick,
                 &mut rng,
                 65_536_u32.saturating_sub(prefix),
+                false,
             )
             .ok()
         };
@@ -43,5 +45,37 @@ pub(super) fn capture(
         }
         prefix = next;
     }
+    if demolition_enabled {
+        let mut rng = witness.basis.rng.clone();
+        diagnostic = diagnose_hard_v61_plant(
+            witness.basis.observation,
+            witness.basis.memory,
+            witness.basis.hazard_memory,
+            witness.basis.settled_stop_tick,
+            &mut rng,
+            65_536_u32.saturating_sub(prefix),
+            true,
+        )
+        .ok();
+    }
     (prefix, diagnostic)
+}
+
+pub(in crate::game::rooms::roster_owner) fn demolition_enabled(
+    snapshots: &[super::PlanSnapshot],
+) -> bool {
+    snapshots.iter().all(|snapshot| {
+        snapshot
+            .plant_diagnostic
+            .as_ref()
+            .is_none_or(|diagnostic| diagnostic.demolition.is_none())
+    })
+}
+
+pub(in crate::game::rooms::roster_owner) fn digest(value: &impl std::fmt::Debug) -> u64 {
+    format!("{value:?}")
+        .bytes()
+        .fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
+            (hash ^ u64::from(byte)).wrapping_mul(0x100_0000_01b3)
+        })
 }

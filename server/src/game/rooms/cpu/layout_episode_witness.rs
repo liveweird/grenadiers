@@ -22,6 +22,7 @@ use super::{BombLifecycle, DeathWitness, EFFECTS};
 #[path = "layout_plant_diagnostic.rs"]
 mod plant_diagnostic;
 use plant_diagnostic::FullProof;
+pub(super) use plant_diagnostic::{demolition_enabled, digest};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(in crate::game::rooms::roster_owner) struct PlanSnapshot {
@@ -108,7 +109,7 @@ pub(in crate::game::rooms::roster_owner) enum CorrectedRecoveryOutcome {
 }
 
 impl PlanSnapshot {
-    pub(super) fn capture(witness: PlannedResultWitness<'_>) -> Self {
+    pub(super) fn capture(witness: PlannedResultWitness<'_>, demolition_enabled: bool) -> Self {
         let mut full_work = WorkBudget::new(65_536);
         let mut full_rng: CpuRng = witness.basis.rng.clone();
         let full_result = plan_hard_contact_punch_v61_with_origin(
@@ -133,7 +134,7 @@ impl PlanSnapshot {
             },
         };
         let (planner_prefix_spent, plant_diagnostic) =
-            plant_diagnostic::capture(&witness, full_work.spent());
+            plant_diagnostic::capture(&witness, full_work.spent(), demolition_enabled);
         let corrected_recovery = witness.basis.escape_origin.map(|origin| {
             let mut corrected_work = WorkBudget::new(65_536);
             let (outcome, legs, positions, survive_until) = match plan_continuation_lairs_v62(
@@ -291,14 +292,6 @@ pub(super) fn merge(total: &mut PumpReport, next: PumpReport) {
         .planned_intents_by_job
         .extend(next.planned_intents_by_job);
     total.planner_times.extend(next.planner_times);
-}
-
-pub(super) fn digest(value: &impl std::fmt::Debug) -> u64 {
-    format!("{value:?}")
-        .bytes()
-        .fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
-            (hash ^ u64::from(byte)).wrapping_mul(0x100_0000_01b3)
-        })
 }
 
 pub(super) fn record_events(

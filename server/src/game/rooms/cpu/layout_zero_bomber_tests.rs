@@ -1,7 +1,7 @@
 use grenadiers_core::{
     cpu::policy::{StrategicObjectiveKind, StrategicPhase},
     cpu::{ObservedActor, survival::PlantCandidateOutcome},
-    game::{ArenaConstructionProfile, SeatId, StepEventKind, Tick},
+    game::{ArenaConstructionProfile, CellId, SeatId, StepEventKind, Tick},
     room::{BoardSize, SpikePitSettings},
 };
 
@@ -92,6 +92,29 @@ fn hard_v63_zero_bomber_reports_first_attack_plant_refusal_and_death() {
         })
         .collect::<Vec<_>>();
     assert!(replay_mismatches.is_empty(), "{replay_mismatches:?}");
+    let counterfactuals = all_attempts
+        .iter()
+        .filter_map(|witness| {
+            witness
+                .plant_diagnostic
+                .as_ref()?
+                .demolition
+                .as_ref()
+                .map(|proof| (*witness, proof))
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(counterfactuals.len(), 1);
+    let (counter_basis, counterfactual) = counterfactuals[0];
+    assert_eq!(counter_basis.observation.parts().tick, Tick(183));
+    assert_eq!(counterfactual.block, CellId::new(11, 3));
+    assert_eq!(counterfactual.visible_yield, 1);
+    assert_eq!(counterfactual.useful, Some(true));
+    assert_eq!(counterfactual.contact, Ok(()));
+    assert_eq!(counterfactual.survive_until, Some(Tick(400)));
+    assert!(
+        counter_basis.planner_prefix_spent + counterfactual.total_spent
+            <= grenadiers_core::cpu::survival::WORK_ALLOWANCE
+    );
     let candidate_timeline = all_attempts
         .iter()
         .map(|witness| {

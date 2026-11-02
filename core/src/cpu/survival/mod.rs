@@ -72,7 +72,9 @@ pub use corner_refuges::{
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
 #[doc(hidden)]
-pub use lair_v23::{HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant};
+pub use lair_v23::{
+    DemolitionCounterfactual, HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant,
+};
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use pickup_progress::{

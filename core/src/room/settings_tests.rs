@@ -9,6 +9,10 @@ fn defaults_match_the_first_configurable_profile() {
     assert_eq!(settings.wins_to_finish(), 3);
     assert_eq!(settings.bomb_fuse_ticks(), 180);
     assert_eq!(settings.enabled_items(), EnabledItems::EMPTY);
+    assert_eq!(
+        settings.bomb_capacity_drop_multiplier(),
+        BombCapacityDropMultiplier::LEGACY
+    );
     assert_eq!(settings, RoomSettings::DEFAULT);
     assert!(std::mem::size_of::<RoomSettings>() <= 16);
 }
@@ -33,6 +37,7 @@ fn every_boundary_and_discrete_step_is_accepted() {
                             wins_to_finish: wins,
                             bomb_fuse_ticks: fuse as u16,
                             enabled_items: EnabledItems::EMPTY,
+                            bomb_capacity_drop_multiplier: BombCapacityDropMultiplier::LEGACY,
                         })
                     );
                 }
@@ -47,6 +52,21 @@ fn enabled_items_are_added_without_weakening_validated_settings() {
         .unwrap()
         .with_enabled_items(EnabledItems::HEART);
 
+    assert_eq!(settings.enabled_items(), EnabledItems::HEART);
+    assert_eq!(settings.bomb_fuse_ticks(), 240);
+}
+
+#[test]
+fn drop_multiplier_builder_preserves_other_validated_settings() {
+    let settings = RoomSettings::new(SpeedLevel::Two, 128, 5, 240)
+        .unwrap()
+        .with_enabled_items(EnabledItems::HEART)
+        .with_bomb_capacity_drop_multiplier(BombCapacityDropMultiplier::DEFAULT);
+
+    assert_eq!(
+        settings.bomb_capacity_drop_multiplier(),
+        BombCapacityDropMultiplier::DEFAULT
+    );
     assert_eq!(settings.enabled_items(), EnabledItems::HEART);
     assert_eq!(settings.bomb_fuse_ticks(), 240);
 }

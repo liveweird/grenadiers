@@ -6,7 +6,7 @@ import type { GameClientState } from './client'
 import { initialGameClientState } from './client'
 import { GamePanelView, type GameActions } from './GamePanel'
 import { room } from './testSupport'
-import type { Difficulty } from '../v20/schema'
+import type { Difficulty } from '../v21/schema'
 
 vi.mock('../arena/GameArena', () => ({ GameArena: () => <div /> }))
 

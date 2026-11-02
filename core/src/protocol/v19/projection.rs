@@ -57,15 +57,36 @@ pub(crate) fn bind_expanded_with_punch_activation(
     generation: GenerationRecord,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<BoundPublication, ProjectionError> {
-    super::room_validation::validate_room_view(room)?;
-    let facts = &capture.base;
     let base = room.configuration.domain().base().base();
-    let (width, height) = base.board().dimensions();
     let expected_generator = if base.board() == crate::room::BoardSize::FifteenByThirteen {
         crate::game::MULTIPLAYER_GENERATOR_VERSION
     } else {
         crate::game::VARIABLE_GENERATOR_VERSION
     };
+    bind_expanded_with_expected_settings(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        expected_generator,
+        wire_domain_settings(room)?,
+        punch_activation,
+    )
+}
+
+pub(crate) fn bind_expanded_with_expected_settings(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    expected_generator: u16,
+    expected_settings: crate::room::RoomSettings,
+    punch_activation: crate::game::PunchActivationPolicy,
+) -> Result<BoundPublication, ProjectionError> {
+    super::room_validation::validate_room_view(room)?;
+    let facts = &capture.base;
+    let base = room.configuration.domain().base().base();
+    let (width, height) = base.board().dimensions();
     let state_bound = match room.phase {
         RoomPhase::Running => {
             state_epoch == room.round_id
@@ -92,7 +113,13 @@ pub(crate) fn bind_expanded_with_punch_activation(
         }
         _ => false,
     };
-    if facts.rules != expected_rules(room, facts.rules.mob_navigation_policy(), punch_activation)?
+    if facts.rules
+        != expected_rules(
+            room,
+            expected_settings,
+            facts.rules.mob_navigation_policy(),
+            punch_activation,
+        )?
         || facts.world.rules_version != 10
         || facts.world.actors.len() != base.controllers().len()
         || u16::from(facts.world.arena.width) != width
@@ -225,9 +252,28 @@ pub fn prepare_snapshots(
 
 fn expected_rules(
     room: &RoomView,
+    settings: crate::room::RoomSettings,
     navigation: crate::game::MobNavigationPolicy,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<RulesConfig, ProjectionError> {
+    let (cloud, lairs, spike_pits) = room
+        .settings
+        .environment
+        .domain()
+        .map_err(|_| ProjectionError::InvalidExpandedBinding)?;
+    // Navigation is a private, versioned AI identity. Both policies publish the
+    // same checked physics/settings facts; no target or path enters this view.
+    Ok(RulesConfig::environment_v10_with_mob_navigation(
+        settings,
+        cloud,
+        lairs.config(),
+        spike_pits.config(),
+        navigation,
+    )
+    .with_punch_activation_policy(punch_activation))
+}
+
+fn wire_domain_settings(room: &RoomView) -> Result<crate::room::RoomSettings, ProjectionError> {
     let settings = &room.settings.base;
     let speed = [
         crate::game::SpeedLevel::Base,
@@ -239,7 +285,7 @@ fn expected_rules(
     .get(settings.starting_speed_level() as usize)
     .copied()
     .ok_or(ProjectionError::InvalidExpandedBinding)?;
-    let domain = crate::room::RoomSettings::new(
+    Ok(crate::room::RoomSettings::new(
         speed,
         settings.turn_assist_units(),
         settings.wins_to_finish(),
@@ -249,20 +295,5 @@ fn expected_rules(
     .with_enabled_items(
         crate::game::EnabledItems::from_bits(settings.enabled_items().mask().bits())
             .ok_or(ProjectionError::InvalidItems)?,
-    );
-    let (cloud, lairs, spike_pits) = room
-        .settings
-        .environment
-        .domain()
-        .map_err(|_| ProjectionError::InvalidExpandedBinding)?;
-    // Navigation is a private, versioned AI identity. Both policies publish the
-    // same checked physics/settings facts; no target or path enters this view.
-    Ok(RulesConfig::environment_v10_with_mob_navigation(
-        domain,
-        cloud,
-        lairs.config(),
-        spike_pits.config(),
-        navigation,
-    )
-    .with_punch_activation_policy(punch_activation))
+    ))
 }

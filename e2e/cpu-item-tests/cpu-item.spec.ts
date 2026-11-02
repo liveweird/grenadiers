@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor } from '../tests/support/duel'
 import { openSettings } from '../tests/support/settings'
-import type { GameServerMessage } from '../../web/src/game/v20/schema'
+import type { GameServerMessage } from '../../web/src/game/v21/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_CPU_ITEM_FIXTURE).toBe('arena-v3-cpu-wall-pass')

@@ -1,11 +1,18 @@
 # Multiplayer arena generation
 
-Generator v3 serves live three- and four-player 15×13 rooms and remains available for
+Generator6 serves current rooms on every supported board. It reuses the v3/v4 terrain,
+reflection, spawn and bounded-sampling machinery with a checked Bomb Capacity drop multiplier.
+At multiplier1 it takes the exact historical sampler path; at other values it changes only the
+Bomb Capacity interval before normalization. Seeded results are deterministic for the complete
+configuration, including the multiplier. A changed sampling bound can change rejection draws
+and later cells, so equal seeds across multipliers need not yield identical layouts.
+
+Historical generator v3 serves three- and four-player 15×13 profiles and remains available for
 headless two-player compatibility. `generate_multiplayer_arena` accepts
 a private 32-byte seed, an `EnabledItems` mask, and `ArenaGenerationConfig` containing the player
 count, board size, and actual-round assignment. Its historical profile explicitly rejects
-11×9 and 13×11; those live presets use generator 4 through the [board geometry](board-sizes.md)
-profile. Two-player 15×13 rooms retain generator 2.
+11×9 and 13×11; those historical presets use generator4 through the [board geometry](board-sizes.md)
+profile. Older two-player 15×13 profiles retain generator2.
 
 Version three traverses eligible classic-floor cells by row-major orbit representative. Each
 orbit is deduplicated under horizontal and vertical reflection and therefore contains one, two,

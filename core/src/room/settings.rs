@@ -1,5 +1,7 @@
 use crate::game::{EnabledItems, SpeedLevel};
 
+use super::BombCapacityDropMultiplier;
+
 pub const MIN_TURN_ASSIST_UNITS: i32 = 64;
 pub const MAX_TURN_ASSIST_UNITS: i32 = 256;
 pub const TURN_ASSIST_STEP_UNITS: i32 = 64;
@@ -32,6 +34,7 @@ pub struct RoomSettings {
     wins_to_finish: u8,
     bomb_fuse_ticks: u16,
     enabled_items: EnabledItems,
+    bomb_capacity_drop_multiplier: BombCapacityDropMultiplier,
 }
 
 impl RoomSettings {
@@ -41,6 +44,7 @@ impl RoomSettings {
         wins_to_finish: 3,
         bomb_fuse_ticks: 180,
         enabled_items: EnabledItems::EMPTY,
+        bomb_capacity_drop_multiplier: BombCapacityDropMultiplier::LEGACY,
     };
 
     pub fn new(
@@ -68,12 +72,22 @@ impl RoomSettings {
             wins_to_finish,
             bomb_fuse_ticks: bomb_fuse_ticks as u16,
             enabled_items: EnabledItems::EMPTY,
+            bomb_capacity_drop_multiplier: BombCapacityDropMultiplier::LEGACY,
         })
     }
 
     #[must_use]
     pub const fn with_enabled_items(mut self, enabled_items: EnabledItems) -> Self {
         self.enabled_items = enabled_items;
+        self
+    }
+
+    #[must_use]
+    pub const fn with_bomb_capacity_drop_multiplier(
+        mut self,
+        bomb_capacity_drop_multiplier: BombCapacityDropMultiplier,
+    ) -> Self {
+        self.bomb_capacity_drop_multiplier = bomb_capacity_drop_multiplier;
         self
     }
 
@@ -100,6 +114,11 @@ impl RoomSettings {
     #[must_use]
     pub const fn enabled_items(self) -> EnabledItems {
         self.enabled_items
+    }
+
+    #[must_use]
+    pub const fn bomb_capacity_drop_multiplier(self) -> BombCapacityDropMultiplier {
+        self.bomb_capacity_drop_multiplier
     }
 }
 

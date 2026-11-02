@@ -13,7 +13,9 @@ use super::validate_cpus;
 use crate::{
     game::rooms::{
         cpu::{CpuController, CpuPlanner},
-        roster_runtime::{RosterIdentity, RosterRuntime, RosterRuntimeError},
+        roster_runtime::{
+            RosterIdentity, RosterRuntime, RosterRuntimeError, SpikeRuntimeEnvironment,
+        },
     },
     round_seed::RoundSeedSource,
 };
@@ -50,23 +52,27 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
             BoardSize::FifteenByThirteen,
         )
         .unwrap();
-        let runtime = RosterRuntime::new_spike_v20_with_navigation(
+        let runtime = RosterRuntime::new_spike_v21_with_navigation(
             RosterIdentity {
                 id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
                 code: RoomCode::new("ABCDEFGH").unwrap(),
                 registry_serial: 127,
                 configuration,
             },
-            RoomSettings::DEFAULT,
-            StormCloudConfig::Single,
-            RespawnLairTuning::DEFAULT,
-            SpikePitTuning::DEFAULT,
+            RoomSettings::DEFAULT.with_bomb_capacity_drop_multiplier(
+                grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT,
+            ),
+            SpikeRuntimeEnvironment {
+                cloud: StormCloudConfig::Single,
+                lairs: RespawnLairTuning::DEFAULT,
+                spike_pits: SpikePitTuning::DEFAULT,
+                navigation: MobNavigationPolicy::TimedEscapeV3,
+            },
             RoundSeedSource::with_entropy(|bytes| {
                 bytes.fill(27);
                 Ok(())
             }),
             Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
-            MobNavigationPolicy::TimedEscapeV3,
         )
         .unwrap();
         let controller = |profile| {

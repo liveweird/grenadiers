@@ -53,6 +53,7 @@ describe('gameplay settings locks', () => {
     expect(screen.getByRole('checkbox', { name: 'Reverse controls' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Teleporter' })).toBeDisabled()
     expect(screen.getByRole('checkbox', { name: 'Oil barrel' })).toBeDisabled()
+    expect(screen.getByLabelText('Extra-bomb drop weight')).toBeDisabled()
     expect(screen.getByRole('button', { name: 'All on' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'All off' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Restore match defaults' })).toBeDisabled()

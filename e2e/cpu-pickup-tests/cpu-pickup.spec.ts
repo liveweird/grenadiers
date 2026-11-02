@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { openSettings } from '../tests/support/settings'
-import type { GameServerMessage, Seat } from '../../web/src/game/v20/schema'
+import type { GameServerMessage, Seat } from '../../web/src/game/v21/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 const snapshots = (game: ObservedGame): Snapshot[] => game.frames.filter(

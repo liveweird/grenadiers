@@ -1,7 +1,7 @@
 use grenadiers_core::game::{
     ActorInit, ArenaGenerationConfig, Direction, EntityId, Position, RoundActorInit,
     RoundAssignment, SeatId, State, World, generate_multiplayer_arena,
-    generate_variable_multiplayer_arena,
+    generate_variable_multiplayer_arena, generate_weighted_multiplayer_arena,
 };
 use grenadiers_core::room::BoardSize;
 
@@ -25,20 +25,28 @@ impl RosterRuntime {
             board: self.identity.configuration.board(),
             assignment,
         };
-        let generated = if config.board == BoardSize::FifteenByThirteen {
-            generate_multiplayer_arena(
-                generation_seed,
-                self.lifecycle.settings().enabled_items(),
-                config,
-            )
-        } else {
-            generate_variable_multiplayer_arena(
-                generation_seed,
-                self.lifecycle.settings().enabled_items(),
-                config,
-            )
-        }
-        .map_err(|_| RosterRuntimeError::UnsupportedConfiguration)?;
+        let generated =
+            if self.arena_generation == super::runtime::ArenaGenerationProfile::WeightedV6 {
+                generate_weighted_multiplayer_arena(
+                    generation_seed,
+                    self.lifecycle.settings().enabled_items(),
+                    config,
+                    self.lifecycle.settings().bomb_capacity_drop_multiplier(),
+                )
+            } else if config.board == BoardSize::FifteenByThirteen {
+                generate_multiplayer_arena(
+                    generation_seed,
+                    self.lifecycle.settings().enabled_items(),
+                    config,
+                )
+            } else {
+                generate_variable_multiplayer_arena(
+                    generation_seed,
+                    self.lifecycle.settings().enabled_items(),
+                    config,
+                )
+            }
+            .map_err(|_| RosterRuntimeError::UnsupportedConfiguration)?;
         let spawns = assignment.spawns(generated.arena());
         let actors = self
             .identity
@@ -124,6 +132,7 @@ impl RosterRuntime {
         self.spike_cpu_publication = None;
         self.spike_v19_cpu_publication = None;
         self.spike_v20_cpu_publication = None;
+        self.spike_v21_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

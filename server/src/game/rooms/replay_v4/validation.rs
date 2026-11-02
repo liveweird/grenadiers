@@ -25,6 +25,7 @@ pub(super) fn validate_header_for_profile(
         || header.simulation_randomness_version != SIMULATION_RANDOMNESS_VERSION
         || header.simulation_seed_derivation_version != SIMULATION_SEED_DERIVATION_VERSION
         || header.initial_settings_revision != 1
+        || !crate::game::rooms::replay_legacy_settings::settings_are_legacy(header.initial_settings)
         || !profile.accepts_board(header.configuration.board())
     {
         return Err(());

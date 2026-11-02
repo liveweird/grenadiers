@@ -70,8 +70,9 @@ pub use fixtures::fixed_arena;
 pub use generation::{
     ArenaGenerationConfig, EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GeneratedArena,
     GenerationError, GenerationRecord, MULTIPLAYER_GENERATOR_VERSION, VARIABLE_GENERATOR_VERSION,
-    generate_arena, generate_expanded_arena, generate_multiplayer_arena,
-    generate_variable_multiplayer_arena,
+    WEIGHTED_GENERATOR_VERSION, generate_arena, generate_expanded_arena,
+    generate_multiplayer_arena, generate_variable_multiplayer_arena,
+    generate_weighted_multiplayer_arena,
 };
 pub use geometry::{MovementSegment, MovementTrace};
 pub use input::{Direction, HeldDirections};

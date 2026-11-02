@@ -4,8 +4,8 @@ use grenadiers_core::{
     game::{EnabledItems, SimulationSeed, StormCloudConfig},
     protocol::{Counter, RoomCode, RoomId, v14},
     room::{
-        CpuDifficulty, CpuProfile, RespawnLairTuning, RoomSettings, SpikePitTuning,
-        SpikeRoomConfiguration,
+        BombCapacityDropMultiplier, CpuDifficulty, CpuProfile, RespawnLairTuning, RoomSettings,
+        SpikePitTuning, SpikeRoomConfiguration,
     },
 };
 use tokio::time::Instant;
@@ -16,7 +16,7 @@ use super::{
     live::LiveOwner,
     registry_lookup::RegistryOperation,
     roster_owner::PreparedRosterOwner,
-    roster_runtime::{RosterAction, RosterIdentity, RosterRuntime},
+    roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, SpikeRuntimeEnvironment},
     roster_seed::SimulationRoot,
 };
 
@@ -180,15 +180,19 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_spike_v20_with_navigation(
+        let runtime = RosterRuntime::new_spike_v21_with_navigation(
             identity,
-            RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
-            cloud,
-            tuning,
-            spike_pits,
+            RoomSettings::DEFAULT
+                .with_enabled_items(EnabledItems::ALL)
+                .with_bomb_capacity_drop_multiplier(BombCapacityDropMultiplier::DEFAULT),
+            SpikeRuntimeEnvironment {
+                cloud,
+                lairs: tuning,
+                spike_pits,
+                navigation: grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3,
+            },
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,
-            grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3,
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {

@@ -2,6 +2,13 @@ import type { Options } from 'ajv'
 
 const defaultOptions = Object.freeze({ allErrors: true })
 const currentOptions = new Map<string, Readonly<Options>>([
+  ['gameplay-v21', Object.freeze({
+    allErrors: true,
+    messages: false,
+    inlineRefs: false,
+    loopRequired: 10,
+    loopEnum: 10,
+  })],
   ['gameplay-v20', Object.freeze({
     allErrors: true,
     inlineRefs: false,

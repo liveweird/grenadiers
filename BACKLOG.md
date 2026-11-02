@@ -24,10 +24,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
   sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
   preserve deterministic generation and player spawn safety.
-- [todo] **BOMB-DROPS — configurable extra-bomb upgrade frequency.** Make Bomb Capacity
-  upgrades drop five times as frequently by default, with a room configuration control for the
-  multiplier. Define and document how the multiplier behaves with different enabled-item pools
-  and overall drop probability; preserve item switches, seeded generation and historical replay.
 
 ## Single-player
 

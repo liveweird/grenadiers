@@ -198,6 +198,50 @@ fn replay31_rejects_human_equipment_actions_even_with_valid_counters() {
 }
 
 #[test]
+fn replay31_rejects_weighted_initial_and_updated_settings() {
+    use grenadiers_core::room::BombCapacityDropMultiplier;
+
+    let (_, journal) = recorder(None).into_parts();
+    let weighted = RoomSettings::DEFAULT
+        .with_bomb_capacity_drop_multiplier(BombCapacityDropMultiplier::DEFAULT);
+    let mut bad_header = journal.clone();
+    bad_header.header.initial_settings = weighted;
+    bad_header.body.header.initial_settings = weighted;
+    assert_eq!(replay(&bad_header), Err(ReplayError::InvalidHeader));
+
+    let mut recording = recorder(None);
+    recording.admit(SeatId::One, false).unwrap();
+    recording
+        .human_action(
+            SeatId::One,
+            1,
+            ReplayAction::UpdateSpikeSettings {
+                settings_revision: 1,
+                settings: RoomSettings::DEFAULT,
+                cloud: StormCloudConfig::Single,
+                tuning: RespawnLairTuning::DEFAULT,
+                spike_pits: historical_spike_pits(),
+            },
+        )
+        .unwrap();
+    let (_, mut bad_update) = recording.into_parts();
+    let action = bad_update
+        .body
+        .records
+        .iter_mut()
+        .find_map(|record| match &mut record.operation {
+            replay_v8::record::Operation::Action {
+                action: ReplayAction::UpdateSpikeSettings { settings, .. },
+                ..
+            } => Some(settings),
+            _ => None,
+        })
+        .unwrap();
+    *action = weighted;
+    assert_eq!(replay(&bad_update), Err(ReplayError::InvalidHeader));
+}
+
+#[test]
 fn replay31_reconstructs_an_actual_contact_punch_without_an_equipment_action() {
     let mut recording = recorder_with_items(None, EnabledItems::PUNCH);
     start(&mut recording);

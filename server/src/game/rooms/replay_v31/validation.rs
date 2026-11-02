@@ -34,6 +34,8 @@ pub(super) fn validate_header(header: &ReplayHeader, body: &replay_v8::Journal) 
             != grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3.version()
         || header.punch_activation_version != super::PUNCH_ACTIVATION_VERSION
         || header.initial_settings_revision != 1
+        || !crate::game::rooms::replay_legacy_settings::settings_are_legacy(header.initial_settings)
+        || !crate::game::rooms::replay_legacy_settings::body_is_legacy(body)
         || header
             .initially_occupied_humans
             .iter()

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v20::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::v21::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, RoomId};
 use tokio::time::Instant;
 
@@ -183,7 +183,9 @@ pub(super) async fn dispatch(
                     settings_revision: settings_revision.get(),
                     settings: match grenadiers_core::protocol::v13::expanded_settings(settings.base)
                     {
-                        Ok(settings) => settings,
+                        Ok(domain) => domain.with_bomb_capacity_drop_multiplier(
+                            settings.bomb_capacity_drop_multiplier(),
+                        ),
                         Err(_) => {
                             return reply_error(socket, ErrorCode::InvalidMessage, sequence).await;
                         }
@@ -198,7 +200,7 @@ pub(super) async fn dispatch(
                         grenadiers_core::room::RespawnLairSettings::new(
                             settings.environment.lairs.spawn_seconds,
                         )
-                        .expect("v19 parser validates lair settings"),
+                        .expect("v21 parser validates lair settings"),
                     ),
                     spike_pits: grenadiers_core::room::SpikePitTuning::new(
                         settings.environment.spike_pits.enabled,
@@ -206,7 +208,7 @@ pub(super) async fn dispatch(
                             settings.environment.spike_pits.warning_ticks.into(),
                             settings.environment.spike_pits.raised_ticks.into(),
                         )
-                        .expect("v19 parser validates spike-pit settings"),
+                        .expect("v21 parser validates spike-pit settings"),
                     ),
                 },
                 state,

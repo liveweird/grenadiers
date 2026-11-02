@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v20/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v21/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -71,6 +71,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     } : null,
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+      bombCapacityDropMultiplier: 5,
       enabledItems: ['heart'],
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
         spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
@@ -149,8 +150,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 20, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 20 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 21, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 21 }))
   return socket
 }
 
@@ -234,7 +235,7 @@ describe('App game flow', () => {
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
     expect(screen.getAllByText('Alive')).toHaveLength(2)
     expect(screen.queryByText('Not ready')).not.toBeInTheDocument()
-    const upgrades = screen.getByLabelText('Your items')
+    const upgrades = screen.getByRole('region', { name: 'Your items' })
     expect(within(upgrades).getByText('Bombs available').nextElementSibling).toHaveTextContent('5')
     expect(within(upgrades).getByText('Bomb capacity').nextElementSibling).toHaveTextContent('8')
     expect(within(upgrades).getByText('Blast range').nextElementSibling).toHaveTextContent('8')
@@ -288,7 +289,7 @@ describe('App game flow', () => {
     act(() => socket.message(snapshot(2)))
     await user.click(screen.getByRole('radio', { name: 'Polski' }))
     expect(await screen.findAllByText('W grze')).toHaveLength(2)
-    const upgrades = screen.getByLabelText('Twoje przedmioty')
+    const upgrades = screen.getByRole('region', { name: 'Twoje przedmioty' })
     expect(within(upgrades).getByText('Dostępne bomby')).toBeVisible()
     expect(within(upgrades).getByText('Limit bomb')).toBeVisible()
     expect(within(upgrades).getByText('Zasięg wybuchu')).toBeVisible()

@@ -1,9 +1,10 @@
 # Gameplay v20: contact Punch
 
-Gameplay20 is the sole live paired contract on `/api/v1/game/ws`. Its authoritative sources are
+Gameplay20 is retained for compatibility; the live endpoint uses [gameplay21](protocol-v21.md).
+Its authoritative sources are
 `api/gameplay-v20.schema.json`, Rust `core::protocol::v20`, the generated browser declarations,
-and the standalone server-frame validator. Authentication requires protocol20; every other wire
-version is rejected before credential claim.
+and the standalone server-frame validator. Its archived parser requires protocol20; the live
+endpoint rejects it before credential claim.
 
 V20 retains gameplay19's room, snapshot and event shapes, rules10, navigation3, recipient privacy,
 board/generator selection and finite frame bounds. It advances the closed live CPU identities to

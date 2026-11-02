@@ -91,7 +91,7 @@ fn token(admission: &LiveAdmission) -> v14::ResumeToken {
 }
 
 #[tokio::test]
-async fn two_player_live_rooms_use_v20_spike_roster_for_duel_and_solo() {
+async fn two_player_live_rooms_use_v21_weighted_spike_roster_for_duel_and_solo() {
     let now = std::time::Instant::now();
     let rooms = rooms(now);
     let duel = rooms
@@ -113,6 +113,10 @@ async fn two_player_live_rooms_use_v20_spike_roster_for_duel_and_solo() {
             .unwrap()
             .len(),
         22
+    );
+    assert_eq!(
+        personal(&duel)["room"]["settings"]["bombCapacityDropMultiplier"],
+        5
     );
     assert_eq!(
         personal(&duel)["room"]["settings"]["environment"]["stormCloud"],

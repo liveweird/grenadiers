@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { GameSettings } from '../v20/schema'
+import type { GameSettings } from '../v21/schema'
 import { admitted, authenticate, harness, messages, room, SocketStub } from './testSupport'
 
 const changed = {
@@ -7,6 +7,7 @@ const changed = {
   turnAssistUnits: 64 as const,
   winsToFinish: 1,
   bombFuseTicks: 60 as const,
+  bombCapacityDropMultiplier: 10,
   enabledItems: [],
   environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
     spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
@@ -91,10 +92,10 @@ describe('v12 authoritative gameplay settings', () => {
     socket.message(baseline)
     const accepted = value.client.getState().room
 
-    value.client.updateSettings(changed)
+    const multiplierChanged = { ...baseline.room.settings, bombCapacityDropMultiplier: 10 }
+    value.client.updateSettings(multiplierChanged)
     socket.message({ type: 'roomState', room: {
-      ...baseline.room, settings: changed,
-      configuration: { ...baseline.room.configuration, environment: changed.environment },
+      ...baseline.room, settings: multiplierChanged,
     } })
     expect(value.client.getState().settingsPending).toBe(true)
     expect(value.client.getState().room).toBe(accepted)
@@ -167,6 +168,29 @@ describe('v12 authoritative gameplay settings', () => {
           lairs as unknown as GameSettings['environment']['lairs'] },
       })).toBe(false)
     }
+    expect(socket.sent).toHaveLength(sent)
+  })
+})
+
+describe('v21 weighted-drop settings', () => {
+  beforeEach(() => vi.stubGlobal('WebSocket', { OPEN: SocketStub.OPEN }))
+
+  it('rejects missing, fractional and out-of-range drop multipliers before sending', async () => {
+    const value = harness()
+    const socket = await authenticate(value)
+    const baseline = admitted()
+    baseline.room = room(1)
+    baseline.state = null
+    socket.message(baseline)
+    const sent = socket.sent.length; const settings = baseline.room.settings
+    for (const multiplier of [0, 1.5, 11]) {
+      expect(value.client.updateSettings({
+        ...settings, bombCapacityDropMultiplier: multiplier,
+      })).toBe(false)
+    }
+    const missing = { ...settings } as Partial<GameSettings>
+    delete missing.bombCapacityDropMultiplier
+    expect(value.client.updateSettings(missing as GameSettings)).toBe(false)
     expect(socket.sent).toHaveLength(sent)
   })
 

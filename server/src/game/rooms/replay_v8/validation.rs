@@ -30,6 +30,7 @@ pub(super) fn validate_header(header: &ReplayHeader) -> Result<(), ()> {
         || header.lair_layout_version != LAIR_LAYOUT_VERSION
         || header.lair_layout_version != grenadiers_core::game::LAIR_LAYOUT_VERSION
         || header.initial_settings_revision != 1
+        || !super::super::replay_legacy_settings::settings_are_legacy(header.initial_settings)
         || !(2..=4).contains(&base.player_count().get())
         || RespawnLairTuning::try_from(header.configuration.lairs()).is_err()
     {
@@ -117,6 +118,7 @@ pub(super) fn validate_operation(header: &ReplayHeader, operation: Operation) ->
             }
         )
         || matches!(action, ReplayAction::UpdateSpikeSettings { .. })
+        || matches!(action, ReplayAction::UpdateSettings { settings, .. } if !super::super::replay_legacy_settings::settings_are_legacy(settings))
     {
         return Err(());
     }

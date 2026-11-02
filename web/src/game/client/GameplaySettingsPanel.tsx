@@ -2,15 +2,17 @@ import { Button, Checkbox, Group, NativeSelect, NumberInput, SimpleGrid, Text, T
 import { useMemo, useState } from 'react'
 import { sameGameSettings } from './clientProtocol'
 import type { GameCopy } from './locale'
-import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v20/schema'
+import { ITEM_IDS, type GameSettings, type RoomView, type Seat } from '../v21/schema'
 
 const SPEEDS = [0, 1, 2, 3, 4] as const
 const TURN_ASSISTS = [64, 128, 192, 256] as const
 const WINS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
 const FUSES = [60, 90, 120, 150, 180, 210, 240, 270, 300] as const
+const DROP_MULTIPLIERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 type AvailableItem = typeof ITEM_IDS[number]
 const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+  bombCapacityDropMultiplier: 5,
 } satisfies Omit<GameSettings, 'enabledItems' | 'environment'>
 const DEFAULT_LAIRS = { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } as const
 const DEFAULT_SPIKE_PITS = { enabled: true, warningTicks: 60, raisedTicks: 300 } as const
@@ -124,8 +126,15 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
           data={FUSES.map((ticks) => ({
             value: String(ticks), label: `${ticks / 60} ${copy.settings.seconds}`,
           }))} />
+        <NativeSelect label={copy.settings.bombCapacityDropMultiplier} disabled={controlsDisabled}
+          value={draft.bombCapacityDropMultiplier}
+          onChange={(event) => update('bombCapacityDropMultiplier', Number(event.currentTarget.value))}
+          data={DROP_MULTIPLIERS.map((multiplier) => ({
+            value: String(multiplier), label: `×${multiplier}`,
+          }))} />
       </SimpleGrid>
       <Text className="settings-note" size="xs">{copy.settings.speedCap}</Text>
+      <Text className="settings-note" size="xs">{copy.settings.bombCapacityDropMultiplierDescription}</Text>
       {ITEM_IDS.map((item) => <ItemSetting key={item} item={item}
         visible={room.availableItems.includes(item)} checked={draft.enabledItems.includes(item)}
         disabled={controlsDisabled} copy={copy}
@@ -196,7 +205,7 @@ export function GameplaySettingsPanel({ room, youSeat, pending, copy, onApply }:
               spikePits: { ...DEFAULT_SPIKE_PITS } } })}>
           {copy.settings.restore}</Button>
         <Button size="sm" variant="subtle" color="dark" disabled={controlsDisabled}
-          onClick={() => setDraft({ ...DEFAULT_NUMERICS, enabledItems: [],
+          onClick={() => setDraft({ ...DEFAULT_NUMERICS, bombCapacityDropMultiplier: 1, enabledItems: [],
             environment: { stormCloud: false, lairs: { ...DEFAULT_LAIRS, enabled: false },
               spikePits: { ...DEFAULT_SPIKE_PITS, enabled: false } } })}>
           {copy.settings.classic}</Button>

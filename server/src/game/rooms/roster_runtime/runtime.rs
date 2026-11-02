@@ -5,7 +5,7 @@ use grenadiers_core::{
         GenerationRecord, MobNavigationPolicy, PunchActivationPolicy, SeatId, SimulationSeed,
         State, StepReport, StormCloudConfig, Tick,
     },
-    protocol::{v14, v15, v16, v17, v18, v19, v20},
+    protocol::{v14, v15, v16, v17, v18, v19, v20, v21},
     room::{DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle},
 };
 
@@ -40,10 +40,12 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) spike_cpu_publication: Option<Arc<v18::BoundPublication>>,
     pub(super) spike_v19_cpu_publication: Option<Arc<v19::BoundPublication>>,
     pub(super) spike_v20_cpu_publication: Option<Arc<v20::BoundPublication>>,
+    pub(super) spike_v21_cpu_publication: Option<Arc<v21::BoundPublication>>,
     pub(super) environment_profile: Option<EnvironmentProfile>,
     pub(super) mob_navigation: MobNavigationPolicy,
     pub(super) punch_activation: PunchActivationPolicy,
     pub(super) spike_publication: SpikePublicationVersion,
+    pub(super) arena_generation: ArenaGenerationProfile,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -51,6 +53,13 @@ pub(in crate::game::rooms) enum SpikePublicationVersion {
     V18,
     V19,
     V20,
+    V21,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::game::rooms) enum ArenaGenerationProfile {
+    LegacyV3V4,
+    WeightedV6,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -116,10 +125,12 @@ impl RosterRuntime {
             spike_cpu_publication: None,
             spike_v19_cpu_publication: None,
             spike_v20_cpu_publication: None,
+            spike_v21_cpu_publication: None,
             environment_profile: None,
             mob_navigation: MobNavigationPolicy::LegacyV1,
             punch_activation: PunchActivationPolicy::ManualV1,
             spike_publication: SpikePublicationVersion::V18,
+            arena_generation: ArenaGenerationProfile::LegacyV3V4,
         })
     }
 

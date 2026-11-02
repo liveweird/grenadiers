@@ -1,6 +1,6 @@
 import { NativeSelect } from '@mantine/core'
 import { useState } from 'react'
-import type { Difficulty } from '../v20/schema'
+import type { Difficulty } from '../v21/schema'
 import type { GameCopy } from './locale'
 
 interface Props {

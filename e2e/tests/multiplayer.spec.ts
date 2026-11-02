@@ -2,7 +2,7 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
 import { openSettings } from './support/settings'
-import type { Difficulty } from '../../web/src/game/v20/schema'
+import type { Difficulty } from '../../web/src/game/v21/schema'
 
 type Controller = 'human' | 'cpu'
 type Seat = 'one' | 'two' | 'three' | 'four'

@@ -9,11 +9,14 @@ import type { GameServerMessage as V19GameServerMessage, GameState as V19GameSta
   RoomView as V19RoomView, WireEvent as V19WireEvent } from '../v19/schema'
 import type { GameServerMessage as V20GameServerMessage, GameState as V20GameState,
   RoomView as V20RoomView, WireEvent as V20WireEvent } from '../v20/schema'
+import type { GameServerMessage as V21GameServerMessage, GameState as V21GameState,
+  RoomView as V21RoomView, WireEvent as V21WireEvent } from '../v21/schema'
 
-type GameServerMessage = V17GameServerMessage | V18GameServerMessage | V19GameServerMessage | V20GameServerMessage
-type GameState = V17GameState | V18GameState | V19GameState | V20GameState
-type RoomView = V17RoomView | V18RoomView | V19RoomView | V20RoomView
-type WireEvent = V17WireEvent | V18WireEvent | V19WireEvent | V20WireEvent
+type GameServerMessage = V17GameServerMessage | V18GameServerMessage | V19GameServerMessage
+  | V20GameServerMessage | V21GameServerMessage
+type GameState = V17GameState | V18GameState | V19GameState | V20GameState | V21GameState
+type RoomView = V17RoomView | V18RoomView | V19RoomView | V20RoomView | V21RoomView
+type WireEvent = V17WireEvent | V18WireEvent | V19WireEvent | V20WireEvent | V21WireEvent
 
 const ITEM_IDS = [
   'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb',

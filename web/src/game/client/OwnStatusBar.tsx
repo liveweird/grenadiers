@@ -1,4 +1,4 @@
-import type { EffectKind, VisibleActorView } from '../v20/schema'
+import type { EffectKind, VisibleActorView } from '../v21/schema'
 import type { RenderablePickupKind } from '../arena/types'
 import { ItemIcon, StormCloudIcon } from './ItemIcon'
 import { format, type GameCopy } from './locale'
@@ -86,7 +86,7 @@ export function OwnStatusBar({ actor, copy }: { actor: VisibleActorView; copy: G
   const activeEffects = effects(actor, copy)
   return <section className="own-status-bar" aria-label={copy.ownItems.label}>
     <strong className="own-status-heading">{copy.ownItems.heading}</strong>
-    <div className="own-status-list" role="group" tabIndex={0} aria-label={copy.ownItems.heading}>
+    <div className="own-status-list" role="group" tabIndex={0} aria-label={copy.ownItems.inventory}>
       <StatusItem icon="bombCapacity" label={copy.stats.available}
         value={actor.bombCapacity - actor.liveBombCount} />
       <StatusItem icon="bombCapacity" label={copy.stats.capacity} value={actor.bombCapacity} />

@@ -4,7 +4,7 @@ use std::sync::Arc;
 use grenadiers_core::room::RoomSettings;
 use grenadiers_core::{
     game::{Direction, SeatId},
-    protocol::{RoomCode, RoomId, v14, v15, v16, v17, v18, v19, v20},
+    protocol::{RoomCode, RoomId, v14, v15, v16, v17, v18, v19, v20, v21},
     room::RoomConfiguration,
 };
 
@@ -118,6 +118,7 @@ pub(crate) enum RosterPublication {
     Spike(v18::RoomView, Option<Arc<v18::BoundPublication>>),
     SpikeV19(v19::RoomView, Option<Arc<v19::BoundPublication>>),
     SpikeV20(v20::RoomView, Option<Arc<v20::BoundPublication>>),
+    SpikeV21(v21::RoomView, Option<Arc<v21::BoundPublication>>),
 }
 
 #[derive(Clone)]
@@ -139,7 +140,8 @@ impl RosterNotice {
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -151,7 +153,8 @@ impl RosterNotice {
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -163,7 +166,8 @@ impl RosterNotice {
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -176,7 +180,8 @@ impl RosterNotice {
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -189,7 +194,8 @@ impl RosterNotice {
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -202,7 +208,8 @@ impl RosterNotice {
             | RosterPublication::Lairs(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -262,7 +269,8 @@ impl RosterNotice {
             | RosterPublication::Lairs(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 
@@ -277,7 +285,8 @@ impl RosterNotice {
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
             | RosterPublication::SpikeV19(_, _)
-            | RosterPublication::SpikeV20(_, _) => None,
+            | RosterPublication::SpikeV20(_, _)
+            | RosterPublication::SpikeV21(_, _) => None,
         }
     }
 }
@@ -358,6 +367,17 @@ impl PartialEq for RosterNotice {
                 (
                     RosterPublication::SpikeV20(a_room, a_cpu),
                     RosterPublication::SpikeV20(b_room, b_cpu),
+                ) => {
+                    a_room == b_room
+                        && match (a_cpu, b_cpu) {
+                            (Some(a), Some(b)) => Arc::ptr_eq(a, b),
+                            (None, None) => true,
+                            _ => false,
+                        }
+                }
+                (
+                    RosterPublication::SpikeV21(a_room, a_cpu),
+                    RosterPublication::SpikeV21(b_room, b_cpu),
                 ) => {
                     a_room == b_room
                         && match (a_cpu, b_cpu) {

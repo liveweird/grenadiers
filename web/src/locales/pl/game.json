@@ -75,7 +75,8 @@
   },
   "ownItems": {
     "label": "Twoje przedmioty",
-    "heading": "Twoje przedmioty"
+    "heading": "Twoje przedmioty",
+    "inventory": "Szczegóły ekwipunku"
   },
   "panel": {
     "open": "Otwórz ustawienia",
@@ -153,6 +154,8 @@
     "turnAssist": "Tolerancja skrętu",
     "wins": "Wygrane rundy do zwycięstwa",
     "fuse": "Zapalnik bomby",
+    "bombCapacityDropMultiplier": "Waga losowania dodatkowej bomby",
+    "bombCapacityDropMultiplierDescription": "Względna waga wśród włączonych przedmiotów. ×5 to pięciokrotność pierwotnej wagi, nie bezwzględne prawdopodobieństwo. Szansa ukrycia w bloku nadal wynosi 30%.",
     "cellsPerSecond": "pola/s",
     "tile": "pola",
     "seconds": "sekundy",

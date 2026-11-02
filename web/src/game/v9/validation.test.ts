@@ -3,12 +3,13 @@ import { checkedCatalogMaskRanges, executeCatalogMaskRange } from '../../test/ca
 import { validateServerMessage } from '../client/clientProtocol'
 import { snapshot } from '../client/testSupport'
 import { snapshot as v11Snapshot } from '../validation/archived-v11-fixtures'
+import { archivedFrame } from '../validation/archived-v20-fixtures'
 import { validateGameplayV8ServerMessage } from '../v8/validation'
 import { validateGameplayV9ServerMessage } from './validation'
 import type { Snapshot as V9Snapshot } from './schema'
 
 function archivedValue(value: unknown): V9Snapshot {
-  const archived = structuredClone(value) as {
+  const archived = archivedFrame(value) as {
     room: { availableItems: string[]; mode?: unknown; configuration?: unknown; scores: unknown;
       settings: { environment?: unknown };
       seats: Array<{ controller?: unknown }> }

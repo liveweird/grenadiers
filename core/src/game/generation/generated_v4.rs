@@ -9,7 +9,10 @@ use crate::room::BoardSize;
 
 use super::generated_v3::{ArenaGenerationConfig, GenerationError};
 use super::random_words::{ChaChaWords, RandomWords};
-use super::{GeneratedArena, GenerationRecord, sample_percent, sample_pickup};
+use super::{
+    GeneratedArena, GenerationRecord, PickupSelectionPolicy, sample_percent,
+    sample_pickup_with_policy,
+};
 
 pub const VARIABLE_GENERATOR_VERSION: u16 = 4;
 
@@ -18,19 +21,52 @@ pub fn generate_variable_multiplayer_arena(
     enabled: EnabledItems,
     config: ArenaGenerationConfig,
 ) -> Result<GeneratedArena, GenerationError> {
-    Ok(generate_with_source(
+    Ok(generate_with_source_and_policy(
         seed,
         enabled,
         config,
         &mut ChaChaWords::seeded(seed),
+        PickupSelectionPolicy::LegacyV1,
     ))
 }
 
-fn generate_with_source(
+pub(super) fn generate_variable_multiplayer_arena_with_policy(
+    seed: [u8; 32],
+    enabled: EnabledItems,
+    config: ArenaGenerationConfig,
+    selection: PickupSelectionPolicy,
+) -> Result<GeneratedArena, GenerationError> {
+    Ok(generate_with_source_and_policy(
+        seed,
+        enabled,
+        config,
+        &mut ChaChaWords::seeded(seed),
+        selection,
+    ))
+}
+
+#[cfg(test)]
+pub(super) fn generate_with_source(
     seed: [u8; 32],
     enabled: EnabledItems,
     config: ArenaGenerationConfig,
     source: &mut impl RandomWords,
+) -> GeneratedArena {
+    generate_with_source_and_policy(
+        seed,
+        enabled,
+        config,
+        source,
+        PickupSelectionPolicy::LegacyV1,
+    )
+}
+
+pub(super) fn generate_with_source_and_policy(
+    seed: [u8; 32],
+    enabled: EnabledItems,
+    config: ArenaGenerationConfig,
+    source: &mut impl RandomWords,
+    selection: PickupSelectionPolicy,
 ) -> GeneratedArena {
     let spawns = round_spawns(
         config.board,
@@ -38,12 +74,13 @@ fn generate_with_source(
         config.assignment.round_number().get(),
     );
     let terrain = board_terrain(config.board);
-    let generated =
-        generate_layers(source, enabled, config.board).and_then(|(blocks, concealed)| {
+    let generated = generate_layers_with_policy(source, enabled, config.board, selection).and_then(
+        |(blocks, concealed)| {
             let arena =
                 Arena::new_for_board(config.board, terrain.clone(), blocks, spawns.clone()).ok()?;
             validate_reflections(&arena, &concealed).then_some((arena, concealed))
-        });
+        },
+    );
     let (arena, concealed_pickups, fallback_used) = match generated {
         Some((arena, concealed)) => (arena, concealed, false),
         None => (
@@ -63,10 +100,11 @@ fn generate_with_source(
     }
 }
 
-fn generate_layers(
+fn generate_layers_with_policy(
     source: &mut impl RandomWords,
     enabled: EnabledItems,
     board: BoardSize,
+    selection: PickupSelectionPolicy,
 ) -> Option<(BTreeSet<CellId>, BTreeMap<CellId, PickupKind>)> {
     let mut blocks = BTreeSet::new();
     let mut concealed = BTreeMap::new();
@@ -78,7 +116,7 @@ fn generate_layers(
         if sample_percent(source)? >= 30 {
             continue;
         }
-        let kind = sample_pickup(source, enabled)?;
+        let kind = sample_pickup_with_policy(source, enabled, selection)?;
         if kind == PickupKind::OilBarrel && !oil_orbit_fits(&concealed, orbit.len()) {
             continue;
         }

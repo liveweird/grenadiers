@@ -75,7 +75,8 @@
   },
   "ownItems": {
     "label": "Your items",
-    "heading": "Your items"
+    "heading": "Your items",
+    "inventory": "Inventory details"
   },
   "panel": {
     "open": "Open settings",
@@ -153,6 +154,8 @@
     "turnAssist": "Turning tolerance",
     "wins": "Round wins needed",
     "fuse": "Bomb fuse",
+    "bombCapacityDropMultiplier": "Extra-bomb drop weight",
+    "bombCapacityDropMultiplierDescription": "Relative weight among enabled drops. ×5 is five times the original weight, not an absolute probability. Block concealment stays 30%.",
     "cellsPerSecond": "cells/s",
     "tile": "tile",
     "seconds": "seconds",

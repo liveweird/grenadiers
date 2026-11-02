@@ -5,7 +5,7 @@ import serverFixtures from '../../../../api/fixtures/gameplay-v19-server-conform
 import gameplayV19Schema from '../../../../api/gameplay-v19.schema.json'
 import validateServer from '../../validation/generated/gameplay-v19.mjs'
 import { validatorOptions } from '../../validation/validatorOptions'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from '../validation/archived-v20-fixtures'
 import type { Snapshot } from './schema'
 import { validateGameplayV19ServerMessage } from './validation'
 

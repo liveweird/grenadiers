@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { GameSettings } from '../v20/schema'
+import type { GameSettings } from '../v21/schema'
 import { admitted, authenticate, harness, room, SocketStub } from './testSupport'
 
 describe('v18 authoritative spike-pit settings', () => {

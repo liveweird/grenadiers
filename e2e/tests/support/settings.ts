@@ -48,6 +48,7 @@ export async function selectClassicSettings(page: Page, game: ObservedGame): Pro
   expect(latestRoom(game)?.settings.enabledItems).toEqual([])
   expect(latestRoom(game)).toMatchObject({
     rulesVersion: 10, mapId: 'generated_v2',
-    settings: { environment: { stormCloud: false, lairs: DISABLED_LAIRS, spikePits: DISABLED_SPIKES } },
+    settings: { bombCapacityDropMultiplier: 1,
+      environment: { stormCloud: false, lairs: DISABLED_LAIRS, spikePits: DISABLED_SPIKES } },
   })
 }

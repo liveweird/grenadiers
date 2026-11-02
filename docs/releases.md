@@ -97,50 +97,62 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.21 — 2026-11-02
+## v1.3.22 — 2026-11-02
 
-The courtyard and primary actions fit desktop and mobile viewports without page scrolling.
-A hideable settings panel preserves drafts, contains keyboard focus, closes with Escape and
-returns focus to its opener. Arena input is disabled while settings are open. Long rules and
-room details remain inside bounded panels; the keyboard-accessible item bar scrolls internally
-on narrow screens so additional effects do not displace play or local controls.
+Bomb Capacity drop weight is configurable from ×1 to ×10, defaulting to ×5 for new games.
+Restore selects 5, Classic selects 1 and All on/off preserve the number. The value changes only
+selection weight: concealment stays 30%, item switches and Oil suppression remain unchanged.
+With all optional items enabled, the Bomb Capacity share rises from 9.09% to 33.33%; with them
+disabled, from 40% to 76.92%. It is not a fivefold absolute probability.
+
+Gameplay21 carries the checked multiplier through settings, revisions, reconnect, rounds,
+rematches and CPU observations. Generator6 remains deterministic for complete accepted inputs.
+Private replay32 records weighted construction and updates; historical formats reject nonlegacy
+multiplier provenance before execution. Rules10, navigation3, ContactV2 and CPU60/61 remain.
 
 ### Verification
 
-- Independent UI review is clear. Fresh web coverage passes 171 files/7,431 tests: lines 95.53%,
-  statements 92.56%, functions 91.73%, branches 88.94%, above the unchanged floors. API/contracts,
-  lint, Knip, E2E static checks and all 122 scenario mappings pass. A subsequent scroller-only
-  accessibility attribute fix passes its four focused EN/PL tests and the final build; coverage
-  is reused because no decision branches changed. Compressed JS is 399,921/400,000 bytes;
-  CSS is 16,228/20,000.
-- Rust/API implementation, toolchain and external dependencies are unchanged. Reuse the complete
-  [v1.3.20 Rust/Linux/policy/audit evidence](history/releases.md#v1320--2026-11-02), including
-  all debug/release/coverage item masks and 93.17% Rust line coverage. Cargo product versions
-  change only to identify this combined release; the runtime binary is rebuilt for that version.
-- All five final exact-image Chromium scenarios pass: authentication, keyboard duel, shared
-  settings, lobby containment and the painted four-player HUD across 1440×900, 1024×768,
-  390×844 and 320×568. Checks retain Axe accessibility, native keyboard inventory scrolling,
-  draft/focus behavior and a dense inventory/pickup notice. See [desktop](screenshots/viewport-desktop.png)
-  and [320×568](screenshots/viewport-320.png) examples.
-- Compose and restricted Kubernetes each pass fresh three-CPU play, with all CPUs moving and
-  planting, no browser errors, and the required container/probe/resource restrictions. Temporary
-  stacks and namespaces are removed.
-- Pinned Trivy finds zero fixable high/critical vulnerabilities in the exact final image.
-  All five arena/branding image files retain their accepted bytes.
+- Frozen Rust source passes debug/release/coverage: 1,980 Core tests and two doctests, 789 ordinary
+  server cases plus four isolated native worker cases per profile. Every one of 4,194,304 item
+  masks passes in each profile with 32 partitions/four workers and no retries. Coverage is
+  75,716/81,360 lines (93.06%), above the unchanged 90% floor; 40 raw profiles feed the report.
+  The full gate took 1,021.693 seconds. Current CPU opening helpers assert gameplay21/generator6/
+  weight 5 before driving the existing seeded progress cases. Formatting, strict Clippy and
+  source-size checks pass; independent domain, contract, server and web reviews are clear.
+- Distinct Linux debug/release workspace units and doctests pass in run
+  [41392820007](https://github.com/liveweird/grenadiers/actions/runs/41392820007).
+- Fresh shuffled web coverage passes 172 files/7,435 tests: lines 95.51%, statements 92.54%,
+  functions 91.77%, branches 88.90%, above unchanged floors. Focused regressions pass 173 cases.
+  API/contracts, lint, Knip, validator parity, E2E static checks and 122 scenario mappings pass.
+  Compressed JS is 399,060/400,000 bytes; CSS 16,228/20,000. Compact v21 validator output omits
+  unused error prose while retaining all constraints, all-errors collection, paths and keywords.
+- Five exact-image Chromium scenarios pass: authentication, native keyboard duel/Axe, shared
+  settings, lobby containment and painted four-player play/dense HUD across supported sizes.
+  The settings flow verifies ×5 defaults, ×1 Classic, bulk retention, a shared ×10 update,
+  readiness reset, reconnect persistence and locking. English and Polish 320px controls are
+  visually checked: [English](screenshots/bomb-drop-weight-en.png),
+  [Polish 320px](screenshots/bomb-drop-weight-pl-320.png).
+- Compose and restricted Kubernetes pass with three moving, bomb-using CPUs and no browser errors.
+  Dependency policies and high-severity audits pass; existing moderate findings remain 20 web/12
+  E2E. Pinned Trivy reports zero fixable high/critical findings. Temporary stacks/namespaces are
+  removed. All five arena/branding images retain their accepted bytes.
 
 ### Artifact, upgrade and rollback
 
-Accepted application/image source: `862c989645debdc25d9f5c89ac01b277c1b51fb8`.
-The full web coverage source is `3505f62c34edac2fa6aa20fc1d82a650a9a8399d`; intervening changes
-are the focused accessibility attributes and E2E interaction/geometry checks described above.
-Accepted image: `sha256:5d1509da2180fea3a06abb170f554aab798010811988b87a37a5abe9d9f4d6d8`.
+Rust verification source: `7a011e7be68257426df0f59e014d9fef5b3daa2f`.
+Accepted application/image source: `06d4a5a91123fdedf53d29a18d027ed37e5d8279`.
+The difference is limited to reviewed browser fixture isolation and accessible inventory naming;
+Rust and API inputs are unchanged; the full web and exact-image checks cover those browser changes.
+Accepted image: `sha256:edb4dcbc5aec8da0764a5bad1ff2bcb5b151cfe13545e5cb2b7b00f7a73930d8`.
 
-The exact image runs on localhost:8085. Image/source/version labels, restricted runtime settings,
-health/readiness, headers/CSP/cache and all nine served files pass, along with fresh three-Hard-CPU
-play.
-The v1.3.20 immutable image/override remain for rollback. Deploy the paired server/web image
-and reload browser tabs. Existing matches do not survive restart. This publishes source and an
-accepted local runtime; no hosted service or production registry is configured.
+The exact image runs on localhost:8085. Labels, restricted container settings, health/readiness,
+headers/CSP/cache and all nine served files pass, plus fresh three-Hard-CPU play at weight 5.
+Reload browser tabs after deploying the paired server/web image: older wire versions are rejected
+before credential claim. The v1.3.21 immutable image/override remain for rollback. In-memory
+matches do not survive restart. No hosted service or production registry is configured.
+
+<a id="v1321--2026-11-02"></a>
+The [v1.3.21 record](history/releases.md#v1321--2026-11-02) is preserved in release history.
 
 <a id="v1320--2026-11-02"></a>
 The [v1.3.20 record](history/releases.md#v1320--2026-11-02) is preserved in release history.

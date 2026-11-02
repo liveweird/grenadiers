@@ -42,7 +42,8 @@ impl PreparedRosterAdmission {
             | PreparedProjection::Respawn { .. } => None,
             PreparedProjection::Spike { .. }
             | PreparedProjection::SpikeV19 { .. }
-            | PreparedProjection::SpikeV20 { .. } => None,
+            | PreparedProjection::SpikeV20 { .. }
+            | PreparedProjection::SpikeV21 { .. } => None,
         }
     }
 
@@ -55,7 +56,8 @@ impl PreparedRosterAdmission {
             | PreparedProjection::Respawn { .. }
             | PreparedProjection::Spike { .. }
             | PreparedProjection::SpikeV19 { .. }
-            | PreparedProjection::SpikeV20 { .. } => None,
+            | PreparedProjection::SpikeV20 { .. }
+            | PreparedProjection::SpikeV21 { .. } => None,
         }
     }
 
@@ -68,7 +70,8 @@ impl PreparedRosterAdmission {
             | PreparedProjection::Respawn { .. }
             | PreparedProjection::Spike { .. }
             | PreparedProjection::SpikeV19 { .. }
-            | PreparedProjection::SpikeV20 { .. } => None,
+            | PreparedProjection::SpikeV20 { .. }
+            | PreparedProjection::SpikeV21 { .. } => None,
         }
     }
 
@@ -81,7 +84,8 @@ impl PreparedRosterAdmission {
             | PreparedProjection::Lairs { .. }
             | PreparedProjection::Spike { .. }
             | PreparedProjection::SpikeV19 { .. }
-            | PreparedProjection::SpikeV20 { .. } => None,
+            | PreparedProjection::SpikeV20 { .. }
+            | PreparedProjection::SpikeV21 { .. } => None,
         }
     }
 
@@ -130,6 +134,9 @@ impl PreparedRosterAdmission {
             PreparedProjection::SpikeV20 { room, .. } => {
                 (&room.room_id, u64::from(room.round_id.get()))
             }
+            PreparedProjection::SpikeV21 { room, .. } => {
+                (&room.room_id, u64::from(room.round_id.get()))
+            }
         }
     }
 
@@ -145,6 +152,7 @@ impl PreparedRosterAdmission {
             PreparedProjection::Spike { room, .. } => (&room.room_code, room.revision.get()),
             PreparedProjection::SpikeV19 { room, .. } => (&room.room_code, room.revision.get()),
             PreparedProjection::SpikeV20 { room, .. } => (&room.room_code, room.revision.get()),
+            PreparedProjection::SpikeV21 { room, .. } => (&room.room_code, room.revision.get()),
         }
     }
 
@@ -157,7 +165,8 @@ impl PreparedRosterAdmission {
             | PreparedProjection::Respawn { .. }
             | PreparedProjection::Spike { .. }
             | PreparedProjection::SpikeV19 { .. }
-            | PreparedProjection::SpikeV20 { .. } => None,
+            | PreparedProjection::SpikeV20 { .. }
+            | PreparedProjection::SpikeV21 { .. } => None,
         }
     }
 }

@@ -17,6 +17,7 @@ it is not an editable gameplay setting. Quick duel and Solo always use 15×13. S
 | Corner tolerance | 1/16–¼ tile, steps of 1/16 | Controls how far from a corridor center a perpendicular turn may align. |
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
+| Extra-bomb drop weight | ×1–×10, whole multipliers; default ×5 | Multiplies Bomb Capacity’s selection weight; the overall concealed-item chance stays unchanged. |
 | Lair respawn delay | 5–60 whole seconds, default 10 | Delays the first mob and each replacement after death. |
 | Spike warning | 0.1–2 seconds (6–120 ticks), default 1 | Sets the visible interval before contacted spikes rise. |
 | Spike raised | 1–10 seconds (60–600 ticks), default 5 | Sets how long raised spikes remain harmful. |
@@ -47,7 +48,8 @@ All players see accepted values. Editing requires the original creator to be con
 unready and in the waiting lobby. Apply changes to update the shared rules; a genuine change
 clears every human's readiness. **All on** and **All off** change the item switches and environment
 setting in the draft; they do not reset numeric rules or submit automatically. Restore defaults prepares the
-numeric Expanded defaults with every currently available item enabled. Classic settings prepares
+numeric Expanded defaults with every currently available item enabled, including ×5 extra-bomb
+weight. Classic settings selects ×1 and prepares
 the original four values with optional items disabled. Every draft change requires **Apply rules**
 before it changes the shared configuration.
 Each lair has exactly one living mob. Its 5–60 second respawn delay (default 10) begins after
@@ -63,9 +65,17 @@ Reconnect preserves creator authority while the seat remains reserved. If the cr
 permanently or the reservation expires, the last accepted configuration remains; create a new
 room to edit again. A replacement occupant does not become creator.
 
+Bomb Capacity’s base weight is 40, Blast Range’s 40 and Speed’s 20. Heart adds 25;
+each other enabled optional item adds 15. Multiply only Bomb Capacity’s weight, then normalize
+the pool. With all optional items enabled, ×1 gives it 9.09% of pickup selections and ×5 gives
+33.33%; with all optional items disabled, those shares are 40% and 76.92%. This is a relative
+weight rather than five times the absolute probability. The separate 30% concealment trial,
+item switches, reflected placement and Oil Barrel cap are unchanged. All on/off preserve the
+numeric multiplier. Accepted values persist across reconnect, automatic rounds and rematches.
+
 Local keyboard and sound preferences are independent. Turn assistance still uses the normal
 movement budget and swept collision/fire checks. Round/flame duration and loadouts are not
 configurable here.
 
 The map identity remains `generated_v2`. All 22 item switches preserve one another.
-See [Oil Barrel](oil-barrel.md), [Heart behavior](heart.md), [Bracelet](bracelet.md), [Punch](punch.md), [Kick](kick.md), [Wall Pass](wall-pass.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v20.md).
+See [Oil Barrel](oil-barrel.md), [Heart behavior](heart.md), [Bracelet](bracelet.md), [Punch](punch.md), [Kick](kick.md), [Wall Pass](wall-pass.md), [Remote Bomb](remote-bomb.md), [Piercing Bomb](piercing-bomb.md), [Power Bomb](power-bomb.md), [Landmine](landmine.md), [Stopwatch](stopwatch.md), [Invisibility Cloak](invisibility-cloak.md), [Invisible Bombs](invisible-bombs.md), [Teleporter](teleporter.md), [Shield behavior](shield.md), [Golden Flame](golden-flame.md), [Short Fuse](short-fuse.md), [Short Flame](short-flame.md), [Long Fuse](long-fuse.md), [Reverse Controls](reverse-controls.md), [Diarrhea](diarrhea.md), [Slow foot](slow-foot.md), and [protocol compatibility](protocol-v21.md).

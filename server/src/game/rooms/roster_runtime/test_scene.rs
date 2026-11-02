@@ -52,6 +52,7 @@ impl RosterRuntime {
         next.spike_cpu_publication = None;
         next.spike_v19_cpu_publication = None;
         next.spike_v20_cpu_publication = None;
+        next.spike_v21_cpu_publication = None;
         let notice = next.publish_current()?;
         *self = next;
         Ok(notice)
@@ -65,7 +66,7 @@ impl RosterRuntime {
         self.reports.len()
     }
 
-    pub(in crate::game::rooms) fn publication_caches_for_test(&self) -> [bool; 7] {
+    pub(in crate::game::rooms) fn publication_caches_for_test(&self) -> [bool; 8] {
         [
             self.cpu_publication.is_some(),
             self.environment_cpu_publication.is_some(),
@@ -74,6 +75,7 @@ impl RosterRuntime {
             self.spike_cpu_publication.is_some(),
             self.spike_v19_cpu_publication.is_some(),
             self.spike_v20_cpu_publication.is_some(),
+            self.spike_v21_cpu_publication.is_some(),
         ]
     }
 }

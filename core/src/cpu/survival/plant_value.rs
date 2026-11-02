@@ -234,6 +234,49 @@ impl<'a> ObservedBlastGeometry<'a> {
         }
     }
 
+    pub(crate) fn visible_block_yield(
+        &self,
+        firing: CellId,
+        range: u16,
+        kind: BlastKind,
+        target: CellId,
+        work: &mut WorkBudget,
+    ) -> Option<u8> {
+        if kind == BlastKind::Power {
+            work.try_take(u32::try_from(self.observation.parts().arena.cell_count()).ok()?)
+                .ok()?;
+        }
+        let mut seen = [false; ARENA_CELL_COUNT];
+        let mut target_hit = false;
+        let mut count = 0_u8;
+        let mut exhausted = false;
+        let _ = visit_blast(
+            self,
+            BlastSource {
+                cell: firing,
+                range,
+                kind,
+            },
+            |visit| {
+                if work.try_take(1).is_err() {
+                    exhausted = true;
+                    return ControlFlow::Break(());
+                }
+                let Some(index) = self.observation.parts().arena.index(visit.cell) else {
+                    exhausted = true;
+                    return ControlFlow::Break(());
+                };
+                if visit.soft_block && !seen[index] {
+                    seen[index] = true;
+                    count = count.saturating_add(1);
+                    target_hit |= visit.cell == target;
+                }
+                ControlFlow::Continue(())
+            },
+        );
+        (!exhausted && target_hit).then_some(count)
+    }
+
     fn hits_rival(&self, visit: BlastVisit) -> bool {
         let owner = self
             .observation

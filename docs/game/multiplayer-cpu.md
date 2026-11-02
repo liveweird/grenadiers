@@ -1,7 +1,8 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy38 on Easy/Standard and policy39 on Hard for every live
-two-to-four-seat rules10 room. The legacy multiplayer profiles remain policy17 for archived/reference paths. See the
+The live environment CPU implementation uses policy56 on Easy/Standard and policy59 on Hard for every live
+two-to-four-seat rules10 room. Policy58 remains the archived Hard identity for replay29, while
+the legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
@@ -19,8 +20,9 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::FARM_ORIGINS_V38_STANDARD` and `FARM_ORIGINS_V38_EASY` select Utility38 for live rules10 Easy/Standard rooms.
-`CpuProfile::HARD_V39` selects Utility39 for Hard rooms with the same observation boundary.
+`CpuProfile::CORNER_REFUGES_V56_STANDARD` and `CORNER_REFUGES_V56_EASY` select Utility56 for live rules10 Easy/Standard rooms.
+`CpuProfile::HARD_V59` selects Utility59 for Hard rooms with the same observation boundary.
+Private replay30 binds this exact current pair; replay29 retains CPU56/58.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
 `RESPAWN_LAIRS_STANDARD` and `RESPAWN_LAIRS_EASY` retain Utility25 for archived rules9 rooms.
@@ -70,6 +72,13 @@ analysis falls back to collect/farm guidance. Hard has no hidden information, fa
 larger bomb inventory, extra planning workers or immunity. Easy keeps its navigation pause and
 Standard remains the default. See [Solo difficulty](single-player.md#difficulty).
 
+For one selected visible block target, Hard59 can compare eligible adjacent farming approaches
+at the baseline navigation distance and prefer a strictly larger visible soft-block yield under
+the existing timed blast geometry. Ties keep the stable approach and farther origins cannot win.
+This reuses the unchanged optional pressure allowance and does not reveal concealed drops, reorder
+block targets, add RNG, or authorize a bomb. The ordinary complete planting, escape, contact and
+fresh-publication proofs remain mandatory. Hard58 retains the earlier coordinate-selected result.
+
 ## Clear-arena counter-pressure
 
 With Teleporter enabled, CPU29 requires at least one completed running update, no finite flames,
@@ -93,7 +102,9 @@ uncertified movement on rules10. Teleporter and Diarrhea retain their existing e
 Easy keeps its normal clear-navigation cadence. Old policies27–32 remain unchanged; replay15
 retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34; replay17 binds
 Easy/Standard33 and Hard35. Replay18 binds Easy/Standard36 and Hard37; earlier replay versions retain
-their exact policy identities. Replay19 binds current Easy/Standard38 and Hard39, without changing gameplay19.
+their exact policy identities. Replay19 binds archived Easy/Standard38 and Hard39, without
+changing gameplay19. Later private formats advance closed CPU identities; current replay30 binds
+Easy/Standard56 and Hard59.
 
 ## Alternate farming refuges
 
@@ -138,8 +149,8 @@ Reengage memory and RNG and commits live state only after the owner accepts Stop
 survival horizon must cover the old deadline. Queue refusal, stale or failed proof, non-plant result,
 displacement or submission refusal retain the old hold. Optional jobs follow every seat's urgent jobs.
 The existing two workers, 32-job queue, 65,536-work limit and all forecast, motion, contact and usefulness
-proofs remain unchanged. Hard35 reuses the Core34 planner; current Hard39 additionally supports the
-bounded farming refuges above. Teleporter counter-pressure still requires
+proofs remain unchanged. Hard35 reuses the Core34 planner; archived Hard39 adds the bounded
+farming refuges above, and current Hard59 retains them. Teleporter counter-pressure still requires
 globally clear soft blocks and its prior support rules.
 
 ## Footprint-boundary recovery

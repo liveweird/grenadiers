@@ -5,13 +5,14 @@ use grenadiers_core::{
         survival::WORK_ALLOWANCE,
     },
     game::{CellId, Direction},
+    room::CpuProfile,
 };
 
 use super::farm_yield_owner_support::run;
 
 #[test]
 fn current_hard58_records_the_low_yield_farm_choice_through_real_owner_execution() {
-    let outcome = run(400);
+    let outcome = run(CpuProfile::HARD_V58, 400);
     eprintln!("HARD58_FARM_YIELD {outcome:#?}");
     assert_eq!((outcome.initial_range, outcome.final_range), (2, 3));
     assert_eq!(outcome.strategy.objective, StrategicObjectiveKind::Farm);
@@ -45,6 +46,7 @@ fn current_hard58_records_the_low_yield_farm_choice_through_real_owner_execution
     assert!(outcome.target_destroyed);
     assert!(!outcome.second_block_destroyed);
     assert!(outcome.open_flame_observed);
+    assert!(outcome.flame_horizon_observed);
     assert!(outcome.resolved);
     assert!(outcome.cpu_death.is_none());
     assert_eq!((outcome.worker.dequeued, outcome.worker.delivered), (4, 4));
@@ -62,6 +64,71 @@ fn current_hard58_records_the_low_yield_farm_choice_through_real_owner_execution
             .work
             .iter()
             .all(|work| *work <= WORK_ALLOWANCE)
+    );
+    let admissions = outcome.admissions;
+    assert_eq!(
+        [
+            admissions.expired_or_wrong_decision,
+            admissions.missed_manual_tick,
+            admissions.stale_scene,
+            admissions.invalid_hold,
+            admissions.contact,
+            admissions.strategic_plant,
+            admissions.invalid_shape,
+            admissions.pulse,
+            admissions.route,
+            admissions.duplicate_decision,
+            admissions.refuge_handoff,
+        ],
+        [0; 11]
+    );
+}
+
+#[test]
+fn current_hard59_selects_and_executes_the_two_block_farm_yield() {
+    let outcome = run(CpuProfile::HARD_V59, 400);
+    eprintln!("HARD59_FARM_YIELD {outcome:#?}");
+    assert_eq!((outcome.initial_range, outcome.final_range), (2, 3));
+    assert_eq!(outcome.strategy.objective, StrategicObjectiveKind::Farm);
+    assert_eq!(
+        outcome.strategy.target,
+        StrategicTarget::Block {
+            cell: CellId::new(3, 7),
+        }
+    );
+    assert_eq!(outcome.strategy.approach_cell, Some(CellId::new(4, 7)));
+    assert_eq!(
+        outcome.intent.movement,
+        MovementIntent::Direction(Direction::South)
+    );
+    assert!(outcome.intent.manual.is_none());
+    assert!(!outcome.execution);
+    assert_eq!(outcome.basis_tick.0, 183);
+    assert_eq!(outcome.settled_stop_tick.0, 183);
+    assert_eq!(outcome.work, 21_495);
+    assert_eq!(outcome.worker.work[0], outcome.work);
+    assert_eq!(outcome.plant.cell, CellId::new(5, 7));
+    assert_eq!(outcome.plant.range, 3);
+    assert_eq!(
+        (
+            outcome.plant.placed_at.0,
+            outcome.plant.detonates_at.0,
+            outcome.plant.flame_end.0,
+        ),
+        (232, 412, 442)
+    );
+    assert_eq!(outcome.destroyed_blocks, 2);
+    assert!(outcome.target_destroyed && outcome.second_block_destroyed);
+    assert!(outcome.flame_horizon_observed && outcome.resolved);
+    assert!(outcome.cpu_death.is_none());
+    assert_eq!((outcome.worker.dequeued, outcome.worker.delivered), (4, 4));
+    assert_eq!(
+        (
+            outcome.worker.failed,
+            outcome.worker.cancelled,
+            outcome.worker.dropped,
+        ),
+        (0, 0, 0)
     );
     let admissions = outcome.admissions;
     assert_eq!(

@@ -308,11 +308,11 @@ pub(super) fn plan_spike_policy(
         rng,
         work,
         persistent_burning_oil,
-        if hard_tactics {
+        crate::cpu::policy::GoalModes::nearest(if hard_tactics {
             crate::cpu::policy::PressureMode::Baseline
         } else {
             crate::cpu::policy::PressureMode::Disabled
-        },
+        }),
         counter_pressure,
         pickup_progress,
         super::steering::RefugeGuidance::default(),
@@ -367,7 +367,7 @@ fn plan_respawn_policy(
         false,
         false,
         false,
-        crate::cpu::policy::PressureMode::Disabled,
+        crate::cpu::policy::GoalModes::nearest(crate::cpu::policy::PressureMode::Disabled),
         false,
         false,
         super::steering::RefugeGuidance::default(),

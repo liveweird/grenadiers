@@ -55,3 +55,30 @@ fixtures. Core and server independent reviews are clear after strengthening actu
 no-origin and exact job-count assertions. Debug/release each pass five Core cases and seven
 relevant owner regressions; formatting, strict workspace Clippy and repository checks pass.
 Logs use `target/quality-review/farm-yield-diagnostic-*` in the main checkout.
+
+## Hard59 refinement and queued owner comparison
+
+Hard59 compares at most four legal adjacent approaches only after selecting the existing Farm
+block target. Equal graph distance is required; a strictly greater visible block yield wins.
+Exact Standard, Piercing and Power geometry includes current placement modifiers. Unsupported
+scenes, partial comparisons, ties, failed origins and farther approaches retain baseline guidance.
+The comparison uses the unused original pressure allowance and its existing geometry; it adds no
+second search pool, forecast or RNG draw. Retained approaches keep the existing commitment rules:
+genuine navigation/subcell progress may refresh the deadline; reevaluation alone does not.
+
+The initial Core choice changes from `(3,6)`/West to `(4,7)`/South for 21,370 work, ten more than
+Hard58. The useful intermediate `(5,7)` still uses the existing 36,436-work complete plant.
+
+Through the real queued owner, the same basis/settled Stop 183 selects `(4,7)`/South for 21,495
+work, versus the archived 21,485. The CPU naturally plants at `(5,7)`/232, detonates at 412 and
+survives through flame end 442. Both `(3,7)` and `(7,7)` disappear, exactly two blocks are destroyed,
+actual flames are observed and clear, and all four jobs are delivered with zero admission errors.
+The paired Hard58 test retains its West route, early `(3,5)` plant and one-wall yield exactly.
+
+Independent review identified a replaced-approach progress comparison; Hard59 now measures the
+validated retained approach, while archives keep their old semantics. A rival-occupancy plus
+subcell-movement regression prevents false deadline refresh. A 5,200-work partial-comparison
+case charges the attempted work and returns the exact archived baseline guidance. The owner
+comparison pins the exact basis, work, plant/flame ticks and job counts. Both reviews are clear.
+
+Release acceptance will be recorded in the [release record](../releases.md#v1318--2026-11-02).

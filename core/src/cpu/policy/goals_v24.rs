@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::cpu::policy::PressureMode;
+use crate::cpu::policy::{FarmOriginMode, GoalModes};
 use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, Position, Tick};
@@ -19,6 +19,9 @@ mod pressure;
 #[path = "goals_v58_exit_pressure.rs"]
 mod exit_pressure;
 
+#[path = "goals_v59_farm_yield.rs"]
+mod farm_yield;
+
 #[path = "goals_v24_order.rs"]
 mod order;
 use order::{add_ticks, fallback, position_distance, target_order};
@@ -33,7 +36,7 @@ mod farm;
 #[path = "goals_v24_versions.rs"]
 mod versions;
 pub(in crate::cpu::policy) use versions::{
-    select, select_pits, select_v25, select_v28, select_v38,
+    select, select_pits, select_pits_v59, select_v25, select_v28, select_v38,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -67,11 +70,17 @@ fn select_inner(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
     failed_plant_recovery: bool,
-    pressure_mode: PressureMode,
+    goal_modes: GoalModes,
     farm_origin_recovery: bool,
     avoid_pits: bool,
 ) -> Option<GuidanceV24> {
-    let mut map = search_map(observation, actor, current, !pressure_mode.enabled(), work)?;
+    let mut map = search_map(
+        observation,
+        actor,
+        current,
+        !goal_modes.pressure.enabled(),
+        work,
+    )?;
     let pit_sites = if avoid_pits {
         super::super::pit_avoidance::block_search_map(observation, &mut map, work)?
     } else {
@@ -120,8 +129,9 @@ fn select_inner(
             failed_farm_approach,
         );
     }
-    if pressure_mode.enabled() {
-        candidates.extend(pressure::candidates(
+    let mut pressure_remainder = None;
+    if goal_modes.pressure.enabled() {
+        let pressure = pressure::candidates(
             observation,
             actor,
             pressure::PressureMaps {
@@ -130,9 +140,11 @@ fn select_inner(
                 search: &map,
                 pits: &pit_sites,
             },
-            pressure_mode,
+            goal_modes.pressure,
             work,
-        ));
+        );
+        candidates.extend(pressure.candidates);
+        pressure_remainder = pressure.remainder;
     }
     pressure::add_legacy_candidates(
         observation,
@@ -167,9 +179,28 @@ fn select_inner(
             .iter()
             .copied()
             .find(|candidate| candidate.target == previous.target);
-        if let Some(retained) = retained.filter(|_| valid.is_ok()) {
+        if let Some(mut retained) = retained.filter(|_| valid.is_ok()) {
+            if goal_modes.farm_origin == FarmOriginMode::VisibleYield {
+                retained = farm_yield::retain_previous(
+                    observation,
+                    previous,
+                    retained,
+                    pressure::PressureMaps {
+                        distance: &distance,
+                        first_step: &first_step,
+                        search: &map,
+                        pits: &pit_sites,
+                    },
+                    failed_farm_approach,
+                );
+            }
+            let progress_approach = if goal_modes.farm_origin == FarmOriginMode::VisibleYield {
+                Some(retained.approach)
+            } else {
+                previous.approach_cell
+            };
             let progressed = retained.distance < previous.last_distance
-                || previous.approach_cell.is_some_and(|approach| {
+                || progress_approach.is_some_and(|approach| {
                     actor.position != previous.last_cpu_position
                         && position_distance(actor.position, Position::center(approach))
                             < position_distance(
@@ -247,7 +278,24 @@ fn select_inner(
         candidates.first().copied()
     };
 
-    if let Some(chosen) = chosen {
+    if let Some(mut chosen) = chosen {
+        if goal_modes.farm_origin == FarmOriginMode::VisibleYield
+            && let Some(remainder) = &mut pressure_remainder
+        {
+            chosen = farm_yield::promote_fresh(
+                observation,
+                chosen,
+                pressure::PressureMaps {
+                    distance: &distance,
+                    first_step: &first_step,
+                    search: &map,
+                    pits: &pit_sites,
+                },
+                failed_farm_approach,
+                remainder,
+                work,
+            );
+        }
         let tick = observation.parts().tick;
         return Some(GuidanceV24 {
             first_step: chosen.first_step,

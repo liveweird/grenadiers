@@ -63,7 +63,7 @@ pub use continuation_selection::{
 };
 pub use corner_refuges::{
     plan_corner_refuges_v56_with_origin, plan_hard_corner_refuges_v57_with_origin,
-    plan_hard_exit_pressure_v58_with_origin,
+    plan_hard_exit_pressure_v58_with_origin, plan_hard_farm_yield_v59_with_origin,
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
@@ -260,7 +260,9 @@ mod exit_pressure_policy_tests;
 #[cfg(test)]
 mod exit_pressure_witness_tests;
 #[cfg(test)]
-mod farm_yield_fixture;
+pub(crate) mod farm_yield_fixture;
+#[cfg(test)]
+mod farm_yield_v59_tests;
 #[cfg(test)]
 mod farm_yield_witness_tests;
 #[cfg(test)]

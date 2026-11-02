@@ -50,14 +50,12 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   loot, arbitrary partner swaps, contact and renewal obligations covered under the unchanged
   work ceiling. See the [investigation](docs/history/cpu-late-passivity-2026-11-01.md).
 
-- [next] **HARD-CPU — deepen fair tactics.** Improve productive farming,
-  pickup contention and useful bomb combinations. Preserve the bounded opponent-exit guidance. Use permitted
-  observations, bounded planning and unchanged physics. Require authoritative before/after
-  witnesses and independent review; preserve archived policies and complete seeded episodes.
-  The [controlled firing-position comparison](docs/history/cpu-exit-pressure-2026-11-02.md)
-  retains the before/after coverage for the bounded equal-distance exit refinement.
-  The [farming baseline](docs/history/cpu-farming-yield-2026-11-02.md) records a legal equal-distance
-  two-wall opportunity, including its existing live early plant and queued one-wall before-state.
+- [todo] **HARD-CPU — deepen fair tactics.** Improve pickup contention and useful bomb
+  combinations. Preserve bounded opponent-exit guidance and productive equal-distance farming.
+  Use permitted observations, bounded planning and unchanged physics. Require authoritative
+  before/after witnesses and independent review; preserve archived policies and complete seeded
+  episodes. The [farming comparison](docs/history/cpu-farming-yield-2026-11-02.md) retains the
+  paired productive-route evidence.
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
@@ -94,7 +92,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Further art.** Beyond the walking, bomb and death frames, consider idle
   animation, environment detail, layered authoring sources, accessibility and measured effects
   budgets. Follow the [artist handoff](assets/art/README.md).
-- [todo] **AUTO-PUNCH — punch bombs by walking into them.** Activate Punch on attempted
+- [next] **AUTO-PUNCH — punch bombs by walking into them.** Activate Punch on attempted
   movement into an adjacent bomb’s tile. Punch is currently the only manual Equipment action
   (default E); preserve the existing punch flight, cooldown and one
   activation per contact. Remove the separate Equipment key from gameplay controls and update

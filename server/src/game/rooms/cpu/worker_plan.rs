@@ -22,6 +22,8 @@ use grenadiers_core::room::CpuPolicy;
 
 #[path = "worker_plan_continuation.rs"]
 mod continuation;
+#[path = "worker_plan_farm_yield.rs"]
+mod farm_yield;
 #[path = "worker_plan_teleporter.rs"]
 mod teleporter;
 
@@ -64,9 +66,12 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV56
                 | CpuPolicy::UtilityV57
                 | CpuPolicy::UtilityV58
+                | CpuPolicy::UtilityV59
         )
     {
-        let plan = if job.policy == CpuPolicy::UtilityV56 {
+        let plan = if job.policy == CpuPolicy::UtilityV59 {
+            farm_yield::plan(job, work)
+        } else if job.policy == CpuPolicy::UtilityV56 {
             plan_corner_refuges_v56_with_origin(
                 &job.observation,
                 &job.memory,

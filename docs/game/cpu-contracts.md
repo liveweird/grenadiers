@@ -8,9 +8,10 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `CORNER_REFUGES_V56_STANDARD` or `CORNER_REFUGES_V56_EASY` and `HARD_V58`;
-private replay29 binds those identities. Named archive constants preserve historical replay
-identities. Policy identity describes decision semantics, not measured strength; seeds stay
+Two. Live selection uses `CORNER_REFUGES_V56_STANDARD` or `CORNER_REFUGES_V56_EASY` and
+`HARD_V59`; private replay30 binds those identities. Archived replay29 retains CPU56/58. Named
+archive constants preserve historical replay identities. Policy identity describes decision
+semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
 Controllers carry an explicit seat identity through memory, recipient validation and ordinary
@@ -367,7 +368,7 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 ## Live difficulty profiles
 
 Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU56 and Hard
-selects CPU58. They retain CPU52/53's ordinary planning and pit avoidance, adding the bounded
+selects CPU59. They retain CPU52/53's ordinary planning and pit avoidance, adding the bounded
 blocked-away refuge hints described below. Multi-Teleporter selection and confirmed-origin
 shared preparation remain unchanged. Archived CPU54/55 delegate their non-origin planning
 exactly to CPU52/53. Archived CPU50/51
@@ -405,16 +406,17 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay29 binds CPU56/58; archived replay28 binds CPU56/57; archived replay27 binds CPU54/55, replay26 binds CPU52/53,
-replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
-private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
+Private replay30 binds CPU56/59; archived replay29 binds CPU56/58; replay28 binds CPU56/57;
+replay27 binds CPU54/55; replay26 binds CPU52/53; replay25 binds CPU50/51; replay24 retains
+CPU48/49; and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside
+CPU42/43 and private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
 origin record. During continuation, lairs-disabled and lairs-enabled scenes use distinct checked
 contact modes. Older policy/replay contracts remain isolated.
 
 ## Shared escape preparation
 
-CPU54/55 and CPU56/57/58 validate the actual retained plant origin and build one unchanged default forecast
+CPU54/55 and CPU56/57/58/59 validate the actual retained plant origin and build one unchanged default forecast
 against the shared remaining work before attempting optional continuation. A forecast that
 exceeds the old half allowance can therefore still support a checked recovery pulse.
 
@@ -440,7 +442,7 @@ input journals retain their contracts; newly played matches can accept input at 
 
 ## Farming when the usual retreat is blocked
 
-CPU56/57/58 can use a lateral refuge when the cell directly away from an adjacent farming target
+CPU56/57/58/59 can use a lateral refuge when the cell directly away from an adjacent farming target
 is an indestructible wall, lair or outside the board. This requires the CPU to occupy its current
 committed Farm approach, visible empty bombs and no flames. Two deterministic candidates move
 sideways first, then use refuges offset by the observed bomb range both sideways and toward the
@@ -535,8 +537,9 @@ passivity remain unsolved; broader farm/contact stalls and further Hard tactics 
 
 ## Equal-distance opponent exit coverage
 
-Hard58 first retains every visible rival’s existing nearest useful firing-position candidate,
-using the previous seat order, sequential budget shares and coordinate tie-break. Only afterward
+Hard58 first retains every visible rival’s existing nearest useful firing-position candidate;
+Hard59 retains this behavior unchanged, using the previous seat order, sequential budget shares
+and coordinate tie-break. Only afterward
 may it compare other origins at exactly that navigation distance. A strictly larger count of
 currently open adjacent terrain branches covered by the exact blast can replace the baseline.
 Equal coverage keeps the coordinate choice; a farther origin never wins this tie-break.
@@ -556,4 +559,28 @@ each rival’s original unused share; baseline plus optional origin probes remai
 rival. Incomplete or unsupported comparisons retain the baseline. No extra RNG, hidden inputs,
 commitment change, faster physics or larger decision budget is introduced. The selected approach
 still requires the full useful planting, absent/present escape, contact and fresh-publication
-checks before any bomb action is admitted. Archived Hard57 retains its original choice and work.
+checks before any bomb action is admitted. Archived Hard57 retains its original choice and work,
+while archived replay29 freezes Hard58's exit-coverage output.
+
+## Equal-distance visible block yield
+
+Hard59 starts with the existing selected visible block target and baseline adjacent farming
+approach. It may compare only other eligible adjacent approaches for that same target and at
+exactly the same reachable navigation distance. A candidate replaces the baseline only when the
+existing placement-time blast geometry reaches strictly more currently visible soft blocks.
+Equal yield keeps the baseline, a farther origin never wins, and target ordering is unchanged.
+
+Eligibility retains the existing transit, pit and failed-approach exclusions and rejects a pickup
+on the candidate cell. Ranking is unsupported with unavailable or nonempty bomb knowledge,
+flames, Oil or any exposed Teleporter. Yield uses the current timed range and Standard, Piercing
+or Power blast visitor; it counts visible soft blocks, not concealed contents or possible future
+drops. Unsupported or incomplete geometry and work exhaustion retain the baseline.
+
+The comparison consumes only the existing pressure remainder: at most 4,096 work units and one
+eighth of the incoming remaining work. It introduces no larger decision budget, new RNG draw,
+hidden observation, target switch or planting certificate. A retained same-target approach stays
+stable while eligible; genuine navigation or subcell progress may refresh its progress deadline,
+but reevaluation alone does not. If the approach becomes invalid,
+progress is measured against the replacement rather than the stale origin. Every actual bomb
+still requires the unchanged usefulness, absent/present escape, contact, admission and fresh-
+publication checks. Archived Hard58/replay29 keep the coordinate-selected farming approach.

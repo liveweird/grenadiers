@@ -21,6 +21,7 @@ fn corner_refuges_produce_a_useful_natural_plant_and_survive_its_actual_flames()
     for profile in [
         CpuProfile::HARD_V57,
         CpuProfile::HARD_V58,
+        CpuProfile::HARD_V59,
         CpuProfile::CORNER_REFUGES_V56_STANDARD,
         CpuProfile::CORNER_REFUGES_V56_EASY,
     ] {

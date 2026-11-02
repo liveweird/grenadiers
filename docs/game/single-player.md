@@ -14,7 +14,10 @@ or unavailable bomb knowledge bypasses it. All levels share permitted observatio
 checks and planning limits. Hard uses range-aware firing positions and prioritizes certified
 opponent pressure over routine wall farming. Among equally close supported firing positions, Hard
 favors blasts covering more of a visible rival’s open adjacent branches; valuable pickups can still
-take priority. The labels describe these settings, not a measured
+take priority. For the same selected visible block, Hard also favors an equally close eligible
+approach whose existing blast geometry reaches more visible soft blocks. It does not inspect
+concealed drops, choose a farther origin or bypass the normal planting and escape proof. The
+labels describe these settings, not a measured
 strength ranking; balance still needs human playtesting.
 
 ## Settings, start and rematch

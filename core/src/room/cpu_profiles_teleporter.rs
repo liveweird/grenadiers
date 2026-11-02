@@ -53,6 +53,8 @@ impl CpuProfile {
         Self::profile(CpuPolicy::UtilityV56, CpuDifficulty::Easy);
     /// Equal-distance visible opponent exit coverage, retaining corner refuges.
     pub const HARD_V58: Self = Self::profile(CpuPolicy::UtilityV58, CpuDifficulty::Hard);
+    /// Farm-origin yield ranking, retaining the Hard58 recovery and pressure stack.
+    pub const HARD_V59: Self = Self::profile(CpuPolicy::UtilityV59, CpuDifficulty::Hard);
 
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

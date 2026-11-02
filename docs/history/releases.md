@@ -4,6 +4,49 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.17 — 2026-11-02
+
+The supplied gold pixel logo, compact wordmark and browser icons now identify Grenadiers.
+Desktop uses the combined logo; compact layouts use the wordmark. The translated image
+alternative remains the accessible page heading, and English/Polish controls are unchanged.
+CSS removes only transparent display padding and preserves crisp pixel scaling. Desktop header
+height matches the previous layout within rounding; mobile headers are substantially smaller.
+The separate full-screen/no-scroll layout task remains in the backlog.
+
+All four original files retain their bytes in `web/src/assets/branding/`, with replacement
+instructions in its README. The redundant root copies are removed. Vite emits hashed PNG/ICO
+URLs; production serving verifies correct image MIME, immutable caching and exact original bytes.
+Arena artwork, gameplay, CPU policies and replay identities are unchanged.
+
+### Verification
+
+- The complete web gate passes: 169 files/7,426 tests, 95.57% line coverage, 92.54% statements,
+  91.73% functions and 88.95% branches, above the existing floors. API/runtime/generated-contract
+  checks, lint, Knip and production build pass. Compressed JS is 399,897/400,000 bytes and CSS
+  15,568/20,000; no limit was raised. JS has little headroom for future eager UI additions.
+- Real browser checks at 1440×900, 1024×768, 390×844 and 320×568 pass in English/Polish, with no
+  horizontal overflow or browser errors. Responsive selection, heading semantics, image decode
+  and all four assets’ production MIME/cache/bytes pass. Independent UI review is clear.
+- Rust gameplay/server logic is unchanged from v1.3.16; only product-version metadata and the
+  already verified test-only farming diagnostics differ. Its full Rust mask/native/coverage and
+  distinct Linux evidence are reused. Metadata/repository checks, Rust formatting and the new
+  Linux/arm64 production image build pass; no duplicate portable matrix is required.
+- The exact image passes Compose authentication, rendered keyboard duel and three-CPU play,
+  plus restricted Kubernetes and three CPUs. Temporary stacks/namespaces are removed. Pinned
+  Trivy reports zero fixable high/critical findings. Rust dependency policies and npm configured
+  high-severity audits pass; moderate findings remain 20 web/12 E2E in overlapping trees.
+
+### Artifact and operation
+
+Accepted source: `7b8f8eb238b36e3092a8e3c88961c1fc8f2fcee0`.
+Accepted image: `sha256:b6008924d7517151758d3f12f62f21f27188dc30176eda5205bd603e573d4877`.
+
+The exact image runs on localhost:8085. Version/source labels, restricted container settings,
+health/readiness, headers/CSP/cache and all nine served assets pass. A fresh three-Hard-CPU game
+moves and plants bombs without browser errors. The v1.3.16 immutable image/override remain
+available for rollback. This publishes source and an accepted local runtime, with no hosted
+service or production registry. The arena artist bundle is unchanged.
+
 ## v1.3.16 — 2026-11-02
 
 Hard CPUs prefer equally close firing positions whose exact blast covers more of a visible

@@ -373,6 +373,8 @@ fn corner_refuge_profiles_preserve_the_shared_recovery_archive_pair() {
 
 #[test]
 fn hard_exit_pressure_has_its_own_policy_without_relabeling_normal_or_archived_hard() {
+    assert_eq!(CpuProfile::HARD_V59.policy.version(), 59);
+    assert_eq!(CpuProfile::HARD_V59.difficulty, CpuDifficulty::Hard);
     assert_eq!(CpuProfile::HARD_V58.policy.version(), 58);
     assert_eq!(CpuProfile::HARD_V58.difficulty, CpuDifficulty::Hard);
     assert_eq!(CpuProfile::HARD_V57.policy.version(), 57);

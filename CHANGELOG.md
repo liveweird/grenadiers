@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.18 — 2026-11-02
+
+- Let Hard CPUs prefer an equally close approach to the same farming target when its exact visible blast destroys more soft blocks; retain that approach while it remains eligible.
+- Reuse the existing pressure search budget and complete planting/escape checks, preserving archived Hard58 behavior and Easy/Standard56; bind Hard59 under private replay30.
+- Verify the natural queued-owner route, early useful planting, two destroyed walls and survival through the complete flame window, alongside the unchanged one-wall baseline.
+
 ## 1.3.17 — 2026-11-02
 
 - Integrate the supplied pixel-art logo, compact wordmark and browser/touch icons, preserving the original transparent image files in a documented branding directory.

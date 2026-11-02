@@ -16,6 +16,8 @@ pub(in crate::cpu::policy) enum PlannerVersion {
     HardPitsCautiousV53,
     HardFarmExitPressureV58,
     HardPitsExitPressureV58,
+    HardFarmYieldV59,
+    HardPitsYieldV59,
 }
 
 impl PlannerVersion {
@@ -39,6 +41,8 @@ impl PlannerVersion {
                 | Self::HardPitsCautiousV53
                 | Self::HardFarmExitPressureV58
                 | Self::HardPitsExitPressureV58
+                | Self::HardFarmYieldV59
+                | Self::HardPitsYieldV59
         )
     }
 
@@ -57,6 +61,8 @@ impl PlannerVersion {
                 | Self::HardPitsCautiousV53
                 | Self::HardFarmExitPressureV58
                 | Self::HardPitsExitPressureV58
+                | Self::HardFarmYieldV59
+                | Self::HardPitsYieldV59
         )
     }
 
@@ -74,13 +80,18 @@ impl PlannerVersion {
                 | Self::HardPitsCautiousV53
                 | Self::HardFarmExitPressureV58
                 | Self::HardPitsExitPressureV58
+                | Self::HardFarmYieldV59
+                | Self::HardPitsYieldV59
         )
     }
 
     pub(super) const fn pressure_mode(self) -> super::super::PressureMode {
         if matches!(
             self,
-            Self::HardFarmExitPressureV58 | Self::HardPitsExitPressureV58
+            Self::HardFarmExitPressureV58
+                | Self::HardPitsExitPressureV58
+                | Self::HardFarmYieldV59
+                | Self::HardPitsYieldV59
         ) {
             super::super::PressureMode::ExitCoverage
         } else if matches!(
@@ -101,6 +112,7 @@ impl PlannerVersion {
                 | Self::FarmPitsV52
                 | Self::HardFarmPitsV53
                 | Self::HardFarmExitPressureV58
+                | Self::HardFarmYieldV59
         )
     }
 
@@ -113,6 +125,16 @@ impl PlannerVersion {
                 | Self::HardPitsCautiousV53
                 | Self::HardFarmExitPressureV58
                 | Self::HardPitsExitPressureV58
+                | Self::HardFarmYieldV59
+                | Self::HardPitsYieldV59
         )
+    }
+
+    pub(super) const fn farm_origin_mode(self) -> super::super::FarmOriginMode {
+        if matches!(self, Self::HardFarmYieldV59 | Self::HardPitsYieldV59) {
+            super::super::FarmOriginMode::VisibleYield
+        } else {
+            super::super::FarmOriginMode::Nearest
+        }
     }
 }

@@ -237,6 +237,12 @@ mod exit_pressure_owner_support;
 #[cfg(test)]
 mod exit_pressure_owner_tests;
 #[cfg(test)]
+mod farm_yield_owner_support;
+#[cfg(test)]
+mod farm_yield_owner_tests;
+#[cfg(test)]
+mod queued_plan_probe_support;
+#[cfg(test)]
 mod queued_scenario_support;
 
 #[cfg(test)]

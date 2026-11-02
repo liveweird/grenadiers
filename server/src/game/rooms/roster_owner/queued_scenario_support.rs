@@ -34,13 +34,50 @@ pub(super) fn driver(
     cpu_seed: [u8; 32],
     environment: Environment,
 ) -> (Driver, CpuPlanner) {
-    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
     let mut controls = [SeatControl::Human; 4];
     for &cpu in cpus {
         controls[cpu.index()] = SeatControl::Cpu;
     }
-    let configuration = RoomConfiguration::new(
+    configured_driver(
+        profile,
+        cpus,
         &controls,
+        scene,
+        departure,
+        cpu_seed,
+        environment,
+    )
+}
+
+pub(super) fn duel_driver(
+    profile: CpuProfile,
+    scene: fn(&State) -> State,
+    cpu_seed: [u8; 32],
+    environment: Environment,
+) -> (Driver, CpuPlanner) {
+    configured_driver(
+        profile,
+        &[SeatId::Two],
+        &[SeatControl::Human, SeatControl::Cpu],
+        scene,
+        None,
+        cpu_seed,
+        environment,
+    )
+}
+
+fn configured_driver(
+    profile: CpuProfile,
+    cpus: &[SeatId],
+    controls: &[SeatControl],
+    scene: fn(&State) -> State,
+    departure: Option<SeatId>,
+    cpu_seed: [u8; 32],
+    environment: Environment,
+) -> (Driver, CpuPlanner) {
+    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
+    let configuration = RoomConfiguration::new(
+        controls,
         Some(profile.difficulty),
         BoardSize::FifteenByThirteen,
     )
@@ -76,7 +113,11 @@ pub(super) fn driver(
         MobNavigationPolicy::TimedEscapeV3,
     )
     .unwrap();
-    for seat in SeatId::ALL.into_iter().filter(|seat| !cpus.contains(seat)) {
+    for seat in SeatId::ALL
+        .into_iter()
+        .take(controls.len())
+        .filter(|seat| !cpus.contains(seat))
+    {
         let admission = runtime.prepare_join(seat).unwrap();
         runtime.commit_admission(admission);
         runtime

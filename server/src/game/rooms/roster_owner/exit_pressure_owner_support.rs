@@ -2,12 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use grenadiers_core::{
     cpu::{
-        Intent, Observation, ObservedActor, WorkBudget,
+        Observation, ObservedActor,
         policy::{IntentDebugSummary, StrategicObjectiveKind},
-        survival::{
-            TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_hard_corner_refuges_v57_with_origin,
-            select_teleporter_recovery_v50,
-        },
     },
     game::{
         ActorInit, Arena, CellId, Direction, EntityId, PickupKind, Position, RoundActorInit,
@@ -17,21 +13,14 @@ use grenadiers_core::{
 };
 use tokio::time::Instant;
 
+use super::queued_plan_probe_support::inspect;
 use super::queued_scenario_support::{Environment, driver};
-use crate::game::rooms::cpu::{AdmissionTrace, PlanningBasis, PumpReport};
+use crate::game::rooms::cpu::{AdmissionTrace, PumpReport};
 
 const CPU: SeatId = SeatId::Two;
 const INSTANCE: u64 = 5_461;
 
-#[derive(Debug)]
-pub(super) struct Basis {
-    pub observation: Observation,
-    pub stop: Tick,
-    pub work: u32,
-    pub intent: Intent,
-    pub strategy: Option<grenadiers_core::cpu::policy::StrategicIntent>,
-    pub execution: bool,
-}
+pub(super) use super::queued_plan_probe_support::QueuedPlanProbe as Basis;
 
 #[derive(Clone, Copy, Debug)]
 pub(super) struct Plant {
@@ -90,6 +79,7 @@ pub(super) fn run_with_environment(
         let mut captured_index = None;
         let report = planner.pump_for_test_inspecting(usize::MAX, |job| {
             if basis.is_none() && ranged(job.observation) {
+                assert!(job.escape_origin.is_none());
                 basis = Some(inspect(&job));
                 captured_index = Some(index);
             }
@@ -179,48 +169,6 @@ pub(super) fn run_with_environment(
 
 fn ranged(observation: &Observation) -> bool {
     matches!(&observation.parts().actors[CPU.index()], ObservedActor::Visible(cpu) if cpu.bomb_range == 3)
-}
-
-fn inspect(job: &PlanningBasis<'_>) -> Basis {
-    let plan = match job.policy {
-        grenadiers_core::room::CpuPolicy::UtilityV57 => plan_hard_corner_refuges_v57_with_origin,
-        grenadiers_core::room::CpuPolicy::UtilityV58 => {
-            grenadiers_core::cpu::survival::plan_hard_exit_pressure_v58_with_origin
-        }
-        _ => panic!("unsupported pressure witness profile"),
-    };
-    assert!(job.escape_origin.is_none());
-    let mut rng = job.rng.clone();
-    let mut work = WorkBudget::new(WORK_ALLOWANCE);
-    let planned = plan(
-        job.observation,
-        job.memory,
-        job.hazard_memory,
-        job.settled_stop_tick,
-        None,
-        &mut rng,
-        &mut work,
-    )
-    .unwrap();
-    let TeleporterRecoveryChoice::Ordinary(planned) = select_teleporter_recovery_v50(
-        job.observation,
-        job.hazard_memory,
-        job.settled_stop_tick,
-        job.memory,
-        None,
-        planned,
-        &mut work,
-    ) else {
-        panic!("fixture has no Teleporter target")
-    };
-    Basis {
-        observation: job.observation.clone(),
-        stop: job.settled_stop_tick,
-        work: work.spent(),
-        intent: planned.survival.control.intent,
-        strategy: planned.survival.control.next_memory.strategic_intent(),
-        execution: planned.survival.execution.is_some(),
-    }
 }
 
 fn scene(basis: &State) -> State {

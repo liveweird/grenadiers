@@ -33,6 +33,7 @@ describe('own status bar', () => {
   it('shows authoritative totals, slots, every effect, equal slow stacks, freeze and grace', () => {
     render(<OwnStatusBar actor={actor()} copy={en} />)
     const bar = screen.getByRole('region', { name: 'Your items' })
+    expect(screen.getByRole('group', { name: 'Your items' })).toHaveAttribute('tabindex', '0')
     expect(bar).toHaveTextContent('Bombs available3')
     expect(bar).toHaveTextContent('Bomb capacity5')
     expect(bar).toHaveTextContent('Blast range6')
@@ -68,6 +69,7 @@ describe('own status bar', () => {
 
   it('includes the authoritative grace time in the localized accessible value', () => {
     render(<OwnStatusBar actor={actor()} copy={pl} />)
+    expect(screen.getByLabelText('Twoje przedmioty', { selector: '.own-status-list' })).toHaveAttribute('tabindex', '0')
     expect(screen.getByLabelText('Ochrona przed obrażeniami aktywna, pozostało 0:02'))
       .toHaveTextContent('0:02')
   })

@@ -131,4 +131,17 @@ export async function expectActorStatGeometry(page: Page, rivalColumnCount: numb
   }
   await statusList.evaluate((list, left) => { list.scrollLeft = left }, baseline.listLeft)
   await expect.poll(() => statusList.evaluate((list) => list.scrollLeft)).toBe(baseline.listLeft)
+  await statusList.focus()
+  await expect(statusList).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => statusList.evaluate((list) => list.scrollLeft)).toBeGreaterThan(baseline.listLeft)
+  expect(await page.evaluate(() => ({
+    bodyLeft: document.body.scrollLeft, bodyTop: document.body.scrollTop,
+    rootLeft: document.documentElement.scrollLeft, rootTop: document.documentElement.scrollTop,
+  }))).toEqual({
+    bodyLeft: baseline.bodyLeft, bodyTop: baseline.bodyTop,
+    rootLeft: baseline.rootLeft, rootTop: baseline.rootTop,
+  })
+  await statusList.evaluate((list, left) => { list.scrollLeft = left }, baseline.listLeft)
+  await expect.poll(() => statusList.evaluate((list) => list.scrollLeft)).toBe(baseline.listLeft)
 }

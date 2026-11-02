@@ -86,7 +86,7 @@ export function OwnStatusBar({ actor, copy }: { actor: VisibleActorView; copy: G
   const activeEffects = effects(actor, copy)
   return <section className="own-status-bar" aria-label={copy.ownItems.label}>
     <strong className="own-status-heading">{copy.ownItems.heading}</strong>
-    <div className="own-status-list">
+    <div className="own-status-list" role="group" tabIndex={0} aria-label={copy.ownItems.heading}>
       <StatusItem icon="bombCapacity" label={copy.stats.available}
         value={actor.bombCapacity - actor.liveBombCount} />
       <StatusItem icon="bombCapacity" label={copy.stats.capacity} value={actor.bombCapacity} />

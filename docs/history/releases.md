@@ -4,6 +4,51 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.21 — 2026-11-02
+
+The courtyard and primary actions fit desktop and mobile viewports without page scrolling.
+A hideable settings panel preserves drafts, contains keyboard focus, closes with Escape and
+returns focus to its opener. Arena input is disabled while settings are open. Long rules and
+room details remain inside bounded panels; the keyboard-accessible item bar scrolls internally
+on narrow screens so additional effects do not displace play or local controls.
+
+### Verification
+
+- Independent UI review is clear. Fresh web coverage passes 171 files/7,431 tests: lines 95.53%,
+  statements 92.56%, functions 91.73%, branches 88.94%, above the unchanged floors. API/contracts,
+  lint, Knip, E2E static checks and all 122 scenario mappings pass. A subsequent scroller-only
+  accessibility attribute fix passes its four focused EN/PL tests and the final build; coverage
+  is reused because no decision branches changed. Compressed JS is 399,921/400,000 bytes;
+  CSS is 16,228/20,000.
+- Rust/API implementation, toolchain and external dependencies are unchanged. Reuse the complete
+  [v1.3.20 Rust/Linux/policy/audit evidence](releases.md#v1320--2026-11-02), including
+  all debug/release/coverage item masks and 93.17% Rust line coverage. Cargo product versions
+  change only to identify this combined release; the runtime binary is rebuilt for that version.
+- All five final exact-image Chromium scenarios pass: authentication, keyboard duel, shared
+  settings, lobby containment and the painted four-player HUD across 1440×900, 1024×768,
+  390×844 and 320×568. Checks retain Axe accessibility, native keyboard inventory scrolling,
+  draft/focus behavior and a dense inventory/pickup notice. See [desktop](../screenshots/viewport-desktop.png)
+  and [320×568](../screenshots/viewport-320.png) examples.
+- Compose and restricted Kubernetes each pass fresh three-CPU play, with all CPUs moving and
+  planting, no browser errors, and the required container/probe/resource restrictions. Temporary
+  stacks and namespaces are removed.
+- Pinned Trivy finds zero fixable high/critical vulnerabilities in the exact final image.
+  All five arena/branding image files retain their accepted bytes.
+
+### Artifact, upgrade and rollback
+
+Accepted application/image source: `862c989645debdc25d9f5c89ac01b277c1b51fb8`.
+The full web coverage source is `3505f62c34edac2fa6aa20fc1d82a650a9a8399d`; intervening changes
+are the focused accessibility attributes and E2E interaction/geometry checks described above.
+Accepted image: `sha256:5d1509da2180fea3a06abb170f554aab798010811988b87a37a5abe9d9f4d6d8`.
+
+The exact image runs on localhost:8085. Image/source/version labels, restricted runtime settings,
+health/readiness, headers/CSP/cache and all nine served files pass, along with fresh three-Hard-CPU
+play.
+The v1.3.20 immutable image/override remain for rollback. Deploy the paired server/web image
+and reload browser tabs. Existing matches do not survive restart. This publishes source and an
+accepted local runtime; no hosted service or production registry is configured.
+
 ## v1.3.20 — 2026-11-02
 
 New games and restored settings use a 1-second spike warning and a 5-second raised phase

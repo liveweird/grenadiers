@@ -79,21 +79,45 @@ async function punchBombByContact(
   page: Page, games: ObservedGame[], demo: Bomb,
 ): Promise<{ punchFloors: number[], movedRevisions: number[] }> {
   await moveSeatTo(page, games[0], 'one', { column: 5, row: 1 })
+  const bombCenterX = demo.cell.column * 1024 + 512
+  await expect.poll(() => actor(games[0]).position.x - bombCenterX).toBeGreaterThan(832)
+  const settledPosition = actor(games[0]).position
+  const settledRevision = latestSnapshot(games[0])!.room.revision
+  await Promise.all(games.map((game) => expect.poll(() => {
+    const snapshot = latestSnapshot(game)!
+    return {
+      caughtUp: snapshot.room.revision >= settledRevision,
+      position: visibleActor(snapshot, 'one')?.position,
+    }
+  }).toEqual({ caughtUp: true, position: settledPosition })))
   const actorFacts = games.map((game) => {
     const value = actor(game)
     return { position: value.position, lastTeleportTick: value.lastTeleportTick }
   })
   const punchFloors = games.map((game) => latestSnapshot(game)!.room.revision)
   const commandFloor = games[0].commands.length
-  await page.keyboard.press('ArrowLeft', { delay: 40 })
-  await expect.poll(() => games[0].commands.slice(commandFloor)).toEqual([
-    { type: 'movement', direction: 'west' }, { type: 'movement', direction: null },
-  ])
-  await Promise.all(games.map((game, index) => expect.poll(() => {
-    const snapshot = latestSnapshot(game)!
-    if (snapshot.room.revision <= punchFloors[index]!) return undefined
-    return snapshot.state.bombs.find(({ id }) => id === demo.id)?.cell
-  }).toEqual({ column: 1, row: 1 })))
+  await page.keyboard.down('ArrowLeft')
+  try {
+    await expect.poll(() => games[0].commands.slice(commandFloor)
+      .some((command) => command.type === 'movement' && command.direction === 'west')).toBe(true)
+    await Promise.all(games.map((game, index) => expect.poll(() => {
+      const snapshot = latestSnapshot(game)!
+      if (snapshot.room.revision <= punchFloors[index]!) return undefined
+      return snapshot.state.bombs.find(({ id }) => id === demo.id)?.cell
+    }).toEqual({ column: 1, row: 1 })))
+  } finally {
+    await page.keyboard.up('ArrowLeft')
+  }
+  await expect.poll(() => {
+    const commands = games[0].commands.slice(commandFloor)
+    const west = commands.findIndex((command) => command.type === 'movement'
+      && command.direction === 'west')
+    return west >= 0 && commands.at(-1)?.type === 'movement'
+      && commands.at(-1)?.direction === null
+  }).toBe(true)
+  const contactCommands = games[0].commands.slice(commandFloor)
+  expect(contactCommands.every((command) => command.type === 'movement'
+    && (command.direction === 'west' || command.direction === null))).toBe(true)
 
   const movedRevisions: number[] = []
   for (const [index, game] of games.entries()) {
@@ -108,7 +132,10 @@ async function punchBombByContact(
     const rawPunchFrames = revisionFrames(game, punchFloors[index]!, moved.room.revision)
     expect(rawPunchFrames.flatMap(({ events }) => events)
       .filter(({ kind }) => ['bombPlaced', 'bombDetonated'].includes(kind.type))).toEqual([])
-    expect(visibleActor(moved, 'one')).toMatchObject(actorFacts[index]!)
+    const movedActor = visibleActor(moved, 'one')!
+    expect(movedActor.position.x).toBeLessThan(actorFacts[index]!.position.x)
+    expect(movedActor.position.y).toBe(actorFacts[index]!.position.y)
+    expect(movedActor.lastTeleportTick).toBe(actorFacts[index]!.lastTeleportTick)
     expect(JSON.stringify(rawPunchFrames)).not.toMatch(punchPrivateFacts)
   }
   return { punchFloors, movedRevisions }
@@ -207,18 +234,18 @@ test('Punch wraps one retained bomb on contact and preserves its fuse', async ({
 
     const first = await plantDemoBomb(one, games[0])
     const firstPunch = await punchBombByContact(one, games, first.demo)
+    await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
     const cells = [{ column: 1, row: 1 }, { column: 4, row: 1 }]
     const captures = await Promise.all([
       captureArenaTiles(one, info.outputPath('punch-contact-desktop-en.png'), cells),
       captureArenaTiles(two, info.outputPath('punch-contact-polish-320-reduced.png'), cells),
     ])
     expect(captures.every(({ screenshot }) => screenshot.length > 0)).toBe(true)
-    await moveSeatTo(one, games[0], 'one', { column: 3, row: 2 })
     await expectNaturalDetonation(games, first.demo, first.beforePlant,
       firstPunch.punchFloors, firstPunch.movedRevisions)
 
     await waitClear(games[0])
-    await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 })
+    await moveSeatTo(one, games[0], 'one', { column: 4, row: 1 }, ['y', 'x'])
     const resumed = await plantDemoBomb(one, games[0])
     const resumedPunch = await punchBombByContact(one, games, resumed.demo)
     await expectResumedContactState(one, games[0], resumed.demo, resumed.actionId)

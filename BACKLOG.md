@@ -25,15 +25,11 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena layout and environment
 
-- [todo] **LAYOUT-CLEARANCE — improve generated lair surroundings.** Review the current
+- [next] **LAYOUT-CLEARANCE — improve generated lair surroundings.** Review the current
   generation and placement rules. Reserve connected, usable spawn/movement space beside every
   lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
   sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
   preserve deterministic generation and player spawn safety.
-- [next] **SPIKE-DEFAULTS — use a 1-second warning and 5-second raised phase.** Change new-game
-  defaults from the current 0.6/3 seconds to 1/5 seconds (60/300 ticks at 60 Hz). Update UI/default
-  examples and tests while preserving explicitly configured durations and historical replay.
-
 - [todo] **BOMB-DROPS — configurable extra-bomb upgrade frequency.** Make Bomb Capacity
   upgrades drop five times as frequently by default, with a room configuration control for the
   multiplier. Define and document how the multiplier behaves with different enabled-item pools

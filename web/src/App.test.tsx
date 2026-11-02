@@ -56,7 +56,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
     configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
       board: { width: 15, height: 13 },
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } },
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } } },
     roomCode: 'ABCDEFGH',
     roundId: 1,
     revision,
@@ -73,7 +73,7 @@ function room(revision: number, phase: RoomPhase = { type: 'waiting' }): RoomVie
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: ['heart'],
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
     },
     availableItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak', 'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse', 'reverseControls', 'invisibleBombs', 'oilBarrel', 'teleporter'],
     settingsRevision: 1,
@@ -176,7 +176,7 @@ describe('App game flow', () => {
       configuration: { controllers: ['human', 'human'], cpuDifficulty: null,
         board: { width: 15, height: 13 },
         environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-          spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } },
+          spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } } },
     })
 
     act(() => admit(socket, room(1)))

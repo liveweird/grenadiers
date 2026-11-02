@@ -49,10 +49,10 @@ export function createConfiguration(intent: ConfigurationIntent): RoomConfigurat
   return difficulty === null
     ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } }
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } } }
     : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } } }
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } } }
 }
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length

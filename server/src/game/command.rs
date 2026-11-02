@@ -225,7 +225,10 @@ mod tests {
                         )
                         .as_legacy(),
                     ),
-                    grenadiers_core::room::SpikePitTuning::DEFAULT,
+                    grenadiers_core::room::SpikePitTuning::new(
+                        true,
+                        grenadiers_core::room::SpikePitSettings::new(36, 180).unwrap(),
+                    ),
                 )
             );
         }

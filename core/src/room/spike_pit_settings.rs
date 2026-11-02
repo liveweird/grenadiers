@@ -1,9 +1,9 @@
 pub const MIN_SPIKE_PIT_WARNING_TICKS: u64 = 6;
 pub const MAX_SPIKE_PIT_WARNING_TICKS: u64 = 120;
-pub const DEFAULT_SPIKE_PIT_WARNING_TICKS: u16 = 36;
+pub const DEFAULT_SPIKE_PIT_WARNING_TICKS: u16 = 60;
 pub const MIN_SPIKE_PIT_RAISED_TICKS: u64 = 60;
 pub const MAX_SPIKE_PIT_RAISED_TICKS: u64 = 600;
-pub const DEFAULT_SPIKE_PIT_RAISED_TICKS: u16 = 180;
+pub const DEFAULT_SPIKE_PIT_RAISED_TICKS: u16 = 300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SpikePitSettingsError {
@@ -78,9 +78,16 @@ mod tests {
 
     #[test]
     fn defaults_are_sixty_hertz_product_values_and_config_stays_disabled() {
-        assert_eq!(SpikePitSettings::DEFAULT.warning_ticks(), 36);
-        assert_eq!(SpikePitSettings::DEFAULT.raised_ticks(), 180);
+        assert_eq!(SpikePitSettings::DEFAULT.warning_ticks(), 60);
+        assert_eq!(SpikePitSettings::DEFAULT.raised_ticks(), 300);
         assert_eq!(SpikePitConfig::default(), SpikePitConfig::Disabled);
+    }
+
+    #[test]
+    fn former_product_defaults_remain_valid_explicit_settings() {
+        let settings = SpikePitSettings::new(36, 180).unwrap();
+        assert_eq!(settings.warning_ticks(), 36);
+        assert_eq!(settings.raised_ticks(), 180);
     }
 
     #[test]

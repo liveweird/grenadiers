@@ -65,7 +65,7 @@ describe('gameplay settings panel', () => {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
       enabledItems: custom.availableItems,
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
     })
   })
 })
@@ -213,7 +213,7 @@ describe('gameplay settings items', () => {
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
       bombFuseTicks: 180, enabledItems: [],
       environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
+        spikePits: { enabled: false, warningTicks: 60, raisedTicks: 300 } },
     })
     await user.click(screen.getByRole('checkbox', { name: 'Shield' }))
     await user.click(screen.getByRole('checkbox', { name: 'Short flame' }))
@@ -241,7 +241,7 @@ describe('gameplay settings bulk actions', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith(expect.objectContaining({ environment: {
       stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 1 },
-      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+      spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
     } }))
   })
 

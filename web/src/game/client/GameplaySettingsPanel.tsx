@@ -13,7 +13,7 @@ const DEFAULT_NUMERICS = {
   startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
 } satisfies Omit<GameSettings, 'enabledItems' | 'environment'>
 const DEFAULT_LAIRS = { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 } as const
-const DEFAULT_SPIKE_PITS = { enabled: true, warningTicks: 36, raisedTicks: 180 } as const
+const DEFAULT_SPIKE_PITS = { enabled: true, warningTicks: 60, raisedTicks: 300 } as const
 
 const speedText = (level: number): string => `${3 + level * 0.5}`
 const turnText = (units: number): string => {

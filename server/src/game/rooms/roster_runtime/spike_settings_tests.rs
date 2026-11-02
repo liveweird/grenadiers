@@ -116,8 +116,8 @@ fn spike_defaults_publish_v18_rules10_and_recipient_checked_admission() {
     let room = runtime.current_notice().unwrap();
     let room = room.spike_room().unwrap();
     assert_eq!(room.rules_version.get(), 10);
-    assert_eq!(room.settings.environment.spike_pits.warning_ticks, 36);
-    assert_eq!(room.settings.environment.spike_pits.raised_ticks, 180);
+    assert_eq!(room.settings.environment.spike_pits.warning_ticks, 60);
+    assert_eq!(room.settings.environment.spike_pits.raised_ticks, 300);
     assert!(room.settings.environment.spike_pits.enabled);
 
     let prepared = runtime.prepare_resume(SeatId::One).unwrap();

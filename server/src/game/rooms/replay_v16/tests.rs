@@ -10,6 +10,10 @@ use grenadiers_core::{
 use super::*;
 use crate::round_seed::RoundSeedSource;
 
+fn historical_spike_pits() -> SpikePitTuning {
+    SpikePitTuning::new(true, SpikePitSettings::new(36, 180).unwrap())
+}
+
 fn configuration(spike_pits: SpikePitTuning) -> SpikeRoomConfiguration {
     SpikeRoomConfiguration::new(
         LairRoomConfiguration::new(
@@ -143,7 +147,7 @@ fn replay16_retains_disabled_spike_numbers_without_constructing_pits() {
 
 #[test]
 fn replay16_rejects_cross_profile_headers_provenance_and_incomplete_records() {
-    let pits = SpikePitTuning::DEFAULT;
+    let pits = historical_spike_pits();
     let base_recorder = recorder(pits);
     let (_, journal) = base_recorder.into_parts();
     for field in ["format", "rules", "cpu", "navigation", "layout"] {
@@ -184,7 +188,7 @@ fn replay16_binds_gameplay19_and_exact_easy_standard_hard_policy_pairs() {
         (CpuDifficulty::Standard, 33),
         (CpuDifficulty::Hard, 34),
     ] {
-        let pits = SpikePitTuning::DEFAULT;
+        let pits = historical_spike_pits();
         let original = configuration(pits);
         let selected = SpikeRoomConfiguration::new(
             LairRoomConfiguration::new(
@@ -265,7 +269,7 @@ fn replay16_binds_gameplay19_and_exact_easy_standard_hard_policy_pairs() {
 
 #[test]
 fn replay16_records_human_only_rooms_with_no_cpu_provenance() {
-    let pits = SpikePitTuning::DEFAULT;
+    let pits = historical_spike_pits();
     let original = configuration(pits);
     let selected = SpikeRoomConfiguration::new(
         LairRoomConfiguration::new(
@@ -327,7 +331,7 @@ fn replay16_records_human_only_rooms_with_no_cpu_provenance() {
 
 #[test]
 fn replay16_rejects_consistently_forged_future_hard35_provenance() {
-    let pits = SpikePitTuning::DEFAULT;
+    let pits = historical_spike_pits();
     let base = configuration(pits);
     let hard = SpikeRoomConfiguration::new(
         LairRoomConfiguration::new(

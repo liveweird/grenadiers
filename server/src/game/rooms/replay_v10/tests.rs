@@ -10,6 +10,10 @@ use grenadiers_core::{
 use super::*;
 use crate::round_seed::RoundSeedSource;
 
+fn historical_spike_pits() -> SpikePitTuning {
+    SpikePitTuning::new(true, SpikePitSettings::new(36, 180).unwrap())
+}
+
 fn configuration(spike_pits: SpikePitTuning) -> SpikeRoomConfiguration {
     SpikeRoomConfiguration::new(
         LairRoomConfiguration::new(
@@ -143,7 +147,7 @@ fn replay10_retains_disabled_spike_numbers_without_constructing_pits() {
 
 #[test]
 fn replay10_rejects_cross_profile_headers_provenance_and_incomplete_records() {
-    let pits = SpikePitTuning::DEFAULT;
+    let pits = historical_spike_pits();
     let base_recorder = recorder(pits);
     let (_, journal) = base_recorder.into_parts();
     for field in ["format", "rules", "cpu", "navigation", "layout"] {

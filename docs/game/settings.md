@@ -17,8 +17,8 @@ it is not an editable gameplay setting. Quick duel and Solo always use 15×13. S
 | Wins to finish | 1–9 | Sets round wins needed for match victory. Draws award no point. |
 | Bomb fuse | 1–5 seconds, steps of 0.5 | Sets the delay for successfully planted ordinary bombs. |
 | Lair respawn delay | 5–60 whole seconds, default 10 | Delays the first mob and each replacement after death. |
-| Spike warning | 0.1–2 seconds (6–120 ticks), default 0.6 | Sets the visible interval before contacted spikes rise. |
-| Spike raised | 1–10 seconds (60–600 ticks), default 3 | Sets how long raised spikes remain harmful. |
+| Spike warning | 0.1–2 seconds (6–120 ticks), default 1 | Sets the visible interval before contacted spikes rise. |
+| Spike raised | 1–10 seconds (60–600 ticks), default 5 | Sets how long raised spikes remain harmful. |
 | Heart | Enabled or disabled; enabled by default | Adds the one-hit protection pickup to generated soft blocks. |
 | Bracelet | Enabled or disabled; enabled by default | Adds passive equipment that shoves a contacted rival up to one tile. |
 | Punch | Enabled or disabled; enabled by default | Adds permanent equipment for moving the adjacent facing bomb to the next open three-cell wrapped landing. |
@@ -53,8 +53,8 @@ Each lair has exactly one living mob. Its 5–60 second respawn delay (default 1
 that mob dies and also delays the first spawn; there is no capacity editor. All on enables
 lairs; All off and Classic disable them. Disabling/re-enabling retains the delay; Restore resets
 it to ten seconds. See the [lair guide](lairs.md) for independent timers and blocked spawning.
-Spike timing is retained while pits are disabled. Restore returns it to 36 warning ticks and
-180 raised ticks. See the [spike-pit guide](spike-pits.md) for phases, placement and damage.
+Spike timing is retained while pits are disabled. Restore returns it to 60 warning ticks and
+300 raised ticks. See the [spike-pit guide](spike-pits.md) for phases, placement and damage.
 Settings lock at first start and remain locked through automatic rounds and rematches. Create a
 new room to change them.
 

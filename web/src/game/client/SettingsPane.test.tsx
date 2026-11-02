@@ -8,7 +8,10 @@ import { initialGameClientState } from './client'
 import { GamePanelView, type GameActions } from './GamePanel'
 import { snapshot } from './testSupport'
 
-vi.mock('../arena/GameArena', () => ({ GameArena: () => <div /> }))
+vi.mock('../arena/GameArena', () => ({
+  GameArena: ({ label, enabled }: { label: string; enabled?: boolean }) =>
+    <div role="region" aria-label={label} data-enabled={String(enabled)} />,
+}))
 
 const actions = (): GameActions => ({
   admit: vi.fn(() => true), ready: vi.fn(() => true), updateSettings: vi.fn(() => true),
@@ -63,4 +66,14 @@ it('keeps room actions available and preserves an unapplied rules draft', () => 
   expect(screen.queryByRole('combobox', { name: 'Round wins needed' })).not.toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
   expect(screen.getByLabelText('Round wins needed')).toHaveValue('1')
+})
+
+it('disables arena input while settings have focus', () => {
+  const current = snapshot(20)
+  show({ ...initialGameClientState(), connection: 'authenticated', room: current.room,
+    snapshot: current, youSeat: 'one' })
+  const arena = screen.getByRole('region', { name: 'Grenadiers courtyard' })
+  expect(arena).toHaveAttribute('data-enabled', 'true')
+  fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
+  expect(arena).toHaveAttribute('data-enabled', 'false')
 })

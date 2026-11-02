@@ -65,14 +65,6 @@ describe('v12 reconnect presentation', () => {
     renderPanel(state('authenticated'))
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
   })
-
-  it('disables arena input while settings have focus', () => {
-    renderPanel(state('authenticated'))
-    const arena = screen.getByRole('region', { name: 'Grenadiers courtyard' })
-    expect(arena).toHaveAttribute('data-enabled', 'true')
-    fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
-    expect(arena).toHaveAttribute('data-enabled', 'false')
-  })
 })
 
 describe('v12 private-state presentation', () => {

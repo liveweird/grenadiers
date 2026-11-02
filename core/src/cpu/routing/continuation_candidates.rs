@@ -22,6 +22,46 @@ pub(crate) fn continuation_candidates(
     first_axis: Direction,
     work: &mut WorkBudget,
 ) -> Result<Vec<Vec<NominalLeg>>, RouteFailure> {
+    continuation_candidates_inner(
+        observation,
+        forecast,
+        request,
+        refuge,
+        first_axis,
+        false,
+        work,
+    )
+}
+
+pub(crate) fn continuation_candidates_v62(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: ContinuationRequest,
+    refuge: CellId,
+    first_axis: Direction,
+    work: &mut WorkBudget,
+) -> Result<Vec<Vec<NominalLeg>>, RouteFailure> {
+    continuation_candidates_inner(
+        observation,
+        forecast,
+        request,
+        refuge,
+        first_axis,
+        true,
+        work,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn continuation_candidates_inner(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: ContinuationRequest,
+    refuge: CellId,
+    first_axis: Direction,
+    allow_nonfinal_crossing: bool,
+    work: &mut WorkBudget,
+) -> Result<Vec<Vec<NominalLeg>>, RouteFailure> {
     let context = validation::validate(
         observation,
         forecast,
@@ -34,7 +74,14 @@ pub(crate) fn continuation_candidates(
     let vertical_first = matches!(first_axis, Direction::North | Direction::South);
     let mut candidates = Vec::with_capacity(2);
     for first_vertical in [vertical_first, !vertical_first] {
-        match build_candidate(&context, request, refuge, first_vertical, work) {
+        match build_candidate(
+            &context,
+            request,
+            refuge,
+            first_vertical,
+            allow_nonfinal_crossing,
+            work,
+        ) {
             Ok(legs) if !candidates.contains(&legs) => candidates.push(legs),
             Ok(_) | Err(RouteFailure::NoRoute | RouteFailure::Capacity) => {}
             Err(failure) => return Err(failure),
@@ -48,6 +95,7 @@ fn build_candidate(
     request: ContinuationRequest,
     refuge: CellId,
     first_vertical: bool,
+    allow_nonfinal_crossing: bool,
     work: &mut WorkBudget,
 ) -> Result<Vec<NominalLeg>, RouteFailure> {
     let mut motion = Motion::stopped(context, request.first_update);
@@ -72,6 +120,7 @@ fn build_candidate(
             direction,
             refuge,
             final_axis,
+            allow_nonfinal_crossing,
             &mut tick,
             work,
         )?;
@@ -102,6 +151,7 @@ fn advance_axis(
     direction: Direction,
     refuge: CellId,
     final_axis: bool,
+    allow_nonfinal_crossing: bool,
     tick: &mut Tick,
     work: &mut WorkBudget,
 ) -> Result<u8, RouteFailure> {
@@ -116,16 +166,29 @@ fn advance_axis(
         *tick = next_tick(*tick)?;
         let reached = if final_axis {
             inside_refuge(motion.position, refuge)
-        } else if matches!(direction, Direction::North | Direction::South) {
-            motion.position.y == target.y
         } else {
-            motion.position.x == target.x
+            reached_axis(motion.position, target, direction, allow_nonfinal_crossing)
         };
         if reached {
             return Ok(updates);
         }
     }
     Err(RouteFailure::Capacity)
+}
+
+fn reached_axis(
+    position: Position,
+    target: Position,
+    direction: Direction,
+    allow_crossing: bool,
+) -> bool {
+    let (current, target, crossed) = match direction {
+        Direction::North => (position.y, target.y, position.y <= target.y),
+        Direction::East => (position.x, target.x, position.x >= target.x),
+        Direction::South => (position.y, target.y, position.y >= target.y),
+        Direction::West => (position.x, target.x, position.x <= target.x),
+    };
+    current == target || (allow_crossing && crossed)
 }
 
 fn charge_hint_tick(

@@ -8,6 +8,25 @@ use grenadiers_core::game::Tick;
 
 use super::{AcceptedPlan, CpuController};
 
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::game::rooms) enum RouteTracePhase {
+    Observe,
+    Poll,
+    Commit,
+}
+
+#[cfg(test)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::game::rooms) struct RouteTrace {
+    pub tick: Tick,
+    pub phase: RouteTracePhase,
+    pub status: RouteStatus,
+    pub invalidator: Option<grenadiers_core::cpu::survival::RouteInvalidator>,
+    pub plant: Option<PlantPresence>,
+    pub escape_origin_after: bool,
+}
+
 impl AcceptedPlan {
     pub(in crate::game::rooms) const fn has_route(&self) -> bool {
         self.committed_route.is_some()
@@ -35,10 +54,20 @@ impl CpuController {
             (!self.escaping && self.escape_origin.is_none() && self.committed_pulse.is_none())
                 .then_some(self.settled_stop_tick)
                 .flatten();
+        #[cfg(test)]
+        let invalidator = self
+            .committed_route
+            .as_ref()
+            .and_then(|route| route.first_invalidator(observation));
         let status = self
             .committed_route
             .as_mut()?
             .observe_with_stop(observation, settled_stop_tick);
+        #[cfg(test)]
+        let plant = self
+            .committed_route
+            .as_ref()
+            .and_then(CommittedRoute::plant_presence);
         if matches!(status, RouteStatus::Completed | RouteStatus::Invalidated) {
             let origin = (status == RouteStatus::Invalidated)
                 .then(|| self.committed_route.as_ref()?.escape_origin(observation))
@@ -48,6 +77,15 @@ impl CpuController {
             self.escape_origin = origin;
             self.escape_origin_epoch = origin_epoch;
         }
+        #[cfg(test)]
+        self.route_trace.push(RouteTrace {
+            tick: observation.parts().tick,
+            phase: RouteTracePhase::Observe,
+            status,
+            invalidator,
+            plant,
+            escape_origin_after: self.escape_origin.is_some(),
+        });
         Some(status)
     }
 
@@ -65,16 +103,53 @@ impl CpuController {
             .committed_route
             .as_ref()?
             .poll_command(current_tick, self.settled_stop_tick);
+        #[cfg(test)]
+        let plant = self
+            .committed_route
+            .as_ref()
+            .and_then(CommittedRoute::plant_presence);
         if matches!(status, RouteStatus::Completed | RouteStatus::Invalidated) {
             self.clear_route(status == RouteStatus::Invalidated);
         }
+        #[cfg(test)]
+        self.route_trace.push(RouteTrace {
+            tick: current_tick,
+            phase: RouteTracePhase::Poll,
+            status,
+            invalidator: None,
+            plant,
+            escape_origin_after: self.escape_origin.is_some(),
+        });
         Some(status)
     }
 
     pub(in crate::game::rooms) fn commit_route_command(&mut self, command: RouteCommand) -> bool {
-        self.committed_route
+        let committed = self
+            .committed_route
             .as_mut()
-            .is_some_and(|route| route.commit_command(command))
+            .is_some_and(|route| route.commit_command(command));
+        #[cfg(test)]
+        self.route_trace.push(RouteTrace {
+            tick: command.admission_tick(),
+            phase: RouteTracePhase::Commit,
+            status: if committed {
+                RouteStatus::Submit(command)
+            } else {
+                RouteStatus::Invalidated
+            },
+            invalidator: None,
+            plant: self
+                .committed_route
+                .as_ref()
+                .and_then(CommittedRoute::plant_presence),
+            escape_origin_after: self.escape_origin.is_some(),
+        });
+        committed
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn route_trace_for_test(&self) -> &[RouteTrace] {
+        &self.route_trace
     }
 
     pub(in crate::game::rooms) fn invalidate_route(&mut self) {

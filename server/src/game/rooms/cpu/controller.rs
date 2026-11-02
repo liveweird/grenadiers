@@ -14,6 +14,8 @@ use grenadiers_core::room::CpuProfile;
 
 use self::cadence::CadenceState;
 pub(in crate::game::rooms) use self::continuation::ContinuationService;
+#[cfg(test)]
+pub(in crate::game::rooms) use self::continuation_types::ContinuationTrace;
 use self::continuation_types::{ContinuationAuthority, ContinuationClock, PreparedAdmission};
 pub(in crate::game::rooms) use self::teleporter::TeleporterService;
 pub(in crate::game::rooms) use self::types::AcceptedPlan;
@@ -55,6 +57,8 @@ pub(in crate::game::rooms) struct CpuController {
     continuation_trace: continuation_types::ContinuationTrace,
     #[cfg(test)]
     admission_trace: admission::AdmissionTrace,
+    #[cfg(test)]
+    route_trace: Vec<route::RouteTrace>,
 }
 
 impl CpuController {
@@ -101,6 +105,8 @@ impl CpuController {
             continuation_trace: continuation_types::ContinuationTrace::default(),
             #[cfg(test)]
             admission_trace: admission::AdmissionTrace::default(),
+            #[cfg(test)]
+            route_trace: Vec::new(),
         }
     }
 
@@ -270,14 +276,6 @@ impl CpuController {
         self.escape_origin_epoch = None;
     }
 
-    #[cfg(test)]
-    pub(in crate::game::rooms) const fn recovery_state(&self) -> (bool, bool) {
-        (
-            self.escape_origin.is_some(),
-            self.escape_origin.is_some() && self.committed_pulse.is_some(),
-        )
-    }
-
     pub(in crate::game::rooms) fn validate_escape_epoch(&mut self, command_epoch: u64) {
         if self.escape_origin.is_some() && self.escape_origin_epoch != Some(command_epoch) {
             self.clear_escape_origin();
@@ -299,6 +297,8 @@ mod observation;
 
 #[path = "controller_route.rs"]
 mod route;
+#[cfg(test)]
+pub(in crate::game::rooms) use route::RouteTrace;
 
 #[path = "controller_admission.rs"]
 pub(in crate::game::rooms) mod admission;

@@ -384,3 +384,11 @@ pub(super) fn teleporter_plant_supported(
                 .iter()
                 .all(|oil| oil.state != OilBarrelState::Burning))
 }
+
+#[path = "plant_tactic_diagnostic.rs"]
+mod diagnostic;
+pub(super) use diagnostic::diagnose_candidates;
+pub use diagnostic::{
+    PlantCandidateDiagnostic, PlantCandidateOutcome, PlantSupportDiagnostic,
+    TeleporterSupportFailure,
+};

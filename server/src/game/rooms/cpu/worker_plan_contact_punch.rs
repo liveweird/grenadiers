@@ -17,9 +17,9 @@ pub(super) fn plan(
     work: &mut WorkBudget,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     let planner = match job.policy {
-        CpuPolicy::UtilityV60 => plan_contact_punch_v60_with_origin,
-        CpuPolicy::UtilityV61 => plan_hard_contact_punch_v61_with_origin,
-        _ => unreachable!("contact-punch dispatch is closed to policies 60/61"),
+        CpuPolicy::UtilityV60 | CpuPolicy::UtilityV62 => plan_contact_punch_v60_with_origin,
+        CpuPolicy::UtilityV61 | CpuPolicy::UtilityV63 => plan_hard_contact_punch_v61_with_origin,
+        _ => unreachable!("contact-punch dispatch is closed to policies 60-63"),
     };
     planner(
         &job.observation,

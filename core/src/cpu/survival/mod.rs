@@ -9,9 +9,11 @@ mod compatibility;
 mod contact_plant;
 mod continuation_compatibility;
 mod continuation_execution;
+mod continuation_execution_types;
 mod continuation_pending;
 mod continuation_planner;
 mod continuation_selection;
+mod continuation_selection_v62;
 mod corner_refuges;
 mod deadline;
 mod execution;
@@ -48,9 +50,9 @@ pub use compatibility::can_admit_ordinary;
 pub use contact_plant::PlantContactCertificate;
 #[cfg(test)]
 pub(crate) use contact_plant::contact_scene_candidate_for_test;
-pub use continuation_execution::{
-    CommittedContinuation, ContinuationCommand, ContinuationPublication, ContinuationStatus,
-    PreparedContinuation, PreparedRenewal,
+pub use continuation_execution::{CommittedContinuation, PreparedContinuation, PreparedRenewal};
+pub use continuation_execution_types::{
+    ContinuationCommand, ContinuationPublication, ContinuationStatus,
 };
 pub use continuation_pending::PendingContinuation;
 #[cfg(test)]
@@ -61,6 +63,7 @@ pub use continuation_selection::{
     plan_lairs_avoiding_pits as plan_continuation_lairs_avoiding_pits,
     plan_lairs_v54 as plan_continuation_lairs_v54,
 };
+pub use continuation_selection_v62::plan_lairs_v62 as plan_continuation_lairs_v62;
 pub use corner_refuges::{
     plan_contact_punch_v60_with_origin, plan_corner_refuges_v56_with_origin,
     plan_hard_contact_punch_v61_with_origin, plan_hard_corner_refuges_v57_with_origin,
@@ -68,6 +71,8 @@ pub use corner_refuges::{
 };
 pub use execution::{CommittedPulse, PulseStatus};
 pub use lair_planner::{LairSurvivalPlan, plan_lairs, plan_lairs_with_origin};
+#[doc(hidden)]
+pub use lair_v23::{HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant};
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
 pub use pickup_progress::{
@@ -77,6 +82,11 @@ pub use pit_avoidance::{
     plan_hard_pit_avoidance_v53_with_origin, plan_pit_avoidance_v52_with_origin,
 };
 pub use planner::{plan, plan_with_origin};
+#[doc(hidden)]
+pub use plant_tactic::{
+    PlantCandidateDiagnostic, PlantCandidateOutcome, PlantSupportDiagnostic,
+    TeleporterSupportFailure,
+};
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
 pub use refuge_guidance::{
@@ -95,6 +105,8 @@ pub use respawn_v22::{
     plan_respawn_v23_with_origin, plan_respawn_v24_with_origin, plan_respawn_v25_with_origin,
     plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
 };
+#[doc(hidden)]
+pub use route_diagnostic::{RouteInvalidator, stationary_suffix_preflight};
 pub use route_execution::{CommittedRoute, RouteCommand, RouteStatus};
 pub use teleporter_execution::TELEPORTER_ADMISSION_ALLOWANCE;
 pub use teleporter_execution_types::{
@@ -108,6 +120,9 @@ pub use teleporter_recovery_types::TeleporterStepPlan;
 
 pub const MAX_PLAN_AGE_TICKS: u64 = 6;
 pub const WORK_ALLOWANCE: u32 = 65_536;
+
+#[path = "route_diagnostic.rs"]
+mod route_diagnostic;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SurvivalPlan {
@@ -149,6 +164,8 @@ mod continuation_authority_tests;
 mod continuation_execution_guard_tests;
 #[cfg(test)]
 mod continuation_execution_tests;
+#[cfg(test)]
+mod continuation_suffix_execution_tests;
 
 #[cfg(test)]
 mod continuation_test_fixture;
@@ -163,6 +180,8 @@ mod continuation_guard_tests;
 mod continuation_selection_tests;
 #[cfg(test)]
 mod continuation_selection_v54_tests;
+#[cfg(test)]
+mod continuation_selection_v62_tests;
 
 #[cfg(test)]
 mod pickup_stall_tests;

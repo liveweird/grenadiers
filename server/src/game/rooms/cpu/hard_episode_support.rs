@@ -3,7 +3,10 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     cpu::WorldId,
-    game::{EnabledItems, MobNavigationPolicy, SeatId, SimulationSeed, StormCloudConfig},
+    game::{
+        ArenaConstructionProfile, EnabledItems, MobNavigationPolicy, SeatId, SimulationSeed,
+        SpikePitLayoutPolicy, StepEventKind, StormCloudConfig,
+    },
     protocol::{RoomCode, RoomId},
     room::{
         BoardSize, CpuDifficulty, CpuProfile, RespawnLairSettings, RespawnLairTuning,
@@ -40,6 +43,7 @@ pub(super) struct Outcome {
     pub profile: CpuProfile,
     pub moved: [bool; 3],
     pub owned_bombs: [usize; 3],
+    pub event_placements: [usize; 3],
     pub upgrades: [[bool; 3]; 3],
     pub attack_intents: [usize; 3],
     pub attack_bombs: [usize; 3],
@@ -58,9 +62,9 @@ pub(super) struct Outcome {
 
 pub(super) const fn current_profile(difficulty: CpuDifficulty) -> CpuProfile {
     match difficulty {
-        CpuDifficulty::Easy => CpuProfile::CONTACT_PUNCH_V60_EASY,
-        CpuDifficulty::Standard => CpuProfile::CONTACT_PUNCH_V60_STANDARD,
-        CpuDifficulty::Hard => CpuProfile::HARD_V61,
+        CpuDifficulty::Easy => CpuProfile::RECOVERY_V62_EASY,
+        CpuDifficulty::Standard => CpuProfile::RECOVERY_V62_STANDARD,
+        CpuDifficulty::Hard => CpuProfile::HARD_V63,
     }
 }
 
@@ -77,7 +81,7 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
         case.board,
     )
     .unwrap();
-    let mut runtime = RosterRuntime::new_spike_v20_with_navigation(
+    let mut runtime = RosterRuntime::new_spike_v20_profiled_with_navigation(
         RosterIdentity {
             id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
             code: RoomCode::new("ABCDEFGH").unwrap(),
@@ -98,6 +102,7 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
             ))
         }),
         MobNavigationPolicy::TimedEscapeV3,
+        ArenaConstructionProfile::LairClearanceV5,
     )
     .unwrap();
     let admission = runtime.prepare_join(SeatId::One).unwrap();
@@ -115,6 +120,17 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
     for _ in 0..grenadiers_core::room::COUNTDOWN_TICKS {
         runtime.settle_boundary([None; 4]).unwrap();
     }
+    let current = runtime.replay_inspection();
+    let simulation = current.simulation.as_ref().unwrap();
+    assert_eq!(
+        current.construction_profile,
+        ArenaConstructionProfile::LairClearanceV5
+    );
+    assert_eq!(simulation.generation.version(), 5);
+    assert_eq!(
+        simulation.state.rules().spike_pit_layout_policy(),
+        SpikePitLayoutPolicy::LairClearanceV2
+    );
     let planner = if case.native {
         CpuPlanner::new().unwrap()
     } else {
@@ -166,6 +182,7 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
         .collect::<BTreeSet<_>>();
     let mut moved = [false; 3];
     let mut owned_bombs = [0; 3];
+    let mut event_placements = [0; 3];
     let mut upgrades_seen = [[false; 3]; 3];
     let mut attack_intents = [0; 3];
     let mut attack_bombs = [0; 3];
@@ -178,6 +195,17 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
             merge(&mut aggregate, planner.pump_for_test(usize::MAX));
         }
         driver.tick(Instant::now()).unwrap();
+        let (_, report) = driver.runtime.last_step_trace_for_test().unwrap();
+        for event in &report.events {
+            if let StepEventKind::BombPlaced(bomb) = event.kind
+                && let Some(index) = CPU_SEATS.iter().position(|seat| {
+                    driver.runtime.state_for_test().unwrap().actors()[seat.index()].id()
+                        == bomb.owner
+                })
+            {
+                event_placements[index] += 1;
+            }
+        }
         if case.native {
             std::thread::sleep(std::time::Duration::from_millis(16));
         }
@@ -239,6 +267,7 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
         profile,
         moved,
         owned_bombs,
+        event_placements,
         upgrades: upgrades_seen,
         attack_intents,
         attack_bombs,
@@ -298,6 +327,7 @@ fn log(case: Case, outcome: &Outcome) {
             "native": case.native,
             "moved": outcome.moved,
             "ownedBombs": outcome.owned_bombs,
+            "eventPlacements": outcome.event_placements,
             "upgrades": outcome.upgrades,
             "attackIntents": outcome.attack_intents,
             "attackBombs": outcome.attack_bombs,

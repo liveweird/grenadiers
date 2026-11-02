@@ -46,6 +46,26 @@ pub(super) fn observation_with_pose(
 }
 
 impl CpuController {
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn recovery_state(&self) -> (bool, bool) {
+        (
+            self.escape_origin.is_some(),
+            self.escape_origin.is_some() && self.committed_pulse.is_some(),
+        )
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn has_continuation_authority_for_test(&self) -> bool {
+        self.continuation.is_some()
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn continuation_trace_for_test(
+        &self,
+    ) -> super::continuation_types::ContinuationTrace {
+        self.continuation_trace
+    }
+
     pub(in crate::game::rooms) fn plan_now_for_test(
         &mut self,
         observation: &Observation,

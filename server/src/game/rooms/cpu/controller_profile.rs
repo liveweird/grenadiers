@@ -27,6 +27,9 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                         | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                         | grenadiers_core::room::CpuProfile::HARD_V61
+                        | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                        | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                        | grenadiers_core::room::CpuProfile::HARD_V63
                 );
         }
         match rules_version {
@@ -93,6 +96,8 @@ impl CpuController {
                     | grenadiers_core::room::CpuProfile::CORNER_REFUGES_V56_EASY
                     | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                     | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
+                    | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                    | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
             ),
             _ => false,
         }
@@ -118,6 +123,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V61
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V63
         )
     }
 
@@ -156,6 +164,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V61
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V63
         )
     }
 
@@ -191,6 +202,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V61
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V63
         )
     }
 
@@ -223,6 +237,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V61
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V63
         )
     }
 
@@ -252,6 +269,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V61
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V63
         )
     }
 
@@ -278,6 +298,9 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_STANDARD
                 | grenadiers_core::room::CpuProfile::CONTACT_PUNCH_V60_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V61
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_STANDARD
+                | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
+                | grenadiers_core::room::CpuProfile::HARD_V63
         )
     }
 }

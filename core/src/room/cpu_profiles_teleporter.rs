@@ -63,5 +63,11 @@ impl CpuProfile {
         Self::profile(CpuPolicy::UtilityV60, CpuDifficulty::Easy);
     pub const HARD_V61: Self = Self::profile(CpuPolicy::UtilityV61, CpuDifficulty::Hard);
 
+    /// Crossing-aware origin continuation, retaining the v60/v61 ordinary planners.
+    pub const RECOVERY_V62_STANDARD: Self =
+        Self::profile(CpuPolicy::UtilityV62, CpuDifficulty::Standard);
+    pub const RECOVERY_V62_EASY: Self = Self::profile(CpuPolicy::UtilityV62, CpuDifficulty::Easy);
+    pub const HARD_V63: Self = Self::profile(CpuPolicy::UtilityV63, CpuDifficulty::Hard);
+
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

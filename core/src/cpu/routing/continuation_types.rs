@@ -57,6 +57,20 @@ pub(super) struct StopBranch {
     pub(super) checkpoints: Vec<ContinuationCheckpoint>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct CertifiedStationarySuffix {
+    pub(super) checkpoints: Vec<ContinuationCheckpoint>,
+}
+
+impl CertifiedStationarySuffix {
+    pub(super) fn protects_final_update(&self, publication: Tick, horizon: Tick) -> bool {
+        self.checkpoints
+            .last()
+            .is_some_and(|last| last.tick == publication)
+            && publication.0.checked_add(1) == Some(horizon.0)
+    }
+}
+
 #[cfg(test)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct ContinuationCheckpointView {
@@ -84,6 +98,7 @@ pub struct ContinuationCertificate {
     legs: Vec<NominalLeg>,
     checkpoints: Vec<ContinuationCheckpoint>,
     stop_branches: Vec<StopBranch>,
+    stationary_suffix: Option<CertifiedStationarySuffix>,
     assurance: RouteAssurance,
     assumptions: BTreeSet<EntityId>,
     evolution: ForecastEvolution,
@@ -100,6 +115,7 @@ pub(super) struct ContinuationParts {
     pub(super) legs: Vec<NominalLeg>,
     pub(super) checkpoints: Vec<ContinuationCheckpoint>,
     pub(super) stop_branches: Vec<StopBranch>,
+    pub(super) stationary_suffix: Option<CertifiedStationarySuffix>,
     pub(super) assumptions: BTreeSet<EntityId>,
     pub(super) evolution: ForecastEvolution,
     pub(super) contact: ContinuationContact,
@@ -126,6 +142,7 @@ impl ContinuationCertificate {
             legs: parts.legs,
             checkpoints: parts.checkpoints,
             stop_branches: parts.stop_branches,
+            stationary_suffix: parts.stationary_suffix,
             assurance,
             assumptions: parts.assumptions,
             evolution: parts.evolution,
@@ -150,6 +167,33 @@ impl ContinuationCertificate {
     }
 
     pub(crate) const fn survive_until(&self) -> Tick {
+        self.survive_until
+    }
+
+    #[doc(hidden)]
+    pub fn diagnostic_legs(&self) -> Vec<(crate::cpu::MovementIntent, u8)> {
+        self.legs
+            .iter()
+            .map(|leg| (leg.movement(), leg.updates()))
+            .collect()
+    }
+
+    #[doc(hidden)]
+    pub fn diagnostic_positions(&self) -> Vec<(Tick, crate::game::Position, Direction)> {
+        self.checkpoints
+            .iter()
+            .map(|checkpoint| {
+                (
+                    checkpoint.tick,
+                    checkpoint.motion.position,
+                    checkpoint.motion.heading,
+                )
+            })
+            .collect()
+    }
+
+    #[doc(hidden)]
+    pub const fn diagnostic_survive_until(&self) -> Tick {
         self.survive_until
     }
 
@@ -201,6 +245,10 @@ impl ContinuationCertificate {
         &self.stop_branches
     }
 
+    pub(super) const fn stationary_suffix(&self) -> Option<&CertifiedStationarySuffix> {
+        self.stationary_suffix.as_ref()
+    }
+
     pub(super) const fn assurance(&self) -> &RouteAssurance {
         &self.assurance
     }
@@ -250,5 +298,15 @@ impl ContinuationCertificate {
                 ))
             })
             .collect()
+    }
+
+    #[cfg(test)]
+    pub(crate) fn stationary_suffix_shape_for_test(&self) -> Option<(Tick, Tick, usize)> {
+        let suffix = self.stationary_suffix.as_ref()?;
+        Some((
+            suffix.checkpoints.first()?.tick,
+            suffix.checkpoints.last()?.tick,
+            suffix.checkpoints.len(),
+        ))
     }
 }

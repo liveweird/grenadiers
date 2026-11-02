@@ -7,11 +7,14 @@ mod continuation_candidates;
 mod continuation_contact;
 mod continuation_proof;
 mod continuation_renewal;
+#[cfg(test)]
+mod continuation_renewal_tests;
 mod continuation_types;
 mod motion;
 mod pickup_pulse;
 mod pit_avoidance;
 mod plant;
+mod plant_diagnostic;
 mod plant_types;
 mod pulse;
 mod pulse_geometry;
@@ -50,12 +53,13 @@ pub use teleporter_step_types::{TeleporterStep, TeleporterStepPhase, TeleporterS
 pub use types::{PoseBounds, PulseLease, PulseRequest, RouteAssurance, RouteFailure, RouteMode};
 
 pub(crate) use bracelet_guard::BraceletGuard;
-pub(crate) use continuation::certify_continuation;
 #[cfg(test)]
 pub(crate) use continuation::certify_nominal_for_test;
+pub(crate) use continuation::{certify_continuation, certify_continuation_v62};
 pub(crate) use continuation_candidates::continuation_candidates;
+pub(crate) use continuation_candidates::continuation_candidates_v62;
 pub use continuation_renewal::CONTINUATION_RENEWAL_ALLOWANCE;
-pub(crate) use continuation_renewal::{PreparedFrame, PreparedGrant};
+pub(crate) use continuation_renewal::{PreparedFrame, PreparedGrant, PreparedHold};
 pub use continuation_types::ContinuationCertificate;
 pub(crate) use continuation_types::{ContinuationRequest, NominalLeg};
 pub(crate) use teleporter_step_geometry::max_travel as teleporter_max_travel;
@@ -67,6 +71,7 @@ pub(crate) use plant::{
     plan_lair_timed_weapon_plant,
 };
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
+pub(crate) use plant_diagnostic::derive_lair_plant_placement;
 pub(crate) use pulse::{PulseOriginGrace, certify_escape_pulse, certify_lair_escape_pulse};
 pub use pulse::{certify_lair_pulse, certify_pulse};
 pub use punch::plan_punch;

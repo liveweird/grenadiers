@@ -95,3 +95,7 @@ pub(super) fn opening(
         contact: Some(contact),
     })
 }
+
+#[path = "lair_v23_diagnostic.rs"]
+mod diagnostic;
+pub use diagnostic::{HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant};

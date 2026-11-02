@@ -97,45 +97,53 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.20 — 2026-11-02
+## v1.3.21 — 2026-11-02
 
-New games and restored settings use a 1-second spike warning and a 5-second raised phase
-(60/300 ticks). Quick duel, Solo, custom rooms and disabled-feature tuning use the same defaults.
-Explicit previous/custom durations remain valid. Archived replay fixtures keep their recorded
-36/180 timings; physics, bounds, gameplay20 and replay identities remain unchanged.
+The courtyard and primary actions fit desktop and mobile viewports without page scrolling.
+A hideable settings panel preserves drafts, contains keyboard focus, closes with Escape and
+returns focus to its opener. Arena input is disabled while settings are open. Long rules and
+room details remain inside bounded panels; the keyboard-accessible item bar scrolls internally
+on narrow screens so additional effects do not displace play or local controls.
 
 ### Verification
 
-- Frozen local Rust source passes debug/release/coverage: 1,965 Core tests plus two doctests,
-  780 ordinary server cases and four isolated native worker cases per profile. All 4,194,304
-  item masks pass in each profile with 32 partitions/four workers and no retries. Coverage is
-  74,827/80,311 lines (93.17%), above the unchanged 90% floor, using 40 raw profiles. The full
-  gate took 970.669 seconds. Formatting, strict workspace Clippy and repository checks pass.
-  Independent review is clear.
-- Distinct Linux debug/release workspace units and doctests pass in run
-  [41383568806](https://github.com/liveweird/grenadiers/actions/runs/41383568806).
-- Fresh web coverage passes 170 files/7,428 tests: lines 95.53%, statements 92.55%, functions
-  91.70%, branches 88.96%, above the unchanged floors. API/contracts, lint, Knip, E2E static
-  checks and production build pass. Compressed JS is 399,576/400,000 bytes; CSS is 15,568/20,000.
-- Exact-image Compose authentication, rendered keyboard duel and three-CPU play pass. The
-  two-browser settings scenario verifies new defaults, restoring defaults and explicit settings.
-  Restricted Kubernetes passes with three moving, bomb-using CPUs, no browser errors and the
-  required container/probe/resource restrictions. Temporary stacks and namespaces are removed.
-- Rust policies and npm high-severity audits pass; existing moderate findings remain 20 web/12
-  E2E in overlapping trees. Pinned Trivy finds zero fixable high/critical vulnerabilities.
-  All five arena/branding images retain their accepted bytes.
+- Independent UI review is clear. Fresh web coverage passes 171 files/7,431 tests: lines 95.53%,
+  statements 92.56%, functions 91.73%, branches 88.94%, above the unchanged floors. API/contracts,
+  lint, Knip, E2E static checks and all 122 scenario mappings pass. A subsequent scroller-only
+  accessibility attribute fix passes its four focused EN/PL tests and the final build; coverage
+  is reused because no decision branches changed. Compressed JS is 399,921/400,000 bytes;
+  CSS is 16,228/20,000.
+- Rust/API implementation, toolchain and external dependencies are unchanged. Reuse the complete
+  [v1.3.20 Rust/Linux/policy/audit evidence](history/releases.md#v1320--2026-11-02), including
+  all debug/release/coverage item masks and 93.17% Rust line coverage. Cargo product versions
+  change only to identify this combined release; the runtime binary is rebuilt for that version.
+- All five final exact-image Chromium scenarios pass: authentication, keyboard duel, shared
+  settings, lobby containment and the painted four-player HUD across 1440×900, 1024×768,
+  390×844 and 320×568. Checks retain Axe accessibility, native keyboard inventory scrolling,
+  draft/focus behavior and a dense inventory/pickup notice. See [desktop](screenshots/viewport-desktop.png)
+  and [320×568](screenshots/viewport-320.png) examples.
+- Compose and restricted Kubernetes each pass fresh three-CPU play, with all CPUs moving and
+  planting, no browser errors, and the required container/probe/resource restrictions. Temporary
+  stacks and namespaces are removed.
+- Pinned Trivy finds zero fixable high/critical vulnerabilities in the exact final image.
+  All five arena/branding image files retain their accepted bytes.
 
 ### Artifact, upgrade and rollback
 
-Accepted source: `c043e5732af0fa6e5d744fa0bbfe49cb9bac827f`.
-Accepted image: `sha256:3ab41b76d485506e2a94fd3323fbf4dbb663d2dcdb2dba54e9650d07202c2889`.
+Accepted application/image source: `862c989645debdc25d9f5c89ac01b277c1b51fb8`.
+The full web coverage source is `3505f62c34edac2fa6aa20fc1d82a650a9a8399d`; intervening changes
+are the focused accessibility attributes and E2E interaction/geometry checks described above.
+Accepted image: `sha256:5d1509da2180fea3a06abb170f554aab798010811988b87a37a5abe9d9f4d6d8`.
 
-The exact image runs on localhost:8085. Image/source/version labels, restricted container
-settings, health/readiness, headers/CSP/cache and all nine served files pass, along with fresh
-three-Hard-CPU play. Deploy the paired server/web image and reload existing browser tabs.
-The v1.3.19 immutable image/override remain for rollback. Existing matches do not survive a
-server restart. This publishes source and an accepted local runtime; no hosted service or
-production registry is configured. The artist bundle is unchanged.
+The exact image runs on localhost:8085. Image/source/version labels, restricted runtime settings,
+health/readiness, headers/CSP/cache and all nine served files pass, along with fresh three-Hard-CPU
+play.
+The v1.3.20 immutable image/override remain for rollback. Deploy the paired server/web image
+and reload browser tabs. Existing matches do not survive restart. This publishes source and an
+accepted local runtime; no hosted service or production registry is configured.
+
+<a id="v1320--2026-11-02"></a>
+The [v1.3.20 record](history/releases.md#v1320--2026-11-02) is preserved in release history.
 
 <a id="v1319--2026-11-02"></a>
 The [v1.3.19 record](history/releases.md#v1319--2026-11-02) is preserved in release history.

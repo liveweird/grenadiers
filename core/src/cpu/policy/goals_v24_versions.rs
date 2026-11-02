@@ -2,7 +2,7 @@ use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::CellId;
 
 use super::{GuidanceV24, select_inner};
-use crate::cpu::policy::{PressureMode, UtilityMemory};
+use crate::cpu::policy::{GoalModes, PressureMode, UtilityMemory};
 
 pub(in crate::cpu::policy) fn select(
     observation: &Observation,
@@ -18,7 +18,7 @@ pub(in crate::cpu::policy) fn select(
         memory,
         work,
         false,
-        PressureMode::Disabled,
+        GoalModes::nearest(PressureMode::Disabled),
         false,
         false,
     )
@@ -38,7 +38,7 @@ pub(in crate::cpu::policy) fn select_v25(
         memory,
         work,
         true,
-        PressureMode::Disabled,
+        GoalModes::nearest(PressureMode::Disabled),
         false,
         false,
     )
@@ -58,7 +58,7 @@ pub(in crate::cpu::policy) fn select_v28(
         memory,
         work,
         true,
-        PressureMode::Baseline,
+        GoalModes::nearest(PressureMode::Baseline),
         false,
         false,
     )
@@ -79,7 +79,7 @@ pub(in crate::cpu::policy) fn select_v38(
         memory,
         work,
         true,
-        pressure_mode,
+        GoalModes::nearest(pressure_mode),
         true,
         false,
     )
@@ -102,7 +102,28 @@ pub(in crate::cpu::policy) fn select_pits(
         memory,
         work,
         true,
-        pressure_mode,
+        GoalModes::nearest(pressure_mode),
+        farm_origin_recovery,
+        true,
+    )
+}
+
+pub(in crate::cpu::policy) fn select_pits_v59(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+    farm_origin_recovery: bool,
+) -> Option<GuidanceV24> {
+    select_inner(
+        observation,
+        actor,
+        current,
+        memory,
+        work,
+        true,
+        GoalModes::visible_yield(),
         farm_origin_recovery,
         true,
     )

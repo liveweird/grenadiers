@@ -6,7 +6,8 @@ use grenadiers_core::{
         survival::{
             TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_corner_refuges_v56_with_origin,
             plan_hard_blocked_births_v43_with_origin, plan_hard_corner_refuges_v57_with_origin,
-            plan_hard_pit_avoidance_v53_with_origin, select_teleporter_recovery_v50,
+            plan_hard_farm_yield_v59_with_origin, plan_hard_pit_avoidance_v53_with_origin,
+            select_teleporter_recovery_v50,
         },
     },
     game::{CellId, EntityId, PickupKind, Position, SeatId, State, Tick},
@@ -269,6 +270,7 @@ fn probe_basis(basis: &PlanningBasis<'_>) -> BasisProbe {
         CpuPolicy::UtilityV58 => {
             grenadiers_core::cpu::survival::plan_hard_exit_pressure_v58_with_origin
         }
+        CpuPolicy::UtilityV59 => plan_hard_farm_yield_v59_with_origin,
         _ => panic!("unsupported interaction characterization profile"),
     };
     let planned = plan(

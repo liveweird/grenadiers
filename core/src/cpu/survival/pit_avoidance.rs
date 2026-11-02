@@ -1,5 +1,5 @@
 use crate::cpu::forecast::ObservedHazardMemory;
-use crate::cpu::policy::{PolicyError, PressureMode, UtilityMemory};
+use crate::cpu::policy::{GoalModes, PolicyError, PressureMode, UtilityMemory};
 use crate::cpu::{CpuRng, Observation, WorkBudget};
 use crate::game::Tick;
 
@@ -26,7 +26,7 @@ pub fn plan_pit_avoidance_v52_with_origin(
         origin,
         rng,
         work,
-        PressureMode::Disabled,
+        GoalModes::nearest(PressureMode::Disabled),
     )
 }
 
@@ -48,7 +48,7 @@ pub fn plan_hard_pit_avoidance_v53_with_origin(
         origin,
         rng,
         work,
-        PressureMode::Baseline,
+        GoalModes::nearest(PressureMode::Baseline),
     )
 }
 
@@ -61,7 +61,7 @@ fn plan(
     origin: Option<&PlantEscapeOrigin>,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
-    pressure_mode: PressureMode,
+    goal_modes: GoalModes,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     super::refuge_guidance::plan_policy(
         observation,
@@ -72,8 +72,8 @@ fn plan(
         rng,
         work,
         true,
-        pressure_mode,
-        pressure_mode.enabled(),
+        goal_modes,
+        goal_modes.pressure.enabled(),
         true,
         RefugeGuidance::CENTER_THREATENED_ROOT,
         FarmRefugeMode::Legacy,

@@ -25,6 +25,24 @@ pub(super) fn select_guidance(
     )
 }
 
+pub(super) fn select_guidance_v59(
+    observation: &Observation,
+    actor: &VisibleActor,
+    current: CellId,
+    memory: &UtilityMemory,
+    work: &mut WorkBudget,
+    farm_origin_recovery: bool,
+) -> Option<super::goals::v24::GuidanceV24> {
+    super::goals::v24::select_pits_v59(
+        observation,
+        actor,
+        current,
+        memory,
+        work,
+        farm_origin_recovery,
+    )
+}
+
 pub fn plan_farm_pits_v52(
     observation: &Observation,
     memory: &UtilityMemory,
@@ -106,6 +124,36 @@ pub(crate) fn plan_hard_pits_exit_pressure_v58(
         rng,
         work,
         PlannerVersion::HardPitsExitPressureV58,
+    )
+}
+
+pub(crate) fn plan_hard_farm_yield_v59(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    plan_rules10(
+        observation,
+        memory,
+        rng,
+        work,
+        PlannerVersion::HardFarmYieldV59,
+    )
+}
+
+pub(crate) fn plan_hard_pits_yield_v59(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    plan_rules10(
+        observation,
+        memory,
+        rng,
+        work,
+        PlannerVersion::HardPitsYieldV59,
     )
 }
 

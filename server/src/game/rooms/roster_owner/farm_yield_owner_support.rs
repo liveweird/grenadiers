@@ -45,15 +45,15 @@ pub(super) struct Outcome {
     pub target_destroyed: bool,
     pub second_block_destroyed: bool,
     pub open_flame_observed: bool,
+    pub flame_horizon_observed: bool,
     pub resolved: bool,
     pub cpu_death: Option<Tick>,
     pub worker: PumpReport,
     pub admissions: AdmissionTrace,
 }
 
-pub(super) fn run(updates: usize) -> Outcome {
-    let (mut owner, planner) =
-        duel_driver(CpuProfile::HARD_V58, scene, [58; 32], Environment::Disabled);
+pub(super) fn run(profile: CpuProfile, updates: usize) -> Outcome {
+    let (mut owner, planner) = duel_driver(profile, scene, [58; 32], Environment::Disabled);
     let initial_range = owner
         .runtime
         .state_for_test()
@@ -67,6 +67,7 @@ pub(super) fn run(updates: usize) -> Outcome {
     let mut target_destroyed = false;
     let mut second_block_destroyed = false;
     let mut open_flame_observed = false;
+    let mut flame_horizon_observed = false;
     let mut resolved = false;
     let mut cpu_death = None;
     let mut worker = PumpReport::default();
@@ -117,6 +118,12 @@ pub(super) fn run(updates: usize) -> Outcome {
             second_block_destroyed = !state.world().arena().blocks().contains(&SECOND_BLOCK);
             open_flame_observed =
                 state.world().hazards().get(&CellId::new(3, 6)) == Some(&first.flame_end);
+            flame_horizon_observed = !state.world().hazards().is_empty()
+                && state
+                    .world()
+                    .hazards()
+                    .values()
+                    .all(|expiry| *expiry == first.flame_end);
         }
         if let Some(first) = plant
             && state.tick().0 == first.flame_end.0 + 1
@@ -149,6 +156,7 @@ pub(super) fn run(updates: usize) -> Outcome {
         target_destroyed,
         second_block_destroyed,
         open_flame_observed,
+        flame_horizon_observed,
         resolved,
         cpu_death,
         worker,

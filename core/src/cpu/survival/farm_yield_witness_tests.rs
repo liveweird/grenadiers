@@ -1,4 +1,6 @@
-use crate::cpu::policy::{PressureMode, StrategicObjectiveKind, StrategicTarget, UtilityMemory};
+use crate::cpu::policy::{
+    GoalModes, PressureMode, StrategicObjectiveKind, StrategicTarget, UtilityMemory,
+};
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant};
 use crate::cpu::{BombKnowledge, CpuRng, ManualIntent, MovementIntent, WorkBudget};
 use crate::game::{Direction, EnabledItems, InputAction, Position, SeatInput, Tick};
@@ -244,7 +246,7 @@ fn high_yield_live_candidate_is_refused_by_the_bounded_no_lair_plant_tactic() {
         true,
         true,
         true,
-        PressureMode::ExitCoverage,
+        GoalModes::nearest(PressureMode::ExitCoverage),
         false,
         true,
     )
@@ -286,7 +288,7 @@ fn high_yield_live_candidate_is_refused_by_the_bounded_no_lair_plant_tactic() {
     assert_eq!(work.spent(), 33_089);
 }
 
-fn execute_through_flames(
+pub(super) fn execute_through_flames(
     basis: &mut FarmYieldBasis,
     certificate: crate::cpu::routing::PlantCertificate,
     accepted_movement: MovementIntent,

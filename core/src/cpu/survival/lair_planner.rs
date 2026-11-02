@@ -36,7 +36,7 @@ pub(super) fn plan_lairs_inner(
     strategic_goals: bool,
     failed_plant_recovery: bool,
     persistent_burning_oil: bool,
-    pressure_mode: crate::cpu::policy::PressureMode,
+    goal_modes: crate::cpu::policy::GoalModes,
     counter_pressure: bool,
     pickup_progress: bool,
     refuge_guidance: RefugeGuidance,
@@ -110,7 +110,7 @@ pub(super) fn plan_lairs_inner(
             opportunistic_planting,
             strategic_goals,
             failed_plant_recovery,
-            pressure_mode,
+            goal_modes,
             farm_origin_recovery,
             avoid_pits,
         )?

@@ -27,11 +27,34 @@ pub(super) struct RivalPressure {
     pub unused_slot: u32,
 }
 
+#[derive(Clone, Copy)]
 pub(super) struct PressureMaps<'a> {
     pub distance: &'a DistanceMap,
     pub first_step: &'a FirstStepMap,
     pub search: &'a SearchMap,
     pub pits: &'a PitMask,
+}
+
+pub(super) struct PressureCandidates<'a> {
+    pub(super) candidates: Vec<Candidate>,
+    pub(super) remainder: Option<PressureRemainder<'a>>,
+}
+
+pub(super) struct PressureRemainder<'a> {
+    pub(super) kind: BlastKind,
+    pub(super) range: u16,
+    pub(super) geometry: crate::cpu::survival::ObservedBlastGeometry<'a>,
+    pub(super) work: WorkBudget,
+    charged: u32,
+}
+
+impl PressureRemainder<'_> {
+    pub(super) fn charge_delta(&mut self, parent: &mut WorkBudget) -> Option<()> {
+        let delta = self.work.spent().checked_sub(self.charged)?;
+        parent.try_take(delta).ok()?;
+        self.charged = self.work.spent();
+        Some(())
+    }
 }
 
 const fn pressure_allowance(remaining: u32) -> u32 {
@@ -43,23 +66,29 @@ const fn pressure_allowance(remaining: u32) -> u32 {
     }
 }
 
-pub(super) fn candidates(
-    observation: &Observation,
+pub(super) fn candidates<'a>(
+    observation: &'a Observation,
     actor: &VisibleActor,
     maps: PressureMaps<'_>,
     mode: crate::cpu::policy::PressureMode,
     work: &mut WorkBudget,
-) -> Vec<Candidate> {
+) -> PressureCandidates<'a> {
     let allowance = pressure_allowance(work.remaining());
     let mut pressure_work = WorkBudget::new(allowance);
     let Some((kind, range)) = super::super::pressure::weapon_geometry(observation, actor) else {
-        return Vec::new();
+        return PressureCandidates {
+            candidates: Vec::new(),
+            remainder: None,
+        };
     };
     let Some(geometry) =
         crate::cpu::survival::ObservedBlastGeometry::new(observation, &mut pressure_work)
     else {
         let _ = work.try_take(pressure_work.spent());
-        return Vec::new();
+        return PressureCandidates {
+            candidates: Vec::new(),
+            remainder: None,
+        };
     };
     let mut rivals = observation
         .parts()
@@ -112,11 +141,22 @@ pub(super) fn candidates(
             &mut pressure_work,
         );
     }
-    let _ = work.try_take(pressure_work.spent());
-    rivals_pressure
+    let charged = pressure_work.spent();
+    let _ = work.try_take(charged);
+    let candidates = rivals_pressure
         .into_iter()
         .filter_map(|rival| rival.baseline)
-        .collect()
+        .collect();
+    PressureCandidates {
+        candidates,
+        remainder: Some(PressureRemainder {
+            kind,
+            range,
+            geometry,
+            work: pressure_work,
+            charged,
+        }),
+    }
 }
 
 pub(super) fn add_legacy_candidates(

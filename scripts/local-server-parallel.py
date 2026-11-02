@@ -24,7 +24,7 @@ HEAVY_TEST = "game::rooms::replay::settings_tests::expanded_item_masks_and_disab
 ISOLATED_TESTS = (
     "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu26_progress_and_scheduling_with_bounded_plans",
     "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu27_progress_and_scheduling_with_bounded_plans",
-    "game::rooms::roster_owner::hard_episode_tests::native_hard_v58_seed73_progresses_with_two_workers_at_production_pacing",
+    "game::rooms::roster_owner::hard_episode_tests::native_hard_v59_seed73_progresses_with_two_workers_at_production_pacing",
     "game::rooms::roster_owner::teleporter_owner_tests::native_worker_completes_collection_stop_and_productive_follow_up",
 )
 INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"

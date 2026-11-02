@@ -313,15 +313,20 @@ fn queued_worker_dispatches_contact_topology_profiles_with_direct_parity() {
 }
 
 #[test]
-fn queued_worker_keeps_hard57_archived_and_dispatches_hard58_exactly() {
+fn queued_worker_keeps_hard57_and_hard58_archived_and_dispatches_hard59_exactly() {
     use grenadiers_core::cpu::{
         WorkBudget,
         survival::{
             TeleporterRecoveryChoice, plan_hard_corner_refuges_v57_with_origin,
-            plan_hard_exit_pressure_v58_with_origin, select_teleporter_recovery_v50,
+            plan_hard_exit_pressure_v58_with_origin, plan_hard_farm_yield_v59_with_origin,
+            select_teleporter_recovery_v50,
         },
     };
-    for policy in [CpuPolicy::UtilityV57, CpuPolicy::UtilityV58] {
+    for policy in [
+        CpuPolicy::UtilityV57,
+        CpuPolicy::UtilityV58,
+        CpuPolicy::UtilityV59,
+    ] {
         let planner = CpuPlanner::without_workers();
         let (job, result) = spike_job(policy);
         let mut rng = job.rng.clone();
@@ -336,8 +341,18 @@ fn queued_worker_keeps_hard57_archived_and_dispatches_hard58_exactly() {
                 &mut rng,
                 &mut work,
             )
-        } else {
+        } else if policy == CpuPolicy::UtilityV58 {
             plan_hard_exit_pressure_v58_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut rng,
+                &mut work,
+            )
+        } else {
+            plan_hard_farm_yield_v59_with_origin(
                 &job.observation,
                 &job.memory,
                 &job.hazard_memory,

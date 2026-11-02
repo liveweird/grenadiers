@@ -3,7 +3,8 @@ use grenadiers_core::cpu::{
     policy::StrategicIntent,
     survival::{
         TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_hard_corner_refuges_v57_with_origin,
-        plan_hard_exit_pressure_v58_with_origin, select_teleporter_recovery_v50,
+        plan_hard_exit_pressure_v58_with_origin, plan_hard_farm_yield_v59_with_origin,
+        select_teleporter_recovery_v50,
     },
 };
 use grenadiers_core::game::Tick;
@@ -25,6 +26,7 @@ pub(super) fn inspect(basis: &PlanningBasis<'_>) -> QueuedPlanProbe {
     let planner = match basis.policy {
         CpuPolicy::UtilityV57 => plan_hard_corner_refuges_v57_with_origin,
         CpuPolicy::UtilityV58 => plan_hard_exit_pressure_v58_with_origin,
+        CpuPolicy::UtilityV59 => plan_hard_farm_yield_v59_with_origin,
         _ => panic!("unsupported queued-plan witness profile"),
     };
     let mut rng = basis.rng.clone();

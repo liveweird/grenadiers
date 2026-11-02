@@ -1,4 +1,6 @@
-use crate::cpu::policy::{ControlPlan, PolicyError, PressureMode, UtilityMemory};
+use crate::cpu::policy::{
+    ControlPlan, FarmOriginMode, GoalModes, PolicyError, PressureMode, UtilityMemory,
+};
 use crate::cpu::{CpuRng, Observation, WorkBudget};
 
 #[allow(clippy::too_many_arguments)]
@@ -11,11 +13,17 @@ pub(super) fn plan(
     opportunistic_planting: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
-    pressure_mode: PressureMode,
+    goal_modes: GoalModes,
     farm_origin_recovery: bool,
     avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
-    if avoid_pits && farm_origin_recovery && pressure_mode == PressureMode::ExitCoverage {
+    let pressure_mode = goal_modes.pressure;
+    if avoid_pits && farm_origin_recovery && goal_modes.farm_origin == FarmOriginMode::VisibleYield
+    {
+        crate::cpu::policy::plan_hard_farm_yield_v59(observation, memory, rng, work)
+    } else if avoid_pits && goal_modes.farm_origin == FarmOriginMode::VisibleYield {
+        crate::cpu::policy::plan_hard_pits_yield_v59(observation, memory, rng, work)
+    } else if avoid_pits && farm_origin_recovery && pressure_mode == PressureMode::ExitCoverage {
         crate::cpu::policy::plan_hard_farm_exit_pressure_v58(observation, memory, rng, work)
     } else if avoid_pits && pressure_mode == PressureMode::ExitCoverage {
         crate::cpu::policy::plan_hard_pits_exit_pressure_v58(observation, memory, rng, work)

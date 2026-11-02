@@ -18,6 +18,9 @@ use super::{ControlPlan, PolicyError, UtilityMemory};
 mod escape;
 use escape::{escape_before_fuse, escape_route};
 
+#[path = "planner_guidance.rs"]
+mod guidance;
+
 #[path = "planner_version.rs"]
 pub(super) mod version;
 use version::PlannerVersion;
@@ -249,7 +252,10 @@ pub(super) fn plan_inner(
         persistent_goals,
         version.strategic_goals(),
         version.failed_plant_recovery(),
-        version.pressure_mode(),
+        super::GoalModes {
+            pressure: version.pressure_mode(),
+            farm_origin: version.farm_origin_mode(),
+        },
         version.farm_origin_recovery(),
         avoid_pits,
     )
@@ -266,31 +272,23 @@ fn navigate(
     persistent_goals: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
-    pressure_mode: super::PressureMode,
+    goal_modes: super::GoalModes,
     farm_origin_recovery: bool,
     avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let key = memory.key();
     if strategic_goals {
-        let guidance = if avoid_pits {
-            super::pit_planner::select_guidance(
-                observation,
-                actor,
-                current,
-                memory,
-                work,
-                pressure_mode,
-                farm_origin_recovery,
-            )
-        } else if farm_origin_recovery {
-            super::goals::select_v38(observation, actor, current, memory, work, pressure_mode)
-        } else if pressure_mode.enabled() {
-            super::goals::select_v28(observation, actor, current, memory, work)
-        } else if failed_plant_recovery {
-            super::goals::select_v25(observation, actor, current, memory, work)
-        } else {
-            super::goals::select_v24(observation, actor, current, memory, work)
-        };
+        let guidance = guidance::strategic(
+            observation,
+            actor,
+            current,
+            memory,
+            work,
+            goal_modes,
+            failed_plant_recovery,
+            farm_origin_recovery,
+            avoid_pits,
+        );
         let Some(guidance) = guidance else {
             return Ok(ControlPlan::stop(*memory));
         };

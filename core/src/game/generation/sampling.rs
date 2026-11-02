@@ -15,6 +15,10 @@ pub(super) fn sample_pickup(
     } else {
         sample_below(source, bound)?
     };
+    Some(pickup_for_value(value, enabled))
+}
+
+pub(super) fn pickup_for_value(value: u32, enabled: EnabledItems) -> PickupKind {
     let heart_end = 100 + u32::from(enabled.contains_heart()) * 25;
     let shield_end = heart_end + u32::from(enabled.contains_shield()) * 15;
     let golden_end = shield_end + u32::from(enabled.contains_golden_flame()) * 15;
@@ -37,7 +41,7 @@ pub(super) fn sample_pickup(
     let punch_end = kick_end + u32::from(enabled.contains_punch()) * 15;
     let bracelet_end = punch_end + u32::from(enabled.contains_bracelet()) * 15;
     let oil_end = bracelet_end + u32::from(enabled.contains_oil_barrel()) * 15;
-    Some(match value {
+    match value {
         0..40 => PickupKind::BombCapacity,
         40..80 => PickupKind::BlastRange,
         80..100 => PickupKind::MovementSpeed,
@@ -64,10 +68,10 @@ pub(super) fn sample_pickup(
         value if value < bracelet_end => PickupKind::Bracelet,
         value if value < oil_end => PickupKind::OilBarrel,
         _ => unreachable!("sample value is bounded by the enabled item pool"),
-    })
+    }
 }
 
-fn sample_below(source: &mut impl RandomWords, bound: u32) -> Option<u32> {
+pub(super) fn sample_below(source: &mut impl RandomWords, bound: u32) -> Option<u32> {
     let limit = u32::MAX - u32::MAX % bound;
     for _ in 0..MAX_DRAWS_PER_SAMPLE {
         let value = source.next_u32()?;

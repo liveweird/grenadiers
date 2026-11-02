@@ -12,15 +12,39 @@ mod generated_v3;
 mod generated_v4;
 mod random_words;
 mod sampling;
+mod weighted_sampling;
 pub use generated_v3::{
     ArenaGenerationConfig, GenerationError, MULTIPLAYER_GENERATOR_VERSION,
     generate_multiplayer_arena,
 };
 pub use generated_v4::{VARIABLE_GENERATOR_VERSION, generate_variable_multiplayer_arena};
 use sampling::{sample_percent, sample_pickup};
+use weighted_sampling::{PickupSelectionPolicy, sample_pickup_with_policy};
 
 pub const GENERATOR_VERSION: u16 = 1;
 pub const EXPANDED_GENERATOR_VERSION: u16 = 2;
+pub const WEIGHTED_GENERATOR_VERSION: u16 = 6;
+
+pub fn generate_weighted_multiplayer_arena(
+    seed: [u8; 32],
+    enabled: EnabledItems,
+    config: ArenaGenerationConfig,
+    multiplier: crate::room::BombCapacityDropMultiplier,
+) -> Result<GeneratedArena, GenerationError> {
+    let selection = PickupSelectionPolicy::WeightedBombCapacityV2(multiplier);
+    let mut generated = match config.board {
+        crate::room::BoardSize::FifteenByThirteen => {
+            generated_v3::generate_multiplayer_arena_with_policy(seed, enabled, config, selection)?
+        }
+        crate::room::BoardSize::ElevenByNine | crate::room::BoardSize::ThirteenByEleven => {
+            generated_v4::generate_variable_multiplayer_arena_with_policy(
+                seed, enabled, config, selection,
+            )?
+        }
+    };
+    generated.record.version = WEIGHTED_GENERATOR_VERSION;
+    Ok(generated)
+}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct GenerationRecord {
@@ -321,3 +345,7 @@ mod stopwatch_tests;
 mod teleporter_tests;
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+#[path = "weighted_generation_tests.rs"]
+mod weighted_generation_tests;

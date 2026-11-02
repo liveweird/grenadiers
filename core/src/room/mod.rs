@@ -19,6 +19,7 @@
 //! );
 //! ```
 
+pub mod bomb_capacity_drop_multiplier;
 pub mod configuration;
 pub mod environment;
 pub mod lair_environment;
@@ -33,6 +34,10 @@ pub mod settings;
 pub mod spike_environment;
 pub mod spike_pit_settings;
 
+pub use bomb_capacity_drop_multiplier::{
+    BombCapacityDropMultiplier, BombCapacityDropMultiplierError, MAX_BOMB_CAPACITY_DROP_MULTIPLIER,
+    MIN_BOMB_CAPACITY_DROP_MULTIPLIER,
+};
 pub use configuration::{BoardSize, RoomConfiguration, RoomConfigurationError, SeatControl};
 pub use environment::EnvironmentRoomConfiguration;
 pub use lair_environment::{LairRoomConfiguration, LairTuning};

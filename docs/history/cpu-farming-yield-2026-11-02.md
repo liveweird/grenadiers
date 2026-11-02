@@ -63,7 +63,8 @@ block target. Equal graph distance is required; a strictly greater visible block
 Exact Standard, Piercing and Power geometry includes current placement modifiers. Unsupported
 scenes, partial comparisons, ties, failed origins and farther approaches retain baseline guidance.
 The comparison uses the unused original pressure allowance and its existing geometry; it adds no
-second search pool, forecast or RNG draw. Retained approaches keep the existing progress deadline.
+second search pool, forecast or RNG draw. Retained approaches keep the existing commitment rules:
+genuine navigation/subcell progress may refresh the deadline; reevaluation alone does not.
 
 The initial Core choice changes from `(3,6)`/West to `(4,7)`/South for 21,370 work, ten more than
 Hard58. The useful intermediate `(5,7)` still uses the existing 36,436-work complete plant.

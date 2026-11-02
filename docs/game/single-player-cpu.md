@@ -359,7 +359,8 @@ For one selected visible block target, Hard59 can compare the other eligible adj
 at exactly the baseline navigation distance. It prefers a candidate only when the existing blast
 geometry reaches more currently visible soft blocks; a tie keeps the stable baseline approach,
 and a farther approach never wins. A still-eligible retained approach remains stable with its
-existing commitment and progress deadlines.
+existing commitment rules. Genuine navigation or subcell progress may refresh its progress
+deadline; reevaluation alone does not.
 
 This is not hidden-loot prediction and does not change block-target ordering. Bombs, flames, Oil,
 an exposed Teleporter, an invalid pit/transit cell, a pickup on the approach, incomplete geometry

@@ -579,7 +579,8 @@ drops. Unsupported or incomplete geometry and work exhaustion retain the baselin
 The comparison consumes only the existing pressure remainder: at most 4,096 work units and one
 eighth of the incoming remaining work. It introduces no larger decision budget, new RNG draw,
 hidden observation, target switch or planting certificate. A retained same-target approach stays
-stable while eligible and preserves its commitment/progress deadlines; if it becomes invalid,
+stable while eligible; genuine navigation or subcell progress may refresh its progress deadline,
+but reevaluation alone does not. If the approach becomes invalid,
 progress is measured against the replacement rather than the stale origin. Every actual bomb
 still requires the unchanged usefulness, absent/present escape, contact, admission and fresh-
 publication checks. Archived Hard58/replay29 keep the coordinate-selected farming approach.

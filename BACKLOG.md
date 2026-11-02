@@ -24,6 +24,13 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
   sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
   preserve deterministic generation and player spawn safety.
+  - A separate, unmerged prototype clears connected lair exits and excludes nearby pits.
+    Its seeded CPU acceptance still exposes a zero-bomb actor; retain the unchanged episode
+    assertions while proving useful planting through normal admission and full flame survival.
+    See the [controlled investigation](docs/history/lair-clearance-cpu-2026-11-02.md).
+  - Before delivery, integrate with the published weighted-drop generator and protocol v21.
+    Allocate new generation/replay identities; published generator 6 and replay 32 must retain
+    their existing semantics. Complete review and the relevant release checks on that integration.
 
 ## Single-player
 

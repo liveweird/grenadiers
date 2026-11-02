@@ -1,8 +1,8 @@
 # Gameplay v19: room-wide CPU difficulty
 
-Gameplay19 is the live paired contract on `/api/v1/game/ws`. Its sources are
+Gameplay19 is the retained paired archive immediately preceding live gameplay20. Its sources are
 [`api/gameplay-v19.schema.json`](../../api/gameplay-v19.schema.json), the generated
-`web/src/game/v19/schema.ts`, and the standalone v19 server-frame validator. Authentication requires protocol19; older clients must reload the paired application.
+`web/src/game/v19/schema.ts`, and the standalone v19 server-frame validator. The live socket rejects protocol19 before credential claim; retained readers and fixtures preserve its exact shape.
 
 ## Identity-only extension
 
@@ -21,12 +21,12 @@ The lobby offers three localized choices and defaults to Standard. Every CPU in 
 the selected tier. Easy/Standard select CPU56; Hard selects CPU59. Rules10, generator3/4,
 navigation3 and all movement/damage settings remain shared.
 
-Runtime publication identity is explicit and immutable. Every newly created live room uses19,
+Runtime publication identity is explicit and immutable. Archived v19 constructors use19,
 including human-only rooms. Archived constructors and replay10–12 retain18; no Hard room is
 projected through an Easy/Standard shadow. Retained v14–18 wire types and replay readers reject
-Hard rather than downgrading it. Private replay13 retains Hard28 and replay14 retains Hard29/Easy/Standard27. Replay15 retains gameplay19 with Hard32 or Easy/Standard31; replay16 retains Hard34 or Easy/Standard33; replay17 retains Hard35 or Easy/Standard33; replay18 retains Hard37 or Easy/Standard36; private replay19 retains Hard39 or Easy/Standard38. Current private replay30 binds Hard59 or Easy/Standard56; the closed intervening formats remain archived as described in the [replay guide](multiplayer-replay.md). The network contract remains gameplay19.
+Hard rather than downgrading it. Private replay13 retains Hard28 and replay14 retains Hard29/Easy/Standard27. Replay15 retains gameplay19 with Hard32 or Easy/Standard31; replay16 retains Hard34 or Easy/Standard33; replay17 retains Hard35 or Easy/Standard33; replay18 retains Hard37 or Easy/Standard36; private replay19 retains Hard39 or Easy/Standard38. Private replay30 binds Hard59 or Easy/Standard56 and ManualV1 Punch activation; the closed intervening formats remain archived as described in the [replay guide](multiplayer-replay.md). Live gameplay20 does not alter these identities.
 Production recording/export remains disabled.
 
-The browser ships only the v19 generated runtime validator and retains the same semantic,
+The retained browser v19 validator preserves the same semantic,
 privacy, lifecycle, world, lair and spike-pit checks. Shared archived types are compile-time
 references; they do not load an additional generated validator into the production bundle.

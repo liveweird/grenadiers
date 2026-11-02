@@ -43,15 +43,14 @@ generation path or RNG progress.
 
 Every new round resets the selected pits to idle. The authoritative snapshot publishes their
 sorted `cell`, `phase` and `remainingTicks`; it never publishes an activator, seed, hidden
-position, target or route. See the [gameplay19 contract](protocol-v19.md).
+position, target or route. See the [gameplay20 contract](protocol-v20.md).
 
 ## CPU, mobs and presentation
 
-CPU26 forecasts path-dependent warning and raised intervals, including warnings its own route
+CPU26 introduced forecasts of path-dependent warning and raised intervals, including warnings its own route
 would trigger. Route execution is guarded by the observed public pit state and retains the
-existing bounded work, normal protection, movement and planting safety budgets. The live
-profiles are explicitly `SPIKE_PITS_STANDARD` and `SPIKE_PITS_EASY`; archived CPU25 behavior
-and historical replay identities remain closed.
+existing bounded work, normal protection, movement and planting safety budgets. Current CPU60/61 retain this pit behavior alongside later recovery and contact-Punch guards;
+archived CPU25 behavior and historical replay identities remain closed.
 
 Mobs do not deliberately enter pits from safe floor. A mob already overlapping a pit is allowed
 to move out, including a newborn exceptional pose; pit deaths schedule the same single lair

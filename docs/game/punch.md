@@ -1,40 +1,45 @@
 # Punch
 
-## Availability and rules
+## Contact activation
 
-Punch is configurable permanent equipment, enabled in new Expanded-v5 rooms. Press the remappable Equipment key to
-punch the bomb in the adjacent cell indicated by the actor's authoritative heading. The target cell
-does not wrap. Timed or Remote bombs with Standard, Piercing or Power blasts are eligible, including
-a bomb whose Kick motion is active; Contact mines are excluded. A source touching active fire, a
-Timed bomb already due after pause preflight, or a Remote bomb reserved for same-update detonation
-cannot be punched. Failed, blocked, frozen, unequipped and cooling-down actions are gameplay no-ops
-after normal server admission.
+Punch is a configurable permanent equipment item. In current gameplay, walk into an adjacent
+bomb to punch it in the physical movement direction. No Equipment key is needed. A positive
+forward request reaching the bomb’s boundary counts as contact; stationary touching, turn
+centering, forced shoves, frozen actors and leaving an own bomb under placement grace do not.
+A nearer or equally blocking player/wall prevents the attempt.
 
-An eligible bomb searches exactly three interior cells at a time along the facing axis, wrapping
-the playable columns 1–13 or rows 1–11. It takes the first floor cell without a soft block, barrel,
-other bomb or positive-area overlap with a living actor. Search stops after one complete axis cycle,
-and returning to the source fails unchanged. The logical hop is instantaneous: intermediate cells
-do not cause fire, mine, collision or pickup interaction. Landing on fire is legal and participates
-in the update's one later explosion plan.
+Each exact bomb receives at most one attempt during uninterrupted contact, including failed
+landing or cooldown attempts. Releasing/repressing a key, changing heading, freezing or replacing
+equipment does not rearm that contact. Separate physically before trying again. Multiple touching
+bombs retain independent contact latches; removal, teleport, death and a new round clear the
+appropriate contact state.
 
-## State and privacy
+Timed or Remote bombs with Standard, Piercing or Power blasts are eligible, including rolling
+bombs. Contact mines are excluded. Active source fire, a timed fuse already due, or a remote
+reserved for same-update detonation prevents Punch. Contacts resolve after manual bomb actions
+and before explosions, rechecking the exact bomb and actor. The actor does not advance into the
+vacated tile during that update.
 
-Success preserves the bomb's entity ID, owner, range, blast, placement tick, trigger and captured
-fuse. It stops active Kick motion, retains Kick history, removes every actor's grace for the moved
-bomb and creates no placement, movement or sound event. Success at physical tick T blocks another
-success through T+11 and permits one at T+12. The cooldown and persistent `hasBeenPunched` facts are
-private trusted state retained through replacement, reconnect, death and results, then cleared by a
-new round. No countdown, target highlight, blocked reason or success cue is published.
+## Flight and cooldown
 
-## Compatibility
+The bomb searches three interior cells at a time along the contact axis, wrapping around the
+playable board edges. It takes the first floor cell without a soft block, unlit barrel, another
+bomb or overlap with a living actor. Search ends after one axis cycle; returning to the source
+fails unchanged. Intermediate cells cause no collision, fire, mine or pickup interaction.
+Landing on fire is legal and participates in the same update’s explosion plan.
 
-Punch uses equipment capability bit `2` and generator-v2 weight 15 after Kick. Archived gameplay
-v9 and earlier reject Punch catalog entries, equipment, pickups,
-cooldown and live or historical bomb provenance.
+Success preserves entity ID, owner, range, blast, placement tick and fuse/trigger. It stops Kick
+motion, retains Kick history and removes placement grace for the moved bomb. Success at tick T
+permits another success at T+12. Cooldown and Punch provenance remain private; no separate
+Equipment action, target marker or blocked-reason message is published.
 
-## Accepted captures
+## CPU and compatibility
 
-The accepted browser run checks an uninterrupted first bomb through natural detonation, then a
-fresh second bomb across a real transport interruption and reconnect. The [English desktop capture](../screenshots/punch-desktop.png) and
-[Polish 320px reduced-motion capture](../screenshots/punch-mobile-pl.png) are the reviewed outputs.
-The release record is in [item acceptance history](../history/game-acceptance.md#punch-v0345).
+Current CPUs refuse their own forward contact when relocation is absent from their certified
+route; they retain useful wall approaches and own-bomb departures. This does not guarantee
+survival against arbitrary rival actions. Changed public bomb facts invalidate conditional routes.
+
+Gameplay20 selects contact activation; archived gameplay19 and replay30 retain manual behavior.
+Private replay31 records activation version2 explicitly. Earlier contracts keep their original
+catalog boundaries; gameplay9 and earlier reject Punch. See the [protocol](protocol-v20.md),
+[controls](controls.md) and [original manual acceptance](../history/game-acceptance.md#punch-v0345).

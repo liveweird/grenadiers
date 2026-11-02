@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.19 — 2026-11-02
+
+- Activate Punch by walking into a bomb, with exact contact arbitration and one attempt per continuous contact for each bomb; preserve flight, fuse and cooldown behavior.
+- Remove the Equipment key from live controls and migrate saved bindings without changing movement or Bomb mappings. Keep E available for custom bindings.
+- Bind contact activation to gameplay20 and private replay31, preserve archived manual behavior, and certify CPU60/Hard61 movement against the real pre-explosion bomb phases with bounded indexed forecasts.
+
 ## 1.3.18 — 2026-11-02
 
 - Let Hard CPUs prefer an equally close approach to the same farming target when its exact visible blast destroys more soft blocks; retain that approach while it remains eligible.

@@ -313,22 +313,23 @@ required alongside geometric separation tests.
 
 ## Ordinary pit avoidance
 
-Live CPU56/59 inherit CPU52/53's fair observation, shared work limit and multi-Teleporter recovery,
-while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
+Live CPU60/61 inherit CPU56/59 and CPU52/53's fair observation, shared work limit and
+multi-Teleporter recovery, while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
 pulse check covers swept footprint contact, including partial overlaps; a rejected candidate can
 fall through to another checked direction. This prevents choosing a locally safe approach that
 leaves the CPU standing on a pit when its warning expires.
 
 Complete planting and continuation routes keep their time-dependent pit proofs and may cross
 pits when the entire escape is certified. Already-on-pit recovery remains checked and can still
-be impossible. Private replay30 binds the current profiles; archived replay29 retains CPU56/58,
+be impossible. Private replay31 binds the current profiles and ContactV2; archived replay30 retains
+CPU56/59 with ManualV1, replay29 retains CPU56/58,
 and older formats retain their original policy identities. See the
 [pit contract](cpu-contracts.md#voluntary-pit-avoidance).
 
 ## Shared preparation for interrupted escapes
 
-CPU56/59 retain CPU54/55's common forecast before reserving optional continuation work. Preparation
-that fits the historical half allowance retains its exact previous continuation/fallback
+CPU60/61 retain CPU56/59 and CPU54/55's common forecast before reserving optional continuation
+work. Preparation that fits the historical half allowance retains its exact previous continuation/fallback
 allocation. More expensive supported forecasts can use the shared allowance, with at least
 half the remaining work reserved for the existing checked pulse fallback. Both paths reuse
 one forecast and retain the 65,536-work ceiling, actual Stop and origin provenance, contact,
@@ -336,8 +337,8 @@ Oil and pit guards. See the [allocation contract](cpu-contracts.md#shared-escape
 
 ## Bounded farming refuges
 
-When an adjacent farming target leaves the usual retreat facing a hard wall or lair, CPU56/59
-can try two lateral-first refuge hints. This requires a current committed approach and a clear
+When an adjacent farming target leaves the usual retreat facing a hard wall or lair, CPU60/61
+inherit CPU56/59 and can try two lateral-first refuge hints. This requires a current committed approach and a clear
 bomb/flame scene. Geometry and the complete route, usefulness and contact proofs share the
 existing optional hint allowance; failed attempts leave the normal checked fallback available.
 The earlier foreign-bomb/future-loot support boundary remains unchanged. See the
@@ -346,7 +347,7 @@ The earlier foreign-bomb/future-loot support boundary remains unchanged. See the
 ## Hard opponent exit coverage
 
 Hard58 introduced equal-distance firing-position ranking by how many of the visible rival’s
-currently open adjacent terrain branches the exact blast covers; current Hard59 retains it. It
+currently open adjacent terrain branches the exact blast covers; current Hard61 retains it. It
 keeps the existing nearest candidate
 when comparison is unsupported, incomplete or tied. Rival equipment determines branch openness;
 this does not predict rival controls or promise a kill. All rivals receive their existing baseline
@@ -355,7 +356,7 @@ remain authoritative. See the [bounded contract](cpu-contracts.md#equal-distance
 
 ## Hard visible block yield
 
-For one selected visible block target, Hard59 can compare the other eligible adjacent approaches
+For one selected visible block target, Hard61 retains Hard59's comparison of the other eligible adjacent approaches
 at exactly the baseline navigation distance. It prefers a candidate only when the existing blast
 geometry reaches more currently visible soft blocks; a tie keeps the stable baseline approach,
 and a farther approach never wins. A still-eligible retained approach remains stable with its

@@ -1,6 +1,6 @@
 # Gameplay protocol consumer inventory
 
-This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v19 is the
+This inventory applies [ADR 0021](../decisions/0021-gameplay-retention.md): gameplay v20 is the
 only live network version, while archived schemas, compatibility exports, shared implementation
 and regression corpora remain repository consumers. Retention does not mean an old client can
 connect, and no complete historical Rust version directory is selected for deletion.
@@ -27,7 +27,8 @@ separate compatibility axes. In particular, rules profile 5 is not a gameplay-v5
 | v16 | Rust `core::protocol::v16`, archived server/browser validators and retained conformance/E2E corpus. | Exact historical rules8 binding, canonical lairs, bounded mob counts/footprints, private Stopwatch freeze facts and checked CPU observations. |
 | v17 | Native Rust `core::protocol::v17`, `api/gameplay-v17.schema.json`, generated `web/src/game/v17/schema.ts`, retained standalone validator and conformance corpus. | Exact historical rules9/CPU25 binding, one-living-mob-per-lair respawn/death-delay facts, solid-player collisions and archived server fixtures. No server runtime accepts v17. |
 | v18 | Retained Rust `core::protocol::v18`, archived schema, generated types, validator, conformance corpus and replay10–12 publication paths. | Rules10 spike settings and authoritative pit projection, solid collision, respawn lairs and recipient privacy; closed Easy/Standard metadata rejects Hard. No live socket accepts v18. |
-| v19 | Rust `core::protocol::v19`, schema/generated types, live server socket/command/dispatcher, browser client, standalone validator and shared conformance/E2E corpus. | Same rules10 physics/privacy and bounds, with checked room-wide Easy/Standard/Hard metadata; CPU56 on Easy/Standard and CPU59 on Hard. This is the sole live network contract. |
+| v19 | Retained Rust `core::protocol::v19`, schema/generated types, validator, replay13–30 publication paths and conformance/E2E corpus. | Same rules10 physics/privacy and bounds, with checked room-wide Easy/Standard/Hard metadata and ManualV1 Punch activation. No live socket accepts v19. |
+| v20 | Rust `core::protocol::v20`, schema/generated types, live server socket/command/dispatcher, browser client, standalone validator and shared conformance/E2E corpus. | Rules10/navigation3 with ContactV2 implied by the closed transport, CPU60 on Easy/Standard and CPU61 on Hard. This is the sole live network contract. |
 
 The shared client corpus exercises the closed client-message union across retained v8-v11 Rust
 parsers, schemas and browser validators. The server corpus checks actual Rust-produced
@@ -35,7 +36,7 @@ admissions/snapshot pairs with frozen actors, Teleporter epochs, empty/materiali
 recipient identity and concealment controls. Existing control/error-frame conformance remains.
 V12 adds its closed client corpus and checks inherited server fixtures with controller metadata.
 A typed fixture bridge preserves archived v11 metadata without cloning physical data; standalone
-validator parity retains v11–v15 and covers live v16.
+validator parity retains v11–v19 and covers live v20.
 See [Testing](../testing.md) for commands and the release/history records for executed results.
 
 ## Diagnostic coverage disposition

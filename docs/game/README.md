@@ -59,7 +59,7 @@ for current defaults and behavior, rather than treating design proposals as deli
 [Weather](storm-cloud.md), [headless lairs](lairs.md) and [spike pits](spike-pits.md) describe environment physics and checked
 simulation boundaries.
 
-[Gameplay v19](protocol-v19.md) defines the live two-to-four-seat wire contract. The retained
+[Gameplay v20](protocol-v20.md) defines the live two-to-four-seat wire contract. The retained
 [Gameplay v17 respawn contract](protocol-v17.md) and
 [Gameplay v13 compatibility guide](protocol-v13.md) document their closed historical contracts,
 including the authoritative teleport position epoch. [Gameplay v10](../history/protocols/protocol-v10.md) and

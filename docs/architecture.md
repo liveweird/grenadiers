@@ -107,15 +107,15 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `roster_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v19 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v20 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v19 client/panel shares the Three.js presentation boundary, validates v19 messages, keeps
+The active v20 client/panel shares the Three.js presentation boundary, validates v20 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v19 on `/api/v1/game/ws`; versions 1 through 18 are
+authoritative facts. Production routing uses v20 on `/api/v1/game/ws`; versions 1 through 19 are
 rejected before credential claim. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v19](game/protocol-v19.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v20](game/protocol-v20.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

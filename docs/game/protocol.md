@@ -2,8 +2,8 @@
 
 Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
 gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
-`api/gameplay-v19.schema.json`, Rust `core::protocol::v19`, and generated
-`web/src/game/v19/schema.ts` define active socket messages. V2 through v18 remain historical
+`api/gameplay-v20.schema.json`, Rust `core::protocol::v20`, and generated
+`web/src/game/v20/schema.ts` define active socket messages. V2 through v19 remain historical
 or archived compatibility contracts.
 V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
 configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
@@ -33,7 +33,8 @@ The browser validates these messages and drives the playable generated-map match
 | v16 | [Lair contract](protocol-v16.md) | Historical contract |
 | v17 | [Respawn contract](protocol-v17.md) | Historical contract |
 | v18 | [Paired spike-pit contract](protocol-v18.md) | Archived compatibility contract |
-| v19 | [Room-wide difficulty](protocol-v19.md) | Live multiplayer contract |
+| v19 | [Room-wide difficulty](protocol-v19.md) | Retained archived contract |
+| v20 | [Contact Punch](protocol-v20.md) | Live multiplayer contract |
 
 ## Authentication and compatibility
 
@@ -53,13 +54,13 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":19,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":20,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
 It never belongs in a URL or log. A syntactically valid unsupported version is parsed so the
 server can return `incompatibleProtocol` before credential binding. Supported gameplay version
-is 18, independently of the product release and diagnostic protocol. Parser failures expose
+is 20, independently of the product release and diagnostic protocol. Parser failures expose
 only a generic error; token Debug formatting is redacted.
 
 A successful claim atomically binds one connection. Duplicate claims receive `connectionInUse`
@@ -77,7 +78,7 @@ sending `resumeRoom`; the stable seat capability is not an authentication-sessio
 Authentication has an absolute five-second deadline; Ping/Pong cannot extend it. Upgrades use
 a global 32-token burst with eight-per-second refill. Each socket admits a burst of 30 inbound
 messages with 60-per-second refill, including control frames. Client frames/messages are at
-most 4 KiB; encoded v19 server messages are at most 192 KiB with finite write buffering. Sends have
+most 4 KiB; encoded v20 server messages are at most 192 KiB with finite write buffering. Sends have
 a five-second deadline. Server Ping runs every ten seconds, no inbound activity for 30 seconds
 closes the socket, and unseated authentication expires after an absolute five minutes.
 
@@ -104,14 +105,14 @@ All listed fields are required; objects reject extra fields. Counter values are 
 | `ready` | `sequence`, `roomId`, `roundId`, `settingsRevision`, `ready` |
 | `updateSettings` | `sequence`, `roomId`, `roundId`, `settingsRevision`, complete `settings` |
 | `movement` | `sequence`, `roomId`, `roundId`, `direction` (cardinal direction or explicit null) |
-| `manualAction` | `sequence`, `roomId`, `roundId`, `actionId`, `action` (`bomb` or active Punch `equipment`) |
+| `manualAction` | `sequence`, `roomId`, `roundId`, `actionId`, `action` (`bomb`) |
 | `leaveRoom` | `sequence`, `roomId`, `roundId` |
 | `rematch` | `sequence`, `roomId`, `roundId`, `ready` |
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 19` |
-| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 18) |
+| `authenticated` | `protocolVersion: 20` |
+| `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 20) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
 | `seatReplaced` | `roomId`; old binding closes with code 4001 |
@@ -169,7 +170,7 @@ completed 60 Hz updates per normal snapshot.
 
 ## Checked domain conversion
 
-Use `core::protocol::v19::capture_expanded` to observe the complete State and reports, then
+Use `core::protocol::v20::capture_expanded` to observe the complete State and reports, then
 `bind_expanded` to certify the room profile, configuration, settings, lifecycle epoch, physical tick and
 trusted round generation record.
 Opaque captures cannot be serialized directly. Raw server DTO fields alone do not establish
@@ -201,8 +202,9 @@ A structurally valid command consumes its sequence before semantic handling. Man
 increase independently per seat/round and remain consumed after an unsuccessful placement.
 Invalid room/round bindings cannot mutate another seat's high-water marks. Resume reports the
 accepted floor; the next admitted manual action ID must be greater. A floor of 2,147,483,647 exhausts bomb actions
-for that epoch. Unsupported equipment commands consume only the connection sequence,
-not the manual high-water, mailbox budget or journal; a later bomb may reuse that action ID.
+for that epoch. Gameplay20 rejects the retired Equipment action before credential claim, so it
+cannot consume a sequence, manual high-water, mailbox budget or journal entry. Archived gameplay19
+retains its original Equipment command semantics.
 
 `RoomView` carries identity/code, independent command epoch `roundId`, revision, global tick,
 rules/map versions, actual `roundNumber`, canonical per-seat scores (0..9, bounded by the selected
@@ -215,7 +217,7 @@ spawn/tie assignment uses actual round count rather than command epoch.
 
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v19
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v20
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment
@@ -250,11 +252,11 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
 rejects state whose checked rules version disagrees with that profile. Every live two-to-four-seat
-room uses rules10 and CPU38 on Easy/Standard or CPU39 on Hard, with generator3 on 15×13 and generator4 on 11×9/13×11; see
+room uses rules10, navigation3 and CPU60 on Easy/Standard or CPU61 on Hard, with generator3 on 15×13 and generator4 on 11×9/13×11; see
 [board geometry](board-sizes.md). Snapshot pickup arrays begin empty because contents remain
 concealed until exposed. Fixed-classic and earlier expanded profiles remain retained fixtures.
 
-Gameplay19 requires paired server/client upgrades. Versions1–18 and future versions are rejected
+Gameplay20 requires paired server/client upgrades. Versions1–19 and future versions are rejected
 before credential lookup, so rejection cannot claim or revoke a token. `supportedVersion`
 accepts the bounded input range, allowing a new client to understand an older server's response.
 See [ADR 0013](../decisions/0013-gameplay-v2-and-room-profiles.md).
@@ -266,7 +268,7 @@ without writing. The shared web gate runs this alongside existing diagnostic che
 validation tests. Rust conformance tests compare strict parsing and serialization with the same
 schema, including missing/null fields, scalar boundaries, integer-valued number forms, version
 rejection responses, credential redaction, all event variants, nested bounds, and real
-frame-size enforcement. Conservative v18 physical schema bounds retained by v19 keep Snapshot and Admitted at
+frame-size enforcement. Conservative v18 physical schema bounds retained by v20 keep Snapshot and Admitted at
 or below the inclusive 196,608-byte ceiling. Separate
 schema-valid representatives and oversize rejection tests remain. These are structural bounds,
 not reachable gameplay claims. TypeScript types do not enforce string patterns

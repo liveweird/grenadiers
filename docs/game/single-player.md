@@ -140,13 +140,14 @@ replacing it with Kick or the other tactical equipment. Heart and Wall Pass reta
 existing protection and priority; collecting equipment does not guarantee an opportunity to
 use its restricted tactic.
 
-With Punch held, the CPU can check one stopped Equipment action against a single adjacent,
-unpaused Standard timed bomb. It uses one complete escape for both relocation and cooldown
-failure, then confirms the observed bomb identity and position. The narrow tactic requires a
-centered CPU, no exposed pickups, Oil or existing flames, and a visible rival without Kick,
-Punch or Bracelet. An ambiguous landing or failed proof withholds the action. This uses the
-existing manual Punch rule and does not change player controls. New observations can invalidate
-the route and require a fresh decision.
+Archived ManualV1 CPU profiles can check one stopped Equipment action against a single adjacent,
+unpaused Standard timed bomb. Their complete relocation/cooldown-failure escape proof and scene
+restrictions remain frozen for replay compatibility. Live CPU60/61 intentionally emit no manual
+Equipment action and do not currently use an intentional contact-Punch tactic. ContactV2 can
+activate Punch through movement, so their route guard declines forward bomb contact that could
+cause an unmodelled relocation. Exact retained origin grace permits safe departure from an overlap;
+it is not an exception that activates Punch. This adds no planting proof or hidden bomb knowledge;
+fresh observations can invalidate the route and require a new decision.
 
 The [CPU contracts](cpu-contracts.md) explain execution and privacy; the
 [accepted design](single-player-cpu.md) specifies the broader model. Remaining work and tuning

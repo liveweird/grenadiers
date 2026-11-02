@@ -130,8 +130,8 @@ async fn two_player_live_rooms_use_v20_spike_roster_for_duel_and_solo() {
         personal(&duel)["room"]["settings"]["environment"]["spikePits"],
         serde_json::json!({
             "enabled": true,
-            "warningTicks": 36,
-            "raisedTicks": 180
+            "warningTicks": 60,
+            "raisedTicks": 300
         })
     );
     assert_eq!(

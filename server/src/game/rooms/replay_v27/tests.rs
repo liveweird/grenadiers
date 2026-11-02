@@ -2,12 +2,16 @@ use grenadiers_core::{
     game::{Direction, EnabledItems, SeatId, StormCloudConfig},
     room::{
         BoardSize, CpuDifficulty, LairRoomConfiguration, RespawnLairTuning, RoomConfiguration,
-        RoomSettings, SeatControl, SpikePitTuning, SpikeRoomConfiguration,
+        RoomSettings, SeatControl, SpikePitSettings, SpikePitTuning, SpikeRoomConfiguration,
     },
 };
 
 use super::*;
 use crate::round_seed::RoundSeedSource;
+
+fn historical_spike_pits() -> SpikePitTuning {
+    SpikePitTuning::new(true, SpikePitSettings::new(36, 180).unwrap())
+}
 
 fn configuration(difficulty: Option<CpuDifficulty>) -> SpikeRoomConfiguration {
     let controllers = if difficulty.is_some() {
@@ -21,7 +25,7 @@ fn configuration(difficulty: Option<CpuDifficulty>) -> SpikeRoomConfiguration {
             StormCloudConfig::Single,
             RespawnLairTuning::DEFAULT.as_legacy(),
         ),
-        SpikePitTuning::DEFAULT,
+        historical_spike_pits(),
     )
 }
 

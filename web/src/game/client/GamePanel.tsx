@@ -167,7 +167,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
     return {
       controllers, cpuDifficulty: hasCpu ? difficulty : null, board,
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
     } as RoomConfiguration
   }
   return (

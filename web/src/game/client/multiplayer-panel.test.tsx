@@ -36,7 +36,7 @@ it('creates an explicit four-controller mixed configuration while keeping player
       controllers: ['human', 'cpu', 'human', 'cpu'], cpuDifficulty: 'hard',
       board: { width: 11, height: 9 },
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
+        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
     },
   })
 })

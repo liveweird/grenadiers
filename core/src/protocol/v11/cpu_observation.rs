@@ -27,6 +27,7 @@ pub fn observe_cpu_recipient(
         tick,
         recipient: domain_seat(recipient),
         rules: ObservedRules {
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             version: publication.room.rules_version.get(),
             tick_rate: game::RulesConfig::expanded_v5(settings).tick_rate(),
             running_updates: state.running_updates,

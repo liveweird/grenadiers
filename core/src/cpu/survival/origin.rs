@@ -165,6 +165,7 @@ pub(super) fn valid_origin(origin: &PlantEscapeOrigin, current: &Observation) ->
         || parts.tick < origin.checkpoint_tick
         || parts.recipient != origin.basis.parts().recipient
         || parts.rules.version != origin.basis.parts().rules.version
+        || parts.rules.punch_activation_policy != origin.basis.parts().rules.punch_activation_policy
         || parts.rules.tick_rate != origin.basis.parts().rules.tick_rate
         || parts.rules.settings != origin.basis.parts().rules.settings
         || parts.arena.width != origin.basis.parts().arena.width

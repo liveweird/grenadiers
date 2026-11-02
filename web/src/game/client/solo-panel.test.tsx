@@ -6,14 +6,14 @@ import type { GameClientState } from './client'
 import { initialGameClientState } from './client'
 import { GamePanelView, type GameActions } from './GamePanel'
 import { room } from './testSupport'
-import type { Difficulty } from '../v19/schema'
+import type { Difficulty } from '../v20/schema'
 
 vi.mock('../arena/GameArena', () => ({ GameArena: () => <div /> }))
 
 const actions = (): GameActions => ({
   admit: vi.fn(() => true), ready: vi.fn(() => true), updateSettings: vi.fn(() => true),
   rematch: vi.fn(() => true), movement: vi.fn(() => true), placeBomb: vi.fn(() => true),
-  useEquipment: vi.fn(() => true), leave: vi.fn(() => true),
+  leave: vi.fn(() => true),
 })
 
 function soloState(difficulty: Difficulty = 'standard'): GameClientState {
@@ -38,7 +38,7 @@ function soloState(difficulty: Difficulty = 'standard'): GameClientState {
 beforeEach(async () => { localStorage.clear(); await i18n.changeLanguage('en') })
 afterEach(cleanup)
 
-it('defaults solo admission to Standard, offers every v19 tier, and disables the selector while busy', () => {
+it('defaults solo admission to Standard, offers every v20 tier, and disables the selector while busy', () => {
   const controls = actions()
   const state = initialGameClientState()
   const view = render(<MantineProvider env="test"><GamePanelView state={state} actions={controls} /></MantineProvider>)

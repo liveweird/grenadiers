@@ -49,6 +49,7 @@ pub fn forecast(
     take(work, cell_count as u32)?;
 
     let mut cells = vec![CellForecast::default(); cell_count];
+    let mut bomb_occupancy = super::BombOccupancyIndex::default();
     let mut evolution = ForecastEvolution::new(observation, horizon_end)?;
     let mut bombs = observed_bombs
         .iter()
@@ -116,14 +117,21 @@ pub fn forecast(
         work,
         &mut cells,
         &mut evolution,
+        &mut bomb_occupancy,
     )?;
     add_uncertainties(observation, &bombs, horizon_end, limits, work, &mut cells)?;
+    take(
+        work,
+        u32::try_from(bomb_occupancy.len()).map_err(|_| ForecastFailure::IntervalCapacity)?,
+    )?;
+    bomb_occupancy.finish();
     HazardForecast::from_parts(
         key,
         board,
         parts.tick,
         horizon_end,
         cells,
+        bomb_occupancy,
         assumptions,
         evolution,
         hypothetical_id,

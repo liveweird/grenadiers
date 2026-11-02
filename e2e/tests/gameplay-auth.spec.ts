@@ -84,7 +84,7 @@ test('gameplay authentication preserves credentials and connection ownership', a
   })
 
   expect(frames.incompatible).toEqual({ type: 'incompatibleProtocol', supportedVersion: 19 })
-  expect(frames.authenticated).toEqual({ type: 'authenticated', protocolVersion: 19 })
+  expect(frames.authenticated).toEqual({ type: 'authenticated', protocolVersion: 20 })
   expect(frames.duplicate).toEqual({ type: 'error', code: 'connectionInUse', sequence: null })
   expect(frames.firstCommand).toEqual({ type: 'error', code: 'notInRoom', sequence: 1 })
   expect(frames.replay).toEqual({ type: 'error', code: 'staleSequence', sequence: 1 })

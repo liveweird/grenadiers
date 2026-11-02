@@ -8,7 +8,10 @@ use crate::game::{CellId, EntityId, OilBarrelState, Tick};
 use super::evolution::FlameChange;
 use super::intervals::{add_window, take};
 use super::model::{ForecastBomb, ForecastField, Trigger, index};
-use super::{CellForecast, ForecastEvolution, ForecastFailure, ForecastLimits, TickWindow};
+use super::{
+    BombOccupancy, BombOccupancyIndex, CellForecast, ForecastEvolution, ForecastFailure,
+    ForecastLimits, TickWindow,
+};
 
 #[allow(clippy::too_many_arguments)]
 pub(super) fn simulate_stationary(
@@ -20,6 +23,7 @@ pub(super) fn simulate_stationary(
     work: &mut WorkBudget,
     cells: &mut [CellForecast],
     evolution: &mut ForecastEvolution,
+    bomb_occupancy: &mut BombOccupancyIndex,
 ) -> Result<(), ForecastFailure> {
     let parts = observation.parts();
     let width = parts.arena.width;
@@ -119,6 +123,7 @@ pub(super) fn simulate_stationary(
         limits,
         work,
         cells,
+        bomb_occupancy,
     )
 }
 
@@ -240,6 +245,7 @@ fn add_blocking_windows(
     limits: ForecastLimits,
     work: &mut WorkBudget,
     cells: &mut [CellForecast],
+    bomb_occupancy: &mut BombOccupancyIndex,
 ) -> Result<(), ForecastFailure> {
     let basis = observation.parts().tick;
     let width = observation.parts().arena.width;
@@ -251,26 +257,70 @@ fn add_blocking_windows(
             block_removals.entry(cell).or_insert(tick);
         }
     }
+    let contact_enabled = observation.parts().rules.punch_activation_policy
+        == crate::game::PunchActivationPolicy::ContactV2;
+    let flame_expiries = if contact_enabled {
+        take(
+            work,
+            u32::try_from(observation.parts().flames.len())
+                .map_err(|_| ForecastFailure::IntervalCapacity)?,
+        )?;
+        observation
+            .parts()
+            .flames
+            .iter()
+            .map(|flame| {
+                basis
+                    .0
+                    .checked_add(u64::from(flame.remaining_ticks))
+                    .map(|expiry| (flame.cell, Tick(expiry)))
+                    .ok_or(ForecastFailure::ClockOverflow)
+            })
+            .collect::<Result<BTreeMap<_, _>, _>>()?
+    } else {
+        BTreeMap::new()
+    };
     for bomb in bombs {
         if !matches!(bomb.trigger, Trigger::Contact) {
+            let normal_start = if bomb.hypothetical {
+                Tick(
+                    bomb.active_from
+                        .0
+                        .checked_add(1)
+                        .ok_or(ForecastFailure::ClockOverflow)?,
+                )
+            } else {
+                basis
+            };
+            let contact_start = flame_expiries
+                .get(&bomb.cell)
+                .copied()
+                .map_or(normal_start, |expiry| expiry.max(normal_start));
+            let blocking_end = removals.get(&bomb.id).copied().unwrap_or(horizon_end);
             add_window(
                 &mut cells[index(bomb.cell, width)].blocking,
                 TickWindow {
-                    start: if bomb.hypothetical {
-                        Tick(
-                            bomb.active_from
-                                .0
-                                .checked_add(1)
-                                .ok_or(ForecastFailure::ClockOverflow)?,
-                        )
-                    } else {
-                        basis
-                    },
-                    end: removals.get(&bomb.id).copied().unwrap_or(horizon_end),
+                    start: normal_start,
+                    end: blocking_end,
                 },
                 limits,
                 work,
             )?;
+            let contact_end = match bomb.trigger {
+                Trigger::Timed(due) => due.min(blocking_end),
+                Trigger::Paused(_) | Trigger::Remote => blocking_end,
+                Trigger::Contact => unreachable!(),
+            };
+            if contact_enabled && contact_start < contact_end {
+                bomb_occupancy.insert(BombOccupancy {
+                    id: bomb.id,
+                    cell: bomb.cell,
+                    window: TickWindow {
+                        start: contact_start,
+                        end: contact_end,
+                    },
+                });
+            }
         }
     }
     for cell in &observation.parts().arena.blocks {

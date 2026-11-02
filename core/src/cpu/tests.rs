@@ -59,6 +59,7 @@ pub(super) fn observation(bombs: BombKnowledge) -> Observation {
         recipient: SeatId::Two,
         rules: ObservedRules {
             version: 5,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 4,
             remaining_ticks: 100,
@@ -320,6 +321,23 @@ fn work_overflow_is_rejected_without_changing_accounting() {
     assert_eq!(work.try_take(1), Err(WorkError::Exhausted));
     assert_eq!(work.spent(), u32::MAX);
     assert!(work.exhausted());
+}
+
+#[test]
+fn reconstructed_rules_preserve_the_typed_punch_activation_policy() {
+    for policy in [
+        crate::game::PunchActivationPolicy::ManualV1,
+        crate::game::PunchActivationPolicy::ContactV2,
+    ] {
+        let observed = observation(BombKnowledge::Visible(Vec::new())).map_parts(|parts| {
+            parts.rules.punch_activation_policy = policy;
+        });
+        let observed = observed.unwrap();
+        assert_eq!(
+            rules_config(&observed).unwrap().punch_activation_policy(),
+            policy
+        );
+    }
 }
 
 #[test]

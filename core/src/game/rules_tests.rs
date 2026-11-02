@@ -1,5 +1,5 @@
 use super::RulesConfig;
-use crate::game::{EnabledItems, MobNavigationPolicy, SpeedLevel};
+use crate::game::{EnabledItems, MobNavigationPolicy, PunchActivationPolicy, SpeedLevel};
 use crate::room::{
     RespawnLairConfig, RespawnLairSettings, RoomSettings, SpikePitConfig, SpikePitSettings,
 };
@@ -21,6 +21,31 @@ fn classic_v1_exposes_the_fixed_geometry_and_tick_parameters() {
     assert_eq!(rules.bomb_fuse_ticks(), 180);
     assert_eq!(rules.flame_ticks(), 30);
     assert_eq!(rules.round_ticks(), 10_800);
+    assert_eq!(
+        rules.punch_activation_policy(),
+        PunchActivationPolicy::ManualV1
+    );
+}
+
+#[test]
+fn contact_punch_is_an_explicit_policy_without_changing_the_rules_version() {
+    let legacy = RulesConfig::environment_v10(
+        RoomSettings::DEFAULT,
+        super::StormCloudConfig::Disabled,
+        RespawnLairConfig::Disabled,
+        SpikePitConfig::Disabled,
+    );
+    let contact = legacy.with_punch_activation_policy(PunchActivationPolicy::ContactV2);
+
+    assert_eq!(
+        legacy.punch_activation_policy(),
+        PunchActivationPolicy::ManualV1
+    );
+    assert_eq!(
+        contact.punch_activation_policy(),
+        PunchActivationPolicy::ContactV2
+    );
+    assert_eq!(contact.version(), legacy.version());
 }
 
 #[test]

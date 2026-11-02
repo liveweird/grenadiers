@@ -10,7 +10,6 @@ use crate::cpu::routing::{
 };
 use crate::cpu::{CpuRng, Intent, MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
-
 pub fn plan(
     observation: &Observation,
     memory: &UtilityMemory,

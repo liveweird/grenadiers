@@ -3,7 +3,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from './game/arena/types'
-import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v19/schema'
+import type { GameState, RoomPhase, RoomView, Snapshot } from './game/v20/schema'
 import i18n from './i18n'
 import { App } from './App'
 
@@ -149,8 +149,8 @@ async function beginRoom(user: ReturnType<typeof userEvent.setup>, action: 'crea
   await waitFor(() => expect(appSockets.filter((socket) => socket.url.endsWith('/api/v1/game/ws'))).toHaveLength(1))
   const socket = appSockets.find((candidate) => candidate.url.endsWith('/api/v1/game/ws'))!
   act(() => socket.emit('open'))
-  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 19, token })
-  act(() => socket.message({ type: 'authenticated', protocolVersion: 19 }))
+  expect(JSON.parse(socket.sent[0])).toEqual({ type: 'authenticate', protocolVersion: 20, token })
+  act(() => socket.message({ type: 'authenticated', protocolVersion: 20 }))
   return socket
 }
 

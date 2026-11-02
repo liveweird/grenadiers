@@ -1,30 +1,21 @@
 # Punch
 
-## Scenario: Punch wraps one retained bomb three cells without extra cues and preserves its fuse
+## Scenario: Punch wraps one retained bomb on contact and preserves its fuse
 
-Two Chromium contexts use pinned seed bytes through generator3 with only Punch enabled and a
-300-tick fuse. Before joining, the English desktop client remaps Equipment from E to F and uses that
-actual key throughout play. The English desktop and Polish 320-pixel reduced-motion clients ready,
-reveal and collect Punch with an ordinary bomb, then use two more ordinary bombs to clear the route.
-A demo bomb is planted at `(4,1)` and the holder fully exits east to `(5,1)`, faces west, and presses
-F. Both public streams observe the same entity ID move directly by its three-cell wrapped path to
-`(1,1)`, with unchanged owner, range, placement tick, Timed trigger and Standard blast. The action
-uses the immediate successor of the demo placement's shared manual-action ID, creates no placement
-or detonation event, and leaves the actor position, heading and Teleporter epoch unchanged. Neither
-public stream contains private Punch cooldown or bomb-history fields.
+Two Chromium contexts use the pinned Punch arena with only Punch enabled and a 300-tick fuse.
+The English controls help has five remappable actions, no Equipment row, and explains that Punch
+activates by walking into a bomb. English desktop and Polish narrow clients reveal and collect
+Punch, clear its route, and retain the existing Punch inventory and status presentation.
 
-The holder escapes through `(4,1)` and `(3,1)` into safe cell `(3,2)` before either screenshot or
-compositor crop. Both clients capture the punched bomb at `(1,1)` and the unobscured vacated source
-cell `(4,1)`, then observe its natural same-ID detonation at `placedAt + 300`. Both recipient views
-show both actors alive.
+The holder plants a timed bomb at `(4,1)`, walks east to `(5,1)`, and moves west into it. Both
+public streams observe the same bomb move along its three-cell wrapped path to `(1,1)` without a
+manual Equipment command, placement event, detonation event, actor displacement, or private Punch
+cooldown/history fields. Its identity, owner, range, placement tick, timed fuse, and standard blast
+remain unchanged. Both clients capture the destination and vacated source cells, then observe the
+same-ID natural detonation at `placedAt + 300`.
 
-After that visual proof completes and the arena clears, the holder repeats the same route with a
-fresh bomb. While this second punched bomb remains live at `(1,1)`, the English client closes its
-actual application transport and resumes through the normal client path. The new admitted baseline
-retains the room, seat, both living actors, Punch inventory and the same bomb identity, cell, owner,
-range, placement tick, Timed fuse and Standard blast without private Punch fields or replayed action
-events. The next single press of the remapped F key uses the successor action ID. The holder escapes,
-both clients observe the second bomb's natural same-ID detonation at `placedAt + 300`, and a later
-admitted baseline confirms that action was accepted without repetition. The scenario uses ordinary
-UI actions, native keys and read-only socket observation without injection, seed search, retries,
-direct gameplay commands or extended budgets.
+The holder repeats the contact punch with a fresh bomb and reconnects through the application
+transport. The admitted baseline retains the room, seat, Punch inventory, bomb identity and fuse,
+and reports only the preceding Bomb action ID. Pressing default E emits no command. Both clients
+then observe the second bomb's natural detonation. The scenario uses UI actions, native keys, and
+read-only socket observation without direct gameplay command injection.

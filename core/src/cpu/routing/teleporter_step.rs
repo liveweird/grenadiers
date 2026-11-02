@@ -87,6 +87,14 @@ fn certify(
         super::storm::charge_tick(context.storm, work)?;
         charge_directional_advance(&motion_observation, work)?;
         let segments = advance(&motion_context, &mut motion, request.movement, Tick(start))?;
+        super::contact_punch_guard::check_motion(
+            observation,
+            &[forecast],
+            &motion,
+            Tick(start),
+            None,
+            work,
+        )?;
         nominal.push((Tick(start), motion, segments));
     }
     take(work, usize_to_work(nominal.len())?)?;

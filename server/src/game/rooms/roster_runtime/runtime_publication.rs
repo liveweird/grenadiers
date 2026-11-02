@@ -3,7 +3,7 @@ use grenadiers_core::room::{MatchChange, MatchPhase};
 use super::{
     error::RosterRuntimeError,
     publication, publication_v15, publication_v16, publication_v17, publication_v18,
-    publication_v19,
+    publication_v19, publication_v20,
     runtime::{EnvironmentProfile, RosterRuntime, SpikePublicationVersion},
     types::{RosterNotice, RosterPublication},
 };
@@ -91,7 +91,27 @@ impl RosterRuntime {
                     lairs,
                     spike_pits,
                 };
-                if self.spike_publication == SpikePublicationVersion::V19 {
+                if self.spike_publication == SpikePublicationVersion::V20 {
+                    let room = publication_v20::room_view(
+                        &self.identity,
+                        &self.lifecycle,
+                        profile,
+                        next,
+                        self.settings_revision,
+                        self.settings_authority_locked(),
+                    )?;
+                    if let Some(sim) = body {
+                        publication_v20::snapshot(
+                            room,
+                            sim.epoch,
+                            &sim.state,
+                            &self.reports,
+                            sim.generation,
+                        )?
+                    } else {
+                        publication_v20::view_notice(room)
+                    }
+                } else if self.spike_publication == SpikePublicationVersion::V19 {
                     let room = publication_v19::room_view(
                         &self.identity,
                         &self.lifecycle,
@@ -160,7 +180,8 @@ impl RosterRuntime {
             RosterPublication::Lairs(_, _)
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
-            | RosterPublication::SpikeV19(_, _) => None,
+            | RosterPublication::SpikeV19(_, _)
+            | RosterPublication::SpikeV20(_, _) => None,
         };
         self.lair_cpu_publication = match &notice.publication {
             RosterPublication::Lairs(_, publication) => publication.clone(),
@@ -168,7 +189,8 @@ impl RosterRuntime {
             | RosterPublication::Environment(_, _)
             | RosterPublication::Respawn(_, _)
             | RosterPublication::Spike(_, _)
-            | RosterPublication::SpikeV19(_, _) => None,
+            | RosterPublication::SpikeV19(_, _)
+            | RosterPublication::SpikeV20(_, _) => None,
         };
         self.respawn_cpu_publication = match &notice.publication {
             RosterPublication::Respawn(_, publication) => publication.clone(),
@@ -176,7 +198,8 @@ impl RosterRuntime {
             | RosterPublication::Environment(_, _)
             | RosterPublication::Lairs(_, _)
             | RosterPublication::Spike(_, _)
-            | RosterPublication::SpikeV19(_, _) => None,
+            | RosterPublication::SpikeV19(_, _)
+            | RosterPublication::SpikeV20(_, _) => None,
         };
         self.spike_cpu_publication = match &notice.publication {
             RosterPublication::Spike(_, publication) => publication.clone(),
@@ -184,6 +207,10 @@ impl RosterRuntime {
         };
         self.spike_v19_cpu_publication = match &notice.publication {
             RosterPublication::SpikeV19(_, publication) => publication.clone(),
+            _ => None,
+        };
+        self.spike_v20_cpu_publication = match &notice.publication {
+            RosterPublication::SpikeV20(_, publication) => publication.clone(),
             _ => None,
         };
         self.revision = next;
@@ -234,7 +261,16 @@ impl RosterRuntime {
                     lairs,
                     spike_pits,
                 };
-                if self.spike_publication == SpikePublicationVersion::V19 {
+                if self.spike_publication == SpikePublicationVersion::V20 {
+                    publication_v20::view_notice(publication_v20::room_view(
+                        &self.identity,
+                        &self.lifecycle,
+                        profile,
+                        next,
+                        self.settings_revision,
+                        self.settings_authority_locked(),
+                    )?)
+                } else if self.spike_publication == SpikePublicationVersion::V19 {
                     publication_v19::view_notice(publication_v19::room_view(
                         &self.identity,
                         &self.lifecycle,
@@ -268,6 +304,7 @@ impl RosterRuntime {
         self.respawn_cpu_publication = None;
         self.spike_cpu_publication = None;
         self.spike_v19_cpu_publication = None;
+        self.spike_v20_cpu_publication = None;
         Ok(notice)
     }
 

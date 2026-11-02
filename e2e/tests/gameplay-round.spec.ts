@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import type { GameServerMessage } from '../../web/src/game/v19/schema'
+import type { GameServerMessage } from '../../web/src/game/v20/schema'
 import { gameFrames, openGame, roomFrame, sendGame } from './support/game'
 import { visibleActor } from './support/duel'
 
@@ -101,10 +101,6 @@ test('two native gameplay sockets finish one authoritative cloud-disabled genera
       return visibleActor(snapshot(await gameFrames(one)), 'one')?.position.x ?? 0
     }, { intervals: [100] }).toBeGreaterThan(2350)
     await sendGame(one, { type: 'movement', ...binding, direction: null })
-    const equipment = await sendGame(one, { type: 'manualAction', action: 'equipment', ...binding, actionId: 1 })
-    await expect.poll(() => gameFrames(one)).toContainEqual({
-      type: 'error', code: 'invalidPhase', sequence: equipment,
-    })
     await sendGame(one, { type: 'manualAction', action: 'bomb', ...binding, actionId: 1 })
     await expect.poll(async () => snapshot(await gameFrames(one))?.state.bombs.length).toBe(1)
     const duplicate = await sendGame(one, { type: 'manualAction', action: 'bomb', ...binding, actionId: 1 })

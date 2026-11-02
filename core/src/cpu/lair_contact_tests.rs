@@ -52,6 +52,7 @@ pub(crate) fn observation(mobs: Vec<MobView>, next_spawn_at: Tick) -> Observatio
         recipient: SeatId::Two,
         rules: ObservedRules {
             version: 8,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 100,
             remaining_ticks: 100,

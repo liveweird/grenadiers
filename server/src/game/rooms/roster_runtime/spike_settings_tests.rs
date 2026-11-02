@@ -44,6 +44,38 @@ fn runtime_v19(configuration: RoomConfiguration) -> RosterRuntime {
     runtime_for_publication(configuration, true)
 }
 
+fn runtime_v20(configuration: RoomConfiguration) -> RosterRuntime {
+    RosterRuntime::new_spike_v20_with_navigation(
+        identity(configuration),
+        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
+        StormCloudConfig::Single,
+        lairs(false, 10),
+        SpikePitTuning::DEFAULT,
+        RoundSeedSource::with_entropy(|bytes| {
+            bytes.fill(72);
+            Ok(())
+        }),
+        Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
+        grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3,
+    )
+    .unwrap()
+}
+
+#[test]
+fn gameplay20_is_contact_v2_before_the_first_round_and_publishes_rules10() {
+    let configuration = RoomConfiguration::human_duel();
+    let mut runtime = runtime_v20(configuration);
+    assert!(runtime.uses_gameplay20());
+    assert_eq!(
+        runtime.replay_inspection().punch_activation,
+        grenadiers_core::game::PunchActivationPolicy::ContactV2
+    );
+    admit(&mut runtime);
+    let notice = runtime.current_notice().unwrap();
+    assert_eq!(notice.spike_v20_room().unwrap().rules_version.get(), 10);
+    assert!(notice.spike_v19_room().is_none());
+}
+
 fn runtime_v18(configuration: RoomConfiguration) -> RosterRuntime {
     runtime_for_publication(configuration, false)
 }

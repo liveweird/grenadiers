@@ -4,8 +4,9 @@ use grenadiers_core::{
         forecast::ObservedHazardMemory,
         policy::{IntentDebugSummary, StrategicIntent, UtilityMemory},
         survival::{
-            TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_corner_refuges_v56_with_origin,
-            plan_hard_blocked_births_v43_with_origin, plan_hard_corner_refuges_v57_with_origin,
+            TeleporterRecoveryChoice, WORK_ALLOWANCE, plan_contact_punch_v60_with_origin,
+            plan_corner_refuges_v56_with_origin, plan_hard_blocked_births_v43_with_origin,
+            plan_hard_contact_punch_v61_with_origin, plan_hard_corner_refuges_v57_with_origin,
             plan_hard_farm_yield_v59_with_origin, plan_hard_pit_avoidance_v53_with_origin,
             select_teleporter_recovery_v50,
         },
@@ -271,6 +272,8 @@ fn probe_basis(basis: &PlanningBasis<'_>) -> BasisProbe {
             grenadiers_core::cpu::survival::plan_hard_exit_pressure_v58_with_origin
         }
         CpuPolicy::UtilityV59 => plan_hard_farm_yield_v59_with_origin,
+        CpuPolicy::UtilityV60 => plan_contact_punch_v60_with_origin,
+        CpuPolicy::UtilityV61 => plan_hard_contact_punch_v61_with_origin,
         _ => panic!("unsupported interaction characterization profile"),
     };
     let planned = plan(

@@ -60,7 +60,7 @@ second each). A correlated operation throttle preserves authentication; per-sock
 still close with policy code 1008. Peer admission below adds independent budgets without replacing
 these global backstops.
 Malformed text messages yield a typed error and policy close. Control frames remain protocol
-control frames. The diagnostic envelope is v2; authenticated gameplay requires v19; versions 1 through 18 are
+control frames. The diagnostic envelope is v2; authenticated gameplay requires v20; versions 1 through 19 are
 rejected before credential lookup.
 
 ## Peer identity and admission

@@ -1,7 +1,7 @@
 # Roster runtime
 
 `server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by every
-live two-to-four-seat configuration and board. The [v18 contract](protocol-v18.md) owns wire shape
+live two-to-four-seat configuration and board. The [v20 contract](protocol-v20.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -35,10 +35,11 @@ Released credentials remain retired and cannot resume or be minted for replaceme
 rooms accept at most 256 lifetime human admissions, bounding the retired-credential set. A
 replacement cannot inherit the departed creator's settings authority.
 
-Round construction uses rules 9 and the actual physical-round assignment. It selects generator 3
-for 15×13 and generator 4 for 11×9/13×11. The configured roster remains intact, with departed
-participants initially inactive. Every live room uses CPU policy 24. The exact profile table is in
-[board geometry](board-sizes.md).
+Round construction uses rules10, navigation3, ContactV2 Punch activation and the actual
+physical-round assignment. It selects generator3 for 15×13 and generator4 for 11×9/13×11.
+The configured roster remains intact, with departed participants initially inactive. Live rooms
+use CPU60 on Easy/Standard and CPU61 on Hard. The exact profile table is in
+[CPU boundaries](multiplayer-cpu.md#policies-and-controller-ownership).
 
 ## Boundaries and randomness
 
@@ -57,9 +58,10 @@ export stay disabled.
 
 ## Explicit lair runtime
 
-`RosterRuntime::new_spike` selects a separate rules10 environment profile, including when pits,
-lairs or clouds are disabled. It publishes checked gameplay18 admissions and snapshots; the ordinary
-live registry uses rules10/gameplay18. Profile-specific settings entry points reject
+`RosterRuntime::new_spike_v20_with_navigation` selects the live rules10 environment profile,
+including when pits, lairs or clouds are disabled. It publishes checked gameplay20 admissions
+and snapshots; retained v19 and older constructors preserve their archived activation and wire
+identities. Profile-specific settings entry points reject
 cross-profile updates and share the same atomic authority, revision and readiness transaction.
 Disabled lairs retain their numeric settings. Creator revocation, forming-seat replacement and
 the first-start lock retain the lifecycle rules above.

@@ -9,7 +9,7 @@ import { format, useGameCopy, type GameCopy } from './locale'
 import type {
   BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
   Seat, VisibleActorView,
-} from '../v19/schema'
+} from '../v20/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -23,7 +23,7 @@ import { controllersAvailable, isLegacySolo, roomCopy } from './roomControllers'
 import { CpuDebugPanel } from './CpuDebugPanel'
 import { useCpuDebug } from './useCpuDebug'
 import { cpuDebugOptedIn } from './cpuDebugOptIn'
-import { DifficultySelector } from '../v19/DifficultySelector'
+import { DifficultySelector } from './DifficultySelector'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
 const BOARD_PRESETS = [
@@ -38,7 +38,6 @@ export interface GameActions {
   rematch(ready: boolean): boolean
   movement(direction: Direction | null): boolean
   placeBomb(): boolean
-  useEquipment(): boolean
   leave(): boolean
 }
 
@@ -293,13 +292,11 @@ function arenaFocusHint(state: GameClientState, snapshot: ReturnType<typeof pres
   bindings: KeyboardBindings, copy: ReturnType<typeof useGameCopy>): string {
   const actor = state.youSeat && snapshot?.state.actors.find(({ seat }) => seat === state.youSeat)
   const bomb = bindings.bomb.map((code) => keyLabel(code, copy)).join(' / ')
-  const equipment = bindings.equipment.map((code) => keyLabel(code, copy)).join(' / ')
   if (actor?.invisibleBombsRemainingTicks && state.room?.settings.enabledItems.includes('remoteBomb')) {
     return format(copy.arena.blindBombHint, { bomb })
   }
   if (actor?.remoteArmed) return format(copy.arena.remoteHint, { bomb })
-  return actor?.punchEquipped
-    ? format(copy.arena.punchHint, { equipment }) : copy.arena.focusHint
+  return actor?.punchEquipped ? copy.arena.punchHint : copy.arena.focusHint
 }
 
 export function GamePanelView({ state, actions, developerPanel, presentationDeaths, presentationOpening }: {
@@ -348,8 +345,7 @@ export function GamePanelView({ state, actions, developerPanel, presentationDeat
           focusHint={focusHint} instructionsId="game-instructions" snapshot={arenaSnapshot}
           youSeat={state.youSeat} enabled={Boolean(enabled)}
           bindings={bindings}
-          onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()}
-          onEquipment={() => actions.useEquipment()} />
+          onDirection={(direction) => actions.movement(direction)} onBomb={() => actions.placeBomb()} />
         {ownActor && <OwnStatusBar actor={ownActor} copy={copy} />}
         <OwnPickupNotice state={state} copy={copy} />
         <p id="game-instructions" className="game-instructions">{bindingsSummary(bindings, copy)}</p>

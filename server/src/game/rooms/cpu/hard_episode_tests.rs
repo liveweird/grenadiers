@@ -6,24 +6,24 @@ use grenadiers_core::room::{BoardSize, CpuDifficulty, CpuProfile};
 use support::{Case, assert_operational, current_profile, run};
 
 #[test]
-fn current_v19_profile_matrix_is_labeled_and_productive() {
+fn current_v20_profile_matrix_is_labeled_and_productive() {
     for (label, difficulty, profile, seed) in [
         (
-            "current-easy-v56",
+            "current-easy-v60",
             CpuDifficulty::Easy,
-            CpuProfile::CORNER_REFUGES_V56_EASY,
+            CpuProfile::CONTACT_PUNCH_V60_EASY,
             71,
         ),
         (
-            "current-standard-v56",
+            "current-standard-v60",
             CpuDifficulty::Standard,
-            CpuProfile::CORNER_REFUGES_V56_STANDARD,
+            CpuProfile::CONTACT_PUNCH_V60_STANDARD,
             72,
         ),
         (
-            "current-hard-v59",
+            "current-hard-v61",
             CpuDifficulty::Hard,
-            CpuProfile::HARD_V59,
+            CpuProfile::HARD_V61,
             73,
         ),
     ] {
@@ -45,7 +45,7 @@ fn current_v19_profile_matrix_is_labeled_and_productive() {
 }
 
 #[test]
-fn pumped_hard_v59_is_deterministic_and_productive_on_every_board_and_lair_mode() {
+fn pumped_hard_v61_is_deterministic_and_productive_on_every_board_and_lair_mode() {
     for board in [
         BoardSize::ElevenByNine,
         BoardSize::ThirteenByEleven,
@@ -53,7 +53,7 @@ fn pumped_hard_v59_is_deterministic_and_productive_on_every_board_and_lair_mode(
     ] {
         for lairs in [false, true] {
             let case = Case {
-                label: "pumped-hard-v59",
+                label: "pumped-hard-v61",
                 difficulty: CpuDifficulty::Hard,
                 board,
                 lairs,
@@ -63,18 +63,18 @@ fn pumped_hard_v59_is_deterministic_and_productive_on_every_board_and_lair_mode(
             let first = run(case, 840);
             let second = run(case, 840);
             assert_eq!(first, second, "board={board:?} lairs={lairs}");
-            assert_eq!(first.profile, CpuProfile::HARD_V59);
+            assert_eq!(first.profile, CpuProfile::HARD_V61);
             assert_operational(&first);
         }
     }
 }
 
 #[test]
-fn native_hard_v59_seed73_progresses_with_two_workers_at_production_pacing() {
+fn native_hard_v61_seed73_progresses_with_two_workers_at_production_pacing() {
     for lairs in [false, true] {
         let outcome = run(
             Case {
-                label: "native-hard-v59-seed73",
+                label: "native-hard-v61-seed73",
                 difficulty: CpuDifficulty::Hard,
                 board: BoardSize::FifteenByThirteen,
                 lairs,
@@ -83,7 +83,7 @@ fn native_hard_v59_seed73_progresses_with_two_workers_at_production_pacing() {
             },
             840,
         );
-        assert_eq!(outcome.profile, CpuProfile::HARD_V59);
+        assert_eq!(outcome.profile, CpuProfile::HARD_V61);
         assert_operational(&outcome);
     }
 }

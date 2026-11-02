@@ -58,9 +58,9 @@ pub(super) struct Outcome {
 
 pub(super) const fn current_profile(difficulty: CpuDifficulty) -> CpuProfile {
     match difficulty {
-        CpuDifficulty::Easy => CpuProfile::CORNER_REFUGES_V56_EASY,
-        CpuDifficulty::Standard => CpuProfile::CORNER_REFUGES_V56_STANDARD,
-        CpuDifficulty::Hard => CpuProfile::HARD_V59,
+        CpuDifficulty::Easy => CpuProfile::CONTACT_PUNCH_V60_EASY,
+        CpuDifficulty::Standard => CpuProfile::CONTACT_PUNCH_V60_STANDARD,
+        CpuDifficulty::Hard => CpuProfile::HARD_V61,
     }
 }
 
@@ -77,7 +77,7 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
         case.board,
     )
     .unwrap();
-    let mut runtime = RosterRuntime::new_spike_v19_with_navigation(
+    let mut runtime = RosterRuntime::new_spike_v20_with_navigation(
         RosterIdentity {
             id: RoomId::new("0123456789abcdef0123456789abcdef").unwrap(),
             code: RoomCode::new("ABCDEFGH").unwrap(),
@@ -135,7 +135,7 @@ pub(super) fn run(case: Case, ticks: usize) -> Outcome {
     assert!(cpus.iter().all(|cpu| cpu.profile() == profile));
     assert_eq!(validate_cpus(&runtime, &cpus), Ok(()));
     let notice = runtime.current_notice().unwrap();
-    assert!(notice.spike_v19_cpu_publication().is_some());
+    assert!(notice.spike_v20_cpu_publication().is_some());
     let (notices, receiver) = watch::channel(RosterOwnerNotice::Publication(notice.clone()));
     drop(receiver);
     let random_fill: Arc<RandomFill> = Arc::new(|bytes| {

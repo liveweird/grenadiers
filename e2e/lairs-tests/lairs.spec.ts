@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
-import type { GameServerMessage, MobView } from '../../web/src/game/v19/schema'
+import type { GameServerMessage, MobView } from '../../web/src/game/v20/schema'
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
 import {

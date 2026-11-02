@@ -2,10 +2,10 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{
-        GenerationRecord, MobNavigationPolicy, SeatId, SimulationSeed, State, StepReport,
-        StormCloudConfig, Tick,
+        GenerationRecord, MobNavigationPolicy, PunchActivationPolicy, SeatId, SimulationSeed,
+        State, StepReport, StormCloudConfig, Tick,
     },
-    protocol::{v14, v15, v16, v17, v18, v19},
+    protocol::{v14, v15, v16, v17, v18, v19, v20},
     room::{DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle},
 };
 
@@ -39,8 +39,10 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) respawn_cpu_publication: Option<Arc<v17::BoundPublication>>,
     pub(super) spike_cpu_publication: Option<Arc<v18::BoundPublication>>,
     pub(super) spike_v19_cpu_publication: Option<Arc<v19::BoundPublication>>,
+    pub(super) spike_v20_cpu_publication: Option<Arc<v20::BoundPublication>>,
     pub(super) environment_profile: Option<EnvironmentProfile>,
     pub(super) mob_navigation: MobNavigationPolicy,
+    pub(super) punch_activation: PunchActivationPolicy,
     pub(super) spike_publication: SpikePublicationVersion,
 }
 
@@ -48,6 +50,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
 pub(in crate::game::rooms) enum SpikePublicationVersion {
     V18,
     V19,
+    V20,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -112,8 +115,10 @@ impl RosterRuntime {
             respawn_cpu_publication: None,
             spike_cpu_publication: None,
             spike_v19_cpu_publication: None,
+            spike_v20_cpu_publication: None,
             environment_profile: None,
             mob_navigation: MobNavigationPolicy::LegacyV1,
+            punch_activation: PunchActivationPolicy::ManualV1,
             spike_publication: SpikePublicationVersion::V18,
         })
     }

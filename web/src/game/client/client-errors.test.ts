@@ -39,8 +39,8 @@ describe('v12 session and admission failures', () => {
     await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
     const socket = value.sockets[0]
     socket.emit('open')
-    socket.message({ type: 'authenticated', protocolVersion: 19 })
-    socket.message({ type: 'authenticated', protocolVersion: 19 })
+    socket.message({ type: 'authenticated', protocolVersion: 20 })
+    socket.message({ type: 'authenticated', protocolVersion: 20 })
     expect(messages(socket).filter((message) => message.type === 'createRoom')).toHaveLength(1)
     socket.message({ ...admitted(), sequence: 2 })
     expect(value.client.getState().room).toBeNull()

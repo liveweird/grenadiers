@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { applyItemSettings } from '../tests/support/settings'
-import type { BombView, GameServerMessage } from '../../web/src/game/v19/schema'
+import type { BombView, GameServerMessage } from '../../web/src/game/v20/schema'
 
 test.beforeAll(() => {
   expect(process.env.E2E_SHIELD_FIXTURE, 'Configure the documented production Shield seed')

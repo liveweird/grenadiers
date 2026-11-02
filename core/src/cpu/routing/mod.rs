@@ -1,6 +1,7 @@
 //! Bounded time-aware routing over recipient-visible hazard forecasts.
 
 mod bracelet_guard;
+mod contact_punch_guard;
 mod continuation;
 mod continuation_candidates;
 mod continuation_contact;
@@ -14,6 +15,7 @@ mod plant;
 mod plant_types;
 mod pulse;
 mod pulse_geometry;
+mod pulse_suffix;
 mod pulse_support;
 mod punch;
 mod punch_types;
@@ -93,6 +95,9 @@ mod route_terminal_tests;
 #[cfg(test)]
 #[path = "motion_regression_tests.rs"]
 mod motion_regression_tests;
+
+#[cfg(test)]
+mod contact_punch_state_tests;
 
 #[cfg(test)]
 mod continuation_tests;

@@ -73,8 +73,8 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     let (url, server) = start_server(state).await;
     let mut socket = connect(&url).await;
     assert_eq!(
-        authenticate(&mut socket, &token, 19).await,
-        json!({"type":"authenticated", "protocolVersion":19})
+        authenticate(&mut socket, &token, 20).await,
+        json!({"type":"authenticated", "protocolVersion":20})
     );
 
     let room_id = "00000000000000000000000000000001";
@@ -117,5 +117,30 @@ async fn fresh_unseated_semantic_errors_consume_sequences_before_retry() {
     )
     .await;
     assert_eq!(next_json(&mut socket).await["type"], "admitted");
+    server.abort();
+}
+
+#[tokio::test]
+async fn retired_equipment_is_rejected_before_the_session_is_claimed() {
+    let state = state();
+    let token = issue_token(&state);
+    let (url, server) = start_server(state).await;
+    let mut rejected = connect(&url).await;
+    send_json(
+        &mut rejected,
+        json!({
+            "type":"manualAction", "sequence":1,
+            "roomId":"00000000000000000000000000000001", "roundId":1,
+            "actionId":1, "action":"equipment"
+        }),
+    )
+    .await;
+    assert_eq!(next_json(&mut rejected).await["code"], "invalidMessage");
+
+    let mut fresh = connect(&url).await;
+    assert_eq!(
+        authenticate(&mut fresh, &token, 20).await["type"],
+        "authenticated"
+    );
     server.abort();
 }

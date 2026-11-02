@@ -62,6 +62,7 @@ pub(crate) fn observation(flames: Vec<ObservedFlame>, pickups: Vec<ObservedPicku
         recipient: SeatId::Two,
         rules: ObservedRules {
             version: 5,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 0,
             remaining_ticks: 1_000,

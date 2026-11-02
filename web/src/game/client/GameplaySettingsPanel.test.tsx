@@ -121,7 +121,7 @@ describe('gameplay settings items', () => {
     expect(screen.getByText(/up to 8 Oil Barrel objects/)).toBeVisible()
     expect(screen.getByText(/Wall Pass can cross an unlit barrel but does not protect/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Kick' }))
-    expect(screen.getByText(/Press your Equipment key to punch/)).toBeVisible()
+    expect(screen.getByText(/Walk into a stationary timed or remote bomb/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Punch' }))
     expect(screen.getByText(/shoves them up to 1 tile/)).toBeVisible()
     await user.click(screen.getByRole('checkbox', { name: 'Bracelet' }))

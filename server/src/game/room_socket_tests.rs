@@ -54,7 +54,7 @@ async fn connect(url: &str, token: &str) -> ClientSocket {
     send(
         &mut socket,
         json!({
-            "type":"authenticate", "protocolVersion":19, "token":token
+            "type":"authenticate", "protocolVersion":20, "token":token
         }),
     )
     .await;
@@ -265,7 +265,7 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
         &mut one,
         json!({
             "type":"manualAction", "sequence":5, "roomId":room_id.clone(),
-            "roundId":1, "actionId":1, "action":"equipment"
+            "roundId":1, "actionId":1, "action":"bomb"
         }),
     )
     .await;
@@ -273,21 +273,12 @@ async fn two_members_receive_personalized_admission_and_live_waiting_updates() {
     send(
         &mut one,
         json!({
-            "type":"manualAction", "sequence":6, "roomId":room_id.clone(),
-            "roundId":1, "actionId":1, "action":"bomb"
-        }),
-    )
-    .await;
-    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 6, ready_revision).await;
-    send(
-        &mut one,
-        json!({
-            "type":"rematch", "sequence":7, "roomId":room_id.clone(),
+            "type":"rematch", "sequence":6, "roomId":room_id.clone(),
             "roundId":1, "ready":true
         }),
     )
     .await;
-    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 7, ready_revision).await;
+    waiting_reply::expect_error(&mut one, &room_id, "invalidPhase", 6, ready_revision).await;
     server.abort();
 }
 

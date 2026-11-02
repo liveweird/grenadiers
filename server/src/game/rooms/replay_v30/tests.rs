@@ -92,6 +92,10 @@ fn replay30_binds_exact_current_policy_pairs_and_reconstructs() {
             recording.settle([None; 4]).unwrap();
         }
         let expected = recording.runtime().replay_inspection();
+        assert_eq!(
+            expected.punch_activation,
+            grenadiers_core::game::PunchActivationPolicy::ManualV1
+        );
         let (_, journal) = recording.into_parts();
         assert_eq!(journal.header.format_version, 30);
         assert_eq!(journal.header.gameplay_version, 19);

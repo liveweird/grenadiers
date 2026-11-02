@@ -1,6 +1,6 @@
 import type { GameClientState } from './clientTypes'
 import type { PresentationDeathCue, PresentationDeaths } from '../arena/types'
-import type { Snapshot, VisibleActorView } from '../v19/schema'
+import type { Snapshot, VisibleActorView } from '../v20/schema'
 
 const MAX_RETAINED_CUES = 64
 

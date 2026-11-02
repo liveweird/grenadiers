@@ -260,6 +260,10 @@ mod exit_pressure_policy_tests;
 #[cfg(test)]
 mod exit_pressure_witness_tests;
 #[cfg(test)]
+mod farm_yield_fixture;
+#[cfg(test)]
+mod farm_yield_witness_tests;
+#[cfg(test)]
 mod foreign_bomb_farming_characterization_tests;
 
 #[cfg(test)]

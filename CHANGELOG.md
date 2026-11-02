@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.20 — 2026-11-02
+
+- Use a 1-second warning and 5-second raised phase for new spike-pit configurations, including quick duel, Solo, custom rooms and restored settings.
+- Preserve explicit previous/custom timings and archived replay fixtures; validation bounds, gameplay20, physics and replay identities remain unchanged.
+
 ## 1.3.19 — 2026-11-02
 
 - Activate Punch by walking into a bomb, with exact contact arbitration and one attempt per continuous contact for each bomb; preserve flight, fuse and cooldown behavior.

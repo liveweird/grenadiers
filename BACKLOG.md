@@ -25,8 +25,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
   preserve deterministic generation and player spawn safety.
   - A separate, unmerged prototype clears connected lair exits and excludes nearby pits.
-    Its seeded CPU acceptance still exposes a zero-bomb actor; retain the unchanged episode
-    assertions while proving useful planting through normal admission and full flame survival.
+    Versioned CPU recovery and demolition now pass queued-owner before/after witnesses,
+    including real planting, wall destruction and full flame survival. These use the earlier,
+    unweighted generator; acceptance must also pass on the combined weighted layouts.
     See the [controlled investigation](docs/history/lair-clearance-cpu-2026-11-02.md).
   - Before delivery, integrate with the published weighted-drop generator and protocol v21.
     Allocate new generation/replay identities; published generator 6 and replay 32 must retain

@@ -34,6 +34,11 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   defaults from the current 0.6/3 seconds to 1/5 seconds (60/300 ticks at 60 Hz). Update UI/default
   examples and tests while preserving explicitly configured durations and historical replay.
 
+- [todo] **BOMB-DROPS — configurable extra-bomb upgrade frequency.** Make Bomb Capacity
+  upgrades drop five times as frequently by default, with a room configuration control for the
+  multiplier. Define and document how the multiplier behaves with different enabled-item pools
+  and overall drop probability; preserve item switches, seeded generation and historical replay.
+
 ## Single-player
 
 - [todo] **CPU-RELIABILITY — extend foreign-bomb support only from complete witnesses.**
@@ -46,7 +51,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   work ceiling. See the [investigation](docs/history/cpu-late-passivity-2026-11-01.md).
 
 - [next] **HARD-CPU — deepen fair tactics.** Improve productive farming,
-  pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
+  pickup contention and useful bomb combinations. Preserve the bounded opponent-exit guidance. Use permitted
   observations, bounded planning and unchanged physics. Require authoritative before/after
   witnesses and independent review; preserve archived policies and complete seeded episodes.
   The [controlled firing-position comparison](docs/history/cpu-exit-pressure-2026-11-02.md)
@@ -71,13 +76,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Playtesting and extensions
 
-- [todo] **EQUIPMENT-KEY — audit the remaining manual equipment action.** Check which items
-  still require the Equipment key, reconcile input hints and guides with the intended contact
-  behavior, and determine whether the separate key can be removed. Currently only Punch uses
-  Equipment (default E); Kick and Bracelet activate through movement/contact, while Wall Pass
-  and Heart are passive. Keep the existing Punch behavior until the interaction decision is made;
-  see AUTO-PUNCH below.
-
 - [todo] **BASELINE — broaden browser/network validation.** Complete human playtesting and decide
   supported browser/network conditions. The 1.0 release records the current limits and
   upgrade/rollback guidance; remaining archived M7/M8 validation criteria stay open. CPU difficulty
@@ -94,6 +92,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Further art.** Beyond the walking, bomb and death frames, consider idle
   animation, environment detail, layered authoring sources, accessibility and measured effects
   budgets. Follow the [artist handoff](assets/art/README.md).
-- [new] **AUTO-PUNCH — consider automatic contact Punch.** The current idea is at most one
-  activation per contact, reducing gameplay controls to movement and Bomb. The user has not approved this
-  behavior; keep the existing manual Punch contract unless a product decision accepts it.
+- [todo] **AUTO-PUNCH — punch bombs by walking into them.** Activate Punch on attempted
+  movement into an adjacent bomb’s tile. Punch is currently the only manual Equipment action
+  (default E); preserve the existing punch flight, cooldown and one
+  activation per contact. Remove the separate Equipment key from gameplay controls and update
+  bindings/help. Preserve archived replay and verify human/CPU movement, contact and bomb-flight
+  interactions; do not trigger repeatedly from an unchanged held contact.

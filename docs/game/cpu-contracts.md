@@ -8,8 +8,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `CORNER_REFUGES_V56_STANDARD` or `CORNER_REFUGES_V56_EASY` and `HARD_V57`;
-private replay28 binds those identities. Named archive constants preserve historical replay
+Two. Live selection uses `CORNER_REFUGES_V56_STANDARD` or `CORNER_REFUGES_V56_EASY` and `HARD_V58`;
+private replay29 binds those identities. Named archive constants preserve historical replay
 identities. Policy identity describes decision semantics, not measured strength; seeds stay
 private. Live owner construction accepts only those three exact selected profiles. Retaining a
 historical replay identity does not re-enable that older policy for new matches.
@@ -367,7 +367,7 @@ movement, planting, stopped-suffix or survival budgets. Rules9/CPU25 remains arc
 ## Live difficulty profiles
 
 Gameplay19 retains the same rules10 observation boundary. Easy/Standard select CPU56 and Hard
-selects CPU57. They retain CPU52/53's ordinary planning and pit avoidance, adding the bounded
+selects CPU58. They retain CPU52/53's ordinary planning and pit avoidance, adding the bounded
 blocked-away refuge hints described below. Multi-Teleporter selection and confirmed-origin
 shared preparation remain unchanged. Archived CPU54/55 delegate their non-origin planning
 exactly to CPU52/53. Archived CPU50/51
@@ -405,7 +405,7 @@ can prove an empty reachable source set. Every birth barrier must remain intact;
 withdraws that authority. Archived CPU40/41 reject this additional certificate capability.
 It does not authorize recovery around an already observed bomb. See the
 [contact topology contract](single-player-cpu.md#plant-bound-contact-topology).
-Private replay28 binds CPU56/57; archived replay27 binds CPU54/55, replay26 binds CPU52/53,
+Private replay29 binds CPU56/58; archived replay28 binds CPU56/57; archived replay27 binds CPU54/55, replay26 binds CPU52/53,
 replay25 binds CPU50/51, replay24 retains CPU48/49 and replay23 retains CPU46/47. CPU44/45 and private replay22 are archived alongside CPU42/43 and
 private replay21; replay20 retains CPU40/41. CPU50/51 ordinary fallback delegates exactly to
 CPU44/45, including confirmed-origin continuation, while its new selector is inactive for an
@@ -414,7 +414,7 @@ contact modes. Older policy/replay contracts remain isolated.
 
 ## Shared escape preparation
 
-CPU54/55 and CPU56/57 validate the actual retained plant origin and build one unchanged default forecast
+CPU54/55 and CPU56/57/58 validate the actual retained plant origin and build one unchanged default forecast
 against the shared remaining work before attempting optional continuation. A forecast that
 exceeds the old half allowance can therefore still support a checked recovery pulse.
 
@@ -440,7 +440,7 @@ input journals retain their contracts; newly played matches can accept input at 
 
 ## Farming when the usual retreat is blocked
 
-CPU56/57 can use a lateral refuge when the cell directly away from an adjacent farming target
+CPU56/57/58 can use a lateral refuge when the cell directly away from an adjacent farming target
 is an indestructible wall, lair or outside the board. This requires the CPU to occupy its current
 committed Farm approach, visible empty bombs and no flames. Two deterministic candidates move
 sideways first, then use refuges offset by the observed bomb range both sideways and toward the
@@ -532,3 +532,28 @@ Expiry tries one alternate approach; an invalid or stalled alternate ends that r
 Fallback or later world facts can make a later episode eligible. Unsupported scenes and general
 passivity remain unsolved; broader farm/contact stalls and further Hard tactics remain in the
 [backlog](../../BACKLOG.md#single-player).
+
+## Equal-distance opponent exit coverage
+
+Hard58 first retains every visible rival’s existing nearest useful firing-position candidate,
+using the previous seat order, sequential budget shares and coordinate tie-break. Only afterward
+may it compare other origins at exactly that navigation distance. A strictly larger count of
+currently open adjacent terrain branches covered by the exact blast can replace the baseline.
+Equal coverage keeps the coordinate choice; a farther origin never wins this tie-break.
+This is present branch coverage, not a guarantee about rival movement or survival.
+
+Optional ranking requires a visible, alive, unfrozen and exactly centered rival, visible-empty
+bombs, no flames/Oil and no exposed Teleporter. Hidden living actors make comparison unsupported.
+Branch walkability uses the rival’s enabled WallPass, never the CPU’s equipment: floor is open,
+intact soft blocks require that rival’s enabled WallPass, and walls/lairs are closed. Adjacent
+pickups, pits, mobs or overlapping visible actors defer to the existing baseline. Lairs or storm
+elsewhere do not add knowledge or relax complete contact and escape proofs.
+
+Placement-time range/modifiers and Standard, Piercing or Power geometry use the existing shared
+blast visitor. Every classification and traversal consumes the original shared pressure budget:
+at most4,096 units and one eighth of incoming remaining work. Optional work also stays within
+each rival’s original unused share; baseline plus optional origin probes remain capped at32 per
+rival. Incomplete or unsupported comparisons retain the baseline. No extra RNG, hidden inputs,
+commitment change, faster physics or larger decision budget is introduced. The selected approach
+still requires the full useful planting, absent/present escape, contact and fresh-publication
+checks before any bomb action is admitted. Archived Hard57 retains its original choice and work.

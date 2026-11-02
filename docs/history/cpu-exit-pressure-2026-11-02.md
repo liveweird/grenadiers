@@ -1,7 +1,7 @@
 # CPU firing-position comparison — 2026-11-02
 
-This controlled characterization records existing Hard57 behavior. It does not change live
-policy, claim a restored match, or establish a guaranteed kill against a reactive opponent.
+This investigation records the frozen Hard57 baseline and controlled Hard58 comparison. It
+does not claim a restored match or establish a guaranteed kill against a reactive opponent.
 Work status belongs in [the backlog](../../BACKLOG.md#single-player).
 
 ## Equal-distance scene
@@ -29,7 +29,7 @@ physics; the test captures an actual queued observation, settled Stop, RNG and h
 A diagnostic replay matches the worker's returned intent and work.
 
 At actual queued tick183/Stop183, Hard57 chooses north/East for21,691 total work. It plants
-at232, detonates412 and survives the complete flame horizon442. The idle rival dies at412;
+at232, detonates412 and survives the complete flame horizon442. The idle rival dies at 412;
 this is an execution witness, not a competitive win-rate test. Worker delivery succeeds and
 the recorded admission categories are zero.
 
@@ -47,3 +47,26 @@ Formatting, strict workspace Clippy and the repository gate pass. Debug and rele
 three Core witnesses, two exit-pressure owner cases, two legacy late-Teleporter owner cases
 and the corner-farming owner case. Independent review is clear after requiring an empty
 hazard map after the flame horizon and observing the rival cell’s exact flame expiry.
+
+## Hard58 owner comparison
+
+The same actual queued scene now selects west `(5,7)` with South movement. It spends 21,876
+work versus archived Hard57’s 21,691: 185 additional logical units in this controlled query,
+not a general latency measurement. The first real bomb remains232/412/442 for placement,
+detonation and complete flame horizon. At detonation the actual hazard map covers both open
+lateral branches `(6,7)` and `(8,7)`, rather than only north `(7,6)`. CPU Two survives the
+whole 500-update episode; the stationary rival dies at 412 in both versions.
+
+The environment-enabled control runs both 57 and 58 and preserves west, actual planting and
+full flame survival. Replay29 closes the new56/58 pairing; replay28 and Hard57 remain archived.
+An integration test caught and corrected a no-lair dispatch collapse: the new internal cautious
+and farm variants preserve their different farm-origin flags while both enable exit ranking.
+
+## Acceptance
+
+The [v1.3.16 record](../releases.md#v1316--2026-11-02) contains the full matrix, final-source
+portability correction, exact-image runtime and Linux acceptance. The correction relocates an
+unchanged nested test module into a tracked directory; the original relative path depended on
+an untracked empty directory. Both images have identical content-addressed runtime filesystem
+layers. Targeted tests and clean Linux debug/release validate the corrected source while the
+unchanged full coverage/native/mask evidence is retained with its original commit identity.

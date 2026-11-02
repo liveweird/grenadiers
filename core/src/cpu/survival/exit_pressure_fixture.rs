@@ -7,29 +7,38 @@ use crate::game::{
     RoundAssignment, RulesConfig, SeatId, SeatInput, SimulationSeed, State, StormCloudConfig, Tick,
     World, fixed_arena,
 };
-use crate::room::{RespawnLairConfig, RoomSettings, SpikePitConfig};
+use crate::room::{RespawnLairConfig, RespawnLairSettings, RoomSettings, SpikePitConfig};
 
-pub(super) const CPU: SeatId = SeatId::Two;
-pub(super) const RIVAL: SeatId = SeatId::One;
-pub(super) const START: CellId = CellId::new(5, 5);
-pub(super) const RIVAL_CELL: CellId = CellId::new(7, 7);
-pub(super) const NORTH_ORIGIN: CellId = CellId::new(7, 5);
-pub(super) const WEST_ORIGIN: CellId = CellId::new(5, 7);
-pub(super) const SOUTH_EXIT_BLOCK: CellId = CellId::new(7, 8);
+pub(crate) const CPU: SeatId = SeatId::Two;
+pub(crate) const RIVAL: SeatId = SeatId::One;
+pub(crate) const START: CellId = CellId::new(5, 5);
+pub(crate) const RIVAL_CELL: CellId = CellId::new(7, 7);
+pub(crate) const NORTH_ORIGIN: CellId = CellId::new(7, 5);
+pub(crate) const WEST_ORIGIN: CellId = CellId::new(5, 7);
+pub(crate) const SOUTH_EXIT_BLOCK: CellId = CellId::new(7, 8);
 
-pub(super) struct PressureBasis {
-    pub observation: Observation,
-    pub history: ObservedHazardMemory,
-    pub key: MemoryKey,
+pub(crate) struct PressureBasis {
+    pub(crate) observation: Observation,
+    pub(crate) history: ObservedHazardMemory,
+    pub(crate) key: MemoryKey,
 }
 
-pub(super) fn collected_basis_at(destination: CellId) -> PressureBasis {
+pub(crate) fn collected_basis_at(destination: CellId) -> PressureBasis {
+    collected_basis_at_with_lairs(destination, false)
+}
+
+pub(crate) fn collected_basis_at_with_lairs(destination: CellId, lairs: bool) -> PressureBasis {
     let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
+    let lairs = if lairs {
+        RespawnLairConfig::Enabled(RespawnLairSettings::new(5).unwrap())
+    } else {
+        RespawnLairConfig::Disabled
+    };
     let mut state = State::new_at_tick_with_assignment_and_seed(
         RulesConfig::environment_v10(
             settings,
             StormCloudConfig::Disabled,
-            RespawnLairConfig::Disabled,
+            lairs,
             SpikePitConfig::Disabled,
         ),
         World::with_pickups(

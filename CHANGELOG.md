@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.16 — 2026-11-02
+
+- Let Hard CPUs prefer equally close firing positions whose exact blast covers more of a visible rival’s open adjacent branches, while preserving complete planting and escape proofs.
+- Keep the existing shared pressure/decision limits, every rival’s baseline search and archived Hard57 choices; retain Easy/Standard56 and bind Hard58 under private replay29.
+- Verify natural range pickup, the changed approach, useful real planting, actual two-branch blast coverage and complete flame survival through the queued owner.
+
 ## 1.3.15 — 2026-11-01
 
 - Let CPU farmers choose a lateral, fully certified escape when their usual route points into an indestructible wall, making short clear planting windows useful near arena borders.

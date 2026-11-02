@@ -15,7 +15,7 @@ use crate::room::{
 pub(super) const CPU: SeatId = SeatId::Three;
 pub(super) const START: Position = Position { x: 2050, y: 9728 };
 
-pub(super) fn captured_scene(recipient: SeatId) -> Observation {
+pub(crate) fn captured_scene(recipient: SeatId) -> Observation {
     let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
     let actors = [
         actor(

@@ -249,7 +249,7 @@ pub(super) fn plan_inner(
         persistent_goals,
         version.strategic_goals(),
         version.failed_plant_recovery(),
-        version.hard_tactics(),
+        version.pressure_mode(),
         version.farm_origin_recovery(),
         avoid_pits,
     )
@@ -266,7 +266,7 @@ fn navigate(
     persistent_goals: bool,
     strategic_goals: bool,
     failed_plant_recovery: bool,
-    hard_tactics: bool,
+    pressure_mode: super::PressureMode,
     farm_origin_recovery: bool,
     avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
@@ -279,12 +279,12 @@ fn navigate(
                 current,
                 memory,
                 work,
-                hard_tactics,
+                pressure_mode,
                 farm_origin_recovery,
             )
         } else if farm_origin_recovery {
-            super::goals::select_v38(observation, actor, current, memory, work, hard_tactics)
-        } else if hard_tactics {
+            super::goals::select_v38(observation, actor, current, memory, work, pressure_mode)
+        } else if pressure_mode.enabled() {
             super::goals::select_v28(observation, actor, current, memory, work)
         } else if failed_plant_recovery {
             super::goals::select_v25(observation, actor, current, memory, work)

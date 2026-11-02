@@ -12,10 +12,32 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
+- [todo] **VIEWPORT — fit the main screen without scrolling.** Rework the layout so the
+  main screen requires neither horizontal nor vertical scrolling. Consider a hideable settings
+  side pane and compact panels/tabs; keep the arena and primary controls usable and all settings
+  accessible. Use a modern interface that fits the game’s retro aesthetic, and verify supported
+  viewport sizes and keyboard access without clipping.
+
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
   boundary while commissioning any required models, rigs and animation.
+
+## Arena layout and environment
+
+- [todo] **LAYOUT-CLEARANCE — improve generated lair surroundings.** Review the current
+  generation and placement rules. Reserve connected, usable spawn/movement space beside every
+  lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
+  sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
+  preserve deterministic generation and player spawn safety.
+- [todo] **SPIKE-DEFAULTS — use a 1-second warning and 5-second raised phase.** Change new-game
+  defaults from the current 0.6/3 seconds to 1/5 seconds (60/300 ticks at 60 Hz). Update UI/default
+  examples and tests while preserving explicitly configured durations and historical replay.
+
+- [todo] **BOMB-DROPS — configurable extra-bomb upgrade frequency.** Make Bomb Capacity
+  upgrades drop five times as frequently by default, with a room configuration control for the
+  multiplier. Define and document how the multiplier behaves with different enabled-item pools
+  and overall drop probability; preserve item switches, seeded generation and historical replay.
 
 ## Single-player
 
@@ -29,11 +51,11 @@ repeated approval for routine implementation choices. Entries are not delivery-d
   work ceiling. See the [investigation](docs/history/cpu-late-passivity-2026-11-01.md).
 
 - [next] **HARD-CPU — deepen fair tactics.** Improve productive farming,
-  pickup contention and opponent-exit guidance toward useful bomb combinations. Use permitted
+  pickup contention and useful bomb combinations. Preserve the bounded opponent-exit guidance. Use permitted
   observations, bounded planning and unchanged physics. Require authoritative before/after
   witnesses and independent review; preserve archived policies and complete seeded episodes.
   The [controlled firing-position comparison](docs/history/cpu-exit-pressure-2026-11-02.md)
-  establishes the current equal-distance exit-coverage weakness; implementation remains next.
+  retains the before/after coverage for the bounded equal-distance exit refinement.
 
 - [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
@@ -70,6 +92,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Further art.** Beyond the walking, bomb and death frames, consider idle
   animation, environment detail, layered authoring sources, accessibility and measured effects
   budgets. Follow the [artist handoff](assets/art/README.md).
-- [new] **AUTO-PUNCH — consider automatic contact Punch.** The current idea is at most one
-  activation per contact, reducing gameplay controls to movement and Bomb. The user has not approved this
-  behavior; keep the existing manual Punch contract unless a product decision accepts it.
+- [todo] **AUTO-PUNCH — punch bombs by walking into them.** Activate Punch on attempted
+  movement into an adjacent bomb’s tile. Punch is currently the only manual Equipment action
+  (default E); preserve the existing punch flight, cooldown and one
+  activation per contact. Remove the separate Equipment key from gameplay controls and update
+  bindings/help. Preserve archived replay and verify human/CPU movement, contact and bomb-flight
+  interactions; do not trigger repeatedly from an unchanged held contact.

@@ -4,10 +4,11 @@ use crate::game::{BlastKind, CellId, Direction, EnabledItems, Position, Tick};
 
 use super::exit_pressure_fixture::{
     CPU, NORTH_ORIGIN, RIVAL, SOUTH_EXIT_BLOCK, START, WEST_ORIGIN, collected_basis_at,
+    collected_basis_at_with_lairs,
 };
 use super::{
     ExecutionCertificate, ObservedBlastGeometry, WORK_ALLOWANCE,
-    plan_hard_corner_refuges_v57_with_origin,
+    plan_hard_corner_refuges_v57_with_origin, plan_hard_exit_pressure_v58_with_origin,
 };
 
 #[test]
@@ -68,6 +69,98 @@ fn hard_v57_naturally_collects_range_three_then_prefers_the_north_origin_tie() {
     );
     assert!(planned.survival.execution.is_none());
     assert_eq!(work.spent(), 21_203);
+}
+
+#[test]
+fn hard_v58_promotes_the_equal_distance_west_origin_with_two_open_exit_branches() {
+    let basis = collected_basis_at(START);
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_exit_pressure_v58_with_origin(
+        &basis.observation,
+        &UtilityMemory::new(basis.key),
+        &basis.history,
+        basis.observation.parts().tick,
+        None,
+        &mut CpuRng::from_seed(basis.key, [58; 32]),
+        &mut work,
+    )
+    .unwrap();
+    let intent = planned
+        .survival
+        .control
+        .next_memory
+        .strategic_intent()
+        .unwrap();
+    assert_eq!(intent.objective, StrategicObjectiveKind::Attack);
+    assert_eq!(intent.target, StrategicTarget::Opponent { seat: RIVAL });
+    assert_eq!(intent.approach_cell, Some(WEST_ORIGIN));
+    assert_eq!(
+        planned.survival.control.intent.movement,
+        MovementIntent::Direction(Direction::South)
+    );
+    assert!(planned.survival.execution.is_none());
+    assert!(work.spent() <= WORK_ALLOWANCE);
+}
+
+#[test]
+fn hard_v58_west_origin_keeps_the_complete_plant_and_escape_authority() {
+    let basis = collected_basis_at(WEST_ORIGIN);
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_exit_pressure_v58_with_origin(
+        &basis.observation,
+        &UtilityMemory::new(basis.key),
+        &basis.history,
+        basis.observation.parts().tick,
+        None,
+        &mut CpuRng::from_seed(basis.key, [58; 32]),
+        &mut work,
+    )
+    .unwrap();
+    let Some(ExecutionCertificate::Plant(certificate)) = planned.survival.execution else {
+        panic!("west origin lost its complete plant proof")
+    };
+    assert_eq!(certificate.placement().cell, WEST_ORIGIN);
+    assert_eq!(certificate.placement().placed_at, Tick(49));
+    assert_eq!(certificate.placement().detonates_at, Tick(229));
+    assert_eq!(certificate.route().survive_until(), Tick(259));
+    assert_eq!(
+        super::plant_value::useful_plant_for(
+            &basis.observation,
+            certificate.placement(),
+            StrategicTarget::Opponent { seat: RIVAL },
+            &mut work,
+        ),
+        Some(true)
+    );
+    assert!(work.spent() <= WORK_ALLOWANCE);
+}
+
+#[test]
+fn hard_v58_lair_planner_uses_the_farm_exit_pressure_variant() {
+    let basis = collected_basis_at_with_lairs(START, true);
+    assert!(basis.observation.respawn_lairs().is_some());
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_exit_pressure_v58_with_origin(
+        &basis.observation,
+        &UtilityMemory::new(basis.key),
+        &basis.history,
+        basis.observation.parts().tick,
+        None,
+        &mut CpuRng::from_seed(basis.key, [58; 32]),
+        &mut work,
+    )
+    .unwrap();
+    assert_eq!(
+        planned
+            .survival
+            .control
+            .next_memory
+            .strategic_intent()
+            .unwrap()
+            .approach_cell,
+        Some(WEST_ORIGIN)
+    );
+    assert!(work.spent() <= WORK_ALLOWANCE);
 }
 
 #[test]

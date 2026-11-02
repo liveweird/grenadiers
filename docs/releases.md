@@ -97,67 +97,60 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.15 — 2026-11-01
+## v1.3.16 — 2026-11-02
 
-CPU farmers can use a lateral escape when their usual retreat points into a hard wall or lair.
-Two checked refuge hints make the demonstrated short clear planting window useful near an arena
-border. This requires a current committed adjacent Farm approach, visible-empty bombs and no
-flames. Geometry is only guidance; complete planting, route, usefulness and mob-contact proofs
-still authorize the action within the existing `min(8,192, remaining / 8)` child and 65,536 total.
+Hard CPUs prefer equally close firing positions whose exact blast covers more of a visible
+rival’s currently open adjacent terrain branches. They retain every rival’s existing nearest
+baseline before optional ranking. Ties, unsupported scenes and incomplete comparisons keep that
+baseline. The metric uses public terrain, the rival’s enabled equipment and placement-time
+Standard/Piercing/Power geometry; it does not predict controls or guarantee a kill.
 
-Easy/Standard use CPU56, Hard uses CPU57 and private replay28 binds those identities. Archived
-policies and replay27 remain unchanged. Pit avoidance, strict publication admission, shared
-continuation preparation and multi-Teleporter recovery are retained. The separate foreign-bomb
-and future-loot support guard is unchanged; this is a clear-window farming improvement.
+All baseline and optional pressure work stays within the existing `min(4096, remaining / 8)`
+pool and 32 probes per rival. Optional work also respects that rival’s unused original share.
+Complete useful planting, absent/present escape, contact, pit and publication proofs remain
+required. Easy/Standard56 and archived Hard57 remain unchanged; private replay29 binds 56/58.
 
-The controlled three-CPU comparison retains CPU55's no-plant episode. On every new difficulty,
-Two naturally plants at (11,1)/439, destroys its committed block at detonation 619, and survives
-the actual flames through 649. All three CPUs remain alive through the 600-update episode
-(ticks 180–780), with other CPUs still active and no worker/admission failures. On its exact
-queued clear basis, the complete planner spends 4,239 work instead of the previous 58,041
-movement-only result. This is a bounded before/after result, not a claim that all tactics or
-future unsupported item combinations are solved.
-
-No frontend, artwork, transport, physics, external dependency or database changes. Restart ends
-in-memory matches.
+The real queued-owner comparison naturally collects range, changes north to west at equal
+travel distance, plants at 232, detonates at 412 and survives the full flame horizon 442. Its actual
+blast covers two open branches instead of one; all admission counters are zero. Work is 21,876
+versus archived 21,691 in this controlled query. An active-pit control preserves the old already-
+correct choice. This is a tactical witness, not a measured win-rate or general difficulty claim.
 
 ### Verification
 
-Accepted source: `7a014a636f01f4a21cc8a60e23ac3d0c959a7f71`.
-Accepted image: `sha256:995727bbd14426822208171423518a677aa52d636ddacb4b68f535ffe6031238`.
-Subsequent release documentation/backlog changes leave Docker build inputs unchanged.
+- The clean full local gate at `b87fe0fc4208024b820a09e3fd0035ba94330699` passes in 916 seconds:
+  1,918 Core and 773 server tests per profile, including four isolated native cases. All 4,194,304
+  item masks pass in debug/release/coverage with 32 partitions, four workers and zero retries.
+  Official coverage is 70,369/75,272 lines (93.49%) against the unchanged 90% floor; 40 raw profiles.
+- Linux caught a test-module path depending on an untracked empty local directory. Final source
+  `416df4a639d3f920f944da4fcbd96c29dcbc0362` only relocates that unchanged test file, fixes its path
+  and updates contributor/backlog documentation. Its 20 affected tests pass in debug/release,
+  with formatting, strict workspace Clippy and repository checks. Independent review confirms
+  unchanged test logic/catalog and justifies reuse of the full matrix above.
+- Linux x86_64 workspace units and doctests pass in debug/release on the exact final source
+  ([run41363833754](https://github.com/liveweird/grenadiers/actions/runs/41363833754)).
+- The before/after images have identical content-addressed runtime filesystem layers. The final
+  executable is byte-identical, and all five frontend files also match v1.3.15. No renderer,
+  artwork, transport, dependency or physics change.
+- Exact-image Compose authentication/keyboard duel/three-CPU and restricted Kubernetes acceptance
+  pass without browser errors. Temporary stacks/namespaces are removed. Trivy reports zero
+  fixable high/critical findings; Rust dependency policies and npm high-threshold audits pass.
+  Moderate findings remain 20 web/12 E2E, in overlapping dependency trees.
 
-- Independent Core and server/profile/replay reviews are clear. Actual queued-basis provenance,
-  archived results/work, geometry, negative cases and exact allocation boundaries pass. The
-  full planner's real child allowance is 8,149 after 343 parent work; total allowance 31,511
-  permits the plant and 31,510 declines without manufacturing authority.
-- The clean local Rust gate passes in 934 seconds: 1,898 Core and 766 server tests per
-  profile (762 ordinary plus four isolated native cases). All 4,194,304 item masks pass in
-  debug, release and coverage with 32 partitions, four workers and zero retries. Official
-  coverage is 69,330/74,195 lines (93.44%), above the unchanged 90% floor; all 40 raw profiles
-  contribute to the report. Formatting, strict Clippy, build, repository and runner contracts
-  pass. Earlier sandbox-only listener failures are retained separately from the authorized
-  successful checks.
-- Linux x86_64 workspace units and doctests pass in debug/release
-  ([run 41357540109](https://github.com/liveweird/grenadiers/actions/runs/41357540109)) on
-  the exact accepted source. No duplicate portable remote matrix is required.
-- Exact-image Compose authentication/keyboard duel/three-CPU play and restricted Kubernetes
-  acceptance pass. Every CPU moves and bombs are planted, without browser errors. Temporary
-  acceptance projects/namespaces are removed.
-- Pinned Trivy reports zero fixable high/critical image vulnerabilities. Rust advisories,
-  bans, licenses and sources pass. npm audits pass their configured high-severity threshold
-  with unchanged moderate findings (20 in web, 12 in E2E; dependency trees overlap).
-- All five frontend assets equal v1.3.14 byte-for-byte. Unchanged frontend inputs reuse their
-  accepted checks; no art update or artist-bundle regeneration is needed.
+### Artifact and operation
 
-### Operation
+Accepted image: `sha256:381e031f36a894ba4c2f2ea62ac6c3ac454f68c99dd367376a8352ad0c72fb39`.
+The exact image runs on localhost:8085. Source/version labels, container restrictions, health,
+readiness, headers, CSP/cache and served assets pass. A fresh three-Hard-CPU match moves and
+plants bombs without browser errors. The immutable v1.3.15 override/image remain for rollback.
 
-The exact accepted image is running on localhost:8085. Image/source labels, restricted container
-settings, health/readiness, security headers, CSP/cache and all five served assets pass. A fresh
-three-Hard-CPU match shows all three moving and CPU bombs, without browser errors.
-The immutable v1.3.14 image/override remain available for rollback. This publishes source and
-an accepted local runtime; no hosted service or production registry is configured. The artist
-bundle is unchanged.
+The separate foreign-bomb/future-loot support boundary remains unchanged. Further tactics and
+new viewport, lair placement, spike defaults, drop frequency and contact-Punch work remain in
+the backlog. The artist bundle is unchanged. Source release and local runtime only; no hosted
+service or production registry is configured.
+
+<a id="v1315--2026-11-01"></a>
+The [v1.3.15 record](history/releases.md#v1315--2026-11-01) is preserved in release history.
 
 <a id="v1314--2026-11-01"></a>
 The [v1.3.14 record](history/releases.md#v1314--2026-11-01) is preserved in release history.

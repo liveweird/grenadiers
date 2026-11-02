@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use crate::cpu::policy::PressureMode;
 use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, Position, Tick};
@@ -14,6 +15,9 @@ use super::{cell_index, pickup_value, search_map};
 
 #[path = "goals_v28_pressure.rs"]
 mod pressure;
+
+#[path = "goals_v58_exit_pressure.rs"]
+mod exit_pressure;
 
 #[path = "goals_v24_order.rs"]
 mod order;
@@ -40,13 +44,13 @@ pub(in crate::cpu::policy) struct GuidanceV24 {
 }
 
 #[derive(Clone, Copy)]
-struct Candidate {
-    objective: StrategicObjectiveKind,
-    target: StrategicTarget,
-    approach: CellId,
-    score: u8,
-    distance: u16,
-    first_step: CellId,
+pub(super) struct Candidate {
+    pub objective: StrategicObjectiveKind,
+    pub target: StrategicTarget,
+    pub approach: CellId,
+    pub score: u8,
+    pub distance: u16,
+    pub first_step: CellId,
 }
 
 pub(in crate::cpu::policy) type DistanceMap = [Option<u16>; ARENA_CELL_COUNT];
@@ -63,11 +67,11 @@ fn select_inner(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
     failed_plant_recovery: bool,
-    range_aware_pressure: bool,
+    pressure_mode: PressureMode,
     farm_origin_recovery: bool,
     avoid_pits: bool,
 ) -> Option<GuidanceV24> {
-    let mut map = search_map(observation, actor, current, !range_aware_pressure, work)?;
+    let mut map = search_map(observation, actor, current, !pressure_mode.enabled(), work)?;
     let pit_sites = if avoid_pits {
         super::super::pit_avoidance::block_search_map(observation, &mut map, work)?
     } else {
@@ -116,14 +120,17 @@ fn select_inner(
             failed_farm_approach,
         );
     }
-    if range_aware_pressure {
+    if pressure_mode.enabled() {
         candidates.extend(pressure::candidates(
             observation,
             actor,
-            &distance,
-            &first_step,
-            &map,
-            &pit_sites,
+            pressure::PressureMaps {
+                distance: &distance,
+                first_step: &first_step,
+                search: &map,
+                pits: &pit_sites,
+            },
+            pressure_mode,
             work,
         ));
     }

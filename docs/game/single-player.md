@@ -12,7 +12,9 @@ confirmed Stop ending ordinary clear-board navigation. Initial decisions remain 
 The pause does not delay committed escapes, Stops or manual confirmation; newly observed danger
 or unavailable bomb knowledge bypasses it. All levels share permitted observations, physics, hazard
 checks and planning limits. Hard uses range-aware firing positions and prioritizes certified
-opponent pressure over routine wall farming; valuable pickups can still take priority. The labels describe these settings, not a measured
+opponent pressure over routine wall farming. Among equally close supported firing positions, Hard
+favors blasts covering more of a visible rival’s open adjacent branches; valuable pickups can still
+take priority. The labels describe these settings, not a measured
 strength ranking; balance still needs human playtesting.
 
 ## Settings, start and rematch

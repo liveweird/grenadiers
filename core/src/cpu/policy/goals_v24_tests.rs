@@ -248,7 +248,7 @@ fn failed_farm_origin_does_not_filter_pickup_or_opponent_candidates() {
         CellId::new(7, 7),
         &UtilityMemory::new(key()).defer_farm_approach(failed, Tick(10)),
         &mut WorkBudget::new(65_536),
-        false,
+        crate::cpu::policy::PressureMode::Disabled,
     )
     .unwrap();
     assert!(matches!(pickup.intent.target, StrategicTarget::Pickup { cell, .. } if cell == failed));
@@ -283,7 +283,7 @@ fn failed_farm_origin_does_not_filter_pickup_or_opponent_candidates() {
         CellId::new(7, 7),
         &UtilityMemory::new(key()).defer_farm_approach(failed, Tick(10)),
         &mut WorkBudget::new(65_536),
-        true,
+        crate::cpu::policy::PressureMode::Baseline,
     )
     .unwrap();
     assert_eq!(

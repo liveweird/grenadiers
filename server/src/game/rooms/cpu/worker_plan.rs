@@ -7,14 +7,15 @@ use grenadiers_core::cpu::{
         plan_corner_refuges_v56_with_origin, plan_counter_pressure_v29_with_origin,
         plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
         plan_hard_blocked_births_v43_with_origin, plan_hard_contact_topology_v41_with_origin,
-        plan_hard_corner_refuges_v57_with_origin, plan_hard_farm_origins_v39_with_origin,
-        plan_hard_farm_refuges_v37_with_origin, plan_hard_pickup_progress_v32_with_origin,
-        plan_hard_pit_avoidance_v53_with_origin, plan_hard_v28_with_origin, plan_lairs_with_origin,
-        plan_pickup_progress_v31_with_origin, plan_pit_avoidance_v52_with_origin,
-        plan_refuge_guidance_v33_with_origin, plan_refuge_guidance_v34_with_origin,
-        plan_reliable_v27_with_origin, plan_respawn_v22_with_origin, plan_respawn_v23_with_origin,
-        plan_respawn_v24_with_origin, plan_respawn_v25_with_origin, plan_respawn_with_origin,
-        plan_spike_pits_v26_with_origin, plan_with_origin,
+        plan_hard_corner_refuges_v57_with_origin, plan_hard_exit_pressure_v58_with_origin,
+        plan_hard_farm_origins_v39_with_origin, plan_hard_farm_refuges_v37_with_origin,
+        plan_hard_pickup_progress_v32_with_origin, plan_hard_pit_avoidance_v53_with_origin,
+        plan_hard_v28_with_origin, plan_lairs_with_origin, plan_pickup_progress_v31_with_origin,
+        plan_pit_avoidance_v52_with_origin, plan_refuge_guidance_v33_with_origin,
+        plan_refuge_guidance_v34_with_origin, plan_reliable_v27_with_origin,
+        plan_respawn_v22_with_origin, plan_respawn_v23_with_origin, plan_respawn_v24_with_origin,
+        plan_respawn_v25_with_origin, plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
+        plan_with_origin,
     },
 };
 use grenadiers_core::room::CpuPolicy;
@@ -62,10 +63,21 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV55
                 | CpuPolicy::UtilityV56
                 | CpuPolicy::UtilityV57
+                | CpuPolicy::UtilityV58
         )
     {
         let plan = if job.policy == CpuPolicy::UtilityV56 {
             plan_corner_refuges_v56_with_origin(
+                &job.observation,
+                &job.memory,
+                &job.hazard_memory,
+                job.settled_stop_tick,
+                job.escape_origin.as_ref(),
+                &mut job.rng,
+                work,
+            )
+        } else if job.policy == CpuPolicy::UtilityV58 {
+            plan_hard_exit_pressure_v58_with_origin(
                 &job.observation,
                 &job.memory,
                 &job.hazard_memory,

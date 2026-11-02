@@ -20,6 +20,7 @@ pub(super) fn select(job: &PlanJob, plan: LairSurvivalPlan, work: &mut WorkBudge
             | CpuPolicy::UtilityV55
             | CpuPolicy::UtilityV56
             | CpuPolicy::UtilityV57
+            | CpuPolicy::UtilityV58
     ) {
         return ordinary(plan);
     }
@@ -33,6 +34,7 @@ pub(super) fn select(job: &PlanJob, plan: LairSurvivalPlan, work: &mut WorkBudge
             | CpuPolicy::UtilityV55
             | CpuPolicy::UtilityV56
             | CpuPolicy::UtilityV57
+            | CpuPolicy::UtilityV58
     ) {
         grenadiers_core::cpu::survival::select_teleporter_recovery_v50
     } else {

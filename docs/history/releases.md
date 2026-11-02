@@ -4,6 +4,68 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.15 — 2026-11-01
+
+CPU farmers can use a lateral escape when their usual retreat points into a hard wall or lair.
+Two checked refuge hints make the demonstrated short clear planting window useful near an arena
+border. This requires a current committed adjacent Farm approach, visible-empty bombs and no
+flames. Geometry is only guidance; complete planting, route, usefulness and mob-contact proofs
+still authorize the action within the existing `min(8,192, remaining / 8)` child and 65,536 total.
+
+Easy/Standard use CPU56, Hard uses CPU57 and private replay28 binds those identities. Archived
+policies and replay27 remain unchanged. Pit avoidance, strict publication admission, shared
+continuation preparation and multi-Teleporter recovery are retained. The separate foreign-bomb
+and future-loot support guard is unchanged; this is a clear-window farming improvement.
+
+The controlled three-CPU comparison retains CPU55's no-plant episode. On every new difficulty,
+Two naturally plants at (11,1)/439, destroys its committed block at detonation 619, and survives
+the actual flames through 649. All three CPUs remain alive through the 600-update episode
+(ticks 180–780), with other CPUs still active and no worker/admission failures. On its exact
+queued clear basis, the complete planner spends 4,239 work instead of the previous 58,041
+movement-only result. This is a bounded before/after result, not a claim that all tactics or
+future unsupported item combinations are solved.
+
+No frontend, artwork, transport, physics, external dependency or database changes. Restart ends
+in-memory matches.
+
+### Verification
+
+Accepted source: `7a014a636f01f4a21cc8a60e23ac3d0c959a7f71`.
+Accepted image: `sha256:995727bbd14426822208171423518a677aa52d636ddacb4b68f535ffe6031238`.
+Subsequent release documentation/backlog changes leave Docker build inputs unchanged.
+
+- Independent Core and server/profile/replay reviews are clear. Actual queued-basis provenance,
+  archived results/work, geometry, negative cases and exact allocation boundaries pass. The
+  full planner's real child allowance is 8,149 after 343 parent work; total allowance 31,511
+  permits the plant and 31,510 declines without manufacturing authority.
+- The clean local Rust gate passes in 934 seconds: 1,898 Core and 766 server tests per
+  profile (762 ordinary plus four isolated native cases). All 4,194,304 item masks pass in
+  debug, release and coverage with 32 partitions, four workers and zero retries. Official
+  coverage is 69,330/74,195 lines (93.44%), above the unchanged 90% floor; all 40 raw profiles
+  contribute to the report. Formatting, strict Clippy, build, repository and runner contracts
+  pass. Earlier sandbox-only listener failures are retained separately from the authorized
+  successful checks.
+- Linux x86_64 workspace units and doctests pass in debug/release
+  ([run 41357540109](https://github.com/liveweird/grenadiers/actions/runs/41357540109)) on
+  the exact accepted source. No duplicate portable remote matrix is required.
+- Exact-image Compose authentication/keyboard duel/three-CPU play and restricted Kubernetes
+  acceptance pass. Every CPU moves and bombs are planted, without browser errors. Temporary
+  acceptance projects/namespaces are removed.
+- Pinned Trivy reports zero fixable high/critical image vulnerabilities. Rust advisories,
+  bans, licenses and sources pass. npm audits pass their configured high-severity threshold
+  with unchanged moderate findings (20 in web, 12 in E2E; dependency trees overlap).
+- All five frontend assets equal v1.3.14 byte-for-byte. Unchanged frontend inputs reuse their
+  accepted checks; no art update or artist-bundle regeneration is needed.
+
+### Operation
+
+The exact accepted image is running on localhost:8085. Image/source labels, restricted container
+settings, health/readiness, security headers, CSP/cache and all five served assets pass. A fresh
+three-Hard-CPU match shows all three moving and CPU bombs, without browser errors.
+The immutable v1.3.14 image/override remain available for rollback. This publishes source and
+an accepted local runtime; no hosted service or production registry is configured. The artist
+bundle is unchanged.
+
 ## v1.3.14 — 2026-11-01
 
 CPUs can resume checked movement after simultaneous bomb plants when a supported forecast

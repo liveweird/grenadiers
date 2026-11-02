@@ -180,6 +180,14 @@ fn plan_timed_plant(
                 request.first_movement,
                 request.execution_tick,
             )?;
+            super::contact_punch_guard::check_motion(
+                observation,
+                &[&absent],
+                &motion,
+                request.execution_tick,
+                None,
+                work,
+            )?;
             (
                 motion.position,
                 RouteStep::Move {

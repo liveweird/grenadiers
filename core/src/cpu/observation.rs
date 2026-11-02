@@ -1,7 +1,7 @@
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{
     CellId, Direction, EffectKind, EntityId, Equipment, MAX_OIL_BARRELS, OilBarrelState,
-    PickupKind, Position, SeatId, SpecialWeapon, SpeedLevel, Terrain, Tick,
+    PickupKind, Position, PunchActivationPolicy, SeatId, SpecialWeapon, SpeedLevel, Terrain, Tick,
 };
 use crate::room::BoardSize;
 use crate::room::RoomSettings;
@@ -49,6 +49,7 @@ impl UnknownActorFacts {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ObservedRules {
     pub version: u16,
+    pub punch_activation_policy: PunchActivationPolicy,
     pub tick_rate: u16,
     pub running_updates: u16,
     pub remaining_ticks: u16,

@@ -95,6 +95,7 @@ fn captured_observation() -> Observation {
         recipient: CPU,
         rules: ObservedRules {
             version: 10,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 54,
             remaining_ticks: 10_746,

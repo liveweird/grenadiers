@@ -17,6 +17,7 @@ pub(super) struct Motion {
     residual: u16,
     pending: Option<(Direction, i32)>,
     reversed: bool,
+    forward: Option<MovementSegment>,
     storm_deadlines: Option<super::storm::DeadlineBounds>,
 }
 
@@ -38,6 +39,7 @@ impl Motion {
             residual: 0,
             pending: None,
             reversed: reverse_active(context, tick),
+            forward: None,
             storm_deadlines: context
                 .storm
                 .map(super::storm::StormContext::initial_deadline),
@@ -47,6 +49,10 @@ impl Motion {
     pub(super) fn stop(&mut self) {
         self.residual = 0;
         self.pending = None;
+    }
+
+    pub(super) const fn forward_segment(&self) -> Option<MovementSegment> {
+        self.forward
     }
 
     pub(super) const fn storm_deadlines(&self) -> Option<super::storm::DeadlineBounds> {
@@ -71,6 +77,7 @@ pub(super) fn advance(
     movement: MovementIntent,
     tick: Tick,
 ) -> Result<Vec<MovementSegment>, RouteFailure> {
+    motion.forward = None;
     let actor_start = motion.position;
     let MovementIntent::Direction(input) = movement else {
         motion.stop();
@@ -105,7 +112,9 @@ pub(super) fn advance(
     let mut segments = Vec::with_capacity(2);
     if same_axis(motion.heading, desired) {
         motion.heading = desired;
+        let before = segments.len();
         move_axis(context, motion, desired, budget, &mut segments);
+        motion.forward = segments.get(before).copied();
         let segments = stationary_if_empty(motion, segments);
         apply_storm(context, motion, tick, actor_start, &segments)?;
         return Ok(segments);
@@ -147,7 +156,9 @@ pub(super) fn advance(
     }
     motion.pending = None;
     motion.heading = desired;
+    let before = segments.len();
     move_axis(context, motion, desired, budget, &mut segments);
+    motion.forward = segments.get(before).copied();
     let segments = stationary_if_empty(motion, segments);
     apply_storm(context, motion, tick, actor_start, &segments)?;
     Ok(segments)

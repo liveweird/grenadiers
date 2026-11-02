@@ -126,6 +126,7 @@ pub(super) fn observe_for(state: &State, settings: RoomSettings, recipient: Seat
         recipient,
         rules: ObservedRules {
             version: 9,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: u16::try_from(view.running_updates).unwrap(),
             remaining_ticks: u16::try_from(view.remaining_ticks).unwrap(),

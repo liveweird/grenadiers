@@ -116,6 +116,7 @@ fn captured_tick_1800(blocking_contact: bool) -> Observation {
         recipient: CPU,
         rules: ObservedRules {
             version: 10,
+            punch_activation_policy: crate::game::PunchActivationPolicy::ManualV1,
             tick_rate: 60,
             running_updates: 1_599,
             remaining_ticks: 9_201,

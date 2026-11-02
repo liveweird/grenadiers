@@ -42,6 +42,14 @@ pub(super) fn apply_move(
                 MovementIntent::Direction(direction),
                 tick,
             )?;
+            super::contact_punch_guard::check_motion(
+                context.observation,
+                forecasts,
+                &lane.motion,
+                tick,
+                lane.origin_grace,
+                work,
+            )?;
             lane.pits
                 .advance(tick, segments[0].start(), &segments, work)?;
             node.assumptions.extend(check_transition_all(

@@ -17,6 +17,8 @@ pub(in crate::game::rooms) struct RosterRuntimeInspection {
     pub(in crate::game::rooms) environment: Option<StormCloudConfig>,
     pub(in crate::game::rooms) mob_navigation: grenadiers_core::game::MobNavigationPolicy,
     pub(in crate::game::rooms) punch_activation: grenadiers_core::game::PunchActivationPolicy,
+    pub(in crate::game::rooms) construction_profile:
+        grenadiers_core::game::ArenaConstructionProfile,
     pub(in crate::game::rooms) spike_publication: super::runtime::SpikePublicationVersion,
 }
 
@@ -44,6 +46,7 @@ impl RosterRuntime {
             environment: self.environment(),
             mob_navigation: self.mob_navigation,
             punch_activation: self.punch_activation,
+            construction_profile: self.construction_profile,
             spike_publication: self.spike_publication,
         }
     }

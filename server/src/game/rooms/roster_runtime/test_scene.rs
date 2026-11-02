@@ -1,5 +1,5 @@
 use grenadiers_core::{
-    game::{EntityId, MobNavigationPolicy, State},
+    game::{EntityId, MobNavigationPolicy, SeatInput, State, StepReport},
     room::MatchPhase,
 };
 
@@ -63,6 +63,15 @@ impl RosterRuntime {
 
     pub(in crate::game::rooms) fn pending_report_count_for_test(&self) -> usize {
         self.reports.len()
+    }
+
+    /// The exact accepted inputs and authoritative report from the latest physics step.
+    pub(in crate::game::rooms) fn last_step_trace_for_test(
+        &self,
+    ) -> Option<(&[SeatInput], &StepReport)> {
+        self.last_step_trace
+            .as_ref()
+            .map(|(inputs, report)| (inputs.as_slice(), report))
     }
 
     pub(in crate::game::rooms) fn publication_caches_for_test(&self) -> [bool; 7] {

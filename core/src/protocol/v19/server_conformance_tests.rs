@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use crate::game::{
     ActorInit, ArenaGenerationConfig, CellId, EnabledItems, PlayerCount, Position, RoundAssignment,
     RulesConfig, SeatId, SpeedLevel, SpikePitPhase as DomainPhase, StormCloudConfig, World,
-    generate_multiplayer_arena,
+    generate_profiled_multiplayer_arena,
 };
 use crate::protocol::{Counter, RoomCode, RoomId, Tick};
 use crate::room::{
@@ -152,7 +152,23 @@ pub(crate) fn runtime_with_activation(
     phase: DomainPhase,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> (crate::game::State, crate::game::GenerationRecord) {
-    let generated = generate_multiplayer_arena(
+    runtime_with_profile(
+        spike_enabled,
+        empty,
+        phase,
+        punch_activation,
+        crate::game::ArenaConstructionProfile::ReflectedV3V4,
+    )
+}
+
+pub(crate) fn runtime_with_profile(
+    spike_enabled: bool,
+    empty: bool,
+    phase: DomainPhase,
+    punch_activation: crate::game::PunchActivationPolicy,
+    construction: crate::game::ArenaConstructionProfile,
+) -> (crate::game::State, crate::game::GenerationRecord) {
+    let generated = generate_profiled_multiplayer_arena(
         [18; 32],
         EnabledItems::EMPTY,
         ArenaGenerationConfig {
@@ -160,6 +176,8 @@ pub(crate) fn runtime_with_activation(
             board: DomainBoard::FifteenByThirteen,
             assignment: RoundAssignment::first(),
         },
+        construction,
+        true,
     )
     .unwrap();
     let generation = generated.record();
@@ -187,7 +205,8 @@ pub(crate) fn runtime_with_activation(
         RespawnLairConfig::Disabled,
         config,
     )
-    .with_punch_activation_policy(punch_activation);
+    .with_punch_activation_policy(punch_activation)
+    .with_spike_pit_layout_policy(construction.spike_pit_layout_policy());
     let mut state = crate::game::State::new(rules, world, actors).unwrap();
     if matches!(phase, DomainPhase::Warning | DomainPhase::Raised) {
         let pit = state.spike_pits().unwrap()[0].cell;

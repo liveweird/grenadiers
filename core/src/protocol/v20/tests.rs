@@ -1,4 +1,5 @@
 use super::*;
+use crate::protocol::Counter;
 
 #[test]
 fn checked_client_corpus_accepts_bomb_and_rejects_retired_equipment() {
@@ -80,5 +81,81 @@ fn authoritative_observation_round_trips_the_closed_contact_activation() {
     assert_eq!(
         observation.parts().rules.punch_activation_policy,
         PunchActivationPolicy::ContactV2
+    );
+}
+
+#[test]
+fn profile_binder_closes_generator_and_pit_layout_as_one_identity() {
+    use crate::game::{ArenaConstructionProfile, PunchActivationPolicy, SpikePitPhase};
+
+    let construction = ArenaConstructionProfile::LairClearanceV5;
+    let (state, generation) = crate::protocol::v19::server_conformance_tests::runtime_with_profile(
+        true,
+        false,
+        SpikePitPhase::Idle,
+        PunchActivationPolicy::ContactV2,
+        construction,
+    );
+    let capture = capture_expanded(&state, &[]).unwrap();
+    let room = crate::protocol::v19::server_conformance_tests::room(
+        state.tick().0,
+        RoomPhase::Running,
+        true,
+    );
+
+    assert!(bind_expanded(&room, Counter::new(1).unwrap(), &capture, generation).is_err());
+    bind_expanded_with_profile(
+        &room,
+        Counter::new(1).unwrap(),
+        &capture,
+        generation,
+        construction,
+    )
+    .unwrap();
+    let personal = || PersonalAdmission {
+        recipient: Seat::One,
+        last_action_id: None,
+        sequence: Counter::new(2).unwrap(),
+        resume_token: ResumeToken::new(
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        )
+        .unwrap(),
+    };
+    let projection = || AdmissionProjection {
+        room: &room,
+        state_epoch: Some(Counter::new(1).unwrap()),
+        capture: Some(&capture),
+        generation: Some(generation),
+    };
+    assert!(prepare_admission(projection(), personal()).is_err());
+    prepare_admission_with_profile(projection(), personal(), construction).unwrap();
+
+    let (legacy_state, legacy_generation) =
+        crate::protocol::v19::server_conformance_tests::runtime_with_activation(
+            true,
+            false,
+            SpikePitPhase::Idle,
+            PunchActivationPolicy::ContactV2,
+        );
+    let legacy_capture = capture_expanded(&legacy_state, &[]).unwrap();
+    assert!(
+        bind_expanded_with_profile(
+            &room,
+            Counter::new(1).unwrap(),
+            &capture,
+            legacy_generation,
+            construction,
+        )
+        .is_err()
+    );
+    assert!(
+        bind_expanded_with_profile(
+            &room,
+            Counter::new(1).unwrap(),
+            &legacy_capture,
+            generation,
+            construction,
+        )
+        .is_err()
     );
 }

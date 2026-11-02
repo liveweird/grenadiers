@@ -180,7 +180,7 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_spike_v20_with_navigation(
+        let runtime = RosterRuntime::new_spike_v20_profiled_with_navigation(
             identity,
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             cloud,
@@ -189,13 +189,14 @@ impl GameRooms {
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,
             grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3,
+            grenadiers_core::game::ArenaConstructionProfile::LairClearanceV5,
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::CONTACT_PUNCH_V60_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::CONTACT_PUNCH_V60_STANDARD,
-            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V61,
-            None => CpuProfile::CONTACT_PUNCH_V60_STANDARD,
+            Some(CpuDifficulty::Easy) => CpuProfile::RECOVERY_V62_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::RECOVERY_V62_STANDARD,
+            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V63,
+            None => CpuProfile::RECOVERY_V62_STANDARD,
         };
         let mut cpus = Vec::new();
         for seat in base.cpu_seats() {

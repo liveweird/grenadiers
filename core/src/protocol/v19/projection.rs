@@ -57,15 +57,29 @@ pub(crate) fn bind_expanded_with_punch_activation(
     generation: GenerationRecord,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<BoundPublication, ProjectionError> {
+    bind_expanded_with_profile(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        crate::game::ArenaConstructionProfile::ReflectedV3V4,
+        punch_activation,
+    )
+}
+
+pub(crate) fn bind_expanded_with_profile(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    construction: crate::game::ArenaConstructionProfile,
+    punch_activation: crate::game::PunchActivationPolicy,
+) -> Result<BoundPublication, ProjectionError> {
     super::room_validation::validate_room_view(room)?;
     let facts = &capture.base;
     let base = room.configuration.domain().base().base();
     let (width, height) = base.board().dimensions();
-    let expected_generator = if base.board() == crate::room::BoardSize::FifteenByThirteen {
-        crate::game::MULTIPLAYER_GENERATOR_VERSION
-    } else {
-        crate::game::VARIABLE_GENERATOR_VERSION
-    };
+    let expected_generator = construction.generator_version(base.board());
     let state_bound = match room.phase {
         RoomPhase::Running => {
             state_epoch == room.round_id
@@ -92,7 +106,13 @@ pub(crate) fn bind_expanded_with_punch_activation(
         }
         _ => false,
     };
-    if facts.rules != expected_rules(room, facts.rules.mob_navigation_policy(), punch_activation)?
+    if facts.rules
+        != expected_rules(
+            room,
+            facts.rules.mob_navigation_policy(),
+            construction.spike_pit_layout_policy(),
+            punch_activation,
+        )?
         || facts.world.rules_version != 10
         || facts.world.actors.len() != base.controllers().len()
         || u16::from(facts.world.arena.width) != width
@@ -226,6 +246,7 @@ pub fn prepare_snapshots(
 fn expected_rules(
     room: &RoomView,
     navigation: crate::game::MobNavigationPolicy,
+    spike_pit_layout: crate::game::SpikePitLayoutPolicy,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<RulesConfig, ProjectionError> {
     let settings = &room.settings.base;
@@ -264,5 +285,6 @@ fn expected_rules(
         spike_pits.config(),
         navigation,
     )
+    .with_spike_pit_layout_policy(spike_pit_layout)
     .with_punch_activation_policy(punch_activation))
 }

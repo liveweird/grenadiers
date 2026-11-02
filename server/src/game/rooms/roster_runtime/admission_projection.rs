@@ -45,6 +45,7 @@ pub(super) enum PreparedProjection {
         state_epoch: Option<Counter>,
         capture: Option<v20::ExpandedCapture>,
         generation: Option<GenerationRecord>,
+        construction: grenadiers_core::game::ArenaConstructionProfile,
     },
 }
 
@@ -176,7 +177,8 @@ impl PreparedProjection {
                 state_epoch,
                 capture,
                 generation,
-            } => v20::prepare_admission(
+                construction,
+            } => v20::prepare_admission_with_profile(
                 v20::AdmissionProjection {
                     room,
                     state_epoch: *state_epoch,
@@ -189,6 +191,7 @@ impl PreparedProjection {
                     sequence,
                     resume_token,
                 },
+                *construction,
             ),
         }
     }

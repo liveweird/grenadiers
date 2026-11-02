@@ -17,11 +17,13 @@ pub use crate::protocol::v19::{
     Scores, Seat, SeatStatus, SnapshotEvents, SpikePitPhase, SpikePitView, SpikePits,
     StormCloudView, Terrain, WeaponId, Wins, WireEvent,
 };
-pub use admission::{AdmissionProjection, PersonalAdmission, prepare_admission};
+pub use admission::{
+    AdmissionProjection, PersonalAdmission, prepare_admission, prepare_admission_with_profile,
+};
 pub use client::{GameClientMessage, ManualActionKind};
 pub use projection::{
-    BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded, capture_expanded,
-    prepare_snapshots, project_recipient,
+    BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded,
+    bind_expanded_with_profile, capture_expanded, prepare_snapshots, project_recipient,
 };
 
 pub fn observe_cpu_recipient(

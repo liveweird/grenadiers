@@ -1,7 +1,7 @@
 use grenadiers_core::{
     game::{
-        BombTrigger, CellId, Direction, EnabledItems, Equipment, PunchActivationPolicy, SeatId,
-        StormCloudConfig,
+        ArenaConstructionProfile, BombTrigger, CellId, Direction, EnabledItems, Equipment,
+        PunchActivationPolicy, SeatId, StormCloudConfig,
     },
     room::{
         BoardSize, CpuDifficulty, LairRoomConfiguration, RespawnLairTuning, RoomConfiguration,
@@ -134,8 +134,14 @@ fn replay31_binds_contact_v2_and_exact_current_policy_pairs() {
         assert_eq!(journal.header.rules_version, 10);
         assert_eq!(journal.header.mob_navigation_version, 3);
         assert_eq!(journal.header.punch_activation_version, 2);
+        assert_eq!(journal.header.generator_version, 3);
+        assert_eq!(journal.header.spike_pit_layout_version, 1);
         assert_eq!(journal.header.cpu_policy_version, policy);
         assert_eq!(expected.punch_activation, PunchActivationPolicy::ContactV2);
+        assert_eq!(
+            expected.construction_profile,
+            ArenaConstructionProfile::ReflectedV3V4
+        );
         verify_exact(&journal, &expected).unwrap();
     }
 }

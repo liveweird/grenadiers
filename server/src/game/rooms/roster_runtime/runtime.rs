@@ -33,6 +33,8 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) inputs: InputMailbox,
     pub(super) sim: Option<SimRound>,
     pub(super) reports: Vec<StepReport>,
+    #[cfg(test)]
+    pub(super) last_step_trace: Option<(Vec<grenadiers_core::game::SeatInput>, StepReport)>,
     pub(super) cpu_publication: Option<v14::BoundPublication>,
     pub(super) environment_cpu_publication: Option<Arc<v15::BoundPublication>>,
     pub(super) lair_cpu_publication: Option<Arc<v16::BoundPublication>>,
@@ -43,6 +45,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) environment_profile: Option<EnvironmentProfile>,
     pub(super) mob_navigation: MobNavigationPolicy,
     pub(super) punch_activation: PunchActivationPolicy,
+    pub(super) construction_profile: grenadiers_core::game::ArenaConstructionProfile,
     pub(super) spike_publication: SpikePublicationVersion,
 }
 
@@ -109,6 +112,8 @@ impl RosterRuntime {
             simulation_seed,
             sim: None,
             reports: Vec::new(),
+            #[cfg(test)]
+            last_step_trace: None,
             cpu_publication: None,
             environment_cpu_publication: None,
             lair_cpu_publication: None,
@@ -119,6 +124,7 @@ impl RosterRuntime {
             environment_profile: None,
             mob_navigation: MobNavigationPolicy::LegacyV1,
             punch_activation: PunchActivationPolicy::ManualV1,
+            construction_profile: grenadiers_core::game::ArenaConstructionProfile::ReflectedV3V4,
             spike_publication: SpikePublicationVersion::V18,
         })
     }
@@ -304,6 +310,10 @@ impl RosterRuntime {
             .state
             .step(&inputs)
             .map_err(|_| RosterRuntimeError::CapacityReached)?;
+        #[cfg(test)]
+        {
+            self.last_step_trace = Some((inputs.clone(), report.clone()));
+        }
         let result = sim.state.result();
         self.lifecycle
             .complete_running_tick(result)

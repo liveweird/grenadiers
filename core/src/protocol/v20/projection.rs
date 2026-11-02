@@ -18,11 +18,28 @@ pub fn bind_expanded(
     capture: &ExpandedCapture,
     generation: GenerationRecord,
 ) -> Result<BoundPublication, ProjectionError> {
-    crate::protocol::v19::bind_expanded_with_punch_activation(
+    bind_expanded_with_profile(
         room,
         state_epoch,
         capture,
         generation,
+        crate::game::ArenaConstructionProfile::ReflectedV3V4,
+    )
+}
+
+pub fn bind_expanded_with_profile(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    construction: crate::game::ArenaConstructionProfile,
+) -> Result<BoundPublication, ProjectionError> {
+    crate::protocol::v19::bind_expanded_with_profile(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        construction,
         crate::game::PunchActivationPolicy::ContactV2,
     )
 }

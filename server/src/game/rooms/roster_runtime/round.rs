@@ -1,9 +1,7 @@
 use grenadiers_core::game::{
     ActorInit, ArenaGenerationConfig, Direction, EntityId, Position, RoundActorInit,
-    RoundAssignment, SeatId, State, World, generate_multiplayer_arena,
-    generate_variable_multiplayer_arena,
+    RoundAssignment, SeatId, State, World, generate_profiled_multiplayer_arena,
 };
-use grenadiers_core::room::BoardSize;
 
 use super::{
     error::RosterRuntimeError,
@@ -25,19 +23,19 @@ impl RosterRuntime {
             board: self.identity.configuration.board(),
             assignment,
         };
-        let generated = if config.board == BoardSize::FifteenByThirteen {
-            generate_multiplayer_arena(
-                generation_seed,
-                self.lifecycle.settings().enabled_items(),
-                config,
-            )
-        } else {
-            generate_variable_multiplayer_arena(
-                generation_seed,
-                self.lifecycle.settings().enabled_items(),
-                config,
-            )
-        }
+        let lairs_enabled = match self.environment_profile {
+            Some(super::runtime::EnvironmentProfile::LairsV8 { tuning, .. }) => tuning.enabled(),
+            Some(super::runtime::EnvironmentProfile::RespawnV9 { tuning, .. }) => tuning.enabled(),
+            Some(super::runtime::EnvironmentProfile::SpikeV10 { lairs, .. }) => lairs.enabled(),
+            Some(super::runtime::EnvironmentProfile::StormV7(_)) | None => false,
+        };
+        let generated = generate_profiled_multiplayer_arena(
+            generation_seed,
+            self.lifecycle.settings().enabled_items(),
+            config,
+            self.construction_profile,
+            lairs_enabled,
+        )
         .map_err(|_| RosterRuntimeError::UnsupportedConfiguration)?;
         let spawns = assignment.spawns(generated.arena());
         let actors = self
@@ -105,7 +103,8 @@ impl RosterRuntime {
                     ),
                 },
             )
-            .with_punch_activation_policy(self.punch_activation);
+            .with_punch_activation_policy(self.punch_activation)
+            .with_spike_pit_layout_policy(self.construction_profile.spike_pit_layout_policy());
         let state = State::new_round(
             rules,
             world,

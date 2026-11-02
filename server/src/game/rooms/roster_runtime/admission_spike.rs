@@ -135,7 +135,14 @@ impl RosterRuntime {
             })
             .transpose()?;
         let notice = if let Some(sim) = body {
-            publication_v20::snapshot(room.clone(), sim.epoch, &sim.state, &[], sim.generation)?
+            publication_v20::snapshot(
+                room.clone(),
+                sim.epoch,
+                &sim.state,
+                &[],
+                sim.generation,
+                self.construction_profile,
+            )?
         } else {
             publication_v20::view_notice(room.clone())
         };
@@ -145,6 +152,7 @@ impl RosterRuntime {
                 state_epoch,
                 capture,
                 generation,
+                construction: self.construction_profile,
             },
             notice,
         ))

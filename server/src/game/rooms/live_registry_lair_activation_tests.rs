@@ -51,6 +51,48 @@ async fn live_lair_cpu_progresses_through_checked_v20_snapshots() {
     assert_eq!(first["type"], "snapshot");
     assert_eq!(first["room"]["rulesVersion"], 10);
     assert_eq!(first["room"]["phase"]["type"], "running");
+    let actual_blocks = first["state"]["arena"]["blocks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|cell| {
+            (
+                cell["column"].as_u64().unwrap() as u16,
+                cell["row"].as_u64().unwrap() as u16,
+            )
+        })
+        .collect::<std::collections::BTreeSet<_>>();
+    let config = grenadiers_core::game::ArenaGenerationConfig {
+        player_count: grenadiers_core::game::PlayerCount::Two,
+        board: BoardSize::FifteenByThirteen,
+        assignment: grenadiers_core::game::RoundAssignment::first(),
+    };
+    let expected = grenadiers_core::game::generate_profiled_multiplayer_arena(
+        [23; 32],
+        grenadiers_core::game::EnabledItems::ALL,
+        config,
+        grenadiers_core::game::ArenaConstructionProfile::LairClearanceV5,
+        true,
+    )
+    .unwrap();
+    let legacy = grenadiers_core::game::generate_profiled_multiplayer_arena(
+        [23; 32],
+        grenadiers_core::game::EnabledItems::ALL,
+        config,
+        grenadiers_core::game::ArenaConstructionProfile::ReflectedV3V4,
+        true,
+    )
+    .unwrap();
+    let blocks = |generated: &grenadiers_core::game::GeneratedArena| {
+        generated
+            .arena()
+            .blocks()
+            .iter()
+            .map(|cell| (cell.column, cell.row))
+            .collect::<std::collections::BTreeSet<_>>()
+    };
+    assert_eq!(actual_blocks, blocks(&expected));
+    assert_ne!(actual_blocks, blocks(&legacy));
     let initial_tick = first["state"]["physicalTick"].as_u64().unwrap();
 
     advance_ticks(20).await;

@@ -14,7 +14,10 @@ use grenadiers_core::{
 };
 use tokio::time::Instant;
 
-use super::late_teleporter_owner_support::scenario_driver_for_cpus;
+use super::{
+    late_teleporter_owner_support::scenario_driver_for_cpus_with_environment,
+    queued_scenario_support::Environment,
+};
 use crate::game::rooms::cpu::{AdmissionTrace, PlanningBasis, PumpReport};
 
 pub(super) const CPU: SeatId = SeatId::Three;
@@ -72,7 +75,14 @@ pub(super) fn run_with_open_route(profile: CpuProfile, ticks: usize) -> Outcome 
 }
 
 fn run_scene(profile: CpuProfile, ticks: usize, scene: fn(&State) -> State) -> Outcome {
-    let (mut owner, planner) = scenario_driver_for_cpus(profile, &[CPU], scene, None, [47; 32]);
+    let (mut owner, planner) = scenario_driver_for_cpus_with_environment(
+        profile,
+        &[CPU],
+        scene,
+        None,
+        [47; 32],
+        Environment::ActiveWithFormerSpikeTiming,
+    );
     let world = WorldId {
         room_instance: INSTANCE,
         physical_round: 1,

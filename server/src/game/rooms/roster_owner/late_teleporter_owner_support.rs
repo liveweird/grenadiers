@@ -173,7 +173,7 @@ pub(super) fn scenario_driver_for_cpus(
     departure: Option<SeatId>,
     cpu_seed: [u8; 32],
 ) -> (Driver, CpuPlanner) {
-    super::queued_scenario_support::driver(
+    scenario_driver_for_cpus_with_environment(
         profile,
         cpus,
         scene,
@@ -181,6 +181,17 @@ pub(super) fn scenario_driver_for_cpus(
         cpu_seed,
         super::queued_scenario_support::Environment::Active,
     )
+}
+
+pub(super) fn scenario_driver_for_cpus_with_environment(
+    profile: CpuProfile,
+    cpus: &[SeatId],
+    scene: fn(&State) -> State,
+    departure: Option<SeatId>,
+    cpu_seed: [u8; 32],
+    environment: super::queued_scenario_support::Environment,
+) -> (Driver, CpuPlanner) {
+    super::queued_scenario_support::driver(profile, cpus, scene, departure, cpu_seed, environment)
 }
 
 fn controlled_scene(basis: &State) -> State {

@@ -75,7 +75,7 @@ fn occupied_pit_egress_makes_progress_on_every_axis_and_survives_the_rise() {
             previous_progress > 800,
             "made too little progress {heading:?}: {previous_progress}"
         );
-        step_to(&mut game, 37);
+        step_to(&mut game, SpikePitSettings::DEFAULT.warning_ticks() + 1);
         let mob = game.mobs().into_iter().find(|mob| mob.id == id).unwrap();
         assert_eq!(mob.heading, heading);
         assert!(!position_contacts_spike_pit(mob.position, ESCAPE_PIT));
@@ -95,7 +95,7 @@ fn default_warning_allows_a_newborn_to_clear_its_spawn_pit() {
     assert_eq!(newborn.position, Position::center(SPAWN_PIT));
     assert_eq!(game.spike_pits().unwrap()[0].phase, SpikePitPhase::Warning);
 
-    step_to(&mut game, 336);
+    step_to(&mut game, 300 + SpikePitSettings::DEFAULT.warning_ticks());
     let escaped = game
         .mobs()
         .into_iter()
@@ -117,7 +117,7 @@ fn frozen_occupant_still_dies_when_the_pit_rises() {
     );
     game.apply_test_effect(SeatId::One, EffectKind::Stopwatch, Tick(0));
 
-    step_to(&mut game, 37);
+    step_to(&mut game, SpikePitSettings::DEFAULT.warning_ticks() + 1);
 
     assert!(game.mobs().into_iter().all(|mob| mob.id != id));
     assert_eq!(game.spike_pits().unwrap()[0].phase, SpikePitPhase::Raised);

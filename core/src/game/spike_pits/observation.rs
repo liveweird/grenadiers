@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn remaining_bounds_are_phase_specific() {
-        let settings = SpikePitSettings::DEFAULT;
+        let settings = SpikePitSettings::new(36, 180).unwrap();
         assert!(
             SpikePitClock::from_observation(SpikePitPhase::Idle, 0, Tick(10), settings).is_ok()
         );
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn reconstructed_phases_round_trip_across_future_boundaries() {
-        let settings = SpikePitSettings::DEFAULT;
+        let settings = SpikePitSettings::new(36, 180).unwrap();
         let warning =
             SpikePitClock::from_observation(SpikePitPhase::Warning, 6, Tick(100), settings)
                 .unwrap();

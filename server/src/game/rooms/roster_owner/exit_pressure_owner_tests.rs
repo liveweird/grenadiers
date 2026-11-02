@@ -95,7 +95,7 @@ fn hard57_and_hard58_preserve_west_when_active_pits_make_north_farther() {
     use super::exit_pressure_owner_support::run_with_environment;
     use super::queued_scenario_support::Environment;
     for profile in [CpuProfile::HARD_V57, CpuProfile::HARD_V58] {
-        let episode = run_with_environment(profile, 500, Environment::Active);
+        let episode = run_with_environment(profile, 500, Environment::ActiveWithFormerSpikeTiming);
         let strategy = episode.basis.strategy.unwrap();
         assert_eq!(strategy.approach_cell, Some(CellId::new(5, 7)));
         if profile == CpuProfile::HARD_V57 {

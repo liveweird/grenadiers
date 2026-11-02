@@ -6,7 +6,7 @@ use crate::room::BoardSize;
 
 #[test]
 fn contact_cycle_uses_half_open_deadlines_without_extension() {
-    let settings = SpikePitSettings::DEFAULT;
+    let settings = SpikePitSettings::new(36, 180).unwrap();
     let mut clock = SpikePitClock::new();
     assert_eq!(
         clock.update(Tick(10), true, settings),
@@ -46,7 +46,7 @@ fn contact_cycle_uses_half_open_deadlines_without_extension() {
 
 #[test]
 fn retraction_tick_suppresses_continuous_contact_until_the_following_update() {
-    let settings = SpikePitSettings::DEFAULT;
+    let settings = SpikePitSettings::new(36, 180).unwrap();
     let mut clock = SpikePitClock::new();
     clock.update(Tick(10), true, settings).unwrap();
     clock.update(Tick(46), true, settings).unwrap();
@@ -103,7 +103,7 @@ fn deadline_overflow_is_atomic() {
 
 #[test]
 fn update_and_forecast_reject_ticks_behind_the_successful_horizon() {
-    let settings = SpikePitSettings::DEFAULT;
+    let settings = SpikePitSettings::new(36, 180).unwrap();
     let mut clock = SpikePitClock::new();
     clock.update(Tick(10), true, settings).unwrap();
     clock.update(Tick(46), true, settings).unwrap();

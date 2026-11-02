@@ -15,6 +15,7 @@ pub(crate) const FARM_TARGET: CellId = CellId::new(3, 7);
 pub(crate) const SECOND_BLOCK: CellId = CellId::new(7, 7);
 pub(crate) const BASELINE_ORIGIN: CellId = CellId::new(3, 6);
 pub(crate) const HIGH_YIELD_ORIGIN: CellId = CellId::new(4, 7);
+pub(crate) const EARLY_HIGH_YIELD_ORIGIN: CellId = CellId::new(5, 7);
 
 pub(crate) struct FarmYieldBasis {
     pub(crate) state: State,
@@ -70,6 +71,7 @@ fn walk_to(state: &mut State, destination: CellId) {
         START => &[],
         BASELINE_ORIGIN => &[(Direction::West, 40), (Direction::South, 20)],
         HIGH_YIELD_ORIGIN => &[(Direction::South, 40), (Direction::West, 20)],
+        EARLY_HIGH_YIELD_ORIGIN => &[(Direction::South, 40)],
         _ => panic!("unsupported controlled destination"),
     };
     for &(direction, updates) in legs {

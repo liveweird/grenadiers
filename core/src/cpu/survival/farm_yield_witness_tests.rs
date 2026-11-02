@@ -1,11 +1,11 @@
-use crate::cpu::policy::{StrategicObjectiveKind, StrategicTarget, UtilityMemory};
+use crate::cpu::policy::{PressureMode, StrategicObjectiveKind, StrategicTarget, UtilityMemory};
 use crate::cpu::routing::{PlantRequest, RouteLimits, plan_lair_ordinary_plant};
-use crate::cpu::{BombKnowledge, CpuRng, MovementIntent, WorkBudget};
+use crate::cpu::{BombKnowledge, CpuRng, ManualIntent, MovementIntent, WorkBudget};
 use crate::game::{Direction, EnabledItems, InputAction, Position, SeatInput, Tick};
 
 use super::farm_yield_fixture::{
-    BASELINE_ORIGIN, CPU, FARM_TARGET, FarmYieldBasis, HIGH_YIELD_ORIGIN, SECOND_BLOCK, START,
-    collected_basis_at,
+    BASELINE_ORIGIN, CPU, EARLY_HIGH_YIELD_ORIGIN, FARM_TARGET, FarmYieldBasis, HIGH_YIELD_ORIGIN,
+    SECOND_BLOCK, START, collected_basis_at,
 };
 use super::{
     CommittedRoute, ExecutionCertificate, RouteStatus, WORK_ALLOWANCE,
@@ -119,7 +119,7 @@ fn both_equal_distance_origins_have_useful_complete_escape_proofs_and_physical_y
             Some(true)
         );
         assert_eq!(work.spent(), expected_work);
-        execute_through_flames(&mut basis, certificate);
+        execute_through_flames(&mut basis, certificate, MovementIntent::Stop);
         let blocks = basis.state.world().arena().blocks();
         assert!(!blocks.contains(&FARM_TARGET));
         assert_eq!(blocks.contains(&SECOND_BLOCK), expected_destroyed == 1);
@@ -128,9 +128,168 @@ fn both_equal_distance_origins_have_useful_complete_escape_proofs_and_physical_y
     }
 }
 
+#[test]
+fn hard_v58_live_wrapper_plants_only_at_the_current_baseline_origin() {
+    for (origin, expected_work) in [(BASELINE_ORIGIN, 3_764), (HIGH_YIELD_ORIGIN, 39_979)] {
+        let basis = collected_basis_at(origin);
+        let mut work = WorkBudget::new(WORK_ALLOWANCE);
+        let planned = plan_hard_exit_pressure_v58_with_origin(
+            &basis.observation,
+            &UtilityMemory::new(basis.key),
+            &basis.history,
+            basis.observation.parts().tick,
+            None,
+            &mut CpuRng::from_seed(basis.key, [58; 32]),
+            &mut work,
+        )
+        .unwrap();
+        let intent = planned
+            .survival
+            .control
+            .next_memory
+            .strategic_intent()
+            .unwrap();
+        assert_eq!(intent.objective, StrategicObjectiveKind::Farm);
+        assert_eq!(intent.target, StrategicTarget::Block { cell: FARM_TARGET });
+        assert_eq!(intent.approach_cell, Some(origin));
+        assert_eq!(work.spent(), expected_work);
+        if origin == BASELINE_ORIGIN {
+            assert_eq!(
+                planned.survival.control.intent.movement,
+                MovementIntent::Stop
+            );
+            assert_eq!(
+                planned.survival.control.intent.manual,
+                Some(ManualIntent::Bomb)
+            );
+            let Some(ExecutionCertificate::Plant(certificate)) = planned.survival.execution else {
+                panic!("live wrapper lost the baseline plant")
+            };
+            assert_eq!(certificate.placement().cell, BASELINE_ORIGIN);
+        } else {
+            assert_eq!(
+                planned.survival.control.intent.movement,
+                MovementIntent::Direction(Direction::North)
+            );
+            assert_eq!(planned.survival.control.intent.manual, None);
+            assert!(planned.survival.execution.is_none());
+        }
+    }
+}
+
+#[test]
+fn hard_v58_live_wrapper_at_the_high_yield_south_path_intermediate() {
+    let mut basis = collected_basis_at(EARLY_HIGH_YIELD_ORIGIN);
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let planned = plan_hard_exit_pressure_v58_with_origin(
+        &basis.observation,
+        &UtilityMemory::new(basis.key),
+        &basis.history,
+        basis.observation.parts().tick,
+        None,
+        &mut CpuRng::from_seed(basis.key, [58; 32]),
+        &mut work,
+    )
+    .unwrap();
+    let intent = planned
+        .survival
+        .control
+        .next_memory
+        .strategic_intent()
+        .unwrap();
+    assert_eq!(basis.observation.parts().tick, Tick(42));
+    assert_eq!(intent.objective, StrategicObjectiveKind::Farm);
+    assert_eq!(intent.target, StrategicTarget::Block { cell: FARM_TARGET });
+    assert_eq!(intent.approach_cell, Some(HIGH_YIELD_ORIGIN));
+    assert_eq!(
+        planned.survival.control.intent.movement,
+        MovementIntent::Direction(Direction::South)
+    );
+    assert_eq!(
+        planned.survival.control.intent.manual,
+        Some(ManualIntent::Bomb)
+    );
+    assert_eq!(work.spent(), 36_436);
+    let Some(ExecutionCertificate::Plant(certificate)) = planned.survival.execution else {
+        panic!("south-path intermediate lost its live plant")
+    };
+    assert_eq!(certificate.placement().cell, EARLY_HIGH_YIELD_ORIGIN);
+    assert_eq!(certificate.placement().placed_at, Tick(49));
+    assert_eq!(certificate.placement().detonates_at, Tick(229));
+    assert_eq!(certificate.route().survive_until(), Tick(259));
+    execute_through_flames(
+        &mut basis,
+        *certificate,
+        MovementIntent::Direction(Direction::South),
+    );
+    let blocks = basis.state.world().arena().blocks();
+    assert!(!blocks.contains(&FARM_TARGET));
+    assert!(!blocks.contains(&SECOND_BLOCK));
+    assert_eq!(blocks.len(), 4);
+    assert!(basis.state.actor(CPU).unwrap().alive());
+}
+
+#[test]
+fn high_yield_live_candidate_is_refused_by_the_bounded_no_lair_plant_tactic() {
+    let basis = collected_basis_at(HIGH_YIELD_ORIGIN);
+    let memory = UtilityMemory::new(basis.key);
+    let mut rng = CpuRng::from_seed(basis.key, [58; 32]);
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let ordinary = super::ordinary_planner::plan(
+        &basis.observation,
+        &memory,
+        &mut rng,
+        &mut work,
+        true,
+        true,
+        true,
+        true,
+        PressureMode::ExitCoverage,
+        false,
+        true,
+    )
+    .unwrap();
+    let ordinary_work = work.spent();
+    assert_eq!(ordinary.intent.movement, MovementIntent::Stop);
+    assert_eq!(ordinary.intent.manual, None);
+    assert!(super::strategic_recovery::attained_firing_position(
+        &basis.observation,
+        &ordinary,
+    ));
+    let clear = super::deadline::ordinary_movement_is_clear(
+        &basis.observation,
+        ordinary.intent.movement != MovementIntent::Stop,
+        &mut work,
+    );
+    let before_tactic = work.spent();
+    let planned = super::plant_tactic::certified_plant_for_policy(
+        &basis.observation,
+        &basis.history,
+        basis.observation.parts().tick,
+        &memory,
+        &ordinary,
+        true,
+        true,
+        true,
+        super::plant_tactic::PlantSupport::for_policy(true, true),
+        &mut work,
+    );
+    assert_eq!(ordinary_work, 754);
+    assert!(!clear);
+    assert_eq!(before_tactic, 754);
+    let tactic_allowance = (WORK_ALLOWANCE - before_tactic) / 2;
+    assert_eq!(tactic_allowance, 32_391);
+    let first_candidate_slice = tactic_allowance - (tactic_allowance / 10) * 4;
+    assert_eq!(first_candidate_slice, 19_435);
+    assert!(21_854 > first_candidate_slice);
+    assert!(planned.is_none());
+    assert_eq!(work.spent(), 33_089);
+}
+
 fn execute_through_flames(
     basis: &mut FarmYieldBasis,
     certificate: crate::cpu::routing::PlantCertificate,
+    accepted_movement: MovementIntent,
 ) {
     let placement = *certificate.placement();
     let survive_until = certificate.route().survive_until();
@@ -144,23 +303,17 @@ fn execute_through_flames(
         basis.observation.clone(),
         &current,
         admission_tick,
-        MovementIntent::Stop,
+        accepted_movement,
     )
     .unwrap();
-    basis
-        .state
-        .step(&[
-            SeatInput {
-                seat: CPU,
-                action: InputAction::Clear,
-            },
-            SeatInput {
-                seat: CPU,
-                action: InputAction::PlaceBomb,
-            },
-        ])
-        .unwrap();
-    let mut settled_stop = Some(basis.state.tick());
+    let mut inputs = movement_input(accepted_movement);
+    inputs.push(SeatInput {
+        seat: CPU,
+        action: InputAction::PlaceBomb,
+    });
+    basis.state.step(&inputs).unwrap();
+    let mut settled_stop =
+        (accepted_movement == MovementIntent::Stop).then_some(basis.state.tick());
     while basis.state.tick() <= survive_until {
         let current = super::reliable_v27_oil_tests::observe(&basis.state, basis.settings);
         assert_ne!(

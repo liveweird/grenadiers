@@ -62,6 +62,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await expect(one.getByRole('checkbox', { name: 'Legowiska potworów', exact: true })).toBeChecked()
     await one.getByText('English', { exact: true }).click()
     await selectClassicSettings(one, games[0])
+    await expect(one.locator('#game-settings-pane')).toBeHidden()
     const invitation = one.getByLabel('Room invitation code', { exact: true })
     await expect(invitation).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/)
     await two.getByRole('textbox', { name: 'Room code', exact: true }).fill(await invitation.innerText())
@@ -70,11 +71,13 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await two.getByRole('button', { name: 'Ready', exact: true }).click()
     await expect.poll(() => latestRoom(games[0])?.seats[1]?.ready).toBe(true)
 
+    await openSettings(one)
     await one.getByLabel('Starting speed').selectOption('4')
     await one.getByLabel('Turning tolerance').selectOption('64')
     await one.getByLabel('Round wins needed').selectOption('1')
     await one.getByLabel('Bomb fuse').selectOption('60')
     await one.getByRole('button', { name: 'Apply rules', exact: true }).click()
+    await expect(one.locator('#game-settings-pane')).toBeHidden()
     const expected = {
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
       environment: {
@@ -91,8 +94,11 @@ test('two browsers share configured rules that drive speed, fuse and match targe
         spikePits: { enabled: false, warningTicks: 60, raisedTicks: 300 },
       })))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.seats[1]?.ready).toBe(false)))
+    await openSettings(two)
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')
     await expect(two.getByLabel('Bomb fuse')).toHaveValue('60')
+    await two.getByRole('button', { name: 'Close settings', exact: true }).click()
+    await expect(two.locator('#game-settings-pane')).toBeHidden()
 
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Ready', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestSnapshot(game)?.room.phase.type).toBe('running')))
@@ -105,7 +111,10 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       expect(latestSnapshot(game)!.state.mobs).toEqual([])
     }
     await Promise.all([one, two].map(expectPaintedCanvas))
+    await openSettings(one)
     await expect(stormCloud).toBeDisabled()
+    await one.getByRole('button', { name: 'Close settings', exact: true }).click()
+    await expect(one.locator('#game-settings-pane')).toBeHidden()
 
     await one.getByRole('region', { name: 'Grenadiers courtyard' }).click()
     await one.keyboard.press('Space')
@@ -128,7 +137,10 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.getByRole('button', { name: 'Play again', exact: true }).click()))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.phase.type).toBe('waiting')))
     expect(latestRoom(games[0])?.settings).toEqual(expected)
+    await openSettings(one)
     await expect(stormCloud).toBeDisabled()
+    await one.getByRole('button', { name: 'Close settings', exact: true }).click()
+    await expect(one.locator('#game-settings-pane')).toBeHidden()
   } finally {
     await Promise.all(contexts.map((context) => context.close()))
   }

@@ -102,7 +102,33 @@ export async function expectActorStatGeometry(page: Page, rivalColumnCount: numb
 
   expect(own).toHaveLength(1)
   expect(own[0]).toMatchObject({
-    cellCount: 8, overflow: [], overlaps: [], outsideViewport: [], containerOutsideViewport: false,
+    cellCount: 8, overflow: [], overlaps: [], containerOutsideViewport: false,
   })
   expect(own[0]!.fragmentCounts.every((count) => count > 0)).toBe(true)
+
+  const statusList = page.locator('.own-status-list')
+  const baseline = await statusList.evaluate((list) => ({
+    bodyLeft: document.body.scrollLeft, bodyTop: document.body.scrollTop,
+    rootLeft: document.documentElement.scrollLeft, rootTop: document.documentElement.scrollTop,
+    listLeft: list.scrollLeft,
+  }))
+  const items = statusList.locator('.own-status-item')
+  for (let index = 0; index < await items.count(); index += 1) {
+    await items.nth(index).evaluate((item) => item.scrollIntoView({ block: 'nearest', inline: 'nearest' }))
+    expect(await items.nth(index).evaluate((item) => {
+      const cell = item.getBoundingClientRect()
+      const list = item.parentElement!.getBoundingClientRect()
+      return cell.width > 0 && cell.height > 0 && cell.left >= list.left - 0.5
+        && cell.right <= list.right + 0.5 && cell.top >= list.top - 0.5 && cell.bottom <= list.bottom + 0.5
+    })).toBe(true)
+    expect(await page.evaluate(() => ({
+      bodyLeft: document.body.scrollLeft, bodyTop: document.body.scrollTop,
+      rootLeft: document.documentElement.scrollLeft, rootTop: document.documentElement.scrollTop,
+    }))).toEqual({
+      bodyLeft: baseline.bodyLeft, bodyTop: baseline.bodyTop,
+      rootLeft: baseline.rootLeft, rootTop: baseline.rootTop,
+    })
+  }
+  await statusList.evaluate((list, left) => { list.scrollLeft = left }, baseline.listLeft)
+  await expect.poll(() => statusList.evaluate((list) => list.scrollLeft)).toBe(baseline.listLeft)
 }

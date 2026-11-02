@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { snapshot } from '../client/testSupport'
+import { snapshot } from '../validation/archived-v20-fixtures'
 import { validateGameplayV18ServerMessage } from './validation'
 
 function frame() {

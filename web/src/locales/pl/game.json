@@ -75,7 +75,8 @@
   },
   "ownItems": {
     "label": "Twoje przedmioty",
-    "heading": "Twoje przedmioty"
+    "heading": "Twoje przedmioty",
+    "inventory": "Szczegóły ekwipunku"
   },
   "panel": {
     "open": "Otwórz ustawienia",

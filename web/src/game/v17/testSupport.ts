@@ -1,4 +1,4 @@
-import { snapshot as currentSnapshot } from '../client/testSupport'
+import { snapshot as currentSnapshot } from '../validation/archived-v20-fixtures'
 import type { Snapshot } from './schema'
 
 export function snapshot(revision: number): Snapshot {

@@ -75,7 +75,8 @@
   },
   "ownItems": {
     "label": "Your items",
-    "heading": "Your items"
+    "heading": "Your items",
+    "inventory": "Inventory details"
   },
   "panel": {
     "open": "Open settings",

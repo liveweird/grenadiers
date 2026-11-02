@@ -53,12 +53,12 @@ async function joinRoom(group: Group): Promise<void> {
   expect(created.settings.environment).toEqual({
     stormCloud: true,
     lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-    spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+    spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
   })
   expect(created.configuration.environment).toEqual({
     stormCloud: true,
     lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-    spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+    spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
   })
   await expect(one.getByRole('combobox', { name: 'Players', exact: true })).toHaveCount(0)
   await expect(one.getByRole('combobox', { name: 'Board size', exact: true })).toHaveCount(0)
@@ -105,10 +105,10 @@ test('enabled storm cloud moves in one shared rendered world and survives reconn
         expect(frame.room).toMatchObject({
           rulesVersion: 10, mapId: 'generated_v2',
           configuration: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
           } },
           settings: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
           } },
         })
         expect(frame.state.actors).toHaveLength(2)
@@ -162,10 +162,10 @@ test('enabled storm cloud moves in one shared rendered world and survives reconn
         expect(latestRoom(game)).toMatchObject({
           roundId: completedRoundId + 1,
           configuration: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
           } },
           settings: { environment: {
-            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+            stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
           } },
         })
       }

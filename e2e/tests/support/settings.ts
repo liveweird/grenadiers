@@ -3,7 +3,7 @@ import type { ObservedGame } from './duel'
 
 type ItemSelection = { id: string; label: string }
 
-const DISABLED_SPIKES = { enabled: false, warningTicks: 36, raisedTicks: 180 } as const
+const DISABLED_SPIKES = { enabled: false, warningTicks: 60, raisedTicks: 300 } as const
 
 const DISABLED_LAIRS = { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 } as const
 

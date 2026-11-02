@@ -81,10 +81,10 @@ function expectBoard(game: ObservedGame, board: BoardSize, count: number): void 
     rulesVersion: 10,
     mapId: 'generated_v2',
     configuration: { environment: {
-      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
     } },
     settings: { environment: {
-      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+      stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 }, spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
     } },
   })
   expect(snapshot?.room.configuration.board).toEqual(board)

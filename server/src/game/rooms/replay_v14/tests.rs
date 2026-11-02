@@ -10,6 +10,10 @@ use grenadiers_core::{
 use super::*;
 use crate::round_seed::RoundSeedSource;
 
+fn historical_spike_pits() -> SpikePitTuning {
+    SpikePitTuning::new(true, SpikePitSettings::new(36, 180).unwrap())
+}
+
 fn configuration(spike_pits: SpikePitTuning) -> SpikeRoomConfiguration {
     SpikeRoomConfiguration::new(
         LairRoomConfiguration::new(
@@ -143,7 +147,7 @@ fn replay14_retains_disabled_spike_numbers_without_constructing_pits() {
 
 #[test]
 fn replay14_rejects_cross_profile_headers_provenance_and_incomplete_records() {
-    let pits = SpikePitTuning::DEFAULT;
+    let pits = historical_spike_pits();
     let base_recorder = recorder(pits);
     let (_, journal) = base_recorder.into_parts();
     for field in ["format", "rules", "cpu", "navigation", "layout"] {
@@ -184,7 +188,7 @@ fn replay14_binds_gameplay19_and_exact_easy_standard_hard_policy_pairs() {
         (CpuDifficulty::Standard, 27),
         (CpuDifficulty::Hard, 29),
     ] {
-        let pits = SpikePitTuning::DEFAULT;
+        let pits = historical_spike_pits();
         let original = configuration(pits);
         let selected = SpikeRoomConfiguration::new(
             LairRoomConfiguration::new(
@@ -266,7 +270,7 @@ fn replay14_binds_gameplay19_and_exact_easy_standard_hard_policy_pairs() {
 #[test]
 fn replay14_rejects_consistently_forged_future_pickup_policies() {
     for (difficulty, future_policy) in [(CpuDifficulty::Standard, 31), (CpuDifficulty::Hard, 32)] {
-        let pits = SpikePitTuning::DEFAULT;
+        let pits = historical_spike_pits();
         let base = configuration(pits);
         let hard = SpikeRoomConfiguration::new(
             LairRoomConfiguration::new(

@@ -18,7 +18,7 @@ test('spike pits warn, permit escape, kill occupants and reset across reconnect 
       await one.getByRole('button', { name: 'Create room', exact: true }).click()
       await expect.poll(room).toBeTruthy()
       expect(room()!.settings.environment.spikePits).toEqual({
-        enabled: true, warningTicks: 36, raisedTicks: 180,
+        enabled: true, warningTicks: 60, raisedTicks: 300,
       })
       await one.getByRole('button', { name: 'All off', exact: true }).click()
       await one.getByRole('checkbox', { name: 'Spike pits', exact: true }).check()

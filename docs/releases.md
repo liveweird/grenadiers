@@ -97,55 +97,48 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
-## v1.3.19 — 2026-11-02
+## v1.3.20 — 2026-11-02
 
-Punch activates by walking into a bomb. Exact contact arbitration, independent per-bomb latches
-and unchanged cooldown/flight preserve ownership, placement tick and fuse. Frozen actors,
-correction-only movement, placement-grace departures and tied player/wall obstructions do not
-activate it. A failed attempt needs physical separation before retrying that same bomb.
-
-The browser has five remappable actions: four directions and Bomb. Equipment/E is removed from
-live gameplay; saved v2/v1 movement and Bomb bindings migrate to v3, including custom E bindings.
-Gameplay20 requires Bomb-only manual actions and contact activation. Private replay31 records
-activation2 and CPU60/61; archived gameplay19/replay30 retain ManualV1 exactly.
-
-CPU60/Hard61 refuse their own unmodelled forward bomb contact while retaining wall approaches and
-own-bomb departures. Indexed forecasts account for pre-explosion chain timing, timed fuses and
-expiring flames under the existing work ceiling. They do not yet use an intentional contact-Punch
-tactic. Rival actions remain subject to the existing conditional scene/revalidation model.
+New games and restored settings use a 1-second spike warning and a 5-second raised phase
+(60/300 ticks). Quick duel, Solo, custom rooms and disabled-feature tuning use the same defaults.
+Explicit previous/custom durations remain valid. Archived replay fixtures keep their recorded
+36/180 timings; physics, bounds, gameplay20 and replay identities remain unchanged.
 
 ### Verification
 
-- Frozen Rust source passes debug/release/coverage: 1,964 Core tests and two doctests, 780 ordinary
-  server tests plus four isolated native worker cases per profile. All 4,194,304 item masks pass
-  in each profile with 32 partitions/four workers and no retries. Line coverage is
-  74,795/80,282 (93.17%), above the unchanged 90% floor; 40 raw profiles feed the official report.
-  The full gate took 909.092 seconds. Formatting, strict workspace Clippy, build and repository
-  checks pass. Independent physics, CPU, server and frontend reviews are clear.
+- Frozen local Rust source passes debug/release/coverage: 1,965 Core tests plus two doctests,
+  780 ordinary server cases and four isolated native worker cases per profile. All 4,194,304
+  item masks pass in each profile with 32 partitions/four workers and no retries. Coverage is
+  74,827/80,311 lines (93.17%), above the unchanged 90% floor, using 40 raw profiles. The full
+  gate took 970.669 seconds. Formatting, strict workspace Clippy and repository checks pass.
+  Independent review is clear.
 - Distinct Linux debug/release workspace units and doctests pass in run
-  [41377965672](https://github.com/liveweird/grenadiers/actions/runs/41377965672).
+  [41383568806](https://github.com/liveweird/grenadiers/actions/runs/41383568806).
 - Fresh web coverage passes 170 files/7,428 tests: lines 95.53%, statements 92.55%, functions
-  91.70%, branches 88.96%, above the unchanged floors. Contract checks, lint, Knip, E2E static
-  checks and production build pass. Compressed JS is 399,575/400,000 bytes; CSS is 15,568/20,000.
-- Exact-image browser checks pass for authentication, the rendered keyboard duel, three CPUs,
-  custom controls and real native contact Punch across two recipients. The latter preserves
-  bomb identity/fuse through a real reconnect and verifies natural detonation at the exact
-  placement-plus-300 deadline. Subsequent E2E fixture corrections change no product inputs.
-- Restricted Kubernetes with three CPUs, Compose operation, Rust dependency policies and
-  configured npm high-severity audits pass. Moderate audit findings remain 20 web/12 E2E in
-  overlapping trees. Pinned Trivy reports zero fixable high/critical findings. Temporary
-  stacks/namespaces are removed. All five arena/branding image files retain their accepted bytes.
+  91.70%, branches 88.96%, above the unchanged floors. API/contracts, lint, Knip, E2E static
+  checks and production build pass. Compressed JS is 399,576/400,000 bytes; CSS is 15,568/20,000.
+- Exact-image Compose authentication, rendered keyboard duel and three-CPU play pass. The
+  two-browser settings scenario verifies new defaults, restoring defaults and explicit settings.
+  Restricted Kubernetes passes with three moving, bomb-using CPUs, no browser errors and the
+  required container/probe/resource restrictions. Temporary stacks and namespaces are removed.
+- Rust policies and npm high-severity audits pass; existing moderate findings remain 20 web/12
+  E2E in overlapping trees. Pinned Trivy finds zero fixable high/critical vulnerabilities.
+  All five arena/branding images retain their accepted bytes.
 
 ### Artifact, upgrade and rollback
 
-Accepted product/Rust source: `8e807cbb317b455a685012dba4310b2fdba52e7f`.
-Accepted image: `sha256:8de84c49046c6c85ca128d497ab5462ca4923b38dd7281f0fe17a0452995c497`.
+Accepted source: `c043e5732af0fa6e5d744fa0bbfe49cb9bac827f`.
+Accepted image: `sha256:3ab41b76d485506e2a94fd3323fbf4dbb663d2dcdb2dba54e9650d07202c2889`.
 
-The exact image runs on localhost:8085. Labels, restricted container settings, health/readiness,
-headers/CSP/cache, all nine served files and fresh three-Hard-CPU play pass. Deploy server and web
-together and reload existing tabs: the live socket rejects older protocol versions before claim.
-The v1.3.18 immutable image/override remain for rollback. This publishes source and an accepted
-local runtime, with no hosted service or production registry. The artist bundle is unchanged.
+The exact image runs on localhost:8085. Image/source/version labels, restricted container
+settings, health/readiness, headers/CSP/cache and all nine served files pass, along with fresh
+three-Hard-CPU play. Deploy the paired server/web image and reload existing browser tabs.
+The v1.3.19 immutable image/override remain for rollback. Existing matches do not survive a
+server restart. This publishes source and an accepted local runtime; no hosted service or
+production registry is configured. The artist bundle is unchanged.
+
+<a id="v1319--2026-11-02"></a>
+The [v1.3.19 record](history/releases.md#v1319--2026-11-02) is preserved in release history.
 
 <a id="v1318--2026-11-02"></a>
 The [v1.3.18 record](history/releases.md#v1318--2026-11-02) is preserved in release history.

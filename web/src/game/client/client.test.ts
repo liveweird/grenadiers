@@ -13,7 +13,7 @@ function multiplayerAdmission(seat: 'three' | 'four', revision: number) {
     controllers: ['human', 'human', 'human', 'human'], cpuDifficulty: null,
     board: { width: 15, height: 13 },
     environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
+      spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
   }
   message.room.seats.push(
     { seat: 'three', controller: { type: 'human' }, occupied: true, ready: false,

@@ -18,8 +18,8 @@ cycle; a pit never rises without first passing through warning. Dead bodies, bom
 blood pools do not activate pits. Bombs do not destroy them or alter blast propagation, Stopwatch
 does not pause their clocks, and storm clouds can pass over them.
 
-The default warning is 36 ticks (0.6 seconds) and the default raised interval is 180 ticks
-(3 seconds). The lobby accepts 6–120 warning ticks and 60–600 raised ticks. Shield prevents a
+The default warning is 60 ticks (1 second) and the default raised interval is 300 ticks
+(5 seconds). The lobby accepts 6–120 warning ticks and 60–600 raised ticks. Shield prevents a
 hit; otherwise Heart absorbs one hit and grants the ordinary damage grace. Existing grace also
 protects normally. Protection does not disarm or reset the pit.
 

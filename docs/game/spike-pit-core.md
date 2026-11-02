@@ -7,7 +7,7 @@ rules profiles remain unchanged. Work status remains in the [backlog](../../BACK
 ## Timing and settings
 
 `SpikePitSettings` validates exact physical-tick durations: warning 6–120 ticks and raised
-60–600 ticks. Defaults are 36 and 180 ticks, equivalent to 0.6 and 3 seconds at 60Hz.
+60–600 ticks. Defaults are 60 and 300 ticks, equivalent to 1 and 5 seconds at 60Hz.
 `SpikePitConfig` defaults to `Disabled`; callers explicitly select `Enabled(settings)`.
 
 `SpikePitClock::update(tick, contacted, settings)` arms an idle pit on contact. Both rise and

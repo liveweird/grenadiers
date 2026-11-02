@@ -25,8 +25,14 @@ describe('live gameplay v18 spike-pit semantics', () => {
   it.each([
     ['order', (value: ReturnType<typeof frame>) => value.state.spikePits.reverse()],
     ['symmetry', (value: ReturnType<typeof frame>) => { value.state.spikePits.pop() }],
-    ['warning timer', (value: ReturnType<typeof frame>) => { value.state.spikePits[1]!.remainingTicks = 37 }],
-    ['raised timer', (value: ReturnType<typeof frame>) => { value.state.spikePits[2]!.remainingTicks = 181 }],
+    ['warning timer', (value: ReturnType<typeof frame>) => {
+      value.state.spikePits[1]!.remainingTicks =
+        value.room.settings.environment.spikePits.warningTicks + 1
+    }],
+    ['raised timer', (value: ReturnType<typeof frame>) => {
+      value.state.spikePits[2]!.remainingTicks =
+        value.room.settings.environment.spikePits.raisedTicks + 1
+    }],
     ['visible block', (value: ReturnType<typeof frame>) => value.state.arena.blocks.push({ column: 4, row: 4 })],
     ['visible oil', (value: ReturnType<typeof frame>) => value.state.oilBarrels.push({
       cell: { column: 4, row: 4 }, state: 'burning',

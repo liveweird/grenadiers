@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.21 — 2026-11-02
+
+- Fit the courtyard and primary actions inside desktop and mobile viewports, with a hideable settings panel and contained item bar.
+- Preserve configuration drafts, trap settings focus, restore focus on close, and suspend arena input while settings are open.
+
 ## 1.3.20 — 2026-11-02
 
 - Use a 1-second warning and 5-second raised phase for new spike-pit configurations, including quick duel, Solo, custom rooms and restored settings.

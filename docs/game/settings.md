@@ -3,7 +3,8 @@
 See [ADR 0020](../decisions/0020-shared-gameplay-settings.md) for the shared configuration model.
 Historical activation details are in the [release record](../history/configuration-activation.md#room-settings-activation).
 
-The creator can configure these rules before the match starts. New rooms use rules 10 and include
+Choose **Open settings** to view the shared rules. The creator can configure them before the
+match starts; closing the panel preserves unapplied edits. New rooms use rules 10 and include
 the environment settings `stormCloud`, `lairs` and `spikePits` (all enabled by default). All on
 and Restore enable all three; All off and Classic disable them. Custom room creation separately
 selects an immutable **Board size** / **Rozmiar planszy** of 11×9, 13×11 or 15×13 (default);

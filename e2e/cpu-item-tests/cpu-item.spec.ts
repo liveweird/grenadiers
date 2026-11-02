@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor } from '../tests/support/duel'
+import { openSettings } from '../tests/support/settings'
 import type { GameServerMessage } from '../../web/src/game/v20/schema'
 
 test.beforeAll(() => {
@@ -25,6 +26,7 @@ test('native CPU collects Wall Pass with all items enabled and renders its publi
   })
 
   const revision = room.settingsRevision
+  await openSettings(page)
   await page.getByRole('checkbox', { name: 'Storm cloud', exact: true }).uncheck()
   await page.getByRole('checkbox', { name: 'Monster lairs', exact: true }).uncheck()
   await page.getByLabel('Bomb fuse').selectOption('300')

@@ -3,6 +3,7 @@ import { createResponsiveBrowserContexts } from '../tests/support/browser-contex
 import { latestSnapshot, observeGame, visibleActor } from '../tests/support/duel'
 import { moveTo } from '../tests/support/movement'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from '../tests/support/reconnect'
+import { openSettings } from '../tests/support/settings'
 
 test('spike pits warn, permit escape, kill occupants and reset across reconnect and rematch',
   async ({ browser }, testInfo) => {
@@ -20,6 +21,7 @@ test('spike pits warn, permit escape, kill occupants and reset across reconnect 
       expect(room()!.settings.environment.spikePits).toEqual({
         enabled: true, warningTicks: 60, raisedTicks: 300,
       })
+      await openSettings(one)
       await one.getByRole('button', { name: 'All off', exact: true }).click()
       await one.getByRole('checkbox', { name: 'Spike pits', exact: true }).check()
       await one.getByRole('textbox', { name: 'Warning time (seconds)', exact: true }).fill('2')

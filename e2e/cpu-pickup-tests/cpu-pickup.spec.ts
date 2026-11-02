@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from '../tests/support/duel'
+import { openSettings } from '../tests/support/settings'
 import type { GameServerMessage, Seat } from '../../web/src/game/v20/schema'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
@@ -27,6 +28,7 @@ test('CPUs collect exposed Golden Flame and keep moving after the pickup handoff
     const page = await context.newPage()
     const game = observeGame(page)
     await page.goto('/')
+    await openSettings(page)
     await page.getByRole('combobox', { name: 'Players', exact: true }).selectOption('4')
     for (const index of [2, 3, 4]) {
       await page.getByRole('combobox', { name: `Player ${index} controller`, exact: true }).selectOption('cpu')
@@ -35,6 +37,7 @@ test('CPUs collect exposed Golden Flame and keep moving after the pickup handoff
     await page.getByRole('button', { name: 'Create custom match', exact: true }).click()
     await expect.poll(() => latestRoom(game)).toBeTruthy()
     const revision = latestRoom(game)!.settingsRevision
+    await openSettings(page)
     await page.getByRole('button', { name: 'All off', exact: true }).click()
     for (const label of ['Golden flame', 'Storm cloud', 'Monster lairs']) {
       await page.getByRole('checkbox', { name: label, exact: true }).check()

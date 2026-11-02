@@ -54,6 +54,7 @@ export const scenarioSpecMap = {
   ],
   'scenarios/terrain-pixels.md': ['terrain-pixel-tests/terrain.spec.ts'],
   'scenarios/turning.md': ['tests/turning.spec.ts'],
+  'scenarios/viewport.md': ['tests/viewport.spec.ts'],
   'scenarios/wall-pass.md': ['wall-pass-tests/wall-pass.spec.ts'],
   'scenarios/websocket-latency.md': [
     'latency-tests/browser-diagnostics.spec.ts',

@@ -4,6 +4,46 @@ This archive preserves the older release records originally maintained in
 [`docs/releases.md`](../releases.md). Records remain in their original order; the current
 release procedure and current release record stay in the [release guide](../releases.md).
 
+## v1.3.20 — 2026-11-02
+
+New games and restored settings use a 1-second spike warning and a 5-second raised phase
+(60/300 ticks). Quick duel, Solo, custom rooms and disabled-feature tuning use the same defaults.
+Explicit previous/custom durations remain valid. Archived replay fixtures keep their recorded
+36/180 timings; physics, bounds, gameplay20 and replay identities remain unchanged.
+
+### Verification
+
+- Frozen local Rust source passes debug/release/coverage: 1,965 Core tests plus two doctests,
+  780 ordinary server cases and four isolated native worker cases per profile. All 4,194,304
+  item masks pass in each profile with 32 partitions/four workers and no retries. Coverage is
+  74,827/80,311 lines (93.17%), above the unchanged 90% floor, using 40 raw profiles. The full
+  gate took 970.669 seconds. Formatting, strict workspace Clippy and repository checks pass.
+  Independent review is clear.
+- Distinct Linux debug/release workspace units and doctests pass in run
+  [41383568806](https://github.com/liveweird/grenadiers/actions/runs/41383568806).
+- Fresh web coverage passes 170 files/7,428 tests: lines 95.53%, statements 92.55%, functions
+  91.70%, branches 88.96%, above the unchanged floors. API/contracts, lint, Knip, E2E static
+  checks and production build pass. Compressed JS is 399,576/400,000 bytes; CSS is 15,568/20,000.
+- Exact-image Compose authentication, rendered keyboard duel and three-CPU play pass. The
+  two-browser settings scenario verifies new defaults, restoring defaults and explicit settings.
+  Restricted Kubernetes passes with three moving, bomb-using CPUs, no browser errors and the
+  required container/probe/resource restrictions. Temporary stacks and namespaces are removed.
+- Rust policies and npm high-severity audits pass; existing moderate findings remain 20 web/12
+  E2E in overlapping trees. Pinned Trivy finds zero fixable high/critical vulnerabilities.
+  All five arena/branding images retain their accepted bytes.
+
+### Artifact, upgrade and rollback
+
+Accepted source: `c043e5732af0fa6e5d744fa0bbfe49cb9bac827f`.
+Accepted image: `sha256:3ab41b76d485506e2a94fd3323fbf4dbb663d2dcdb2dba54e9650d07202c2889`.
+
+The exact image runs on localhost:8085. Image/source/version labels, restricted container
+settings, health/readiness, headers/CSP/cache and all nine served files pass, along with fresh
+three-Hard-CPU play. Deploy the paired server/web image and reload existing browser tabs.
+The v1.3.19 immutable image/override remain for rollback. Existing matches do not survive a
+server restart. This publishes source and an accepted local runtime; no hosted service or
+production registry is configured. The artist bundle is unchanged.
+
 ## v1.3.19 — 2026-11-02
 
 Punch activates by walking into a bomb. Exact contact arbitration, independent per-bomb latches

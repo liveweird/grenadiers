@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
+import { openSettings } from './support/settings'
 import type { Difficulty } from '../../web/src/game/v20/schema'
 
 type Controller = 'human' | 'cpu'
@@ -27,6 +28,7 @@ async function createCustom(
   controllers: readonly Controller[],
   difficulty: Difficulty = 'standard',
 ): Promise<string | null> {
+  await openSettings(page)
   await page.getByRole('combobox', { name: 'Players', exact: true }).selectOption(String(controllers.length))
   for (const [index, controller] of controllers.entries()) {
     if (index > 0) {
@@ -143,6 +145,7 @@ test('four humans share the four-seat lobby at 320 pixels', async ({ browser }) 
     await expectPlayers(group.pages[3], 4)
 
     const settingsRevision = latestRoom(group.games[0])!.settingsRevision
+    await openSettings(group.pages[0])
     await group.pages[0].getByLabel('Round wins needed').selectOption('1')
     await group.pages[0].getByLabel('Bomb fuse').selectOption('120')
     await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()
@@ -328,6 +331,7 @@ test('three CPUs keep moving with all optional features disabled', async ({ brow
     await createCustom(group.pages[0], ['human', 'cpu', 'cpu', 'cpu'])
     const game = group.games[0]!
     const revision = latestRoom(game)!.settingsRevision
+    await openSettings(group.pages[0])
     await group.pages[0].getByRole('button', { name: 'All off', exact: true }).click()
     await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()
     await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(revision)

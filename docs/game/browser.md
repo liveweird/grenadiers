@@ -4,10 +4,24 @@ The browser combines a React/Mantine room interface with a Three.js/React Three 
 Rust owns movement, collision, bomb placement, explosions, damage, and results. Rendering
 never advances the simulation or predicts a different outcome.
 
+## Screen layout
+
+The game fits the viewport without page scrolling. Primary admission, readiness, rematch and
+leave actions remain available beside or below the courtyard. **Open settings** contains custom
+room creation before admission and shared gameplay rules afterward. The panel scrolls internally,
+retains unapplied drafts, contains keyboard focus and closes with Escape; focus returns to its
+opener. Opening settings suspends arena input while the match clock continues.
+
+On narrow screens, the item bar scrolls horizontally within its own bounded region so additional
+effects do not displace the courtyard or local keyboard/sound controls. Long room details and
+expanded diagnostics also remain inside bounded panels. Supported checks cover 1440×900,
+1024×768, 390×844 and 320×568, including a painted four-player arena and a dense inventory.
+
 ## Join and play
 
-1. Open the application, choose **Create room**, select the custom **Board size** / **Rozmiar
-   planszy** if desired, and share its eight-character invitation. The default is 15×13; Quick
+1. Open the application and choose **Create room**, or open settings to create a custom room
+   with the desired **Board size** / **Rozmiar planszy**. Share its eight-character invitation.
+   The default is 15×13; Quick
    duel and Solo always use 15×13.
 2. Each other configured human enters that code and chooses **Join room** in another browser/tab.
 3. The creator can [configure gameplay](settings.md) while unready. All connected humans choose
@@ -53,7 +67,7 @@ The [modern retro courtyard](arena-3d.md) uses weathered terrain, original direc
 poses, grenades, connected flame cells and distinct pickup symbols. Reduced motion fixes
 decorative animation frames while preserving authoritative position and hazard information.
 
-Beside the arena, the localized **Your items** / **Twoje przedmioty** region is derived only
+Below the courtyard, the localized **Your items** / **Twoje przedmioty** region is derived only
 from the viewer's visible actor. It shows permanent upgrade totals, equipment and weapon slots,
 active effect timers, independent Slow-foot stack timers, frozen-action status and remaining
 damage grace. Opponent-private cached state never enters this region. Timers use authoritative
@@ -68,19 +82,8 @@ Run the deployed-stack acceptance with `scripts/gates.sh browser`; its duel scen
 actual native sockets, keyboard events, and compositor screenshots, plus Axe checks across
 lobby, waiting, running, and result. See [verification](../verification.md) for observed results.
 
-Accepted Classic-v7 HUD examples: [English desktop](../screenshots/gameplay-v7-desktop.png)
-and [Polish 320px](../screenshots/gameplay-v7-polish-320.png). Narrow screens use two stat
-columns; desktop retains four. All eight labels and values wrap within their own cells.
-Accepted Heart examples: [exposed pickup on desktop](../screenshots/heart-desktop.png) and
-[equipped Heart in Polish at 320px](../screenshots/heart-polish-320.png).
-Accepted Shield examples: [exposed pickup on desktop](../screenshots/shield-desktop.png) and
-[active immunity in Polish at 320px](../screenshots/shield-polish-320.png).
-Accepted Golden Flame examples: [exposed pickup on desktop](../screenshots/golden-flame-desktop.png)
-and [active effect in Polish at 320px](../screenshots/golden-flame-polish-320.png).
-Accepted Short Fuse examples: [exposed pickup on desktop](../screenshots/short-fuse-desktop.png)
-and [active effect in Polish at 320px](../screenshots/short-fuse-polish-320.png).
-Accepted Short Flame examples: [exposed pickup on desktop](../screenshots/short-flame-desktop.png)
-and [active curse in Polish at 320px](../screenshots/short-flame-polish-320.png).
+Earlier item-release screenshots remain in [presentation history](../history/browser-presentation.md).
+Current accepted layouts are linked from the [release record](../releases.md#v1321--2026-11-02).
 
 All Playwright configurations disable raw framework traces because personal admission
 frames contain capabilities. Failure screenshots, public reports, and redacted summaries remain.

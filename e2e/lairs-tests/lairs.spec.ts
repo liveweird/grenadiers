@@ -2,6 +2,7 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 import type { GameServerMessage, MobView } from '../../web/src/game/v20/schema'
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from '../tests/support/duel'
+import { openSettings } from '../tests/support/settings'
 import {
   admissionBaseline, disconnectTransport, installTransportProbe, transportDiagnostics,
 } from '../tests/support/reconnect'
@@ -156,6 +157,7 @@ test('enabled lairs keep one mob each, render on both clients, reconnect and rem
     try {
       await joinRoom(group, true)
       const [one, two] = group.pages
+      await openSettings(one)
       await one.getByRole('checkbox', { name: 'Storm cloud', exact: true }).uncheck()
       await one.getByRole('textbox', { name: 'Respawn delay (seconds)', exact: true }).fill('5')
       await expect(one.getByRole('textbox', { name: 'Living monsters per lair', exact: true })).toHaveCount(0)
@@ -312,6 +314,7 @@ test('disabled lairs publish empty lair and mob arrays', async ({ browser }) => 
   try {
     await joinRoom(group, false)
     const before = latestRoom(group.games[0])!.settingsRevision
+    await openSettings(group.pages[0])
     await group.pages[0].getByRole('button', { name: 'All off', exact: true }).click()
     await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()
     const environment = {

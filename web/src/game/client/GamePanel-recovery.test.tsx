@@ -1,5 +1,5 @@
 import { MantineProvider } from '@mantine/core'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, it, vi } from 'vitest'
 import type { GameArenaProps } from '../arena/types'
@@ -30,6 +30,7 @@ it('keeps recovery visible and controls disabled while a same-socket resume is p
     placeBomb: vi.fn(), leave: vi.fn(),
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
+  fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
 
   expect(screen.getByRole('alert')).toHaveTextContent('Controls will return after a fresh game state arrives.')
   expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'false')

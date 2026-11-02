@@ -15,6 +15,7 @@ function actions(): GameActions {
     leave: vi.fn(() => true),
   }
 }
+const openPanel = (): void => { fireEvent.click(document.querySelector('[aria-controls="game-settings-pane"]')!) }
 
 beforeEach(async () => { await i18n.changeLanguage('en') })
 afterEach(cleanup)
@@ -24,6 +25,7 @@ it('creates an explicit four-controller mixed configuration while keeping player
   render(<MantineProvider env="test">
     <GamePanelView state={initialGameClientState()} actions={controls} />
   </MantineProvider>)
+  openPanel()
   fireEvent.change(screen.getByRole('combobox', { name: 'Players' }), { target: { value: '4' } })
   fireEvent.change(screen.getByRole('combobox', { name: 'Board size' }), { target: { value: '11x9' } })
   fireEvent.change(screen.getByRole('combobox', { name: 'Player 2 controller' }), { target: { value: 'cpu' } })
@@ -50,6 +52,7 @@ it.each([
   render(<MantineProvider env="test">
     <GamePanelView state={initialGameClientState()} actions={controls} />
   </MantineProvider>)
+  openPanel()
   fireEvent.change(screen.getByRole('combobox', { name: 'Players' }), { target: { value: players } })
   fireEvent.change(screen.getByRole('combobox', { name: 'Board size' }), { target: { value: board } })
   fireEvent.click(screen.getByRole('button', { name: 'Create custom match' }))
@@ -64,7 +67,9 @@ it('keeps quick duel and solo on their server-default 15 × 13 profile after cha
   render(<MantineProvider env="test">
     <GamePanelView state={initialGameClientState()} actions={controls} />
   </MantineProvider>)
+  openPanel()
   fireEvent.change(screen.getByRole('combobox', { name: 'Board size' }), { target: { value: '11x9' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Close settings' }))
   fireEvent.click(screen.getByRole('button', { name: 'Create room' }))
   fireEvent.click(screen.getByRole('button', { name: 'Play solo against CPU' }))
   expect(controls.admit).toHaveBeenNthCalledWith(1, { type: 'create' })
@@ -81,7 +86,8 @@ it.each([
   render(<MantineProvider env="test">
     <GamePanelView state={initialGameClientState()} actions={actions()} />
   </MantineProvider>)
-  expect(screen.getByText(title)).toBeVisible()
+  openPanel()
+  expect(screen.getByRole('group', { name: title })).toBeVisible()
   fireEvent.change(screen.getByRole('combobox', { name: language === 'en' ? 'Players' : 'Gracze' }),
     { target: { value: '3' } })
   expect(screen.getByRole('combobox', { name: controller })).toBeVisible()
@@ -113,6 +119,7 @@ it('uses seat four for the local HUD while keeping creator-only settings authori
     ...initialGameClientState(), connection: 'authenticated', room: current.room,
     snapshot: current, youSeat: 'four',
   }} actions={actions()} /></MantineProvider>)
+  fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
 
   expect(screen.getByRole('list', { name: 'Players' })).toHaveTextContent(/Player four\s+\(you\)/)
   expect(screen.getByRole('group', { name: 'Round wins for Player three' })).toHaveTextContent('2')

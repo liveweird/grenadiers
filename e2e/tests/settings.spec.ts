@@ -29,7 +29,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     const defaultEnvironment = {
       stormCloud: true,
       lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-      spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 },
+      spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 },
     }
     expect(latestRoom(games[0])?.settings.environment).toEqual(defaultEnvironment)
     expect(latestRoom(games[0])?.configuration.environment).toEqual(defaultEnvironment)
@@ -79,7 +79,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       environment: {
         stormCloud: false,
         lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 },
+        spikePits: { enabled: false, warningTicks: 60, raisedTicks: 300 },
       },
     }
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.settings).toEqual(expected)))
@@ -87,7 +87,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
       .toEqual({
         stormCloud: false,
         lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 },
+        spikePits: { enabled: false, warningTicks: 60, raisedTicks: 300 },
       })))
     await Promise.all(games.map((game) => expect.poll(() => latestRoom(game)?.seats[1]?.ready).toBe(false)))
     await expect(two.getByLabel('Starting speed')).toHaveValue('4')

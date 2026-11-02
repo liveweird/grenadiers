@@ -16,16 +16,16 @@ mod bracelet_test_support;
 mod bracelet_tests;
 #[path = "simulation_constructor_tests.rs"]
 mod constructor_tests;
-#[path = "cpu_punch_route_tests.rs"]
-mod cpu_punch_route_tests;
-#[path = "contact_punch_tests.rs"]
-mod contact_punch_tests;
 #[path = "contact_punch_edge_tests.rs"]
 mod contact_punch_edge_tests;
-#[path = "contact_punch_lifecycle_tests.rs"]
-mod contact_punch_lifecycle_tests;
 #[path = "contact_punch_latch_tests.rs"]
 mod contact_punch_latch_tests;
+#[path = "contact_punch_lifecycle_tests.rs"]
+mod contact_punch_lifecycle_tests;
+#[path = "contact_punch_tests.rs"]
+mod contact_punch_tests;
+#[path = "cpu_punch_route_tests.rs"]
+mod cpu_punch_route_tests;
 #[path = "damage_tests.rs"]
 mod damage_tests;
 #[path = "flame_tests.rs"]
@@ -38,14 +38,14 @@ mod invisibility_cloak_acceptance_tests;
 mod item_foundation_tests;
 #[path = "kick_validation_tests.rs"]
 mod kick_validation_tests;
+#[path = "lair_clearance_state_tests.rs"]
+mod lair_clearance_state_tests;
 #[path = "lair_foundation_tests.rs"]
 mod lair_foundation_tests;
-#[path = "lair_review_tests.rs"]
-mod lair_review_tests;
 #[path = "lair_respawn_tests.rs"]
 mod lair_respawn_tests;
-#[path = "mob_navigation_policy_tests.rs"]
-mod mob_navigation_policy_tests;
+#[path = "lair_review_tests.rs"]
+mod lair_review_tests;
 #[path = "simulation/landmine_acceptance_tests.rs"]
 mod landmine_acceptance_tests;
 #[path = "simulation/landmine_capacity_v9_tests.rs"]
@@ -54,22 +54,24 @@ mod landmine_capacity_v9_tests;
 mod landmine_route_tests;
 #[path = "simulation/landmine_tests.rs"]
 mod landmine_tests;
+#[path = "mob_navigation_policy_tests.rs"]
+mod mob_navigation_policy_tests;
 #[path = "multiplayer_headless_tests.rs"]
 mod multiplayer_headless_tests;
+#[path = "multiplayer_interaction_tests.rs"]
+mod multiplayer_interaction_tests;
 #[path = "multiplayer_item_behavior_tests.rs"]
 mod multiplayer_item_behavior_tests;
 #[path = "multiplayer_item_tests.rs"]
 mod multiplayer_item_tests;
-#[path = "multiplayer_interaction_tests.rs"]
-mod multiplayer_interaction_tests;
-#[path = "multiplayer_teleporter_tests.rs"]
-mod multiplayer_teleporter_tests;
-#[path = "participation_tests.rs"]
-mod participation_tests;
 #[path = "multiplayer_kick_tests.rs"]
 mod multiplayer_kick_tests;
+#[path = "multiplayer_teleporter_tests.rs"]
+mod multiplayer_teleporter_tests;
 #[path = "oil_proof_tests.rs"]
 mod oil_proof_tests;
+#[path = "participation_tests.rs"]
+mod participation_tests;
 #[path = "pickup_tests.rs"]
 mod pickup_tests;
 #[path = "placement_tests.rs"]
@@ -98,6 +100,12 @@ mod punch_wave_tests;
 mod round_result_tests;
 #[path = "short_fuse_tests.rs"]
 mod short_fuse_tests;
+#[path = "spike_pit_contact_tests.rs"]
+mod spike_pit_contact_tests;
+#[path = "spike_pit_mob_tests.rs"]
+mod spike_pit_mob_tests;
+#[path = "spike_pit_state_tests.rs"]
+mod spike_pit_state_tests;
 #[path = "step_event_tests.rs"]
 mod step_event_tests;
 #[path = "stopwatch_interaction_tests.rs"]
@@ -114,12 +122,6 @@ mod storm_contact_tests;
 mod storm_golden_tests;
 #[path = "storm_test_support.rs"]
 mod storm_test_support;
-#[path = "spike_pit_state_tests.rs"]
-mod spike_pit_state_tests;
-#[path = "spike_pit_contact_tests.rs"]
-mod spike_pit_contact_tests;
-#[path = "spike_pit_mob_tests.rs"]
-mod spike_pit_mob_tests;
 #[path = "simulation/teleporter_acceptance_tests.rs"]
 mod teleporter_acceptance_tests;
 #[path = "simulation/teleporter_route_tests.rs"]
@@ -139,7 +141,7 @@ mod wall_pass_route_tests;
 #[path = "wall_pass_tests.rs"]
 mod wall_pass_tests;
 
-#[path = "teleport_marker_tests.rs"]
-mod teleport_marker_tests;
 #[path = "rules9_player_collision_tests.rs"]
 mod rules9_player_collision_tests;
+#[path = "teleport_marker_tests.rs"]
+mod teleport_marker_tests;

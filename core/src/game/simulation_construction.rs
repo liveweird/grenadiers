@@ -169,9 +169,17 @@ impl State {
                     .map(|_| crate::game::lair_layout_v1(world.arena.board()).to_vec())
                     .unwrap_or_default();
                 let excluded = lair_cells
-                    .into_iter()
+                    .iter()
+                    .copied()
                     .chain(world.oil_barrels().map(|(cell, _)| cell));
-                super::SpikePitState::new(enabled, &world.arena, excluded, tick)
+                super::SpikePitState::new(
+                    enabled,
+                    rules.spike_pit_layout_policy(),
+                    &world.arena,
+                    excluded,
+                    lair_cells.iter().copied(),
+                    tick,
+                )
             }
         };
         Ok(Self {

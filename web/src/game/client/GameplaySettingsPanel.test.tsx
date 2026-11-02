@@ -19,16 +19,22 @@ describe('gameplay settings panel', () => {
     expect(screen.getByRole('option', { name: '3 cells/s' })).toBeVisible()
     expect(screen.getByRole('option', { name: '1/4 tile' })).toBeVisible()
     expect(screen.getByRole('option', { name: '3 seconds' })).toBeVisible()
+    expect(screen.getByLabelText('Extra-bomb drop weight')).toHaveValue('5')
+    expect(screen.getByRole('option', { name: '×1' })).toBeVisible()
+    expect(screen.getByRole('option', { name: '×10' })).toBeVisible()
+    expect(screen.getByText(/Relative weight among enabled drops/)).toBeVisible()
     await user.selectOptions(screen.getByLabelText('Starting speed'), '4')
     await user.selectOptions(screen.getByLabelText('Turning tolerance'), '64')
     await user.selectOptions(screen.getByLabelText('Round wins needed'), '1')
     await user.selectOptions(screen.getByLabelText('Bomb fuse'), '60')
+    await user.selectOptions(screen.getByLabelText('Extra-bomb drop weight'), '10')
     expect(screen.getByText('Apply these changes before readying up.')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
 
     expect(apply).toHaveBeenCalledWith({
       ...room(1).settings,
       startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+      bombCapacityDropMultiplier: 10,
     })
   })
 
@@ -51,7 +57,8 @@ describe('gameplay settings panel', () => {
     const user = userEvent.setup()
     const custom = room(2)
     custom.settings = {
-      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60, enabledItems: [],
+      startingSpeedLevel: 4, turnAssistUnits: 64, winsToFinish: 1, bombFuseTicks: 60,
+      bombCapacityDropMultiplier: 1, enabledItems: [],
       environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
         spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     }
@@ -63,6 +70,7 @@ describe('gameplay settings panel', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3, bombFuseTicks: 180,
+      bombCapacityDropMultiplier: 5,
       enabledItems: custom.availableItems,
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
         spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } },
@@ -211,7 +219,7 @@ describe('gameplay settings items', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith({
       startingSpeedLevel: 0, turnAssistUnits: 256, winsToFinish: 3,
-      bombFuseTicks: 180, enabledItems: [],
+      bombFuseTicks: 180, bombCapacityDropMultiplier: 1, enabledItems: [],
       environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 },
         spikePits: { enabled: false, warningTicks: 60, raisedTicks: 300 } },
     })
@@ -278,7 +286,7 @@ describe('gameplay settings bulk actions', () => {
     partial.availableItems = ['teleporter', 'heart', 'shield']
     partial.settings = {
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
-      bombFuseTicks: 270, enabledItems: ['heart'],
+      bombFuseTicks: 270, bombCapacityDropMultiplier: 7, enabledItems: ['heart'],
       environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
         spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     }
@@ -289,6 +297,7 @@ describe('gameplay settings bulk actions', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenCalledWith({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7, bombFuseTicks: 270,
+      bombCapacityDropMultiplier: 7,
       enabledItems: ['heart', 'shield', 'teleporter'],
       environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 24, maxLivingMobs: 1 },
         spikePits: { enabled: true, warningTicks: 36, raisedTicks: 180 } },
@@ -298,7 +307,7 @@ describe('gameplay settings bulk actions', () => {
     await user.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(apply).toHaveBeenLastCalledWith(expect.objectContaining({
       startingSpeedLevel: 3, turnAssistUnits: 128, winsToFinish: 7,
-      bombFuseTicks: 270, enabledItems: [],
+      bombFuseTicks: 270, bombCapacityDropMultiplier: 7, enabledItems: [],
       environment: { stormCloud: false, lairs: { enabled: false, spawnSeconds: 24, maxLivingMobs: 1 },
         spikePits: { enabled: false, warningTicks: 36, raisedTicks: 180 } },
     }))
@@ -311,6 +320,8 @@ describe('gameplay settings bulk actions', () => {
     empty.settings.enabledItems = []
     render(<MantineProvider env="test"><GameplaySettingsPanel room={empty} youSeat="one"
       pending={false} copy={pl} onApply={() => true} /></MantineProvider>)
+    expect(screen.getByLabelText('Waga losowania dodatkowej bomby')).toHaveValue('5')
+    expect(screen.getByText(/Względna waga wśród włączonych przedmiotów/)).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Włącz wszystkie' }))
     expect(screen.getByRole('checkbox', { name: 'Chmura burzowa' })).toBeChecked()
     await user.click(screen.getByRole('button', { name: 'Wyłącz wszystkie' }))

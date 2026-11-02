@@ -87,7 +87,9 @@ test('canonical options optimize the bounded current validators', () => {
   assert.deepEqual(validatorOptions('gameplay-v20'), {
     allErrors: true, inlineRefs: false, loopRequired: 10, loopEnum: 10,
   })
-  assert.deepEqual(validatorOptions('gameplay-v21'), { allErrors: true })
+  assert.deepEqual(validatorOptions('gameplay-v21'), {
+    allErrors: true, messages: false, inlineRefs: false, loopRequired: 10, loopEnum: 10,
+  })
   assert.notEqual(validatorOptions('gameplay-v18'), validatorOptions('gameplay-v18'))
 })
 

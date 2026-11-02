@@ -7,7 +7,7 @@ import type { Direction, PresentationDeaths, PresentationOpening } from '../aren
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
 import type { BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration,
-  RoomPhase, RoundResult, Seat, VisibleActorView } from '../v20/schema'
+  RoomPhase, RoundResult, Seat, VisibleActorView } from '../v21/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'

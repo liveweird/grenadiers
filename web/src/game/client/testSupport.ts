@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { GameClient, type AdmissionIntent, type GameClientState } from './client'
-import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v20/schema'
+import type { Admitted, GameServerMessage, GameState, RoomPhase, RoomView, Snapshot } from '../v21/schema'
 
 export const sessionToken = 'a'.repeat(64)
 export const resumeToken = 'c'.repeat(64)
@@ -150,7 +150,7 @@ export async function authenticate(value: Harness, intent: AdmissionIntent = { t
   await vi.waitFor(() => expect(value.sockets).toHaveLength(1))
   const socket = value.sockets.at(-1)!
   socket.emit('open')
-  socket.message({ type: 'authenticated', protocolVersion: 20 })
+  socket.message({ type: 'authenticated', protocolVersion: 21 })
   return socket
 }
 
@@ -175,7 +175,7 @@ export function room(revision: number, phase: RoomPhase = { type: 'waiting' }, r
       { seat: 'two', wins: terminalWinner === 'two' ? 1 : 0 }], lastRound: completed,
     settings: {
       startingSpeedLevel: 0, turnAssistUnits: 256,
-      winsToFinish: terminalWinner ? 1 : 3, bombFuseTicks: 180,
+      winsToFinish: terminalWinner ? 1 : 3, bombFuseTicks: 180, bombCapacityDropMultiplier: 5,
       enabledItems: ['kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb',
         'piercingBomb', 'powerBomb', 'landmine', 'shield', 'stopwatch', 'invisibilityCloak',
         'goldenFlame', 'shortFuse', 'diarrhea', 'slowFoot', 'shortFlame', 'longFuse',

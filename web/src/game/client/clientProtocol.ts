@@ -1,6 +1,6 @@
 import type { Difficulty, Direction, GameServerMessage, GameSettings, RoomConfiguration,
-  RoomView, Seat, V14ErrorCode } from '../v20/schema'
-import { validateGameplayV20ServerMessage } from '../v20/validation'
+  RoomView, Seat, V14ErrorCode } from '../v21/schema'
+import { validateGameplayV21ServerMessage } from '../v21/validation'
 import type { GameClientState } from './clientTypes'
 
 export const MAX_COUNTER = 2_147_483_647
@@ -46,13 +46,14 @@ const TOKEN_PATTERN = /^[0-9a-f]{64}$/
 export function createConfiguration(intent: ConfigurationIntent): RoomConfiguration {
   if (intent.configuration) return intent.configuration
   const difficulty = intent.mode?.type === 'solo' ? intent.mode.difficulty : null
+  const environment = { stormCloud: true,
+    lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 as const },
+    spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } }
   return difficulty === null
     ? { controllers: ['human', 'human'], cpuDifficulty: null, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } } }
+      environment }
     : { controllers: ['human', 'cpu'], cpuDifficulty: difficulty, board: { width: 15, height: 13 },
-      environment: { stormCloud: true, lairs: { enabled: true, spawnSeconds: 10, maxLivingMobs: 1 },
-        spikePits: { enabled: true, warningTicks: 60, raisedTicks: 300 } } }
+      environment }
 }
 function unique<T>(values: readonly T[]): boolean {
   return new Set(values).size === values.length
@@ -85,7 +86,7 @@ function roomRecipientValid(message: GameServerMessage): boolean {
 }
 
 export function validateServerMessage(value: unknown, expectedSeat: Seat | null): value is GameServerMessage {
-  const result = validateGameplayV20ServerMessage(value)
+  const result = validateGameplayV21ServerMessage(value)
   return result.valid && roomRecipientValid(result.value) && stateRecipientValid(result.value, expectedSeat)
 }
 
@@ -117,6 +118,7 @@ export function sameGameSettings(left: GameSettings, right: GameSettings): boole
     && left.turnAssistUnits === right.turnAssistUnits
     && left.winsToFinish === right.winsToFinish
     && left.bombFuseTicks === right.bombFuseTicks
+    && left.bombCapacityDropMultiplier === right.bombCapacityDropMultiplier
     && left.enabledItems.length === right.enabledItems.length
     && left.enabledItems.every((item, index) => item === right.enabledItems[index])
     && left.environment.stormCloud === right.environment.stormCloud
@@ -135,6 +137,8 @@ function validBaseSettings(settings: GameSettings): boolean {
     && Number.isInteger(settings.winsToFinish)
     && settings.winsToFinish >= 1 && settings.winsToFinish <= 9
     && [60, 90, 120, 150, 180, 210, 240, 270, 300].includes(settings.bombFuseTicks)
+    && Number.isInteger(settings.bombCapacityDropMultiplier)
+    && settings.bombCapacityDropMultiplier >= 1 && settings.bombCapacityDropMultiplier <= 10
 }
 
 function validLairSettings(lairs: GameSettings['environment']['lairs']): boolean {
@@ -153,7 +157,7 @@ export function validGameSettings(settings: GameSettings): boolean {
   const environment = settings.environment
   const lairs = environment?.lairs
   const spikePits = environment?.spikePits
-  return Object.keys(settings).length === 6
+  return Object.keys(settings).length === 7
     && Object.keys(environment ?? {}).length === 3
     && typeof environment?.stormCloud === 'boolean'
     && lairs !== undefined && spikePits !== undefined && validBaseSettings(settings)

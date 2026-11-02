@@ -87,6 +87,10 @@
     "src/game/v17/schema.ts": [
       "exports",
       "types"
+    ],
+    "src/game/v21/schema.ts": [
+      "exports",
+      "types"
     ]
   },
   "entry": [

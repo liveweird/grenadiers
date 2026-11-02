@@ -5,11 +5,14 @@ import type { Cell as V19Cell, GameServerMessage as V19GameServerMessage,
   GameState as V19GameState, RoomView as V19RoomView } from '../v19/schema'
 import type { Cell as V20Cell, GameServerMessage as V20GameServerMessage,
   GameState as V20GameState, RoomView as V20RoomView } from '../v20/schema'
+import type { Cell as V21Cell, GameServerMessage as V21GameServerMessage,
+  GameState as V21GameState, RoomView as V21RoomView } from '../v21/schema'
 
-type Cell = V18Cell | V19Cell | V20Cell
+type Cell = V18Cell | V19Cell | V20Cell | V21Cell
 type GameServerMessage = V18GameServerMessage | V19GameServerMessage | V20GameServerMessage
-type GameState = V18GameState | V19GameState | V20GameState
-type RoomView = V18RoomView | V19RoomView | V20RoomView
+  | V21GameServerMessage
+type GameState = V18GameState | V19GameState | V20GameState | V21GameState
+type RoomView = V18RoomView | V19RoomView | V20RoomView | V21RoomView
 
 export type Rules10SemanticError = BaseSemanticError
   | 'invalidLairState' | 'invalidSpikePitState' | 'invalidWorldState'

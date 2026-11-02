@@ -1,7 +1,7 @@
 # CPU intent and developer diagnostics
 
-Live CPU38/39 retain CPU26's persistent objective model and checked spike-pit execution. A
-subject is an exact exposed
+Live Easy/Standard CPU56 and Hard CPU59 retain CPU26's persistent objective model and checked
+spike-pit execution. A subject is an exact exposed
 pickup (cell and kind), destructible block, or visible opponent seat. Firing/approach cells can
 change without changing that subject. When no productive subject is available, the CPU explicitly
 explores, waits, or survives instead of pretending to have an attack target.

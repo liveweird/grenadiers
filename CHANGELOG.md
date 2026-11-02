@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.17 — 2026-11-02
+
+- Integrate the supplied pixel-art logo, compact wordmark and browser/touch icons, preserving the original transparent image files in a documented branding directory.
+- Keep the header compact with an accessible translated heading, responsive artwork and unchanged language controls; remove the redundant project-root copies.
+
 ## 1.3.16 — 2026-11-02
 
 - Let Hard CPUs prefer equally close firing positions whose exact blast covers more of a visible rival’s open adjacent branches, while preserving complete planting and escape proofs.

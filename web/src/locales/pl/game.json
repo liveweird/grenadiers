@@ -163,7 +163,7 @@
     "spikePitRaisedSeconds": "Czas wysunięcia (sekundy)",
     "spikePitsInvalid": "Ustaw 0,1–2 sekundy ostrzeżenia i 1–10 sekund wysunięcia.",
     "kickDescription": "Stałe wyposażenie, które kopie nieruchomą bombę czasową lub zdalną, gdy na nią wejdziesz. Bomba przesuwa się o jedno pole w następnej aktualizacji, a potem co 10 aktualizacji aż do zablokowania; właściciel i lont się nie zmieniają. Min nie można kopać, a inny przedmiot wyposażenia zastępuje Kopnięcie.",
-    "punchDescription": "Stałe wyposażenie. Naciśnij klawisz Wyposażenia, aby uderzyć bombę bezpośrednio przed sobą do następnego wolnego pola na trasie co trzy pola. Po udanym uderzeniu Uderzenie ma stałe 0,2 sekundy odnowienia; inny przedmiot wyposażenia zastępuje Uderzenie.",
+    "punchDescription": "Stałe wyposażenie. Wejdź na nieruchomą bombę czasową lub zdalną, aby uderzyć ją do następnego wolnego pola w zasięgu trzech pól. Po udanym uderzeniu Uderzenie ma stałe 0,2 sekundy odnowienia; min kontaktowych nie można uderzać, a inny przedmiot wyposażenia zastępuje Uderzenie.",
     "braceletDescription": "Stałe wyposażenie. Ruch do przodu w drugiego gracza odpycha go najwyżej o 1 pole. Po udanym odepchnięciu Bransoleta ma 0,5 sekundy odnowienia i wymaga rozdzielenia graczy przed kolejnym odepchnięciem; inny przedmiot wyposażenia zastępuje Bransoletę.",
     "wallPassDescription": "Stałe wyposażenie pozwalające przechodzić przez zniszczalne bloki. Twarde ściany i bomby nadal blokują ruch, wybuchy nadal ranią, a inny przedmiot wyposażenia je zastępuje. Po zastąpieniu możesz opuścić blok, który już przecinasz, ale nie możesz wejść do niego ponownie.",
     "heartDescription": "Chroni przed jednym śmiertelnym wybuchem, a potem na krótko przed obrażeniami.",
@@ -214,7 +214,7 @@
     "failure": "Nie udało się wyświetlić dziedzińca.",
     "focusHint": "Wybierz dziedziniec, aby sterować graczem.",
     "remoteHint": "Bomba zdalna jest uzbrojona. Wybierz dziedziniec i naciśnij {{bomb}}, aby ją zdetonować.",
-    "punchHint": "Masz Uderzenie. Wybierz dziedziniec i naciśnij {{equipment}}, aby uderzyć bombę przed sobą.",
+    "punchHint": "Masz Uderzenie. Wybierz dziedziniec, a potem wejdź na bombę, aby uderzyć ją przed siebie.",
     "blindBombHint": "Bomby są ukryte. Wybierz dziedziniec i naciśnij {{bomb}}, aby podłożyć bombę albo odpalić swoją bombę zdalną.",
     "instructions": "Poruszaj się strzałkami lub klawiszami W A S D. Podłóż bombę spacją. Sterowanie działa tylko podczas rundy."
   },
@@ -289,8 +289,7 @@
       "east": "Wschód",
       "south": "Południe",
       "west": "Zachód",
-      "bomb": "Bomba",
-      "equipment": "Wyposażenie"
+      "bomb": "Bomba"
     },
     "keys": {
       "ArrowUp": "Strzałka w górę",
@@ -300,7 +299,7 @@
       "Space": "Spacja",
       "Enter": "Enter"
     },
-    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Użyj Uderzenia: {{equipment}}. Sterowanie działa tylko podczas rundy."
+    "instructions": "Ruch: {{movement}}. Bomba: {{bomb}}. Mając Uderzenie, wejdź na bombę, aby ją uderzyć. Sterowanie działa tylko podczas rundy."
   },
   "audio": {
     "enable": "Włącz dźwięk",

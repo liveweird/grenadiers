@@ -7,11 +7,13 @@ import type { GameServerMessage as V18GameServerMessage, GameState as V18GameSta
   RoomView as V18RoomView, WireEvent as V18WireEvent } from '../v18/schema'
 import type { GameServerMessage as V19GameServerMessage, GameState as V19GameState,
   RoomView as V19RoomView, WireEvent as V19WireEvent } from '../v19/schema'
+import type { GameServerMessage as V20GameServerMessage, GameState as V20GameState,
+  RoomView as V20RoomView, WireEvent as V20WireEvent } from '../v20/schema'
 
-type GameServerMessage = V17GameServerMessage | V18GameServerMessage | V19GameServerMessage
-type GameState = V17GameState | V18GameState | V19GameState
-type RoomView = V17RoomView | V18RoomView | V19RoomView
-type WireEvent = V17WireEvent | V18WireEvent | V19WireEvent
+type GameServerMessage = V17GameServerMessage | V18GameServerMessage | V19GameServerMessage | V20GameServerMessage
+type GameState = V17GameState | V18GameState | V19GameState | V20GameState
+type RoomView = V17RoomView | V18RoomView | V19RoomView | V20RoomView
+type WireEvent = V17WireEvent | V18WireEvent | V19WireEvent | V20WireEvent
 
 const ITEM_IDS = [
   'kick', 'punch', 'bracelet', 'wallPass', 'heart', 'remoteBomb', 'piercingBomb',

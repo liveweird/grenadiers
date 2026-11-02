@@ -1,7 +1,7 @@
 import { NativeSelect } from '@mantine/core'
 import { useState } from 'react'
-import type { GameCopy } from '../client/locale'
-import type { Difficulty } from './schema'
+import type { Difficulty } from '../v20/schema'
+import type { GameCopy } from './locale'
 
 interface Props {
   copy: GameCopy
@@ -17,12 +17,12 @@ const isDifficulty = (value: string): value is Difficulty =>
 export function DifficultySelector({ copy, disabled = false, onChange, value }: Props) {
   const [localDifficulty, setLocalDifficulty] = useState<Difficulty>('standard')
   const difficulty = value ?? localDifficulty
-  const select = (value: string): void => {
-    if (!isDifficulty(value)) return
-    setLocalDifficulty(value)
-    onChange?.(value)
+  const select = (next: string): void => {
+    if (!isDifficulty(next)) return
+    setLocalDifficulty(next)
+    onChange?.(next)
   }
   return <NativeSelect label={copy.solo.difficultyLabel} value={difficulty} disabled={disabled}
     onChange={(event) => select(event.currentTarget.value)}
-    data={DIFFICULTIES.map((value) => ({ value, label: copy.solo[value] }))} />
+    data={DIFFICULTIES.map((option) => ({ value: option, label: copy.solo[option] }))} />
 }

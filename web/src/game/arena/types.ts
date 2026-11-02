@@ -140,5 +140,4 @@ export interface GameArenaProps {
   bindings?: KeyboardBindings
   onDirection: (direction: Direction | null) => void
   onBomb: () => void
-  onEquipment: () => void
 }

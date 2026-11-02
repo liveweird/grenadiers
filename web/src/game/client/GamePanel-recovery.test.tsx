@@ -27,7 +27,7 @@ it('keeps recovery visible and controls disabled while a same-socket resume is p
   }
   const actions: GameActions = {
     admit: vi.fn(), ready: vi.fn(), updateSettings: vi.fn(), rematch: vi.fn(), movement: vi.fn(),
-    placeBomb: vi.fn(), useEquipment: vi.fn(), leave: vi.fn(),
+    placeBomb: vi.fn(), leave: vi.fn(),
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
 
@@ -51,7 +51,7 @@ it('allows a throttled lobby admission to be retried while the socket stays auth
   }
   const actions: GameActions = {
     admit, ready: vi.fn(), updateSettings: vi.fn(), rematch: vi.fn(), movement: vi.fn(),
-    placeBomb: vi.fn(), useEquipment: vi.fn(), leave: vi.fn(),
+    placeBomb: vi.fn(), leave: vi.fn(),
   }
   render(<MantineProvider env="test"><GamePanelView state={state} actions={actions} /></MantineProvider>)
 

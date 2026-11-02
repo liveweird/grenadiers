@@ -9,7 +9,7 @@ afterEach(cleanup)
 it.each([
   ['en', resources.en.translation.game, ['Easy', 'Standard', 'Hard']],
   ['pl', resources.pl.translation.game, ['Łatwy', 'Standardowy', 'Trudny']],
-] as const)('offers the three localized v19 choices in %s and defaults to Standard',
+] as const)('offers the three localized current choices in %s and defaults to Standard',
   (_language, copy, labels) => {
     const onChange = vi.fn()
     render(<MantineProvider env="test"><DifficultySelector copy={copy} onChange={onChange} /></MantineProvider>)

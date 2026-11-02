@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.22 — 2026-11-02
+
+- Make extra-bomb upgrade selection weight configurable from ×1 to ×10, defaulting to ×5, with unchanged overall concealment and item switches.
+- Preserve deterministic archived generation and replay while binding live gameplay21, weighted generator6 and private replay32.
+
 ## 1.3.21 — 2026-11-02
 
 - Fit the courtyard and primary actions inside desktop and mobile viewports, with a hideable settings panel and contained item bar.

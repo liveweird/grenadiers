@@ -1,9 +1,9 @@
 # Gameplay protocol
 
-Status: gameplay contracts, checked domain conversion, HTTP session issuance, and authenticated
-gameplay WebSockets with authoritative configurable two-to-four-seat matches are implemented.
-`api/gameplay-v20.schema.json`, Rust `core::protocol::v20`, and generated
-`web/src/game/v20/schema.ts` define active socket messages. V2 through v19 remain historical
+Gameplay contracts cover checked domain conversion, HTTP session issuance and authenticated
+gameplay WebSockets with authoritative configurable two-to-four-seat matches.
+`api/gameplay-v21.schema.json`, Rust `core::protocol::v21`, and generated
+`web/src/game/v21/schema.ts` define active socket messages. V2 through v20 remain historical
 or archived compatibility contracts.
 V14 retains the v11 physical/privacy model while adding a checked two-to-four-controller room
 configuration. See the [v14 contract](protocol-v14.md) and [v13 compatibility](protocol-v13.md).
@@ -34,7 +34,8 @@ The browser validates these messages and drives the playable generated-map match
 | v17 | [Respawn contract](protocol-v17.md) | Historical contract |
 | v18 | [Paired spike-pit contract](protocol-v18.md) | Archived compatibility contract |
 | v19 | [Room-wide difficulty](protocol-v19.md) | Retained archived contract |
-| v20 | [Contact Punch](protocol-v20.md) | Live multiplayer contract |
+| v20 | [Contact Punch](protocol-v20.md) | Retained archived contract |
+| v21 | [Weighted drops](protocol-v21.md) | Live multiplayer contract |
 
 ## Authentication and compatibility
 
@@ -54,7 +55,7 @@ Connect to `/api/v1/game/ws` with one configured non-null Origin and no query pa
 Its first application frame must be:
 
 ```json
-{"type":"authenticate","protocolVersion":20,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
+{"type":"authenticate","protocolVersion":21,"token":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}
 ```
 
 The token is a secret 64-character lowercase hexadecimal credential, held only in tab memory.
@@ -111,7 +112,7 @@ All listed fields are required; objects reject extra fields. Counter values are 
 
 | Server type | Additional fields |
 | --- | --- |
-| `authenticated` | `protocolVersion: 20` |
+| `authenticated` | `protocolVersion: 21` |
 | `incompatibleProtocol` | `supportedVersion` (0–65,535; this server emits 20) |
 | `admitted` | acknowledged `sequence`, shared `room`, `youSeat`, private `resumeToken`, nullable `lastActionId`, nullable `state` |
 | `roomState` | shared `room` only |
@@ -215,9 +216,13 @@ round count increases only on starts, remains on the preceding round during inte
 countdown, and resets on rematch. Epochs also advance across cancellation and rematch, so
 spawn/tie assignment uses actual round count rather than command epoch.
 
+Gameplay21 additionally requires integer `bombCapacityDropMultiplier` (1–10) in every complete
+settings value. New rooms use 5; updates preserve atomic revision/readiness handling. See
+[weighted-drop settings](settings.md).
+
 Shared room views and snapshot metadata also carry the complete checked `settings`,
 `settingsRevision`, nullable original `settingsEditor`, and `availableItems`. Settings also
-carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v20
+carry `enabledItems`; v10 remains pinned to its 21-item Bracelet catalog while live v21
 has the unchanged 22-item catalog beginning with Kick, Punch, Bracelet and Wall Pass, with Oil Barrel immediately
 before Teleporter. New live rooms enable the full available catalog and every supported subset is allowed.
 Only actual changes increment

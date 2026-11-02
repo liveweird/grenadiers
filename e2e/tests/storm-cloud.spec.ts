@@ -2,6 +2,7 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 import type { GameServerMessage, StormCloudView } from '../../web/src/game/v20/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
+import { openSettings } from './support/settings'
 
 type Snapshot = Extract<GameServerMessage, { type: 'snapshot' }>
 type Group = { pages: [Page, Page]; games: [ObservedGame, ObservedGame]; close: () => Promise<void> }
@@ -86,6 +87,7 @@ test('enabled storm cloud moves in one shared rendered world and survives reconn
     const group = await createGroup(browser)
     try {
       await joinRoom(group)
+      await openSettings(group.pages[0])
       await group.pages[0].getByLabel('Round wins needed').selectOption('1')
       await group.pages[0].getByLabel('Bomb fuse').selectOption('60')
       await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()

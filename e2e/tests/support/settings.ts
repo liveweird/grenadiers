@@ -10,6 +10,12 @@ const DISABLED_LAIRS = { enabled: false, spawnSeconds: 10, maxLivingMobs: 1 } as
 const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
   frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
 
+export async function openSettings(page: Page): Promise<void> {
+  const toggle = page.locator('button[aria-controls="game-settings-pane"]')
+  if (await toggle.getAttribute('aria-expanded') !== 'true') await toggle.click()
+  await expect(page.locator('#game-settings-pane')).toBeVisible()
+}
+
 export async function applyItemSettings(
   page: Page,
   game: ObservedGame,
@@ -18,6 +24,7 @@ export async function applyItemSettings(
 ): Promise<void> {
   await expect.poll(() => latestRoom(game)).toBeTruthy()
   const before = latestRoom(game)!.settingsRevision
+  await openSettings(page)
   await page.getByRole('button', { name: 'All off', exact: true }).click()
   for (const item of items) {
     await page.getByRole('checkbox', { name: item.label, exact: true }).check()
@@ -34,6 +41,7 @@ export async function applyItemSettings(
 export async function selectClassicSettings(page: Page, game: ObservedGame): Promise<void> {
   await expect.poll(() => latestRoom(game)).toBeTruthy()
   const before = latestRoom(game)!.settingsRevision
+  await openSettings(page)
   await page.getByRole('button', { name: 'Classic settings', exact: true }).click()
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   await expect.poll(() => latestRoom(game)?.settingsRevision).toBeGreaterThan(before)

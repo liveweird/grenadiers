@@ -77,6 +77,11 @@
     "label": "Your items",
     "heading": "Your items"
   },
+  "panel": {
+    "open": "Open settings",
+    "hide": "Hide settings",
+    "close": "Close settings"
+  },
   "pickups": {
     "bombCapacity": "Bomb capacity",
     "blastRange": "Blast range",

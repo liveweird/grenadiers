@@ -3,6 +3,7 @@ import type { BoardSize, Difficulty, Seat } from '../../web/src/game/v20/schema'
 import { expectPaintedCanvas, latestSnapshot, observeGame, visibleActor,
   type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
+import { openSettings } from './support/settings'
 
 type Controller = 'human' | 'cpu'
 type Group = { pages: Page[]; games: ObservedGame[]; close: () => Promise<void> }
@@ -33,6 +34,7 @@ async function createGroup(
 async function createCustom(
   page: Page, board: BoardSize, controllers: readonly Controller[], difficulty: Difficulty = 'standard',
 ): Promise<string | null> {
+  await openSettings(page)
   await page.getByRole('combobox', { name: 'Players', exact: true }).selectOption(String(controllers.length))
   await page.getByRole('combobox', { name: 'Board size', exact: true }).selectOption(boardValue(board))
   for (const [index, controller] of controllers.entries()) {
@@ -187,13 +189,17 @@ test('CPU controller counts and difficulties make authoritative progress on ever
 test('quick duel and solo retain the default board', async ({ browser }) => {
   const group = await createGroup(browser, 1)
   try {
+    await openSettings(group.pages[0])
     await group.pages[0].getByRole('combobox', { name: 'Board size', exact: true }).selectOption('11x9')
+    await group.pages[0].getByRole('button', { name: 'Close settings', exact: true }).click()
     await group.pages[0].getByRole('button', { name: 'Create room', exact: true }).click()
     await expect.poll(() => latestRoom(group.games[0])?.configuration.board).toEqual({ width: 15, height: 13 })
     const duelRoomId = latestRoom(group.games[0])!.roomId
     await group.pages[0].getByRole('button', { name: 'Leave room', exact: true }).click()
     await expect(group.pages[0].getByRole('button', { name: 'Play solo against CPU', exact: true })).toBeVisible()
+    await openSettings(group.pages[0])
     await group.pages[0].getByRole('combobox', { name: 'Board size', exact: true }).selectOption('11x9')
+    await group.pages[0].getByRole('button', { name: 'Close settings', exact: true }).click()
     const admissionCount = group.games[0].frames.filter((frame) => frame.type === 'admitted').length
     await group.pages[0].getByRole('button', { name: 'Play solo against CPU', exact: true }).click()
     await expect.poll(() => group.games[0].frames.filter((frame) => frame.type === 'admitted').length)
@@ -214,6 +220,7 @@ test('a small four-human room reconnects and rematches without changing geometry
   try {
     const code = await createCustom(group.pages[0], board, ['human', 'human', 'human', 'human'])
     await joinInSeatOrder(group, code!)
+    await openSettings(group.pages[0])
     await group.pages[0].getByLabel('Round wins needed').selectOption('1')
     await group.pages[0].getByLabel('Bomb fuse').selectOption('120')
     await group.pages[0].getByRole('button', { name: 'Apply rules', exact: true }).click()

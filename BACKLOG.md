@@ -12,12 +12,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Arena presentation
 
-- [todo] **VIEWPORT — fit the main screen without scrolling.** Rework the layout so the
-  main screen requires neither horizontal nor vertical scrolling. Consider a hideable settings
-  side pane and compact panels/tabs; keep the arena and primary controls usable and all settings
-  accessible. Use a modern interface that fits the game’s retro aesthetic, and verify supported
-  viewport sizes and keyboard access without clipping.
-
 - [todo] **ARENA3D — human visual feedback.** Evaluate camera/depth, sprite detail, readability,
   texture revisions and filter strength after the first playable version.
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view

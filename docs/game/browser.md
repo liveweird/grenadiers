@@ -4,10 +4,24 @@ The browser combines a React/Mantine room interface with a Three.js/React Three 
 Rust owns movement, collision, bomb placement, explosions, damage, and results. Rendering
 never advances the simulation or predicts a different outcome.
 
+## Screen layout
+
+The game fits the viewport without page scrolling. Primary admission, readiness, rematch and
+leave actions remain available beside or below the courtyard. **Open settings** contains custom
+room creation before admission and shared gameplay rules afterward. The panel scrolls internally,
+retains unapplied drafts, contains keyboard focus and closes with Escape; focus returns to its
+opener. Opening settings suspends arena input while the match clock continues.
+
+On narrow screens, the item bar scrolls horizontally within its own bounded region so additional
+effects do not displace the courtyard or local keyboard/sound controls. Long room details and
+expanded diagnostics also remain inside bounded panels. Supported checks cover 1440×900,
+1024×768, 390×844 and 320×568, including a painted four-player arena and a dense inventory.
+
 ## Join and play
 
-1. Open the application, choose **Create room**, select the custom **Board size** / **Rozmiar
-   planszy** if desired, and share its eight-character invitation. The default is 15×13; Quick
+1. Open the application and choose **Create room**, or open settings to create a custom room
+   with the desired **Board size** / **Rozmiar planszy**. Share its eight-character invitation.
+   The default is 15×13; Quick
    duel and Solo always use 15×13.
 2. Each other configured human enters that code and chooses **Join room** in another browser/tab.
 3. The creator can [configure gameplay](settings.md) while unready. All connected humans choose
@@ -53,7 +67,7 @@ The [modern retro courtyard](arena-3d.md) uses weathered terrain, original direc
 poses, grenades, connected flame cells and distinct pickup symbols. Reduced motion fixes
 decorative animation frames while preserving authoritative position and hazard information.
 
-Beside the arena, the localized **Your items** / **Twoje przedmioty** region is derived only
+Below the courtyard, the localized **Your items** / **Twoje przedmioty** region is derived only
 from the viewer's visible actor. It shows permanent upgrade totals, equipment and weapon slots,
 active effect timers, independent Slow-foot stack timers, frozen-action status and remaining
 damage grace. Opponent-private cached state never enters this region. Timers use authoritative

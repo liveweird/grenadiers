@@ -1,4 +1,4 @@
-import { selectClassicSettings } from './support/settings'
+import { openSettings, selectClassicSettings } from './support/settings'
 import { expect, test } from '@playwright/test'
 import { expectPaintedCanvas, latestSnapshot, observeGame, type ObservedGame } from './support/duel'
 
@@ -15,6 +15,7 @@ test('two browsers share configured rules that drive speed, fuse and match targe
     await Promise.all([one, two].map((page) => page.goto('/')))
     await one.getByRole('button', { name: 'Create room', exact: true }).click()
     await expect.poll(() => latestRoom(games[0])).toBeTruthy()
+    await openSettings(one)
     expect(latestRoom(games[0])?.settings.enabledItems).toEqual(latestRoom(games[0])?.availableItems)
     await expect(one.getByRole('button', { name: 'All on', exact: true })).toBeVisible()
     await expect(one.getByRole('button', { name: 'All off', exact: true })).toBeVisible()

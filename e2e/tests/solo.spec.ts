@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { latestSnapshot, observeGame, visibleActor, type ObservedGame } from './support/duel'
 import { admissionBaseline, disconnectTransport, installTransportProbe } from './support/reconnect'
 import { gameFrames, openGame, sendGame } from './support/game'
+import { openSettings } from './support/settings'
 
 const latestRoom = (game: ObservedGame) => game.frames.filter((frame) =>
   frame.type === 'admitted' || frame.type === 'roomState' || frame.type === 'snapshot').at(-1)?.room
@@ -60,6 +61,7 @@ test('an Easy solo player completes, rematches, reconnects and leaves a real CPU
       type: 'error', code: 'resumeRejected', sequence: resumeSequence,
     })
 
+    await openSettings(player)
     await player.getByLabel('Round wins needed').selectOption('1')
     await player.getByLabel('Bomb fuse').selectOption('60')
     await player.getByRole('button', { name: 'Apply rules', exact: true }).click()

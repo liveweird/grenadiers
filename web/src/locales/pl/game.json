@@ -77,6 +77,11 @@
     "label": "Twoje przedmioty",
     "heading": "Twoje przedmioty"
   },
+  "panel": {
+    "open": "Otwórz ustawienia",
+    "hide": "Ukryj ustawienia",
+    "close": "Zamknij ustawienia"
+  },
   "pickups": {
     "bombCapacity": "Limit bomb",
     "blastRange": "Zasięg wybuchu",

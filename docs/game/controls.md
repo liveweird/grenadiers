@@ -13,7 +13,8 @@ A duplicate key produces an inline error and leaves the mapping unchanged.
 
 ## Input lifecycle
 
-Opening settings disables arena input and immediately sends a movement stop if needed. The
+Opening **Keyboard controls** or match **Settings** disables arena input and immediately sends
+a movement stop if needed. The
 match clock continues. Changing a mapping clears movement through the old callback before
 installing the new mapping. A key held across that change stays blocked until native key-up;
 input is neither replayed nor buffered. Bomb placement remains one action per fresh physical

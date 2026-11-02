@@ -1,5 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 import { latestSnapshot, type ObservedGame } from '../tests/support/duel'
+import { openSettings } from '../tests/support/settings'
 import type { CpuDebugResponse } from '../../web/src/game/client/cpuDebugTypes'
 import validateCpuDebug from '../../web/src/validation/generated/cpu-debug.mjs'
 
@@ -25,12 +26,14 @@ export function observeDebug(page: Page) {
 }
 
 export async function createCpuMatch(page: Page, game: ObservedGame, start: boolean) {
+  await openSettings(page)
   await page.getByRole('combobox', { name: 'Players', exact: true }).selectOption('4')
   for (const index of [2, 3, 4]) {
     await page.getByRole('combobox', { name: `Player ${index} controller`, exact: true }).selectOption('cpu')
   }
   await page.getByRole('combobox', { name: 'CPU difficulty', exact: true }).last().selectOption('standard')
   await page.getByRole('button', { name: 'Create custom match', exact: true }).click()
+  await openSettings(page)
   await page.getByRole('button', { name: 'All off', exact: true }).click()
   await page.getByRole('button', { name: 'Apply rules', exact: true }).click()
   if (!start) return

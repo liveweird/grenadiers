@@ -6,10 +6,8 @@ import { GameArena } from '../arena/GameArena'
 import type { Direction, PresentationDeaths, PresentationOpening } from '../arena/types'
 import type { AdmissionIntent, GameClientState } from './client'
 import { format, useGameCopy, type GameCopy } from './locale'
-import type {
-  BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration, RoomPhase, RoundResult,
-  Seat, VisibleActorView,
-} from '../v20/schema'
+import type { BoardSize, Difficulty, GameSettings, MatchInterruptReason, MatchResult, RoomConfiguration,
+  RoomPhase, RoundResult, Seat, VisibleActorView } from '../v20/schema'
 import { useGameClient } from './useGameClient'
 import { ControlsDialog } from './ControlsDialog'
 import { bindingsSummary, keyLabel } from './controlLabels'
@@ -24,22 +22,19 @@ import { CpuDebugPanel } from './CpuDebugPanel'
 import { useCpuDebug } from './useCpuDebug'
 import { cpuDebugOptedIn } from './cpuDebugOptIn'
 import { DifficultySelector } from './DifficultySelector'
+import { SettingsPane } from './SettingsPane'
 
 const CODE_PATTERN = /^[A-HJ-NP-Z2-9]{8}$/
-const BOARD_PRESETS = [
-  { width: 15, height: 13 }, { width: 13, height: 11 }, { width: 11, height: 9 },
-] as const satisfies readonly BoardSize[]
+const BOARD_PRESETS = [{ width: 15, height: 13 }, { width: 13, height: 11 },
+  { width: 11, height: 9 }] as const satisfies readonly BoardSize[]
 const boardKey = ({ width, height }: BoardSize): string => `${width}x${height}`
 
 export interface GameActions {
-  admit(intent: AdmissionIntent): boolean
-  ready(ready: boolean): boolean
-  updateSettings(settings: GameSettings): boolean
-  rematch(ready: boolean): boolean
-  movement(direction: Direction | null): boolean
-  placeBomb(): boolean
-  leave(): boolean
+  admit(intent: AdmissionIntent): boolean; ready(ready: boolean): boolean
+  updateSettings(settings: GameSettings): boolean; rematch(ready: boolean): boolean
+  movement(direction: Direction | null): boolean; placeBomb(): boolean; leave(): boolean
 }
+type SettingsPaneState = { id: string; opened: boolean; onClose: () => void }
 
 function timerTicks(state: GameClientState): number | null {
   const room = state.room
@@ -141,7 +136,9 @@ function SeatLine({ state, seat, copy }: { state: GameClientState; seat: Seat; c
   )
 }
 
-function LobbyControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
+function LobbyControls({ state, actions, copy, pane }: {
+  state: GameClientState; actions: GameActions; copy: GameCopy; pane: SettingsPaneState
+}) {
   const [code, setCode] = useState('')
   const [difficulty, setDifficulty] = useState<Difficulty>('standard')
   const [playerCount, setPlayerCount] = useState(2)
@@ -180,6 +177,7 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
         onClick={() => actions.admit({ type: 'create', mode: { type: 'solo', difficulty } })}>
         {copy.solo.play}
       </Button>
+      <SettingsPane {...pane} title={copy.multiplayer.title} copy={copy}>
       <fieldset className="custom-match">
         <legend>{copy.multiplayer.title}</legend>
         <NativeSelect label={copy.multiplayer.playerCount} value={String(playerCount)} disabled={busy}
@@ -197,11 +195,12 @@ function LobbyControls({ state, actions, copy }: { state: GameClientState; actio
           data={[{ value: 'human', label: copy.multiplayer.human }, { value: 'cpu', label: copy.multiplayer.cpu }]} />)}
         {controllers.includes('cpu') && <DifficultySelector copy={copy} value={difficulty}
           disabled={busy} onChange={setDifficulty} />}
-        <Button size="lg" variant="light" disabled={busy}
-          onClick={() => actions.admit({ type: 'create', configuration: customConfiguration() })}>
+        <Button size="lg" variant="light" disabled={busy} onClick={() => {
+          if (actions.admit({ type: 'create', configuration: customConfiguration() })) pane.onClose()
+        }}>
           {copy.multiplayer.create}
         </Button>
-      </fieldset>
+      </fieldset></SettingsPane>
       <div className="join-rule"><span>{copy.lobby.or}</span></div>
       <TextInput
         label={copy.lobby.code} value={code} maxLength={8} autoComplete="off" spellCheck={false}
@@ -229,7 +228,9 @@ function RematchControl({ state, actions, copy }: { state: GameClientState; acti
   )
 }
 
-function RoomControls({ state, actions, copy }: { state: GameClientState; actions: GameActions; copy: GameCopy }) {
+function RoomControls({ state, actions, copy, pane }: {
+  state: GameClientState; actions: GameActions; copy: GameCopy; pane: SettingsPaneState
+}) {
   const room = state.room!
   const boardDimensions = {
     width: room.configuration.board.width, height: room.configuration.board.height,
@@ -258,10 +259,16 @@ function RoomControls({ state, actions, copy }: { state: GameClientState; action
         {room.seats.map(({ seat }) => <SeatLine key={seat} state={state} seat={seat} copy={copy} />)}
       </ol>
       <AuthoritativeOutcome state={state} copy={copy} />
-      <GameplaySettingsPanel key={room.settingsRevision} room={room} youSeat={state.youSeat}
-        pending={state.settingsPending || state.admissionPending} copy={copy}
-        onApply={(settings) => actions.updateSettings(settings)} />
-      <Stack gap="sm">
+      <SettingsPane {...pane} title={copy.settings.title} copy={copy}>
+        <GameplaySettingsPanel key={room.settingsRevision} room={room} youSeat={state.youSeat}
+          pending={state.settingsPending || state.admissionPending} copy={copy}
+          onApply={(settings) => {
+            const accepted = actions.updateSettings(settings)
+            if (accepted) pane.onClose()
+            return accepted
+          }} />
+      </SettingsPane>
+      <Stack gap="sm" className="primary-room-actions">
         {canReady && own && <Button disabled={!connected || state.leavePending || state.admissionPending
           || state.settingsPending}
           onClick={() => actions.ready(!own.ready)}>{own.ready ? copy.room.cancelReady : copy.room.ready}</Button>}
@@ -310,22 +317,23 @@ export function GamePanelView({ state, actions, developerPanel, presentationDeat
   const copy = useMemo(() => roomCopy(translatedCopy, state.room), [translatedCopy, state.room])
   const [bindings, setBindings] = useState(loadControlBindings)
   const [controlsOpen, setControlsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const failureText = state.failure ? copy.error[state.failure as keyof typeof copy.error] : ''
-  const enabled = !controlsOpen && gameInputEnabled(state)
+  const enabled = !controlsOpen && !settingsOpen && gameInputEnabled(state)
   const waitingText = state.room ? phaseText(copy, state.room.phase) : copy.connection[state.connection]
   const round = state.room?.roundNumber
   const reconnecting = state.room && (state.admissionPending
     || ['reconnecting', 'connecting', 'authenticating'].includes(state.connection))
-  const arenaSnapshot = useMemo(
-    () => presentSnapshot(state, presentationDeaths, presentationOpening),
-    [state, presentationDeaths, presentationOpening],
-  )
+  const arenaSnapshot = useMemo(() => presentSnapshot(state, presentationDeaths, presentationOpening),
+    [state, presentationDeaths, presentationOpening])
   const ownActor = ownStatusActor(state)
   const focusHint = arenaFocusHint(state, arenaSnapshot, bindings, copy)
   const updateBindings = (next: KeyboardBindings): void => {
     setBindings(next)
     saveControlBindings(next)
   }
+  const settingsId = 'game-settings-pane'
+  const settingsPane = { id: settingsId, opened: settingsOpen, onClose: () => setSettingsOpen(false) }
   return (
     <section className="game-shell" aria-label={copy.label}>
       <div className="arena-column">
@@ -357,10 +365,15 @@ export function GamePanelView({ state, actions, developerPanel, presentationDeat
         </div>
       </div>
       <aside className="control-column">
+        <Button className="settings-pane-toggle" variant="light" size="compact-sm"
+          aria-controls={settingsId} aria-expanded={settingsOpen}
+          onClick={() => setSettingsOpen((opened) => !opened)}>
+          {settingsOpen ? copy.panel.hide : copy.panel.open}
+        </Button>
         {reconnecting && <Alert color="yellow" title={copy.reconnect.title}>{copy.reconnect.retrying}</Alert>}
         {failureText && <Alert color="red" title={copy.error.title}>{failureText}</Alert>}
-        {state.room ? <RoomControls state={state} actions={actions} copy={copy} />
-          : <LobbyControls state={state} actions={actions} copy={copy} />}
+        {state.room ? <RoomControls state={state} actions={actions} copy={copy} pane={settingsPane} />
+          : <LobbyControls state={state} actions={actions} copy={copy} pane={settingsPane} />}
         {developerPanel}
         {state.connection !== 'disconnected' && !state.room && <Group gap="xs" className="connection-note">
           <span className="connection-dot" aria-hidden="true" /><Text size="sm">{copy.connection[state.connection]}</Text>

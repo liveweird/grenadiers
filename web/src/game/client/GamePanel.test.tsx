@@ -65,6 +65,14 @@ describe('v12 reconnect presentation', () => {
     renderPanel(state('authenticated'))
     expect(screen.getByRole('region', { name: 'Grenadiers courtyard' })).toHaveAttribute('data-enabled', 'true')
   })
+
+  it('disables arena input while settings have focus', () => {
+    renderPanel(state('authenticated'))
+    const arena = screen.getByRole('region', { name: 'Grenadiers courtyard' })
+    expect(arena).toHaveAttribute('data-enabled', 'true')
+    fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
+    expect(arena).toHaveAttribute('data-enabled', 'false')
+  })
 })
 
 describe('v12 private-state presentation', () => {
@@ -239,6 +247,7 @@ describe('v12 room controls', () => {
     current.snapshot = null
     current.settingsPending = true
     renderPanel(current)
+    fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
     expect(screen.getByRole('button', { name: 'Ready' })).toBeDisabled()
     expect(screen.getByLabelText('Starting speed')).toBeDisabled()
   })
@@ -253,6 +262,7 @@ describe('v12 room controls', () => {
       updateSettings(settings: unknown) { received.push([this, settings]); return true },
     }
     render(<MantineProvider env="test"><GamePanelView state={current} actions={currentActions} /></MantineProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'Open settings' }))
     fireEvent.change(screen.getByLabelText('Round wins needed'), { target: { value: '1' } })
     fireEvent.click(screen.getByRole('button', { name: 'Apply rules' }))
     expect(received).toEqual([[currentActions, {

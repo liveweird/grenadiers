@@ -1,5 +1,5 @@
 import { createResponsiveBrowserContexts } from '../tests/support/browser-contexts'
-import { selectClassicSettings } from '../tests/support/settings'
+import { openSettings, selectClassicSettings } from '../tests/support/settings'
 import { setTimeout as delay } from 'node:timers/promises'
 import { expect, test, type Page, type Route, type TestInfo } from '@playwright/test'
 import { observeBrowserPolicy } from '../tests/support/browser-policy'
@@ -291,6 +291,7 @@ test('a terminal transport loss retires the seat without changing the result or 
       await installTransportProbe(two)
       games.push(...pages.map(observeGame))
       await Promise.all(pages.map((page) => page.goto('/')))
+      await openSettings(one)
       await one.getByRole('combobox', { name: 'Players', exact: true }).selectOption('3')
       await one.getByRole('button', { name: 'Create custom match', exact: true }).click()
       const invitation = one.getByLabel('Room invitation code', { exact: true })
@@ -301,6 +302,7 @@ test('a terminal transport loss retires the seat without changing the result or 
         await page.getByRole('button', { name: 'Join room', exact: true }).click()
       }
       const settingsRevision = latestRoom(games[0])!.settingsRevision
+      await openSettings(one)
       await one.getByRole('button', { name: 'Classic settings', exact: true }).click()
       await one.getByLabel('Round wins needed').selectOption('1')
       await one.getByLabel('Bomb fuse').selectOption('60')

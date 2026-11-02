@@ -22,6 +22,8 @@ pub use admission::{AdmissionProjection, PersonalAdmission, prepare_admission};
 pub use client::{GameClientMessage, ManualActionKind};
 pub use configuration::{Difficulty, Environment, Lairs, RoomConfiguration, SpikePits};
 pub use cpu_observation::observe_cpu_recipient;
+pub(crate) use cpu_observation::observe_cpu_recipient_with_punch_activation;
+pub(crate) use projection::bind_expanded_with_punch_activation;
 pub use projection::{
     BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded, capture_expanded,
     prepare_snapshots, project_recipient,
@@ -74,6 +76,6 @@ mod compatibility_tests;
 #[cfg(test)]
 mod mutable_world_tests;
 #[cfg(test)]
-mod server_conformance_tests;
+pub(crate) mod server_conformance_tests;
 #[cfg(test)]
 mod tests;

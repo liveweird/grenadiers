@@ -283,6 +283,7 @@ fn observe(state: &State, settings: RoomSettings) -> Observation {
         tick: view.tick,
         recipient: CPU,
         rules: ObservedRules {
+            punch_activation_policy: grenadiers_core::game::PunchActivationPolicy::ManualV1,
             version: 10,
             tick_rate: 60,
             running_updates: view.running_updates as u16,

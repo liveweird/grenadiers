@@ -10,20 +10,23 @@ use grenadiers_core::cpu::{
         plan_hard_corner_refuges_v57_with_origin, plan_hard_exit_pressure_v58_with_origin,
         plan_hard_farm_origins_v39_with_origin, plan_hard_farm_refuges_v37_with_origin,
         plan_hard_pickup_progress_v32_with_origin, plan_hard_pit_avoidance_v53_with_origin,
-        plan_hard_v28_with_origin, plan_lairs_with_origin, plan_pickup_progress_v31_with_origin,
+        plan_hard_v28_with_origin, plan_pickup_progress_v31_with_origin,
         plan_pit_avoidance_v52_with_origin, plan_refuge_guidance_v33_with_origin,
         plan_refuge_guidance_v34_with_origin, plan_reliable_v27_with_origin,
         plan_respawn_v22_with_origin, plan_respawn_v23_with_origin, plan_respawn_v24_with_origin,
         plan_respawn_v25_with_origin, plan_respawn_with_origin, plan_spike_pits_v26_with_origin,
-        plan_with_origin,
     },
 };
 use grenadiers_core::room::CpuPolicy;
 
+#[path = "worker_plan_contact_punch.rs"]
+mod contact_punch;
 #[path = "worker_plan_continuation.rs"]
 mod continuation;
 #[path = "worker_plan_farm_yield.rs"]
 mod farm_yield;
+#[path = "worker_plan_legacy.rs"]
+mod legacy;
 #[path = "worker_plan_teleporter.rs"]
 mod teleporter;
 
@@ -67,9 +70,13 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV57
                 | CpuPolicy::UtilityV58
                 | CpuPolicy::UtilityV59
+                | CpuPolicy::UtilityV60
+                | CpuPolicy::UtilityV61
         )
     {
-        let plan = if job.policy == CpuPolicy::UtilityV59 {
+        let plan = if matches!(job.policy, CpuPolicy::UtilityV60 | CpuPolicy::UtilityV61) {
+            contact_punch::plan(job, work)
+        } else if job.policy == CpuPolicy::UtilityV59 {
             farm_yield::plan(job, work)
         } else if job.policy == CpuPolicy::UtilityV56 {
             plan_corner_refuges_v56_with_origin(
@@ -364,33 +371,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
             plan: Box::new(plan.survival),
             contact: plan.contact,
         })
-    } else if job.observation.parts().rules.version == 8 {
-        plan_lairs_with_origin(
-            &job.observation,
-            &job.memory,
-            &job.hazard_memory,
-            job.settled_stop_tick,
-            job.escape_origin.as_ref(),
-            &mut job.rng,
-            work,
-        )
-        .map(|plan| WorkerPlan::Ordinary {
-            plan: Box::new(plan.survival),
-            contact: plan.contact,
-        })
     } else {
-        plan_with_origin(
-            &job.observation,
-            &job.memory,
-            &job.hazard_memory,
-            job.settled_stop_tick,
-            job.escape_origin.as_ref(),
-            &mut job.rng,
-            work,
-        )
-        .map(|plan| WorkerPlan::Ordinary {
-            plan: Box::new(plan),
-            contact: None,
-        })
+        legacy::plan(job, work)
     }
 }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket};
-use grenadiers_core::protocol::v19::{ErrorCode, GameServerMessage, ManualActionKind};
+use grenadiers_core::protocol::v20::{ErrorCode, GameServerMessage, ManualActionKind};
 use grenadiers_core::protocol::{Counter, RoomId};
 use tokio::time::Instant;
 
@@ -272,7 +272,6 @@ pub(super) async fn dispatch(
 const fn manual_room_action(kind: ManualActionKind, id: Counter) -> Option<RoomAction> {
     match kind {
         ManualActionKind::Bomb => Some(RoomAction::Bomb(id.get())),
-        ManualActionKind::Equipment => Some(RoomAction::Equipment(id.get())),
     }
 }
 

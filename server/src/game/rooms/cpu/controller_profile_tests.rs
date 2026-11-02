@@ -36,6 +36,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V57).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V58).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V59).profile_supports(10));
+    assert!(controller(CpuProfile::HARD_V61).profile_supports(10));
     for rules in 5..10 {
         assert!(!hard.profile_supports(rules));
     }
@@ -56,6 +57,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuPolicy::UtilityV52,
         CpuPolicy::UtilityV54,
         CpuPolicy::UtilityV56,
+        CpuPolicy::UtilityV60,
     ] {
         let forged = controller(CpuProfile {
             policy,
@@ -84,6 +86,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuPolicy::UtilityV57,
         CpuPolicy::UtilityV58,
         CpuPolicy::UtilityV59,
+        CpuPolicy::UtilityV61,
     ] {
         for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
             let forged = controller(CpuProfile { policy, difficulty });
@@ -117,6 +120,8 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuProfile::RECOVERY_V54_EASY,
         CpuProfile::CORNER_REFUGES_V56_STANDARD,
         CpuProfile::CORNER_REFUGES_V56_EASY,
+        CpuProfile::CONTACT_PUNCH_V60_STANDARD,
+        CpuProfile::CONTACT_PUNCH_V60_EASY,
     ] {
         assert!(controller(profile).profile_supports(10));
         assert!(!controller(profile).profile_supports(9));
@@ -135,6 +140,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V57).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V58).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V59).supports_refuge_handoff());
+    assert!(controller(CpuProfile::HARD_V61).supports_refuge_handoff());
     assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
     assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD).supports_contact_topology());
     assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_EASY).supports_contact_topology());
@@ -171,6 +177,9 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuProfile::HARD_V57,
         CpuProfile::HARD_V58,
         CpuProfile::HARD_V59,
+        CpuProfile::CONTACT_PUNCH_V60_STANDARD,
+        CpuProfile::CONTACT_PUNCH_V60_EASY,
+        CpuProfile::HARD_V61,
     ] {
         let current = controller(profile);
         assert!(current.supports_contact_topology());

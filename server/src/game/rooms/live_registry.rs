@@ -180,7 +180,7 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_spike_v19_with_navigation(
+        let runtime = RosterRuntime::new_spike_v20_with_navigation(
             identity,
             RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
             cloud,
@@ -192,10 +192,10 @@ impl GameRooms {
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::CORNER_REFUGES_V56_EASY,
-            Some(CpuDifficulty::Standard) => CpuProfile::CORNER_REFUGES_V56_STANDARD,
-            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V59,
-            None => CpuProfile::CORNER_REFUGES_V56_STANDARD,
+            Some(CpuDifficulty::Easy) => CpuProfile::CONTACT_PUNCH_V60_EASY,
+            Some(CpuDifficulty::Standard) => CpuProfile::CONTACT_PUNCH_V60_STANDARD,
+            Some(CpuDifficulty::Hard) => CpuProfile::HARD_V61,
+            None => CpuProfile::CONTACT_PUNCH_V60_STANDARD,
         };
         let mut cpus = Vec::new();
         for seat in base.cpu_seats() {

@@ -26,6 +26,10 @@ impl RosterRuntime {
             RosterPublication::SpikeV19(_, publication) => publication.clone(),
             _ => None,
         };
+        self.spike_v20_cpu_publication = match &prepared.notice.publication {
+            RosterPublication::SpikeV20(_, publication) => publication.clone(),
+            _ => None,
+        };
         self.lifecycle = prepared.lifecycle;
         self.revision = prepared.revision;
     }

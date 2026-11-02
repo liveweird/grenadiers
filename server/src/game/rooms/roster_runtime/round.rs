@@ -66,43 +66,46 @@ impl RosterRuntime {
         let epoch = self.lifecycle.round_attempt();
         let simulation_seed =
             (self.simulation_seed)(epoch).map_err(|()| RosterRuntimeError::SeedUnavailable)?;
-        let rules = self.environment_profile.map_or_else(
-            || grenadiers_core::game::RulesConfig::multiplayer_v6(self.lifecycle.settings()),
-            |profile| match profile {
-                super::runtime::EnvironmentProfile::StormV7(environment) => {
-                    grenadiers_core::game::RulesConfig::environment_v7(
-                        self.lifecycle.settings(),
-                        environment,
-                    )
-                }
-                super::runtime::EnvironmentProfile::LairsV8 { cloud, tuning } => {
-                    grenadiers_core::game::RulesConfig::environment_v8(
+        let rules = self
+            .environment_profile
+            .map_or_else(
+                || grenadiers_core::game::RulesConfig::multiplayer_v6(self.lifecycle.settings()),
+                |profile| match profile {
+                    super::runtime::EnvironmentProfile::StormV7(environment) => {
+                        grenadiers_core::game::RulesConfig::environment_v7(
+                            self.lifecycle.settings(),
+                            environment,
+                        )
+                    }
+                    super::runtime::EnvironmentProfile::LairsV8 { cloud, tuning } => {
+                        grenadiers_core::game::RulesConfig::environment_v8(
+                            self.lifecycle.settings(),
+                            cloud,
+                            tuning.config(),
+                        )
+                    }
+                    super::runtime::EnvironmentProfile::RespawnV9 { cloud, tuning } => {
+                        grenadiers_core::game::RulesConfig::environment_v9_with_mob_navigation(
+                            self.lifecycle.settings(),
+                            cloud,
+                            tuning.config(),
+                            self.mob_navigation,
+                        )
+                    }
+                    super::runtime::EnvironmentProfile::SpikeV10 {
+                        cloud,
+                        lairs,
+                        spike_pits,
+                    } => grenadiers_core::game::RulesConfig::environment_v10_with_mob_navigation(
                         self.lifecycle.settings(),
                         cloud,
-                        tuning.config(),
-                    )
-                }
-                super::runtime::EnvironmentProfile::RespawnV9 { cloud, tuning } => {
-                    grenadiers_core::game::RulesConfig::environment_v9_with_mob_navigation(
-                        self.lifecycle.settings(),
-                        cloud,
-                        tuning.config(),
+                        lairs.config(),
+                        spike_pits.config(),
                         self.mob_navigation,
-                    )
-                }
-                super::runtime::EnvironmentProfile::SpikeV10 {
-                    cloud,
-                    lairs,
-                    spike_pits,
-                } => grenadiers_core::game::RulesConfig::environment_v10_with_mob_navigation(
-                    self.lifecycle.settings(),
-                    cloud,
-                    lairs.config(),
-                    spike_pits.config(),
-                    self.mob_navigation,
-                ),
-            },
-        );
+                    ),
+                },
+            )
+            .with_punch_activation_policy(self.punch_activation);
         let state = State::new_round(
             rules,
             world,
@@ -120,6 +123,7 @@ impl RosterRuntime {
         self.respawn_cpu_publication = None;
         self.spike_cpu_publication = None;
         self.spike_v19_cpu_publication = None;
+        self.spike_v20_cpu_publication = None;
         self.sim = Some(SimRound {
             epoch,
             state,

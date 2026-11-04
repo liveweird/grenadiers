@@ -19,17 +19,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — reactive Hard bombing under visible-state assumptions.**
-  Implement the accepted [measured-risk decision](docs/decisions/0030-reactive-hard-planning.md)
-  for Hard only, preserving Easy/Standard and archived policies. Keep the conservative fallback,
-  bounded work, full nominal escape, contact/pit checks, explicit assumption renewal and command
-  fencing. Add fresh nonmanual escape replanning for an existing owned timed-bomb cohort after
-  interruption; retain new-bomb revocation. Require paired actual queued planting, useful damage, complete flame lifecycles and
-  subsequent progress; compare aggression, survival, stalls and cost. Future unknown actions or
-  loot can invalidate a prediction; do not describe this as all-outcomes safety. Preserve the
-  [earlier investigation](docs/history/cpu-late-passivity-2026-11-01.md), clear-window witness,
-  CPU54/62 recovery and v50 Teleporter behavior.
-
 - [todo] **HARD-CPU — deepen fair tactics.** Improve pickup contention and useful bomb
   combinations. Preserve bounded opponent-exit guidance and productive equal-distance farming.
   Use permitted observations, bounded planning and unchanged physics. Require authoritative

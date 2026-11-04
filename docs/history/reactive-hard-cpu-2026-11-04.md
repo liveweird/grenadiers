@@ -125,3 +125,6 @@ ManualV1 activation. Those fixtures now select ContactV2 for the corresponding c
 while preserving legacy activation for archived workers. Valid Hard65 control/RNG/work parity is
 checked alongside rejection of the deliberately incompatible fixture. This correction changes
 test modules only; the runtime code is unchanged.
+
+The complete release-gate results and the separate runtime-build and Rust-verification source
+identities are recorded in [v1.3.24 verification](../releases.md#v1324--2026-11-04).

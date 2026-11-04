@@ -33,6 +33,23 @@ pub fn bind_expanded(
     capture: &ExpandedCapture,
     generation: GenerationRecord,
 ) -> Result<BoundPublication, ProjectionError> {
+    bind_expanded_with_construction(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        crate::game::ArenaConstructionProfile::WeightedV6,
+    )
+}
+
+pub fn bind_expanded_with_construction(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    construction: crate::game::ArenaConstructionProfile,
+) -> Result<BoundPublication, ProjectionError> {
+    validate_construction(construction)?;
     super::validate_room_view(room)?;
     let legacy = room.legacy_view();
     let base = crate::protocol::v19::bind_expanded_with_expected_settings(
@@ -40,7 +57,7 @@ pub fn bind_expanded(
         state_epoch,
         capture,
         generation,
-        crate::game::WEIGHTED_GENERATOR_VERSION,
+        construction,
         room.settings
             .domain()
             .map_err(|()| ProjectionError::InvalidExpandedBinding)?,
@@ -84,4 +101,14 @@ pub fn prepare_snapshots(
             Ok((recipient, encoded))
         })
         .collect()
+}
+
+pub(super) fn validate_construction(
+    construction: crate::game::ArenaConstructionProfile,
+) -> Result<(), ProjectionError> {
+    match construction {
+        crate::game::ArenaConstructionProfile::WeightedV6
+        | crate::game::ArenaConstructionProfile::WeightedLairClearanceV7 => Ok(()),
+        _ => Err(ProjectionError::InvalidExpandedBinding),
+    }
 }

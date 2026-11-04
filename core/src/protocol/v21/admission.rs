@@ -4,7 +4,7 @@ use crate::room::SeatControl;
 
 use super::{
     ConnectionStatus, ExpandedCapture, GameServerMessage, ProjectionError, ResumeToken, RoomPhase,
-    RoomView, Seat, bind_expanded, project_recipient,
+    RoomView, Seat, bind_expanded_with_construction, project_recipient,
 };
 
 pub struct AdmissionProjection<'a> {
@@ -25,6 +25,19 @@ pub fn prepare_admission(
     projection: AdmissionProjection<'_>,
     personal: PersonalAdmission,
 ) -> Result<String, ProjectionError> {
+    prepare_admission_with_construction(
+        projection,
+        personal,
+        crate::game::ArenaConstructionProfile::WeightedV6,
+    )
+}
+
+pub fn prepare_admission_with_construction(
+    projection: AdmissionProjection<'_>,
+    personal: PersonalAdmission,
+    construction: crate::game::ArenaConstructionProfile,
+) -> Result<String, ProjectionError> {
+    super::projection::validate_construction(construction)?;
     super::validate_room_view(projection.room)?;
     let index = personal.recipient.index();
     let Some(status) = projection.room.seats.get(index) else {
@@ -50,7 +63,13 @@ pub fn prepare_admission(
         projection.generation,
     ) {
         (Some(epoch), Some(capture), Some(generation)) => {
-            let publication = bind_expanded(projection.room, epoch, capture, generation)?;
+            let publication = bind_expanded_with_construction(
+                projection.room,
+                epoch,
+                capture,
+                generation,
+                construction,
+            )?;
             Some(project_recipient(&publication, personal.recipient)?.state)
         }
         (None, None, None)

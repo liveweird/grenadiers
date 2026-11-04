@@ -40,6 +40,8 @@ mod item_foundation_tests;
 mod kick_validation_tests;
 #[path = "lair_foundation_tests.rs"]
 mod lair_foundation_tests;
+#[path = "lair_clearance_state_tests.rs"]
+mod lair_clearance_state_tests;
 #[path = "lair_review_tests.rs"]
 mod lair_review_tests;
 #[path = "lair_respawn_tests.rs"]

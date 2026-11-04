@@ -1,11 +1,34 @@
-use std::collections::BTreeSet;
-
 use crate::room::SpikePitSettings;
 
-use super::{Arena, CellId, MovementSegment, MovementTrace, Position, Terrain, Tick};
+#[cfg(test)]
+use super::Terrain;
+use super::{CellId, MovementSegment, MovementTrace, Position, Tick};
+
+#[path = "spike_pit_layout.rs"]
+mod layout;
+#[cfg(test)]
+use layout::spawn_reserved;
+pub use layout::{spike_pit_layout_v1, spike_pit_layout_v2};
 
 pub const SPIKE_PIT_LAYOUT_VERSION: u16 = 1;
+pub const LAIR_CLEARANCE_SPIKE_PIT_LAYOUT_VERSION: u16 = 2;
 pub const MAX_SPIKE_PITS: usize = 4;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SpikePitLayoutPolicy {
+    LegacyV1,
+    LairClearanceV2,
+}
+
+impl SpikePitLayoutPolicy {
+    #[must_use]
+    pub const fn version(self) -> u16 {
+        match self {
+            Self::LegacyV1 => SPIKE_PIT_LAYOUT_VERSION,
+            Self::LairClearanceV2 => LAIR_CLEARANCE_SPIKE_PIT_LAYOUT_VERSION,
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SpikePitPhase {
@@ -281,81 +304,10 @@ pub fn traces_contact_spike_pit(traces: &[MovementTrace], pit: CellId) -> bool {
         .any(|trace| trace_contacts_spike_pit(trace, pit))
 }
 
-/// Selects a clear reflection orbit from a bounded, RNG-free search.
-///
-/// Callers pass cells occupied by other overlays, including lairs and every Oil
-/// Barrel phase. Four-cell orbits are preferred globally over two-cell
-/// center-axis fallbacks. Within each size, nearer-center seeds precede
-/// row-major ties. An unavailable member rejects its whole orbit.
-#[must_use]
-pub fn spike_pit_layout_v1(
-    arena: &Arena,
-    excluded: impl IntoIterator<Item = CellId>,
-) -> Vec<CellId> {
-    let excluded = excluded.into_iter().collect::<BTreeSet<_>>();
-    let center = CellId::new(arena.width() / 2, arena.height() / 2);
-    let mut candidates = (1..arena.height() - 1)
-        .flat_map(|row| (1..arena.width() - 1).map(move |column| CellId::new(column, row)))
-        .collect::<Vec<_>>();
-    candidates.sort_by_key(|cell| {
-        (
-            cell.column.abs_diff(center.column) + cell.row.abs_diff(center.row),
-            *cell,
-        )
-    });
-
-    for target_size in [MAX_SPIKE_PITS, 2] {
-        for &candidate in &candidates {
-            let orbit = reflected_orbit(arena, candidate);
-            if orbit.len() == target_size
-                && orbit
-                    .iter()
-                    .all(|&cell| placement_is_clear(arena, cell, &excluded))
-            {
-                return orbit;
-            }
-        }
-    }
-    Vec::new()
-}
-
-fn reflected_orbit(arena: &Arena, cell: CellId) -> Vec<CellId> {
-    let reflected_column = arena.width() - 1 - cell.column;
-    let reflected_row = arena.height() - 1 - cell.row;
-    BTreeSet::from([
-        cell,
-        CellId::new(reflected_column, cell.row),
-        CellId::new(cell.column, reflected_row),
-        CellId::new(reflected_column, reflected_row),
-    ])
-    .into_iter()
-    .collect()
-}
-
-fn placement_is_clear(arena: &Arena, cell: CellId, excluded: &BTreeSet<CellId>) -> bool {
-    arena.terrain(cell) == Some(Terrain::Floor)
-        && !arena.blocks().contains(&cell)
-        && !excluded.contains(&cell)
-        && potential_spawns(arena)
-            .into_iter()
-            .all(|spawn| !spawn_reserved(spawn, cell))
-}
-
-fn potential_spawns(arena: &Arena) -> [CellId; 4] {
-    let right = arena.width() - 2;
-    let bottom = arena.height() - 2;
-    [
-        CellId::new(1, 1),
-        CellId::new(right, 1),
-        CellId::new(1, bottom),
-        CellId::new(right, bottom),
-    ]
-}
-
-fn spawn_reserved(spawn: CellId, cell: CellId) -> bool {
-    spawn.column.abs_diff(cell.column) + spawn.row.abs_diff(cell.row) <= 1
-}
-
 #[cfg(test)]
 #[path = "spike_pit_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "spike_pit_layout_v2_tests.rs"]
+mod layout_v2_tests;

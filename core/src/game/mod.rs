@@ -40,6 +40,7 @@ pub mod geometry;
 pub mod input;
 pub mod inventory;
 mod lairs;
+mod layout_clearance;
 mod mob_escape;
 mod mob_hazards;
 mod movement;
@@ -68,10 +69,12 @@ pub use enabled_items::EnabledItems;
 pub use events::{EventAudience, StepEvent, StepEventKind};
 pub use fixtures::fixed_arena;
 pub use generation::{
-    ArenaGenerationConfig, EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION, GeneratedArena,
-    GenerationError, GenerationRecord, MULTIPLAYER_GENERATOR_VERSION, VARIABLE_GENERATOR_VERSION,
-    WEIGHTED_GENERATOR_VERSION, generate_arena, generate_expanded_arena,
-    generate_multiplayer_arena, generate_variable_multiplayer_arena,
+    ArenaConstructionProfile, ArenaGenerationConfig, EXPANDED_GENERATOR_VERSION, GENERATOR_VERSION,
+    GeneratedArena, GenerationError, GenerationRecord, LAIR_CLEARANCE_GENERATOR_VERSION,
+    MULTIPLAYER_GENERATOR_VERSION, VARIABLE_GENERATOR_VERSION, WEIGHTED_GENERATOR_VERSION,
+    WEIGHTED_LAIR_CLEARANCE_GENERATOR_VERSION, generate_arena, generate_expanded_arena,
+    generate_lair_clearance_multiplayer_arena, generate_multiplayer_arena,
+    generate_variable_multiplayer_arena, generate_weighted_lair_clearance_multiplayer_arena,
     generate_weighted_multiplayer_arena,
 };
 pub use geometry::{MovementSegment, MovementTrace};
@@ -99,9 +102,10 @@ pub use simulation::{
 };
 pub(crate) use simulation::{stationary_contact_entry, stationary_sweep_contact};
 pub use spike_pits::{
-    MAX_SPIKE_PITS, SPIKE_PIT_LAYOUT_VERSION, SpikePitClock, SpikePitClockError, SpikePitPhase,
-    SpikePitRaisedInterval, SpikePitView, position_contacts_spike_pit, segment_contacts_spike_pit,
-    spike_pit_layout_v1, trace_contacts_spike_pit, traces_contact_spike_pit,
+    LAIR_CLEARANCE_SPIKE_PIT_LAYOUT_VERSION, MAX_SPIKE_PITS, SPIKE_PIT_LAYOUT_VERSION,
+    SpikePitClock, SpikePitClockError, SpikePitLayoutPolicy, SpikePitPhase, SpikePitRaisedInterval,
+    SpikePitView, position_contacts_spike_pit, segment_contacts_spike_pit, spike_pit_layout_v1,
+    spike_pit_layout_v2, trace_contacts_spike_pit, traces_contact_spike_pit,
 };
 pub use types::{CellId, EntityId, PlayerCount, Position, SeatId, SpeedLevel, Tick};
 pub use view::{ActorView, ArenaView, BombView, FlameView, OilBarrelView, PickupView, PublicState};

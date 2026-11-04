@@ -27,9 +27,7 @@ pub use projection::{
     BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded, capture_expanded,
     prepare_snapshots, project_recipient,
 };
-pub(crate) use projection::{
-    bind_expanded_with_expected_settings, bind_expanded_with_punch_activation,
-};
+pub(crate) use projection::{bind_expanded_with_expected_settings, bind_expanded_with_profile};
 pub use room_validation::validate_room_view;
 pub use server::{
     CompletedRound, ConnectionStatus, Controller, CountdownKind, DrawReason, ErrorCode,

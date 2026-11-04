@@ -106,4 +106,12 @@ impl ObservedHazardMemory {
             .get(&id)
             .map_or(0, |history| usize::from(history.previous.is_some()) + 1)
     }
+
+    pub(crate) fn is_stationary_candidate(&self, id: EntityId, at: Tick, cell: CellId) -> bool {
+        self.bombs.get(&id).is_some_and(|history| {
+            history.previous.is_some_and(|previous| previous.tick < at)
+                && history.latest == BombSnapshot { tick: at, cell }
+                && !history.displaced
+        })
+    }
 }

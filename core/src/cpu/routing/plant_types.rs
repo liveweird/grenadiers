@@ -205,6 +205,39 @@ impl PlantCertificate {
         }
     }
 
+    pub(crate) fn reactive_scene_candidate(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+        established: PlantPresence,
+        work: &mut WorkBudget,
+    ) -> Option<PlantPresence> {
+        let (BombKnowledge::Visible(old_bombs), BombKnowledge::Visible(new_bombs)) =
+            (&basis.parts().bombs, &current.parts().bombs)
+        else {
+            return None;
+        };
+        let charge = self
+            .absent
+            .reactive_scene_work(basis, current)?
+            .max(self.present.reactive_scene_work(basis, current)?)
+            .checked_add(
+                u32::try_from(
+                    old_bombs
+                        .len()
+                        .checked_mul(new_bombs.len().checked_add(2)?)?,
+                )
+                .ok()?,
+            )?;
+        work.try_take(charge).ok()?;
+        if established == PlantPresence::Awaiting {
+            self.confirm(basis, current).ok()
+        } else {
+            self.matches_scene(basis, current, established)
+                .then_some(established)
+        }
+    }
+
     pub(crate) fn contact_actor_work(&self) -> Option<u32> {
         Some(
             self.absent

@@ -1,10 +1,15 @@
 # CPU intent and developer diagnostics
 
-Live Easy/Standard CPU62 and Hard CPU64 retain CPU60/61, CPU56/59 and CPU26's persistent objective model and checked
+Live Easy/Standard CPU62 and Hard CPU65 retain CPU60/61, CPU56/59 and CPU26's persistent objective model and checked
 spike-pit execution. A subject is an exact exposed
 pickup (cell and kind), destructible block, or visible opponent seat. Firing/approach cells can
 change without changing that subject. When no productive subject is available, the CPU explicitly
 explores, waits, or survives instead of pretending to have an attack target.
+
+Hard may attach a forward wall-demolition purpose to an Attack plan without changing its
+opponent, approach or commitment deadlines. Selecting the demolition does not count as progress
+or complete the opponent objective. A fresh OwnEscape certificate likewise withdraws no
+strategic goal; it authorizes only its checked movement or waiting program.
 
 ## Commitment and execution
 

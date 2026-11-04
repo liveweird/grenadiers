@@ -167,3 +167,69 @@ fn future_clearance_owner_accepts_only_its_versioned_cpu_family() {
         }
     }
 }
+
+#[test]
+fn reactive_owner_changes_only_the_hard_profile() {
+    use grenadiers_core::game::SeatId;
+    for (difficulty, accepted, rejected) in [
+        (
+            CpuDifficulty::Standard,
+            CpuProfile::RECOVERY_V62_STANDARD,
+            CpuProfile::HARD_V65,
+        ),
+        (
+            CpuDifficulty::Easy,
+            CpuProfile::RECOVERY_V62_EASY,
+            CpuProfile::HARD_V65,
+        ),
+        (
+            CpuDifficulty::Hard,
+            CpuProfile::HARD_V65,
+            CpuProfile::HARD_V64,
+        ),
+    ] {
+        let configuration = RoomConfiguration::new(
+            &[SeatControl::Human, SeatControl::Cpu],
+            Some(difficulty),
+            BoardSize::FifteenByThirteen,
+        )
+        .unwrap();
+        let runtime = RosterRuntime::new_spike_v21_reactive_with_navigation(
+            RosterIdentity {
+                id: RoomId::new("2123456789abcdef0123456789abcdef").unwrap(),
+                code: RoomCode::new("RBCDEFGH").unwrap(),
+                registry_serial: 129,
+                configuration,
+            },
+            RoomSettings::DEFAULT.with_bomb_capacity_drop_multiplier(
+                grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT,
+            ),
+            SpikeRuntimeEnvironment {
+                cloud: StormCloudConfig::Single,
+                lairs: RespawnLairTuning::DEFAULT,
+                spike_pits: SpikePitTuning::DEFAULT,
+                navigation: MobNavigationPolicy::TimedEscapeV3,
+            },
+            RoundSeedSource::with_entropy(|bytes| {
+                bytes.fill(29);
+                Ok(())
+            }),
+            Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
+        )
+        .unwrap();
+        let controller = |profile| {
+            CpuController::new(
+                CpuPlanner::without_workers(),
+                SeatId::Two,
+                129,
+                [29; 32],
+                profile,
+            )
+        };
+        assert_eq!(validate_cpus(&runtime, &[controller(accepted)]), Ok(()));
+        assert_eq!(
+            validate_cpus(&runtime, &[controller(rejected)]),
+            Err(RosterRuntimeError::UnsupportedConfiguration)
+        );
+    }
+}

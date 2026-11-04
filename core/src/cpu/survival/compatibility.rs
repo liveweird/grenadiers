@@ -262,6 +262,33 @@ pub(super) fn plant_actor_compatible_charged(
         && plant_actor_compatible(basis, observation, certificate, presence)
 }
 
+pub(super) fn charge_route_actor_compatibility(
+    basis: &Observation,
+    observation: &Observation,
+    evolution: &ForecastEvolution,
+    work: &mut WorkBudget,
+) -> bool {
+    let old = basis.parts();
+    let new = observation.parts();
+    let (Some(before), Some(after)) = (actor(basis), actor(observation)) else {
+        return false;
+    };
+    let Some(effect_width) = before.effects.len().checked_add(after.effects.len()) else {
+        return false;
+    };
+    let charge = after
+        .effects
+        .len()
+        .checked_mul(effect_width)
+        .and_then(|count| count.checked_add(before.effects.len()))
+        .and_then(|count| count.checked_add(after.effects.len()))
+        .and_then(|count| count.checked_add(old.actors.len().checked_mul(2)?))
+        .and_then(|count| count.checked_add(new.actors.len()))
+        .and_then(|count| count.checked_add(usize::try_from(evolution.contact_actor_work()?).ok()?))
+        .and_then(|count| u32::try_from(count.checked_add(16)?).ok());
+    charge.is_some_and(|charge| work.try_take(charge).is_ok())
+}
+
 fn effects_match(before: &VisibleActor, after: &VisibleActor, elapsed: u64) -> bool {
     let expected_effects = before
         .effects

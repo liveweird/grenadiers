@@ -9,7 +9,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
 Two. Live selection uses `RECOVERY_V62_STANDARD` or `RECOVERY_V62_EASY` and
-`HARD_V64`; private replay33 binds those identities, generator7, pit-layout2 and ContactV2.
+`HARD_V65`; private replay34 binds those identities, generator7, pit-layout2 and ContactV2.
+Archived generator7/replay33 retains Easy/Standard62 and Hard64.
 Published generator6/replay32 and archived replay31 retain CPU60/61. Archived replay30 retains
 CPU56/59 with ManualV1, and replay29 retains CPU56/58. Named
 archive constants preserve historical replay identities. Policy identity describes decision
@@ -22,7 +23,7 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-archived Equipment intent. Current CPU62/64 do not intentionally request Equipment or contact
+archived Equipment intent. Current CPU62/65 do not intentionally request Equipment or contact
 Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
 forward bomb contact. Intent carries no credentials, seat authority, readiness,
 settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
@@ -192,6 +193,57 @@ insufficient capacity,
 unsupported uncertainty, an unobservable early chain or an incomplete horizon cause refusal.
 The full blast expiry and final stopped margin must fit; no fuse or escape deadline is shortened
 to fit the forecast. The guarded CPU1 planting fallback remains available where applicable.
+
+## Reactive Hard planning
+
+Hard65 adds a distinct conditional planting certificate within the same 65,536-work allowance.
+Active physical-origin recovery delegates directly to Hard64. Other scenes pay for a bounded
+eligibility check first. Eligible scenes give the conservative fallback algorithm at most
+32,768 units or half the remainder, reserving work for the reactive proof. Unsupported scenes
+use that algorithm with all remaining work. This allocation can change Hard65's fallback;
+Hard64, Easy/Standard and archived policies retain their original behavior.
+
+Manual fallback decisions are preserved. A complete reactive plant may replace a newly proposed
+nonmanual route or pulse. Candidate guidance comes from the fallback or a valid incoming
+commitment, with one bounded ordinary Hard goal selection if needed. Failed attempts return
+the retained fallback with its prospective RNG; proof search draws no randomness. Only the
+actual Hard65 controller can admit the distinct reactive certificate.
+
+The extension requires visible actors and timed bombs, two current stationary observations,
+no known bomb-moving equipment, and a named useful visible block contribution. Farm retains its
+block commitment. Attack may clear an auxiliary block on a shortest permanent-terrain corridor
+toward its committed visible opponent, without changing that opponent or refreshing commitment
+and progress deadlines. The strategic distance treats soft blocks as removable; walls and lairs
+remain blocked. Admission seals the opponent identity/cell and block. Opponent movement after
+planting does not alone interrupt the escape, and expected block destruction does not complete
+the primary Attack objective.
+
+It proves the complete placed and absent escape against nominal fire, blocking, pits, storm and ordinary mob-contact
+checks. A separately sealed route assurance can waive only the named bombs' motion uncertainty;
+it retains the forecast facts and never waives trigger/pause uncertainty or physical collision.
+The older three-update conditional pulses and their planting prohibition remain unchanged.
+
+Admission, command polling and command acceptance require explicit reactive support. Fresh
+publications recheck the sealed scene and capabilities within a bounded renewal allowance.
+New bombs, observed movement, exposed pickups, incompatible equipment/effects, changed pose or
+marker, missing visibility and exhausted renewal work withdraw authority. Expected detonation
+and flame expiry use the ordinary scene ledger. Placement confirmation and refusal preserve the
+existing present/absent semantics and physical-origin recovery rules.
+
+A stopped Hard65 CPU with an actual owned timed bomb may instead request a nonmanual
+OwnEscape route after interruption. Its seal includes every actual stationary bomb, including
+the owned cohort, with two samples ending at the fresh basis. It checks seven admission lanes
+and all known hazards through the owned cohort's full flame-expiry update. Observed finite
+flames remain exact hazards; they do not globally prevent this recovery. Oil, exposed pickups,
+unsupported effects and known incompatible capabilities still withhold it. The route carries no
+Bomb action, placement tick or new origin grace. Active physical-origin recovery keeps its
+existing path. A further new bomb invalidates OwnEscape and requires a fresh stopped proof.
+
+This predicts a nominal escape, not every possible future. Unknown actions or drops can
+invalidate it before the next publication, cause damage or leave no recoverable escape. That
+Hard-only tradeoff is the accepted [measured-risk decision](../decisions/0030-reactive-hard-planning.md).
+Dated comparisons and the interrupted-escape investigation belong in the
+[history record](../history/reactive-hard-cpu-2026-11-04.md).
 
 ## Certified timed weapons
 
@@ -613,9 +665,12 @@ current Hard61 inherits Hard59's selected approach unchanged.
 
 Room construction fixes a single `ArenaConstructionProfile`. Its generator and spike-layout
 identities are checked at publication and admission; settings, rounds and rematches retain it.
-The owner admits exactly CPU62 on Easy/Standard or CPU64 on Hard for clearance profiles, and
-exactly CPU60/61 for the published weighted generator6 profile. ContactV2 or gameplay21 alone
-cannot select between these families. A forged policy or difficulty is rejected before work.
+A separate CPU family fixes planner identity without changing arena generation. The clearance
+family admits exactly CPU62 on Easy/Standard and CPU64 on Hard; the reactive family retains
+CPU62 on Easy/Standard and selects Hard65. Published weighted generator6 retains CPU60/61.
+Settings changes, rounds and rematches retain both construction and planner families.
+ContactV2 or gameplay21 alone cannot select a family. A forged policy or difficulty is rejected
+before work. Private replay33 closes the clearance family; replay34 closes the reactive family.
 
 The recovery suffix and initial-demolition behavior are described in the
 [multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared

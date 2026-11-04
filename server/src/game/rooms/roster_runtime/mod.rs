@@ -4,6 +4,7 @@ mod admission;
 mod admission_commit;
 mod admission_projection;
 mod admission_spike;
+mod cpu_family;
 mod environment;
 mod environment_clearance;
 mod environment_notice;
@@ -64,3 +65,6 @@ mod weighted_settings_tests;
 
 #[cfg(test)]
 mod clearance_settings_tests;
+
+#[cfg(test)]
+mod cpu_family_tests;

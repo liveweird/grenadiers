@@ -1,5 +1,11 @@
+#[path = "foreign_bomb_current_support.rs"]
+mod foreign_bomb_current_support;
+#[path = "foreign_bomb_current_tests.rs"]
+mod foreign_bomb_current_tests;
 #[path = "hard_episode_outcome.rs"]
 mod outcome;
+#[path = "hard65_matrix_tests.rs"]
+mod reactive_matrix;
 #[path = "hard_episode_reporting.rs"]
 mod reporting;
 #[path = "hard_episode_support.rs"]
@@ -183,6 +189,31 @@ fn native_hard_v64_gen7_multiplier5_progresses_at_production_pacing() {
             840,
         );
         assert_eq!(outcome.profile, CpuProfile::HARD_V64);
+        assert_clearance_identity(&outcome);
+        assert_eq!(outcome.event_placements, outcome.owned_bombs);
+        assert_operational(&outcome);
+    }
+}
+
+#[test]
+#[ignore = "run in isolation because production worker pacing is timing-sensitive"]
+fn native_hard_v65_gen7_multiplier5_progresses_at_production_pacing() {
+    for lairs in [false, true] {
+        let outcome = support::run_inner(
+            Case {
+                label: "native-hard-v65-gen7-mult5",
+                difficulty: CpuDifficulty::Hard,
+                board: BoardSize::FifteenByThirteen,
+                lairs,
+                seed: 73,
+                native: true,
+            },
+            840,
+            CpuProfile::HARD_V65,
+            true,
+            |_| {},
+        );
+        assert_eq!(outcome.profile, CpuProfile::HARD_V65);
         assert_clearance_identity(&outcome);
         assert_eq!(outcome.event_placements, outcome.owned_bombs);
         assert_operational(&outcome);

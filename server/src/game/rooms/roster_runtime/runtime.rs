@@ -48,6 +48,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) punch_activation: PunchActivationPolicy,
     pub(super) spike_publication: SpikePublicationVersion,
     pub(super) construction_profile: ArenaConstructionProfile,
+    pub(super) cpu_family: super::cpu_family::CpuPolicyFamily,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -129,6 +130,7 @@ impl RosterRuntime {
             punch_activation: PunchActivationPolicy::ManualV1,
             spike_publication: SpikePublicationVersion::V18,
             construction_profile: ArenaConstructionProfile::ReflectedV3V4,
+            cpu_family: super::cpu_family::CpuPolicyFamily::Historical,
         })
     }
 

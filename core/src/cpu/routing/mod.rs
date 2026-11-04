@@ -68,7 +68,7 @@ pub(crate) use pickup_pulse::{certify_lair_contact_pulse, certify_pickup_pulse};
 pub(crate) use pit_avoidance::avoids_new_pit_contact as pit_clear;
 pub(crate) use plant::{
     derive_bomb_modifiers, plan_lair_ordinary_plant, plan_lair_ordinary_plant_to_refuge,
-    plan_lair_timed_weapon_plant,
+    plan_lair_reactive_ordinary_plant, plan_lair_timed_weapon_plant,
 };
 pub use plant::{plan_ordinary_plant, plan_timed_weapon_plant};
 pub(crate) use plant_diagnostic::derive_lair_plant_placement;

@@ -65,6 +65,49 @@ fn route_admission_accepts_predicted_detonation_but_rejects_an_extra_hazard() {
 }
 
 #[test]
+fn ordinary_route_with_carried_strategic_intent_is_not_treated_as_a_plant() {
+    let (basis, current, route, key) = detonation_fixture();
+    let strategic = StrategicIntent {
+        objective: StrategicObjectiveKind::Farm,
+        target: StrategicTarget::Block {
+            cell: CellId::new(8, 7),
+        },
+        approach_cell: Some(CellId::new(7, 7)),
+        phase: StrategicPhase::Approach,
+        last_switch_reason: StrategicSwitchReason::Initial,
+        observation_tick: basis.parts().tick,
+        score: 2,
+        committed_until: Tick(45),
+        progress_deadline: Tick(57),
+        last_distance: 1,
+        last_cpu_position: grenadiers_core::game::Position::center(CellId::new(7, 7)),
+        deferred_until: None,
+    };
+    let mut controller = CpuController::new(
+        CpuPlanner::without_workers(),
+        SeatId::Two,
+        7,
+        [5; 32],
+        grenadiers_core::room::CpuProfile::CURRENT,
+    );
+    controller.reset_world(3);
+    assert!(controller.accept_observation(&basis));
+    controller.settled_stop_tick = Some(basis.parts().tick);
+    assert!(controller.accept_observation(&current));
+    controller.inject_plan_result_for_test(
+        basis,
+        4,
+        SurvivalPlan {
+            control: ControlPlan::stop(UtilityMemory::new(key).with_strategic_intent(strategic)),
+            lease: None,
+            execution: Some(ExecutionCertificate::Route(Box::new(route))),
+        },
+    );
+
+    assert!(controller.poll(Tick(21), 4).is_some());
+}
+
+#[test]
 fn clear_gap_requires_an_unencumbered_settled_stop() {
     let (mut completed, clear) = committed_wait_controller();
     assert_eq!(

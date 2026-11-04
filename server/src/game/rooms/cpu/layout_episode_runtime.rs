@@ -15,7 +15,11 @@ use crate::{
     round_seed::RoundSeedSource,
 };
 
-pub(super) fn runtime(case: LayoutCase, identity: &TraceIdentity) -> RosterRuntime {
+pub(super) fn runtime(
+    case: LayoutCase,
+    identity: &TraceIdentity,
+    reactive_hard: bool,
+) -> RosterRuntime {
     let configuration = RoomConfiguration::new(
         &[
             SeatControl::Human,
@@ -63,6 +67,24 @@ pub(super) fn runtime(case: LayoutCase, identity: &TraceIdentity) -> RosterRunti
         ),
         ArenaConstructionProfile::LairClearanceV5 => {
             RosterRuntime::new_spike_v20_clearance_with_navigation(
+                roster_identity,
+                settings,
+                environment,
+                seeds,
+                simulation_seed,
+            )
+        }
+        ArenaConstructionProfile::WeightedLairClearanceV7 if reactive_hard => {
+            RosterRuntime::new_spike_v21_reactive_with_navigation(
+                roster_identity,
+                settings,
+                environment,
+                seeds,
+                simulation_seed,
+            )
+        }
+        ArenaConstructionProfile::WeightedLairClearanceV7 => {
+            RosterRuntime::new_spike_v21_clearance_with_navigation(
                 roster_identity,
                 settings,
                 environment,

@@ -52,7 +52,8 @@ lossless snapshot restoration APIs. A sandbox needs a deliberate partial-informa
   movement/turn rules. Use a search suited to timed transitions; a cell-only shortest path is
   insufficient.
 - Plan a bomb only when an escape exists under the observed facts and chosen forecast. This is
-  a planning guarantee, not a promise that an opponent or newly revealed hazard cannot kill it.
+  a planning guarantee, not a promise that an opponent or newly revealed hazard cannot kill it. Hard’s
+  explicit conditional-planning boundary is defined in [ADR 0030](../decisions/0030-reactive-hard-planning.md).
 
 ## Decisions, scheduling and replay
 

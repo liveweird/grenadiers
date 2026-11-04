@@ -19,14 +19,16 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — extend foreign-bomb support only from complete witnesses.**
-  Version 1.3.15 delivers useful planting in the demonstrated clear farming window. Preserve
-  its natural owner planting/flame survival, archived choices/work, pit/publication checks,
-  v54 continuation and v50 Teleporter recovery. The exact foreign-bomb tick-234 raw proof
-  exhausts its allowance; relaxing its support guard is not justified by that result or by
-  controlled empty hidden loot. Further support needs a useful complete plant with future
-  loot, arbitrary partner swaps, contact and renewal obligations covered under the unchanged
-  work ceiling. See the [investigation](docs/history/cpu-late-passivity-2026-11-01.md).
+- [next] **CPU-RELIABILITY — reactive Hard bombing under visible-state assumptions.**
+  Implement the accepted [measured-risk decision](docs/decisions/0030-reactive-hard-planning.md)
+  for Hard only, preserving Easy/Standard and archived policies. Keep the conservative fallback,
+  bounded work, full nominal escape, contact/pit checks, explicit assumption renewal and command
+  fencing. Add fresh nonmanual escape replanning for an existing owned timed-bomb cohort after
+  interruption; retain new-bomb revocation. Require paired actual queued planting, useful damage, complete flame lifecycles and
+  subsequent progress; compare aggression, survival, stalls and cost. Future unknown actions or
+  loot can invalidate a prediction; do not describe this as all-outcomes safety. Preserve the
+  [earlier investigation](docs/history/cpu-late-passivity-2026-11-01.md), clear-window witness,
+  CPU54/62 recovery and v50 Teleporter behavior.
 
 - [todo] **HARD-CPU — deepen fair tactics.** Improve pickup contention and useful bomb
   combinations. Preserve bounded opponent-exit guidance and productive equal-distance farming.

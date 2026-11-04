@@ -21,7 +21,7 @@ use super::outcome::{BombHorizon, Outcome};
 use crate::{
     game::rooms::{
         RandomFill,
-        cpu::{AdmissionTrace, CpuController, CpuPlanner, PumpReport},
+        cpu::{AdmissionTrace, CpuController, CpuPlanner, PlanningBasis, PumpReport},
         roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, SpikeRuntimeEnvironment},
     },
     round_seed::RoundSeedSource,
@@ -50,7 +50,7 @@ pub(super) const fn current_profile(difficulty: CpuDifficulty) -> CpuProfile {
 
 pub(super) fn run(case: Case, ticks: usize) -> Outcome {
     let profile = current_profile(case.difficulty);
-    run_inner(case, ticks, profile, false)
+    run_inner(case, ticks, profile, false, |_| {})
 }
 
 pub(super) fn run_clearance(case: Case, ticks: usize) -> Outcome {
@@ -59,10 +59,11 @@ pub(super) fn run_clearance(case: Case, ticks: usize) -> Outcome {
         CpuDifficulty::Standard => CpuProfile::RECOVERY_V62_STANDARD,
         CpuDifficulty::Hard => CpuProfile::HARD_V64,
     };
-    run_inner(case, ticks, profile, true)
+    run_inner(case, ticks, profile, true, |_| {})
 }
 
-fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool) -> Outcome {
+#[rustfmt::skip]
+pub(super) fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool, mut inspect: impl FnMut(PlanningBasis<'_>)) -> Outcome {
     let configuration = RoomConfiguration::new(
         &[
             SeatControl::Human,
@@ -98,7 +99,15 @@ fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool) -> 
             [case.seed.wrapping_add(epoch as u8); 32],
         ))
     });
-    let mut runtime = if clearance {
+    let mut runtime = if profile == CpuProfile::HARD_V65 {
+        RosterRuntime::new_spike_v21_reactive_with_navigation(
+            identity,
+            settings,
+            environment,
+            seeds,
+            simulation_seed,
+        )
+    } else if clearance {
         RosterRuntime::new_spike_v21_clearance_with_navigation(
             identity,
             settings,
@@ -226,11 +235,16 @@ fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool) -> 
     let mut attack_bombs = [0; 3];
     let mut completed_switches = [0; 3];
     let mut previous_completed = [false; 3];
+    let mut stalled_switches = [0; 3];
+    let mut previous_stalled = [false; 3];
     let mut ever_dead = [false; 3];
     let mut aggregate = PumpReport::default();
     for _ in 0..ticks {
         if !case.native {
-            merge(&mut aggregate, planner.pump_for_test(usize::MAX));
+            super::reporting::merge(
+                &mut aggregate,
+                planner.pump_for_test_inspecting(usize::MAX, &mut inspect),
+            );
         }
         driver.tick(Instant::now()).unwrap();
         let (_, report) = driver.runtime.last_step_trace_for_test().unwrap();
@@ -326,18 +340,17 @@ fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool) -> 
                 summary.objective == grenadiers_core::cpu::policy::StrategicObjectiveKind::Attack
             });
             attack_intents[index] += usize::from(attack);
-            let completed = summaries[index].is_some_and(|summary| {
-                summary.last_switch_reason
-                    == grenadiers_core::cpu::policy::StrategicSwitchReason::Completed
-            });
-            completed_switches[index] += usize::from(completed && !previous_completed[index]);
-            previous_completed[index] = completed;
+            super::reporting::count_switch(summaries[index], index, grenadiers_core::cpu::policy::StrategicSwitchReason::Completed, &mut completed_switches, &mut previous_completed);
+            super::reporting::count_switch(summaries[index], index, grenadiers_core::cpu::policy::StrategicSwitchReason::Stalled, &mut stalled_switches, &mut previous_stalled);
         }
     }
     if case.native {
         aggregate = planner.trace_for_test();
     } else {
-        merge(&mut aggregate, planner.pump_for_test(usize::MAX));
+        super::reporting::merge(
+            &mut aggregate,
+            planner.pump_for_test_inspecting(usize::MAX, &mut inspect),
+        );
     }
     let inspection = driver.runtime.replay_inspection();
     let state = &inspection.simulation.as_ref().unwrap().state;
@@ -366,6 +379,7 @@ fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool) -> 
         attack_intents,
         attack_bombs,
         completed_switches,
+        stalled_switches,
         alive: CPU_SEATS.map(|seat| state.actors()[seat.index()].alive()),
         ever_dead,
         dequeued: aggregate.dequeued,
@@ -379,15 +393,4 @@ fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance: bool) -> 
     };
     super::reporting::log(case, &outcome);
     outcome
-}
-
-fn merge(total: &mut PumpReport, next: PumpReport) {
-    total.dequeued += next.dequeued;
-    total.delivered += next.delivered;
-    total.cancelled += next.cancelled;
-    total.failed += next.failed;
-    total.dropped += next.dropped;
-    total.work.extend(next.work);
-    total.planned_intents.extend(next.planned_intents);
-    total.planner_times.extend(next.planner_times);
 }

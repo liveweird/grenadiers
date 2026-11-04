@@ -35,13 +35,17 @@ pub(super) fn plan(
             | CpuPolicy::UtilityV62
             | CpuPolicy::UtilityV63
             | CpuPolicy::UtilityV64
+            | CpuPolicy::UtilityV65
     );
     let origin = supports_continuation
         .then_some(job.escape_origin.as_ref())
         .flatten()?;
     let planner = if matches!(
         job.policy,
-        CpuPolicy::UtilityV62 | CpuPolicy::UtilityV63 | CpuPolicy::UtilityV64
+        CpuPolicy::UtilityV62
+            | CpuPolicy::UtilityV63
+            | CpuPolicy::UtilityV64
+            | CpuPolicy::UtilityV65
     ) {
         grenadiers_core::cpu::survival::plan_continuation_lairs_v62
     } else if matches!(

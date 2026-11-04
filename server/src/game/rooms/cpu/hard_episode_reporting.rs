@@ -1,5 +1,28 @@
 use super::{outcome::Outcome, support::Case};
-use crate::game::rooms::cpu::AdmissionTrace;
+use crate::game::rooms::cpu::{AdmissionTrace, PumpReport};
+
+pub(super) fn count_switch(
+    summary: Option<grenadiers_core::cpu::policy::IntentDebugSummary>,
+    index: usize,
+    reason: grenadiers_core::cpu::policy::StrategicSwitchReason,
+    counts: &mut [usize; 3],
+    previous: &mut [bool; 3],
+) {
+    let active = summary.is_some_and(|summary| summary.last_switch_reason == reason);
+    counts[index] += usize::from(active && !previous[index]);
+    previous[index] = active;
+}
+
+pub(super) fn merge(total: &mut PumpReport, next: PumpReport) {
+    total.dequeued += next.dequeued;
+    total.delivered += next.delivered;
+    total.cancelled += next.cancelled;
+    total.failed += next.failed;
+    total.dropped += next.dropped;
+    total.work.extend(next.work);
+    total.planned_intents.extend(next.planned_intents);
+    total.planner_times.extend(next.planner_times);
+}
 
 fn rejection_total(trace: &AdmissionTrace) -> u32 {
     trace.expired_or_wrong_decision
@@ -44,6 +67,7 @@ pub(super) fn log(case: Case, outcome: &Outcome) {
             "attackIntents": outcome.attack_intents,
             "attackBombs": outcome.attack_bombs,
             "completed": outcome.completed_switches,
+            "stalled": outcome.stalled_switches,
             "alive": outcome.alive,
             "everDead": outcome.ever_dead,
             "dequeued": outcome.dequeued,

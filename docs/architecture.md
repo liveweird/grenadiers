@@ -32,7 +32,7 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
 ceiling, not a connection limit. Live two-to-four-seat matches use CPU62 on Easy/Standard and
-CPU64 on Hard, rules10 physics and mob navigation3. Cloud, lair and spike-pit settings may be
+CPU65 on Hard, rules10 physics and mob navigation3. Cloud, lair and spike-pit settings may be
 enabled or disabled per room. The [CPU guide](game/multiplayer-cpu.md) defines their recovery
 and demolition behavior. Typed construction pairs generator7 with spike layout2; archived
 construction and replay retain their original identities. The board

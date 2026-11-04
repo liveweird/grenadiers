@@ -118,3 +118,10 @@ survival or playing strength.
 
 The [published release notes](https://github.com/liveweird/grenadiers/releases/tag/v1.3.24)
 identify the final tested source, complete checks and deployed image.
+
+
+The first full debug run exposed two worker fixtures that combined Hard65 with archived
+ManualV1 activation. Those fixtures now select ContactV2 for the corresponding current policies
+while preserving legacy activation for archived workers. Valid Hard65 control/RNG/work parity is
+checked alongside rejection of the deliberately incompatible fixture. This correction changes
+test modules only; the runtime code is unchanged.

@@ -97,6 +97,56 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.23 — 2026-11-04
+
+New matches reserve a connected floor ring around each lair and keep spike pits away from its
+spawn exits. Weighted generator7 retains the accepted ×1–×10 Bomb Capacity selection setting;
+new live rooms still select ×5. Construction consumes no additional randomness, preserves
+uncarved contents and spawn reservations, and uses lair-aware pit-layout2 on every board.
+
+CPU62 on Easy/Standard and CPU64 on Hard retain certified escape authority through the full
+own-bomb flame horizon and accept crossed route anchors. Hard64 can reuse a complete ineffective
+attack proof for useful visible-block demolition at the same certified origin. The work ceiling,
+contact/Teleporter guards, collision rules and recipient privacy remain unchanged.
+
+Gameplay21/rules10/navigation3/ContactV2 remain paired. Private replay33 binds the new
+construction, accepted settings and CPU family. Published generator6/replay32/CPU60–61 and
+archived policies retain their exact semantics. Production replay recording/export stays disabled.
+See [generation](game/generation.md), [CPU behavior](game/multiplayer-cpu.md#recovery-and-initial-demolition)
+and the [live arena example](screenshots/lair-clearance.png).
+
+### Verification
+
+- Frozen source `5a18d0ebfdd3d70cbfb06151e598662416d418a3` passes the full local Rust gate:
+  1,995 core tests and two doctests, 804 ordinary server cases and four isolated native cases
+  in each debug/release/coverage profile. All 4,194,304 item masks pass per profile in 32 partitions
+  with four workers and no retries. Coverage is 78,525/84,383 lines (93.06%), above the unchanged
+  90% floor, from 40 raw profiles. The gate took 952.002 seconds. Formatting, strict Clippy,
+  repository and source-size checks pass. Two independent reviews found no actionable defects.
+- The actual queued generator7/×5 Hard witness places all three CPU bombs at tick190,
+  detonates them at370 and confirms all three owners alive after complete finite-flame clearance
+  at400. Five blocks are destroyed and lair mobs spawn/move. The all-board/difficulty/lair-mode
+  queued matrix passes. The new native Hard64 test is also run separately with two real workers
+  at production pacing, with lairs off/on; its ordinary-suite ignore prevents timing contention.
+- Distinct Linux debug/release workspace tests and doctests pass in
+  [41900316646](https://github.com/liveweird/grenadiers/actions/runs/41900316646).
+- Full web coverage passes 172 files/7,435 tests: lines 95.51%, statements 92.54%, functions
+  91.77%, branches 88.90%. API/type/validator drift, lint, Knip and E2E static/scenario checks pass.
+  Compressed JS is 399,060/400,000 bytes and CSS 16,228/20,000. The exact image's nine served
+  web files, including the atlas and branding, are byte-identical to v1.3.22.
+- Five exact-image Chromium cases pass: authentication, keyboard duel/Axe, shared settings,
+  responsive lobby and rendered four-player HUD. Compose and restricted Kubernetes both pass
+  with three moving, bombing Hard CPUs and two spawned, moving mobs; no browser errors occur.
+  Pit/lair separation, image identity, probes and container security assertions pass. Temporary
+  stacks/namespaces are removed. Dependency audits pass with 10 web/11 E2E moderate findings
+  and no high/critical findings; pinned Trivy reports zero fixable high/critical vulnerabilities.
+
+The accepted image is `sha256:b707492ab49e08e53b9355f23611c1d0591b08b12e2ee57789ab412dfd6065e8`,
+labelled v1.3.23 and the frozen source above. Later documentation commits leave its build inputs
+unchanged. Retain the accepted v1.3.22 image for rollback. This release makes no claim that every
+combat episode is survivable or that conservative unsupported planning cases are solved; those
+remain explicit CPU design boundaries and backlog work.
+
 ## v1.3.22 — 2026-11-02
 
 Bomb Capacity drop weight is configurable from ×1 to ×10, defaulting to ×5 for new games.

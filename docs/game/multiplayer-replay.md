@@ -121,7 +121,7 @@ Production recording/export remains disabled.
 Formats20 through 27 retain gameplay19/rules10/navigation3 while advancing their closed CPU
 pairs through CPU40/41, 42/43, 44/45, 46/47, 48/49, 50/51, 52/53 and 54/55 respectively.
 Format28 binds CPU56 on Easy/Standard and CPU57 on Hard. Archived format29 retains CPU56/58;
-archived format30 binds gameplay19, CPU56/59 and ManualV1 Punch activation. Current private
+archived format30 binds gameplay19, CPU56/59 and ManualV1 Punch activation. Archived private
 format31 binds gameplay20, CPU60/61 and explicit Punch activation version2. Every reader requires
 exact agreement among its header, body and per-seat provenance, and an older reader rejects later policy identities even when all
 forged metadata agrees. Accepted inputs are replayed directly; planners are not rerun. These
@@ -131,7 +131,13 @@ Format31 records accepted movement and Bomb actions, not an invented Equipment a
 Punch. Exact inspection compares the complete private State, including each actor's contact latch
 and cooldown history, so reconstruction must reproduce the same contact, landing and latch expiry.
 
-Formats6 through 31 normalize their closed operations into shared executors rather than
+Published format32 binds gameplay21, weighted generator6, pit-layout1 and CPU60/61. Current
+private format33 binds gameplay21, weighted generator7, pit-layout2 and CPU62/64. Both preserve
+accepted Bomb Capacity multipliers from 1 through 10, including settings updates, and reject
+header/body disagreement. Earlier formats retain multiplier1. Construction selection survives
+rounds and rematches; an older reader rejects the newer generator/pit/CPU family.
+
+Formats6 through 33 normalize their closed operations into shared executors rather than
 duplicating lifecycle mechanics. Their headers and accepted source/controller identities remain
 distinct; each reader accepts only the finite identity combinations defined for its profile.
 

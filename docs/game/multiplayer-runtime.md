@@ -1,7 +1,7 @@
 # Roster runtime
 
 `server/src/game/rooms/roster_runtime/` provides the transport-independent runtime used by every
-live two-to-four-seat configuration and board. The [v20 contract](protocol-v20.md) owns wire shape
+live two-to-four-seat configuration and board. The [v21 contract](protocol-v21.md) owns wire shape
 and recipient privacy; the [multiplayer design](multiplayer-design.md) records its integration.
 
 ## Lifecycle and participation
@@ -36,9 +36,11 @@ rooms accept at most 256 lifetime human admissions, bounding the retired-credent
 replacement cannot inherit the departed creator's settings authority.
 
 Round construction uses rules10, navigation3, ContactV2 Punch activation and the actual
-physical-round assignment. It selects generator3 for 15×13 and generator4 for 11×9/13×11.
+physical-round assignment. A typed construction profile pairs weighted generator7 with pit-layout2
+on all supported boards and persists through settings changes, rounds and rematches.
 The configured roster remains intact, with departed participants initially inactive. Live rooms
-use CPU60 on Easy/Standard and CPU61 on Hard. The exact profile table is in
+use CPU62 on Easy/Standard and CPU64 on Hard. Published generator6 construction remains pinned
+to CPU60/61 for replay compatibility. The exact profile table is in
 [CPU boundaries](multiplayer-cpu.md#policies-and-controller-ownership).
 
 ## Boundaries and randomness

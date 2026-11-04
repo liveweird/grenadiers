@@ -1,5 +1,7 @@
 # Lair clearance and CPU investigation — 2026-11-02
 
+The combined weighted construction is documented in the [v1.3.23 release record](../releases.md#v1323--2026-11-04). This page preserves the earlier investigation.
+
 This record describes a controlled, **unreleased prototype**, separate from the live v1.3.22
 game. Open work and priority belong only in the [backlog](../../BACKLOG.md#arena-layout-and-environment).
 

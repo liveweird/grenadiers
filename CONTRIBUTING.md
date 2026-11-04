@@ -45,6 +45,9 @@ session ID and log; resume it when execution yields instead of launching another
 Do not rebuild shared-target executables while partition workers still launch them; keep Cargo
 ownership exclusive until those partitions finish, or use a separate target directory.
 
+Quiet output alone does not establish a hang. Before interrupting a check, inspect elapsed time,
+process CPU and a known passing run; Vitest coverage can remain quiet until its worker completes.
+
 Record the tested commit, commands, outcomes, environment and deployed image digest concisely.
 Repeat checks for relevant changes, failures or an identified coverage gap. Do not add repeated
 approval, evidence-generation or review cycles to routine changes. See [testing](docs/testing.md)

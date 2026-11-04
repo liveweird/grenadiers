@@ -1,9 +1,17 @@
+#[path = "hard_episode_outcome.rs"]
+mod outcome;
+#[path = "hard_episode_reporting.rs"]
+mod reporting;
 #[path = "hard_episode_support.rs"]
 mod support;
 
-use grenadiers_core::room::{BoardSize, CpuDifficulty, CpuProfile};
+use grenadiers_core::{
+    game::{ArenaConstructionProfile, SpikePitLayoutPolicy},
+    room::{BoardSize, BombCapacityDropMultiplier, CpuDifficulty, CpuProfile},
+};
 
-use support::{Case, assert_operational, current_profile, run};
+use reporting::assert_operational;
+use support::{Case, current_profile, run, run_clearance};
 
 #[test]
 fn current_v21_weighted_profile_matrix_is_labeled_and_productive() {
@@ -86,4 +94,107 @@ fn native_hard_v61_seed73_progresses_with_two_workers_at_production_pacing() {
         assert_eq!(outcome.profile, CpuProfile::HARD_V61);
         assert_operational(&outcome);
     }
+}
+
+#[test]
+fn queued_hard_v64_on_weighted_clearance_gen7_multiplier5_has_real_progress() {
+    let outcome = run_clearance(
+        Case {
+            label: "queued-hard-v64-gen7-mult5",
+            difficulty: CpuDifficulty::Hard,
+            board: BoardSize::ThirteenByEleven,
+            lairs: true,
+            seed: 73,
+            native: false,
+        },
+        840,
+    );
+    assert_eq!(outcome.profile, CpuProfile::HARD_V64);
+    assert_clearance_identity(&outcome);
+    assert_eq!(outcome.event_placements, outcome.owned_bombs);
+    assert!(outcome.destroyed_blocks > 0, "{outcome:?}");
+    assert!(outcome.flames_seen, "{outcome:?}");
+    assert!(outcome.mob_births > 0, "{outcome:?}");
+    assert!(outcome.mob_moved, "{outcome:?}");
+    assert!(
+        outcome.first_bombs.iter().flatten().any(|bomb| {
+            bomb.detonated_at.is_some_and(|tick| tick > bomb.placed_at)
+                && bomb
+                    .finite_flames_clear_at
+                    .zip(bomb.detonated_at)
+                    .is_some_and(|(clear, detonation)| clear > detonation)
+                && bomb.owner_alive_at_clear == Some(true)
+        }),
+        "{outcome:?}"
+    );
+    assert_operational(&outcome);
+}
+
+#[test]
+fn pumped_gen7_multiplier5_profiles_progress_on_every_board_and_lair_mode() {
+    for (difficulty, profile, seed) in [
+        (CpuDifficulty::Easy, CpuProfile::RECOVERY_V62_EASY, 71),
+        (
+            CpuDifficulty::Standard,
+            CpuProfile::RECOVERY_V62_STANDARD,
+            72,
+        ),
+        (CpuDifficulty::Hard, CpuProfile::HARD_V64, 73),
+    ] {
+        for board in [
+            BoardSize::ElevenByNine,
+            BoardSize::ThirteenByEleven,
+            BoardSize::FifteenByThirteen,
+        ] {
+            for lairs in [false, true] {
+                let outcome = run_clearance(
+                    Case {
+                        label: "pumped-gen7-mult5-matrix",
+                        difficulty,
+                        board,
+                        lairs,
+                        seed,
+                        native: false,
+                    },
+                    840,
+                );
+                assert_eq!(outcome.profile, profile, "board={board:?} lairs={lairs}");
+                assert_clearance_identity(&outcome);
+                assert_eq!(outcome.event_placements, outcome.owned_bombs);
+                assert_operational(&outcome);
+            }
+        }
+    }
+}
+
+#[test]
+#[ignore = "run in isolation because production worker pacing is timing-sensitive"]
+fn native_hard_v64_gen7_multiplier5_progresses_at_production_pacing() {
+    for lairs in [false, true] {
+        let outcome = run_clearance(
+            Case {
+                label: "native-hard-v64-gen7-mult5",
+                difficulty: CpuDifficulty::Hard,
+                board: BoardSize::FifteenByThirteen,
+                lairs,
+                seed: 73,
+                native: true,
+            },
+            840,
+        );
+        assert_eq!(outcome.profile, CpuProfile::HARD_V64);
+        assert_clearance_identity(&outcome);
+        assert_eq!(outcome.event_placements, outcome.owned_bombs);
+        assert_operational(&outcome);
+    }
+}
+
+fn assert_clearance_identity(outcome: &outcome::Outcome) {
+    assert_eq!(
+        outcome.construction_profile,
+        ArenaConstructionProfile::WeightedLairClearanceV7
+    );
+    assert_eq!(outcome.generation_version, 7);
+    assert_eq!(outcome.pit_layout, SpikePitLayoutPolicy::LairClearanceV2);
+    assert_eq!(outcome.multiplier, BombCapacityDropMultiplier::DEFAULT);
 }

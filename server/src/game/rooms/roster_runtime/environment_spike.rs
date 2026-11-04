@@ -155,7 +155,7 @@ impl RosterRuntime {
         };
         runtime.spike_publication = SpikePublicationVersion::V21;
         runtime.punch_activation = grenadiers_core::game::PunchActivationPolicy::ContactV2;
-        runtime.arena_generation = super::runtime::ArenaGenerationProfile::WeightedV6;
+        runtime.construction_profile = grenadiers_core::game::ArenaConstructionProfile::WeightedV6;
         Ok(runtime)
     }
 
@@ -184,9 +184,12 @@ impl RosterRuntime {
         ) {
             return Err(RosterRuntimeError::UnsupportedConfiguration);
         }
-        if next.arena_generation == super::runtime::ArenaGenerationProfile::LegacyV3V4
-            && settings.bomb_capacity_drop_multiplier()
-                != grenadiers_core::room::BombCapacityDropMultiplier::LEGACY
+        if matches!(
+            next.construction_profile,
+            grenadiers_core::game::ArenaConstructionProfile::ReflectedV3V4
+                | grenadiers_core::game::ArenaConstructionProfile::LairClearanceV5
+        ) && settings.bomb_capacity_drop_multiplier()
+            != grenadiers_core::room::BombCapacityDropMultiplier::LEGACY
         {
             return Err(RosterRuntimeError::UnsupportedConfiguration);
         }

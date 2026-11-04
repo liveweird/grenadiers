@@ -19,9 +19,26 @@ pub(crate) struct PreparedGrant {
 }
 
 #[derive(Clone)]
+pub(crate) struct PreparedHold {
+    publication: Tick,
+    renew_at: Tick,
+}
+
+#[derive(Clone)]
 pub(crate) enum PreparedFrame {
     Grant(Box<PreparedGrant>),
+    Hold(PreparedHold),
     Complete,
+}
+
+impl PreparedHold {
+    pub(crate) const fn publication(&self) -> Tick {
+        self.publication
+    }
+
+    pub(crate) const fn renew_at(&self) -> Tick {
+        self.renew_at
+    }
 }
 
 impl PreparedGrant {
@@ -78,24 +95,50 @@ impl ContinuationCertificate {
         }
         validate_expected(self.basis(), current, expected, work)?;
         let fresh = fresh_contact(current, work)?;
-        let safe_until = Tick(
-            publication
-                .0
-                .checked_add(SHORT_WINDOW_UPDATES)
-                .ok_or(RouteFailure::InvalidRequest)?,
-        );
-        if safe_until > self.survive_until() {
-            return Err(RouteFailure::InvalidRequest);
-        }
+        let future = self.future_checkpoints(publication)?;
+        let stationary = future.is_empty() && self.stationary_suffix().is_some();
+        let requested = publication
+            .0
+            .checked_add(SHORT_WINDOW_UPDATES)
+            .ok_or(RouteFailure::InvalidRequest)?;
+        let safe_until = if stationary {
+            Tick(requested.min(self.survive_until().0))
+        } else {
+            let safe_until = Tick(requested);
+            if safe_until > self.survive_until() {
+                return Err(RouteFailure::InvalidRequest);
+            }
+            safe_until
+        };
         if !fresh
-            .teleport_is_clear(current, safe_until, 3, work)
+            .teleport_is_clear(current, safe_until, if stationary { 0 } else { 3 }, work)
             .map_err(super::pulse_support::contact_failure)?
         {
             return Err(RouteFailure::NoRoute);
         }
 
-        let future = self.future_checkpoints(publication)?;
         if future.is_empty() {
+            if stationary {
+                let suffix = self
+                    .stationary_suffix()
+                    .ok_or(RouteFailure::InvalidRequest)?;
+                let local = suffix
+                    .checkpoints
+                    .iter()
+                    .filter(|checkpoint| checkpoint.tick > publication)
+                    .take(GRANT_INPUTS)
+                    .collect::<Vec<_>>();
+                let final_update = suffix.protects_final_update(publication, self.survive_until());
+                if local.is_empty() && !final_update {
+                    return Err(RouteFailure::InvalidRequest);
+                }
+                validate_fresh_paths(self, current, &fresh, &local, work)?;
+                let renew_at = stationary_renew_at(publication, self.survive_until())?;
+                return Ok(PreparedFrame::Hold(PreparedHold {
+                    publication,
+                    renew_at,
+                }));
+            }
             validate_complete_stop(self, current, &fresh, publication, work)?;
             return Ok(PreparedFrame::Complete);
         }
@@ -128,6 +171,12 @@ impl ContinuationCertificate {
             .find(|checkpoint| checkpoint.tick == tick)
             .or_else(|| {
                 terminal_branch(self)?
+                    .checkpoints
+                    .iter()
+                    .find(|value| value.tick == tick)
+            })
+            .or_else(|| {
+                self.stationary_suffix()?
                     .checkpoints
                     .iter()
                     .find(|value| value.tick == tick)
@@ -185,6 +234,19 @@ impl ContinuationCertificate {
     }
 }
 
+pub(super) fn stationary_renew_at(publication: Tick, horizon: Tick) -> Result<Tick, RouteFailure> {
+    (publication < horizon)
+        .then(|| {
+            Tick(
+                publication
+                    .0
+                    .saturating_add(GRANT_INPUTS as u64)
+                    .min(horizon.0),
+            )
+        })
+        .ok_or(RouteFailure::InvalidRequest)
+}
+
 fn terminal_branch(certificate: &ContinuationCertificate) -> Option<&StopBranch> {
     certificate.stop_branches().last()
 }
@@ -200,6 +262,13 @@ fn charge_index_scans(
         .checked_mul(2)
         .and_then(|value| value.checked_add(certificate.stop_branches().len().checked_mul(4)?))
         .and_then(|value| value.checked_add(terminal.checked_mul(4)?))
+        .and_then(|value| {
+            value.checked_add(
+                certificate
+                    .stationary_suffix()
+                    .map_or(0, |suffix| suffix.checkpoints.len()),
+            )
+        })
         .and_then(|value| value.checked_add(8))
         .ok_or(RouteFailure::Capacity)?;
     charge_len(units, work)

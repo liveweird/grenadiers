@@ -114,6 +114,12 @@ mod replay_v31;
 #[cfg(test)]
 mod replay_v32;
 #[cfg(test)]
+#[expect(
+    dead_code,
+    reason = "Private replay33 retains the shared recording facade; production export remains disabled"
+)]
+mod replay_v33;
+#[cfg(test)]
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]

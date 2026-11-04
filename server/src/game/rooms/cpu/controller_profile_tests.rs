@@ -37,6 +37,8 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V58).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V59).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V61).profile_supports(10));
+    assert!(controller(CpuProfile::HARD_V63).profile_supports(10));
+    assert!(controller(CpuProfile::HARD_V64).profile_supports(10));
     for rules in 5..10 {
         assert!(!hard.profile_supports(rules));
     }
@@ -58,6 +60,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuPolicy::UtilityV54,
         CpuPolicy::UtilityV56,
         CpuPolicy::UtilityV60,
+        CpuPolicy::UtilityV62,
     ] {
         let forged = controller(CpuProfile {
             policy,
@@ -87,6 +90,8 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuPolicy::UtilityV58,
         CpuPolicy::UtilityV59,
         CpuPolicy::UtilityV61,
+        CpuPolicy::UtilityV63,
+        CpuPolicy::UtilityV64,
     ] {
         for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
             let forged = controller(CpuProfile { policy, difficulty });
@@ -122,11 +127,15 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuProfile::CORNER_REFUGES_V56_EASY,
         CpuProfile::CONTACT_PUNCH_V60_STANDARD,
         CpuProfile::CONTACT_PUNCH_V60_EASY,
+        CpuProfile::RECOVERY_V62_STANDARD,
+        CpuProfile::RECOVERY_V62_EASY,
     ] {
         assert!(controller(profile).profile_supports(10));
         assert!(!controller(profile).profile_supports(9));
     }
     assert!(controller(CpuProfile::HARD_V35).supports_refuge_handoff());
+    assert!(controller(CpuProfile::HARD_V63).supports_refuge_handoff());
+    assert!(controller(CpuProfile::HARD_V64).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V37).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V39).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V41).supports_refuge_handoff());

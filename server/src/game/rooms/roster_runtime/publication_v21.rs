@@ -51,12 +51,18 @@ pub(super) fn snapshot(
     state: &State,
     reports: &[StepReport],
     generation: GenerationRecord,
+    construction: grenadiers_core::game::ArenaConstructionProfile,
 ) -> Result<RosterNotice, RosterRuntimeError> {
     let capture =
         v21::capture_expanded(state, reports).map_err(|_| RosterRuntimeError::Publication)?;
-    let publication =
-        v21::bind_expanded(&room, publication::counter64(epoch)?, &capture, generation)
-            .map_err(|_| RosterRuntimeError::Publication)?;
+    let publication = v21::bind_expanded_with_construction(
+        &room,
+        publication::counter64(epoch)?,
+        &capture,
+        generation,
+        construction,
+    )
+    .map_err(|_| RosterRuntimeError::Publication)?;
     let encoded =
         v21::prepare_snapshots(&publication).map_err(|_| RosterRuntimeError::Publication)?;
     let frames = RosterSeatFrames::new_v20(encoded).ok_or(RosterRuntimeError::Publication)?;

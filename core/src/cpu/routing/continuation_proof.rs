@@ -165,6 +165,33 @@ pub(super) fn certify_stationary_suffix(
     Ok(())
 }
 
+pub(super) fn certify_stationary_suffix_retained(
+    proof: &ProofContext<'_>,
+    state: &mut ProofState,
+    start: Tick,
+    end: Tick,
+    work: &mut WorkBudget,
+    assumptions: &mut BTreeSet<EntityId>,
+) -> Result<Vec<ContinuationCheckpoint>, RouteFailure> {
+    let capacity =
+        usize::try_from(end.0.saturating_sub(start.0)).map_err(|_| RouteFailure::Capacity)?;
+    if capacity > 840 {
+        return Err(RouteFailure::Capacity);
+    }
+    let mut checkpoints = Vec::with_capacity(capacity);
+    for value in start.0..end.0 {
+        checkpoints.push(advance_checked(
+            proof,
+            state,
+            MovementIntent::Stop,
+            Tick(value),
+            work,
+            assumptions,
+        )?);
+    }
+    Ok(checkpoints)
+}
+
 pub(super) fn reject_initial_scene(
     observation: &Observation,
     forecast: &HazardForecast,

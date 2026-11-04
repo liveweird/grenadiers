@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use grenadiers_core::{
     game::{
-        GenerationRecord, MobNavigationPolicy, PunchActivationPolicy, SeatId, SimulationSeed,
-        State, StepReport, StormCloudConfig, Tick,
+        ArenaConstructionProfile, GenerationRecord, MobNavigationPolicy, PunchActivationPolicy,
+        SeatId, SimulationSeed, State, StepReport, StormCloudConfig, Tick,
     },
     protocol::{v14, v15, v16, v17, v18, v19, v20, v21},
     room::{DepartureReason, MatchChange, MatchPhase, RoomSettings, RosterMatchLifecycle},
@@ -33,6 +33,8 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) inputs: InputMailbox,
     pub(super) sim: Option<SimRound>,
     pub(super) reports: Vec<StepReport>,
+    #[cfg(test)]
+    pub(super) last_step_trace: Option<(Vec<grenadiers_core::game::SeatInput>, StepReport)>,
     pub(super) cpu_publication: Option<v14::BoundPublication>,
     pub(super) environment_cpu_publication: Option<Arc<v15::BoundPublication>>,
     pub(super) lair_cpu_publication: Option<Arc<v16::BoundPublication>>,
@@ -45,7 +47,7 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) mob_navigation: MobNavigationPolicy,
     pub(super) punch_activation: PunchActivationPolicy,
     pub(super) spike_publication: SpikePublicationVersion,
-    pub(super) arena_generation: ArenaGenerationProfile,
+    pub(super) construction_profile: ArenaConstructionProfile,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -54,12 +56,6 @@ pub(in crate::game::rooms) enum SpikePublicationVersion {
     V19,
     V20,
     V21,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(in crate::game::rooms) enum ArenaGenerationProfile {
-    LegacyV3V4,
-    WeightedV6,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -118,6 +114,8 @@ impl RosterRuntime {
             simulation_seed,
             sim: None,
             reports: Vec::new(),
+            #[cfg(test)]
+            last_step_trace: None,
             cpu_publication: None,
             environment_cpu_publication: None,
             lair_cpu_publication: None,
@@ -130,7 +128,7 @@ impl RosterRuntime {
             mob_navigation: MobNavigationPolicy::LegacyV1,
             punch_activation: PunchActivationPolicy::ManualV1,
             spike_publication: SpikePublicationVersion::V18,
-            arena_generation: ArenaGenerationProfile::LegacyV3V4,
+            construction_profile: ArenaConstructionProfile::ReflectedV3V4,
         })
     }
 
@@ -315,6 +313,10 @@ impl RosterRuntime {
             .state
             .step(&inputs)
             .map_err(|_| RosterRuntimeError::CapacityReached)?;
+        #[cfg(test)]
+        {
+            self.last_step_trace = Some((inputs.clone(), report.clone()));
+        }
         let result = sim.state.result();
         self.lifecycle
             .complete_running_tick(result)

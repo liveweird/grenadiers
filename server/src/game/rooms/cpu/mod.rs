@@ -6,9 +6,11 @@ pub(in crate::game::rooms) use controller::admission::AdmissionTrace;
 pub(super) use controller::{
     AcceptedPlan, ContinuationService, CpuController, TeleporterService, contact::ContactStatus,
 };
+#[cfg(test)]
+pub(in crate::game::rooms) use controller::{ContinuationTrace, RouteTrace};
 pub(super) use worker::CpuPlanner;
 #[cfg(test)]
-pub(in crate::game::rooms) use worker::{PlanningBasis, PumpReport};
+pub(in crate::game::rooms) use worker::{PlannedResultWitness, PlanningBasis, PumpReport};
 
 #[cfg(test)]
 mod controller_reliable_tests;

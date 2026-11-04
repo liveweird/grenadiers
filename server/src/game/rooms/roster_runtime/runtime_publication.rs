@@ -107,6 +107,7 @@ impl RosterRuntime {
                             &sim.state,
                             &self.reports,
                             sim.generation,
+                            self.construction_profile,
                         )?
                     } else {
                         publication_v21::view_notice(room)
@@ -127,6 +128,7 @@ impl RosterRuntime {
                             &sim.state,
                             &self.reports,
                             sim.generation,
+                            self.construction_profile,
                         )?
                     } else {
                         publication_v20::view_notice(room)

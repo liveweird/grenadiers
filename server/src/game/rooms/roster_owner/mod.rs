@@ -82,6 +82,14 @@ fn validate_cpus(
         runtime.environment(),
         identity.configuration.cpu_difficulty(),
     ) {
+        (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_clearance_cpu_profiles() => {
+            Some(CpuProfile::RECOVERY_V62_EASY)
+        }
+        (Some(_), _, _, _, Some(CpuDifficulty::Standard))
+            if runtime.uses_clearance_cpu_profiles() =>
+        {
+            Some(CpuProfile::RECOVERY_V62_STANDARD)
+        }
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_contact_cpu_profiles() => {
             Some(CpuProfile::CONTACT_PUNCH_V60_EASY)
         }
@@ -117,6 +125,9 @@ fn validate_cpus(
             Some(CpuProfile::MULTIPLAYER_STANDARD)
         }
         (_, _, _, _, None) => None,
+        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_clearance_cpu_profiles() => {
+            Some(CpuProfile::HARD_V64)
+        }
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_contact_cpu_profiles() => {
             Some(CpuProfile::HARD_V61)
         }
@@ -265,3 +276,7 @@ mod refuge_handoff_physical_tests;
 #[cfg(test)]
 #[path = "../cpu/hard_episode_tests.rs"]
 mod hard_episode_tests;
+
+#[cfg(test)]
+#[path = "../cpu/layout_episode_diagnostic_tests.rs"]
+mod layout_episode_diagnostic_tests;

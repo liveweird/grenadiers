@@ -112,7 +112,14 @@ impl RosterRuntime {
             })
             .transpose()?;
         let notice = if let Some(sim) = body {
-            publication_v21::snapshot(room.clone(), sim.epoch, &sim.state, &[], sim.generation)?
+            publication_v21::snapshot(
+                room.clone(),
+                sim.epoch,
+                &sim.state,
+                &[],
+                sim.generation,
+                self.construction_profile,
+            )?
         } else {
             publication_v21::view_notice(room.clone())
         };
@@ -122,6 +129,7 @@ impl RosterRuntime {
                 state_epoch: state.epoch,
                 capture,
                 generation: state.generation,
+                construction: self.construction_profile,
             },
             notice,
         ))
@@ -190,7 +198,14 @@ impl RosterRuntime {
             })
             .transpose()?;
         let notice = if let Some(sim) = body {
-            publication_v20::snapshot(room.clone(), sim.epoch, &sim.state, &[], sim.generation)?
+            publication_v20::snapshot(
+                room.clone(),
+                sim.epoch,
+                &sim.state,
+                &[],
+                sim.generation,
+                self.construction_profile,
+            )?
         } else {
             publication_v20::view_notice(room.clone())
         };
@@ -200,6 +215,7 @@ impl RosterRuntime {
                 state_epoch,
                 capture,
                 generation,
+                construction: self.construction_profile,
             },
             notice,
         ))

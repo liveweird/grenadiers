@@ -45,12 +45,14 @@ pub(super) enum PreparedProjection {
         state_epoch: Option<Counter>,
         capture: Option<v20::ExpandedCapture>,
         generation: Option<GenerationRecord>,
+        construction: grenadiers_core::game::ArenaConstructionProfile,
     },
     SpikeV21 {
         room: v21::RoomView,
         state_epoch: Option<Counter>,
         capture: Option<v21::ExpandedCapture>,
         generation: Option<GenerationRecord>,
+        construction: grenadiers_core::game::ArenaConstructionProfile,
     },
 }
 
@@ -182,7 +184,8 @@ impl PreparedProjection {
                 state_epoch,
                 capture,
                 generation,
-            } => v20::prepare_admission(
+                construction,
+            } => v20::prepare_admission_with_construction(
                 v20::AdmissionProjection {
                     room,
                     state_epoch: *state_epoch,
@@ -195,13 +198,15 @@ impl PreparedProjection {
                     sequence,
                     resume_token,
                 },
+                *construction,
             ),
             Self::SpikeV21 {
                 room,
                 state_epoch,
                 capture,
                 generation,
-            } => v21::prepare_admission(
+                construction,
+            } => v21::prepare_admission_with_construction(
                 v21::AdmissionProjection {
                     room,
                     state_epoch: *state_epoch,
@@ -214,6 +219,7 @@ impl PreparedProjection {
                     sequence,
                     resume_token,
                 },
+                *construction,
             ),
         }
     }

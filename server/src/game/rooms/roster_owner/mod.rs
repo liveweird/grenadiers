@@ -125,6 +125,9 @@ fn validate_cpus(
             Some(CpuProfile::MULTIPLAYER_STANDARD)
         }
         (_, _, _, _, None) => None,
+        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_reactive_hard_profile() => {
+            Some(CpuProfile::HARD_V65)
+        }
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_clearance_cpu_profiles() => {
             Some(CpuProfile::HARD_V64)
         }

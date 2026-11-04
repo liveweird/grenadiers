@@ -1,6 +1,10 @@
+use crate::cpu::forecast::{
+    ForecastLimits, HazardKind, HypotheticalPlacement, TickWindow, UncertaintyReason, forecast,
+};
 use crate::cpu::policy::{StrategicObjectiveKind, StrategicPhase, StrategicTarget};
 use crate::cpu::routing::{
-    PlantFailure, PlantRequest, RouteFailure, RouteLimits, plan_lair_ordinary_plant,
+    PlannedBomb, PlantFailure, PlantRequest, RouteFailure, RouteLimits, plan_lair_ordinary_plant,
+    plan_lair_ordinary_plant_to_refuge,
 };
 use crate::cpu::{
     BombKnowledge, CpuRng, Intent, MemoryKey, MovementIntent, ObservedActor, ObservedBombTrigger,
@@ -244,4 +248,152 @@ fn stopped_first_move_is_an_independent_raw_plant_diagnostic() {
         Err(PlantFailure::Route(RouteFailure::WorkExhausted))
     );
     assert_eq!(work.spent(), WORK_ALLOWANCE);
+}
+
+#[test]
+fn two_samples_do_not_remove_certified_foreign_bomb_motion() {
+    let captured = captured_basis();
+    let mut absent_work = WorkBudget::new(WORK_ALLOWANCE);
+    let absent = forecast(
+        &captured.observation,
+        &captured.hazard_memory,
+        None,
+        ForecastLimits::default(),
+        &mut absent_work,
+    )
+    .unwrap();
+    assert_eq!(absent_work.spent(), 1_179);
+    assert_eq!(absent.stationary_assumptions(), &[EntityId(0), EntityId(5)]);
+    let foreign_lethal = TickWindow {
+        start: Tick(385),
+        end: Tick(1_074),
+    };
+    for cell in [
+        CellId::new(11, 1),
+        CellId::new(12, 1),
+        CellId::new(13, 1),
+        CellId::new(13, 2),
+        CellId::new(12, 3),
+        CellId::new(13, 3),
+    ] {
+        assert!(has_uncertainty(
+            absent.cell(cell).unwrap(),
+            foreign_lethal,
+            HazardKind::Lethal,
+            UncertaintyReason::BombMotion(EntityId(5)),
+        ));
+    }
+    assert_eq!(
+        absent.cell(CellId::new(10, 1)).unwrap().uncertainty.len(),
+        0
+    );
+    for cell in [CellId::new(13, 1), CellId::new(13, 2), CellId::new(13, 3)] {
+        assert!(has_uncertainty(
+            absent.cell(cell).unwrap(),
+            TickWindow {
+                start: Tick(234),
+                end: Tick(386),
+            },
+            HazardKind::Blocking,
+            UncertaintyReason::BombMotion(EntityId(5)),
+        ));
+    }
+}
+
+#[test]
+fn named_east_refuge_is_useful_but_has_no_conservative_raw_route() {
+    let captured = captured_basis();
+    let placement = HypotheticalPlacement {
+        placed_at: Tick(241),
+        owner: EntityId(2),
+        cell: CellId::new(11, 1),
+        range: 2,
+        blast: crate::game::BlastKind::Standard,
+        detonates_at: Tick(421),
+    };
+    let planned = PlannedBomb {
+        placed_at: placement.placed_at,
+        owner: placement.owner,
+        cell: placement.cell,
+        range: placement.range,
+        blast: placement.blast,
+        detonates_at: placement.detonates_at,
+    };
+    let mut usefulness_work = WorkBudget::new(WORK_ALLOWANCE);
+    let usefulness = super::plant_value::useful_plant_for(
+        &captured.observation,
+        &planned,
+        captured.memory.strategic_intent().unwrap().target,
+        &mut usefulness_work,
+    );
+    assert_eq!(usefulness, Some(true));
+    assert_eq!(usefulness_work.spent(), 199);
+    let mut present_work = WorkBudget::new(WORK_ALLOWANCE);
+    let present = forecast(
+        &captured.observation,
+        &captured.hazard_memory,
+        Some(placement),
+        ForecastLimits::default(),
+        &mut present_work,
+    )
+    .unwrap();
+    assert_eq!(present_work.spent(), 1_706);
+    let own_blast = TickWindow {
+        start: Tick(421),
+        end: Tick(451),
+    };
+    for column in 10..=13 {
+        assert_eq!(
+            present.cell(CellId::new(column, 1)).unwrap().lethal,
+            [own_blast]
+        );
+    }
+    for cell in [
+        CellId::new(10, 1),
+        CellId::new(11, 1),
+        CellId::new(12, 1),
+        CellId::new(13, 1),
+        CellId::new(13, 2),
+        CellId::new(12, 3),
+        CellId::new(13, 3),
+    ] {
+        assert!(has_uncertainty(
+            present.cell(cell).unwrap(),
+            TickWindow {
+                start: Tick(421),
+                end: Tick(1_074),
+            },
+            HazardKind::Lethal,
+            UncertaintyReason::BombMotion(EntityId(0)),
+        ));
+    }
+
+    let mut route_work = WorkBudget::new(WORK_ALLOWANCE);
+    let route = plan_lair_ordinary_plant_to_refuge(
+        &captured.observation,
+        &captured.hazard_memory,
+        PlantRequest {
+            execution_tick: Tick(241),
+            settled_stop_tick: SETTLED_STOP,
+            first_movement: MovementIntent::Direction(Direction::East),
+            limits: RouteLimits::default(),
+        },
+        CellId::new(13, 3),
+        &mut route_work,
+    );
+    assert_eq!(route, Err(PlantFailure::Route(RouteFailure::NoRoute)));
+    assert_eq!(route_work.spent(), 3_232);
+    // With no route certificate, usefulness is only an independent raw
+    // placement fact and MobContactLease certification cannot be reached.
+}
+
+fn has_uncertainty(
+    cell: &crate::cpu::forecast::CellForecast,
+    window: TickWindow,
+    kind: HazardKind,
+    reason: UncertaintyReason,
+) -> bool {
+    cell.uncertainty.iter().any(|uncertain| {
+        uncertain.window == window && uncertain.kind == kind && uncertain.reason == reason
+    })
 }

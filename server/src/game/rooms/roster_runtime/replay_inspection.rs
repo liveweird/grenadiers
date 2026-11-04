@@ -18,6 +18,7 @@ pub(in crate::game::rooms) struct RosterRuntimeInspection {
     pub(in crate::game::rooms) mob_navigation: grenadiers_core::game::MobNavigationPolicy,
     pub(in crate::game::rooms) punch_activation: grenadiers_core::game::PunchActivationPolicy,
     pub(in crate::game::rooms) spike_publication: super::runtime::SpikePublicationVersion,
+    pub(in crate::game::rooms) cpu_family: super::cpu_family::CpuPolicyFamily,
     pub(in crate::game::rooms) construction_profile:
         grenadiers_core::game::ArenaConstructionProfile,
 }
@@ -48,6 +49,7 @@ impl RosterRuntime {
             punch_activation: self.punch_activation,
             spike_publication: self.spike_publication,
             construction_profile: self.construction_profile,
+            cpu_family: self.cpu_family,
         }
     }
 }

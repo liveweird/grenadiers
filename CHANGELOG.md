@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.24 — 2026-11-04
+
+- Let Hard CPU attempt useful wall bombing beside visible stationary rival bombs with a complete nominal escape and fresh assumption checks.
+- Reserve bounded planning work for Hard tactics and replan checked escapes after interruption, retaining physical-origin recovery and fresh-publication withdrawal.
+- Keep Easy/Standard behavior, arena generation and physics unchanged; distinguish reactive Hard65 with a separate runtime family and private replay34.
+
 ## 1.3.23 — 2026-11-04
 
 - Clear connected movement space around each lair and keep spike pits away from its initial exits.

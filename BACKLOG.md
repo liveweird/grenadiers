@@ -19,15 +19,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **CPU-RELIABILITY — extend foreign-bomb support only from complete witnesses.**
-  Version 1.3.15 delivers useful planting in the demonstrated clear farming window. Preserve
-  its natural owner planting/flame survival, archived choices/work, pit/publication checks,
-  v54 continuation and v50 Teleporter recovery. The exact foreign-bomb tick-234 raw proof
-  exhausts its allowance; relaxing its support guard is not justified by that result or by
-  controlled empty hidden loot. Further support needs a useful complete plant with future
-  loot, arbitrary partner swaps, contact and renewal obligations covered under the unchanged
-  work ceiling. See the [investigation](docs/history/cpu-late-passivity-2026-11-01.md).
-
 - [todo] **HARD-CPU — deepen fair tactics.** Improve pickup contention and useful bomb
   combinations. Preserve bounded opponent-exit guidance and productive equal-distance farming.
   Use permitted observations, bounded planning and unchanged physics. Require authoritative

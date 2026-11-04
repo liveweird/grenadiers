@@ -33,6 +33,15 @@ mod plant_demolition;
 mod plant_tactic;
 mod plant_value;
 mod punch_tactic;
+mod reactive_assumptions;
+mod reactive_escape;
+mod reactive_execution;
+mod reactive_plant;
+#[cfg(test)]
+mod reactive_plant_tests;
+mod reactive_purpose;
+#[cfg(test)]
+mod reactive_purpose_tests;
 mod refuge_guidance;
 mod refuge_guidance_policy;
 mod refuge_handoff;
@@ -94,6 +103,8 @@ pub use plant_tactic::{
 };
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
+pub use reactive_escape::ReactiveRouteCertificate;
+pub use reactive_plant::{ReactivePlantCertificate, plan_hard_reactive_v65_with_origin};
 pub use refuge_guidance::{
     plan_blocked_births_v42_with_origin, plan_contact_topology_v40_with_origin,
     plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,
@@ -277,6 +288,12 @@ mod teleporter_execution_environment_tests;
 
 #[cfg(test)]
 mod foreign_bomb_farming_fixture;
+
+mod foreign_bomb_raw_diagnostic;
+pub use foreign_bomb_raw_diagnostic::{
+    ForeignBombRawDiagnostic, ForeignBombRawHint, ForeignBombRawHintMode, ForeignBombRawOutcome,
+    diagnose_foreign_bomb_raw_candidate, foreign_bomb_raw_hints,
+};
 
 #[cfg(test)]
 pub(crate) mod exit_pressure_fixture;

@@ -10,15 +10,22 @@ round target and damage as a human duel. All available items start enabled.
 Standard retains the existing decision cadence. Easy adds a provisional 12-tick pause after the
 confirmed Stop ending ordinary clear-board navigation. Initial decisions remain immediate.
 The pause does not delay committed escapes, Stops or manual confirmation; newly observed danger
-or unavailable bomb knowledge bypasses it. All levels share permitted observations, physics, hazard
-checks and planning limits. Hard uses range-aware firing positions and prioritizes certified
+or unavailable bomb knowledge bypasses it. All levels share permitted observations, physics and
+planning limits. Hard uses range-aware firing positions and prioritizes certified
 opponent pressure over routine wall farming. Among equally close supported firing positions, Hard
 favors blasts covering more of a visible rival’s open adjacent branches; valuable pickups can still
 take priority. For the same selected visible block, Hard also favors an equally close eligible
 approach whose existing blast geometry reaches more visible soft blocks. It does not inspect
-concealed drops, choose a farther origin or bypass the normal planting and escape proof. The
-labels describe these settings, not a measured
-strength ranking; balance still needs human playtesting.
+concealed drops or choose a farther origin merely for greater wall yield.
+
+Hard may use explicit stationary-bomb assumptions to plant beside visible rival timed bombs.
+It still checks a full nominal escape and useful wall contribution. An attacking CPU can clear
+a forward wall while keeping its opponent goal. After interruption it may prove a fresh escape
+for an already planted bomb, including safe waiting when movement is unnecessary. Newly
+published contradictions withdraw authority again. Unknown actions or drops can invalidate
+those predictions; the [reactive planning contract](cpu-contracts.md#reactive-hard-planning)
+defines the limits. The labels describe policy choices, not a measured strength ranking;
+balance still needs human playtesting.
 
 ## Settings, start and rematch
 
@@ -105,8 +112,9 @@ Bomb motion remains partially unknown. Short conditional pulses may explicitly a
 has stayed stationary; observing it move withdraws that assumption. Complete conditional routes
 retain the same explicit assumptions. Pauses and remote/contact triggers cannot use this
 exception. Continuation is initially limited to visible, unpaused standard timed bombs, completed
-running updates, supported effects and scenes without initial finite flames, Oil, exposed
-Teleporter or Diarrhea. Unknown bomb visibility, unsupported collision grace or an unavailable
+running updates, supported effects and scenes without Oil, exposed Teleporter or Diarrhea.
+The short continuation paths retain their initial-flame restriction; Hard's separately checked
+OwnEscape may include observed finite flames. Unknown bomb visibility, unsupported collision grace or an unavailable
 safe action produce Stop. New hazards can invalidate an active grant or pulse. Both lair-disabled
 and lair-enabled rooms use their corresponding checked contact model; this does not extend support
 to broader item scenes. The normal game still applies automatic curses and other effects.
@@ -142,7 +150,7 @@ use its restricted tactic.
 
 Archived ManualV1 CPU profiles can check one stopped Equipment action against a single adjacent,
 unpaused Standard timed bomb. Their complete relocation/cooldown-failure escape proof and scene
-restrictions remain frozen for replay compatibility. Live CPU62/64 intentionally emit no manual
+restrictions remain frozen for replay compatibility. Live CPU62/65 intentionally emit no manual
 Equipment action and do not currently use an intentional contact-Punch tactic. ContactV2 can
 activate Punch through movement, so their route guard declines forward bomb contact that could
 cause an unmodelled relocation. Exact retained origin grace permits safe departure from an overlap;

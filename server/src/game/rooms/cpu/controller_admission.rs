@@ -217,6 +217,15 @@ impl CpuController {
         {
             return self.reject(AdmissionRejection::InvalidShape);
         }
+        let reactive_plant = execution
+            .as_ref()
+            .is_some_and(ExecutionCertificate::requires_reactive_support);
+        if execution
+            .as_ref()
+            .is_some_and(|execution| !self.supports_execution_certificate(execution))
+        {
+            return self.reject(AdmissionRejection::InvalidShape);
+        }
         let contact_required = (result.basis.parts().rules.version == 8
             || (matches!(result.basis.parts().rules.version, 9 | 10)
                 && result.basis.respawn_lairs().is_some()))
@@ -238,13 +247,14 @@ impl CpuController {
         let invalid_manual = execution
             .as_ref()
             .is_some_and(|_| certified_manual != control.intent.manual);
-        if let (Some(intent), Some(plant)) = (
+        if let (Some(intent), Some(execution)) = (
             control.next_memory.strategic_intent(),
-            execution.as_ref().and_then(ExecutionCertificate::plant),
-        ) && !grenadiers_core::cpu::survival::strategic_plant_still_targets(
+            execution
+                .as_ref()
+                .filter(|execution| execution.plant().is_some()),
+        ) && !execution.strategic_plant_still_targets(
             latest,
             intent,
-            plant,
             &mut WorkBudget::new(65_536),
         ) {
             return self.reject(AdmissionRejection::StrategicPlant);
@@ -268,13 +278,23 @@ impl CpuController {
             None => None,
         };
         let committed_route = match execution {
-            Some(execution) => match CommittedRoute::admit_execution(
-                execution,
-                result.basis,
-                latest,
-                current_tick,
-                control.intent.movement,
-            ) {
+            Some(execution) => match if reactive_plant {
+                CommittedRoute::admit_reactive_execution(
+                    execution,
+                    result.basis,
+                    latest,
+                    current_tick,
+                    control.intent.movement,
+                )
+            } else {
+                CommittedRoute::admit_execution(
+                    execution,
+                    result.basis,
+                    latest,
+                    current_tick,
+                    control.intent.movement,
+                )
+            } {
                 Ok(route) => Some(route),
                 Err(_) => return self.reject(AdmissionRejection::Route),
             },

@@ -3,7 +3,8 @@ use grenadiers_core::cpu::{
     Observation, ObservedActor, ObservedEnvironment, ObservedPickup, VisibleActor,
 };
 use grenadiers_core::game::{
-    CellId, Direction, EnabledItems, EntityId, PickupKind, Position, SeatId, SpeedLevel,
+    CellId, Direction, EnabledItems, EntityId, PickupKind, Position, PunchActivationPolicy, SeatId,
+    SpeedLevel,
 };
 use grenadiers_core::room::CpuPolicy;
 
@@ -13,7 +14,8 @@ use super::{CpuPlanner, tests::spike_job, worker::WorkerPlan};
 fn old_profiles_never_emit_the_new_typed_step() {
     for policy in [CpuPolicy::UtilityV44, CpuPolicy::UtilityV45] {
         let planner = CpuPlanner::without_workers();
-        let (job, result) = spike_job(policy);
+        let (mut job, result) = spike_job(policy);
+        use_policy_observation(&mut job);
         assert!(planner.try_submit(job));
         let report = planner.pump_for_test(1);
         assert_eq!((report.delivered, report.failed), (1, 0));
@@ -42,9 +44,15 @@ fn opted_in_profiles_preserve_the_ordinary_fallback_without_a_target() {
         CpuPolicy::UtilityV57,
         CpuPolicy::UtilityV58,
         CpuPolicy::UtilityV59,
+        CpuPolicy::UtilityV60,
+        CpuPolicy::UtilityV61,
+        CpuPolicy::UtilityV62,
+        CpuPolicy::UtilityV64,
+        CpuPolicy::UtilityV65,
     ] {
         let planner = CpuPlanner::without_workers();
-        let (job, result) = spike_job(policy);
+        let (mut job, result) = spike_job(policy);
+        use_policy_observation(&mut job);
         assert!(planner.try_submit(job));
         let report = planner.pump_for_test(1);
         assert_eq!((report.delivered, report.failed), (1, 0));
@@ -73,13 +81,16 @@ fn opted_in_worker_emits_a_bounded_typed_approach_for_an_exposed_target() {
         CpuPolicy::UtilityV57,
         CpuPolicy::UtilityV58,
         CpuPolicy::UtilityV59,
+        CpuPolicy::UtilityV60,
+        CpuPolicy::UtilityV61,
+        CpuPolicy::UtilityV62,
+        CpuPolicy::UtilityV64,
+        CpuPolicy::UtilityV65,
     ] {
         let planner = CpuPlanner::without_workers();
         let (mut job, result) = spike_job(policy);
         job.observation = teleporter_observation();
-        job.hazard_memory =
-            grenadiers_core::cpu::forecast::ObservedHazardMemory::new(job.memory.key());
-        job.hazard_memory.observe(&job.observation).unwrap();
+        use_policy_observation(&mut job);
         assert!(planner.try_submit(job));
         let report = planner.pump_for_test(1);
         assert_eq!((report.delivered, report.failed), (1, 0));
@@ -139,4 +150,25 @@ pub(super) fn teleporter_observation() -> Observation {
         None,
     )
     .unwrap()
+}
+
+pub(super) fn use_policy_observation(job: &mut super::worker::PlanJob) {
+    if matches!(
+        job.policy,
+        CpuPolicy::UtilityV60
+            | CpuPolicy::UtilityV61
+            | CpuPolicy::UtilityV62
+            | CpuPolicy::UtilityV64
+            | CpuPolicy::UtilityV65
+    ) {
+        job.observation = job
+            .observation
+            .clone()
+            .map_parts(|parts| {
+                parts.rules.punch_activation_policy = PunchActivationPolicy::ContactV2;
+            })
+            .unwrap();
+    }
+    job.hazard_memory = grenadiers_core::cpu::forecast::ObservedHazardMemory::new(job.memory.key());
+    job.hazard_memory.observe(&job.observation).unwrap();
 }

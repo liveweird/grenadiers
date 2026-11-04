@@ -44,7 +44,8 @@ pub(super) fn stationary_risk(
                         && !matches!(
                             (mode, hazard.reason),
                             (
-                                RouteMode::AllowStationaryAssumptions,
+                                RouteMode::AllowStationaryAssumptions
+                                    | RouteMode::ReactiveStationaryAssumptions,
                                 crate::cpu::forecast::UncertaintyReason::BombMotion(id)
                             ) if forecast.stationary_assumptions().contains(&id)
                         )

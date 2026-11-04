@@ -1,6 +1,22 @@
 use super::CpuController;
 
 impl CpuController {
+    pub(super) fn supports_execution_certificate(
+        &self,
+        execution: &grenadiers_core::cpu::survival::ExecutionCertificate,
+    ) -> bool {
+        !execution.requires_reactive_support()
+            || self.profile == grenadiers_core::room::CpuProfile::HARD_V65
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn supports_execution_certificate_for_test(
+        &self,
+        execution: &grenadiers_core::cpu::survival::ExecutionCertificate,
+    ) -> bool {
+        self.supports_execution_certificate(execution)
+    }
+
     pub(super) fn profile_supports(&self, rules_version: u16) -> bool {
         if self.profile.difficulty == grenadiers_core::room::CpuDifficulty::Hard {
             return rules_version == 10
@@ -31,6 +47,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                         | grenadiers_core::room::CpuProfile::HARD_V63
                         | grenadiers_core::room::CpuProfile::HARD_V64
+                        | grenadiers_core::room::CpuProfile::HARD_V65
                 );
         }
         match rules_version {
@@ -128,6 +145,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
                 | grenadiers_core::room::CpuProfile::HARD_V64
+                | grenadiers_core::room::CpuProfile::HARD_V65
         )
     }
 
@@ -170,6 +188,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
                 | grenadiers_core::room::CpuProfile::HARD_V64
+                | grenadiers_core::room::CpuProfile::HARD_V65
         )
     }
 
@@ -209,6 +228,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
                 | grenadiers_core::room::CpuProfile::HARD_V64
+                | grenadiers_core::room::CpuProfile::HARD_V65
         )
     }
 
@@ -245,6 +265,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
                 | grenadiers_core::room::CpuProfile::HARD_V64
+                | grenadiers_core::room::CpuProfile::HARD_V65
         )
     }
 
@@ -278,6 +299,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
                 | grenadiers_core::room::CpuProfile::HARD_V64
+                | grenadiers_core::room::CpuProfile::HARD_V65
         )
     }
 
@@ -308,6 +330,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::RECOVERY_V62_EASY
                 | grenadiers_core::room::CpuProfile::HARD_V63
                 | grenadiers_core::room::CpuProfile::HARD_V64
+                | grenadiers_core::room::CpuProfile::HARD_V65
         )
     }
 }

@@ -26,7 +26,15 @@ pub fn plan_ordinary_plant(
     if observation.parts().rules.version >= 8 {
         return Err(PlantFailure::Unsupported);
     }
-    plan_timed_plant(observation, memory, request, work, None, None)
+    plan_timed_plant(
+        observation,
+        memory,
+        request,
+        work,
+        None,
+        None,
+        RouteMode::CertifiedOnly,
+    )
 }
 
 pub(crate) fn plan_lair_ordinary_plant(
@@ -36,7 +44,33 @@ pub(crate) fn plan_lair_ordinary_plant(
     work: &mut WorkBudget,
 ) -> Result<PlantCertificate, PlantFailure> {
     validate_lair_observation(observation)?;
-    plan_timed_plant(observation, memory, request, work, None, None)
+    plan_timed_plant(
+        observation,
+        memory,
+        request,
+        work,
+        None,
+        None,
+        RouteMode::CertifiedOnly,
+    )
+}
+
+pub(crate) fn plan_lair_reactive_ordinary_plant(
+    observation: &Observation,
+    memory: &ObservedHazardMemory,
+    request: PlantRequest,
+    work: &mut WorkBudget,
+) -> Result<PlantCertificate, PlantFailure> {
+    validate_lair_observation(observation)?;
+    plan_timed_plant(
+        observation,
+        memory,
+        request,
+        work,
+        None,
+        None,
+        RouteMode::ReactiveStationaryAssumptions,
+    )
 }
 
 pub(crate) fn plan_lair_ordinary_plant_to_refuge(
@@ -47,7 +81,15 @@ pub(crate) fn plan_lair_ordinary_plant_to_refuge(
     work: &mut WorkBudget,
 ) -> Result<PlantCertificate, PlantFailure> {
     validate_lair_observation(observation)?;
-    plan_timed_plant(observation, memory, request, work, None, Some(refuge))
+    plan_timed_plant(
+        observation,
+        memory,
+        request,
+        work,
+        None,
+        Some(refuge),
+        RouteMode::CertifiedOnly,
+    )
 }
 
 pub fn plan_timed_weapon_plant(
@@ -95,6 +137,7 @@ fn plan_lair_or_legacy_weapon_plant(
         work,
         Some((weapon, blast)),
         None,
+        RouteMode::CertifiedOnly,
     )
 }
 
@@ -112,6 +155,7 @@ fn plan_timed_plant(
     work: &mut WorkBudget,
     weapon: Option<(SpecialWeapon, BlastKind)>,
     refuge: Option<crate::game::CellId>,
+    mode: RouteMode,
 ) -> Result<PlantCertificate, PlantFailure> {
     let parts = observation.parts();
     let expected = parts
@@ -243,7 +287,7 @@ fn plan_timed_plant(
         start_window,
         settled_stop_tick: request.settled_stop_tick,
         survive_until,
-        mode: RouteMode::CertifiedOnly,
+        mode,
         limits: request.limits,
     };
     let route = if let Some(refuge) = refuge {

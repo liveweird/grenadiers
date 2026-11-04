@@ -2,6 +2,8 @@
 mod demolition;
 #[path = "layout_recovery_horizon_tests.rs"]
 mod horizon;
+#[path = "layout_v65_reactive_tests.rs"]
+mod reactive;
 #[path = "layout_episode_trace.rs"]
 mod trace;
 #[path = "layout_zero_bomber_tests.rs"]

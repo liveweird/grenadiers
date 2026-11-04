@@ -3,6 +3,61 @@ use crate::cpu::{BombKnowledge, Observation, ObservedBomb, ObservedBombTrigger};
 use super::ForecastEvolution;
 
 impl ForecastEvolution {
+    pub(crate) fn reactive_scene_work(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+    ) -> Option<u32> {
+        let old = basis.parts();
+        let new = current.parts();
+        let (BombKnowledge::Visible(old_bombs), BombKnowledge::Visible(new_bombs)) =
+            (&old.bombs, &new.bombs)
+        else {
+            return None;
+        };
+        let blocks = old
+            .arena
+            .blocks
+            .len()
+            .checked_mul(self.block_removals.len())?
+            .checked_add(old.arena.blocks.len())?
+            .checked_add(new.arena.blocks.len())?;
+        let bombs = old_bombs
+            .len()
+            .checked_mul(
+                self.bomb_removals
+                    .len()
+                    .checked_add(new_bombs.len())?
+                    .checked_add(3)?,
+            )?
+            .checked_add(new_bombs.len().checked_mul(2)?)?;
+        let oil = old.oil.len().checked_mul(
+            self.oil_ignitions
+                .len()
+                .checked_add(new.oil.len())?
+                .checked_add(1)?,
+        )?;
+        let flames = old
+            .flames
+            .len()
+            .checked_mul(old.oil.len().checked_add(1)?)?
+            .checked_add(self.flame_changes.len())?
+            .checked_add(
+                new.flames
+                    .len()
+                    .checked_mul(new.oil.len().checked_add(1)?)?,
+            )?;
+        let total = 32_usize
+            .checked_add(old.arena.terrain.len())?
+            .checked_add(old.pickups.len())?
+            .checked_add(new.pickups.len())?
+            .checked_add(blocks)?
+            .checked_add(bombs)?
+            .checked_add(oil)?
+            .checked_add(flames)?;
+        u32::try_from(total).ok()
+    }
+
     /// Conservatively charges every collection traversal performed by the
     /// narrow contact-bound scene matcher. It supports only an empty initial
     /// bomb/flame/oil scene and at most the certified own bomb.

@@ -9,12 +9,16 @@ use super::BraceletGuard;
 pub enum RouteMode {
     CertifiedOnly,
     AllowStationaryAssumptions,
+    /// Internal Hard65 planning mode. Public routing entry points reject it;
+    /// only the opaque reactive-plant certificate can authorize execution.
+    ReactiveStationaryAssumptions,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum RouteAssurance {
     Certified,
     ConditionalStationary { bombs: Vec<EntityId> },
+    ReactiveStationary { bombs: Vec<EntityId> },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

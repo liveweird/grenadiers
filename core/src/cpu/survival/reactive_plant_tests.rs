@@ -1,0 +1,168 @@
+use crate::cpu::forecast::ObservedHazardMemory;
+use crate::cpu::policy::UtilityMemory;
+use crate::cpu::{
+    BombKnowledge, CpuRng, MemoryKey, Observation, ObservedBomb, ObservedBombTrigger,
+    UnknownBombFacts, WorkBudget,
+};
+use crate::game::{BlastKind, CellId, EntityId, PunchActivationPolicy, Tick};
+
+use super::foreign_bomb_farming_clear_fixture::captured_clear_basis;
+use super::{
+    WORK_ALLOWANCE, plan_hard_demolition_v64_with_origin, plan_hard_reactive_v65_with_origin,
+};
+
+fn reactive_basis() -> (Observation, ObservedHazardMemory, UtilityMemory, MemoryKey) {
+    let captured = captured_clear_basis();
+    let observation = captured
+        .observation
+        .map_parts(|parts| {
+            parts.rules.punch_activation_policy = PunchActivationPolicy::ContactV2;
+            parts.bombs = BombKnowledge::Visible(vec![ObservedBomb {
+                id: EntityId(70),
+                placed_at: Tick(400),
+                cell: CellId::new(1, 10),
+                owner: EntityId(3),
+                range: 2,
+                trigger: ObservedBombTrigger::Timed {
+                    remaining_ticks: 120,
+                    paused: false,
+                },
+                blast: BlastKind::Standard,
+                unknown: UnknownBombFacts::ALL,
+            }]);
+        })
+        .unwrap();
+    let key = MemoryKey {
+        world: observation.parts().world,
+        cpu_seat: observation.parts().recipient,
+    };
+    let mut history = ObservedHazardMemory::new(key);
+    let previous = previous_sample(&observation);
+    history.observe(&previous).unwrap();
+    history.observe(&observation).unwrap();
+    (observation, history, captured.memory, key)
+}
+
+fn previous_sample(observation: &Observation) -> Observation {
+    observation
+        .clone()
+        .map_parts(|parts| {
+            parts.tick = Tick(parts.tick.0 - 1);
+            let BombKnowledge::Visible(bombs) = &mut parts.bombs else {
+                unreachable!()
+            };
+            let ObservedBombTrigger::Timed {
+                remaining_ticks, ..
+            } = &mut bombs[0].trigger
+            else {
+                unreachable!()
+            };
+            *remaining_ticks += 1;
+        })
+        .unwrap()
+}
+
+#[test]
+fn hard65_keeps_the_bounded_fallback_when_all_remaining_candidate_work_is_exhausted() {
+    let (observation, history, memory, key) = reactive_basis();
+    let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    let mut rng = CpuRng::from_seed(key, [65; 32]);
+    let planned = plan_hard_reactive_v65_with_origin(
+        &observation,
+        &memory,
+        &history,
+        observation.parts().tick,
+        None,
+        &mut rng,
+        &mut work,
+    )
+    .unwrap();
+    assert!(planned.survival.execution.is_none());
+    assert_eq!(work.spent(), WORK_ALLOWANCE - 1);
+
+    let mut guard = WorkBudget::new(8_192);
+    assert!(
+        super::reactive_assumptions::ReactivePlantAssumptions::certify(
+            &observation,
+            &history,
+            observation.parts().tick,
+            &mut guard,
+        )
+        .is_some()
+    );
+    let remaining = WORK_ALLOWANCE - guard.spent();
+    let mut fallback_work = WorkBudget::new(remaining.min(32_768).min(remaining / 2));
+    let mut fallback_rng = CpuRng::from_seed(key, [65; 32]);
+    let fallback = plan_hard_demolition_v64_with_origin(
+        &observation,
+        &memory,
+        &history,
+        observation.parts().tick,
+        None,
+        &mut fallback_rng,
+        &mut fallback_work,
+    )
+    .unwrap();
+    assert_eq!(planned.survival.control, fallback.survival.control);
+    assert_eq!(rng.draws(), fallback_rng.draws());
+}
+
+#[test]
+fn stale_history_ending_before_the_basis_cannot_enable_hard65() {
+    let (observation, _, memory, key) = reactive_basis();
+    let mut stale = ObservedHazardMemory::new(key);
+    stale.observe(&previous_sample(&observation)).unwrap();
+    let planned = plan_hard_reactive_v65_with_origin(
+        &observation,
+        &memory,
+        &stale,
+        observation.parts().tick,
+        None,
+        &mut CpuRng::from_seed(key, [65; 32]),
+        &mut WorkBudget::new(WORK_ALLOWANCE),
+    )
+    .unwrap();
+    assert!(
+        planned
+            .survival
+            .execution
+            .is_none_or(|execution| !execution.requires_reactive_support())
+    );
+}
+
+#[test]
+fn own_escape_preflight_accepts_finite_flames_but_plant_preflight_does_not() {
+    let (observation, history, _, _) = reactive_basis();
+    let observation = observation
+        .map_parts(|parts| {
+            let BombKnowledge::Visible(bombs) = &mut parts.bombs else {
+                unreachable!()
+            };
+            bombs[0].owner = EntityId(2);
+            parts.flames.push(crate::cpu::ObservedFlame {
+                cell: CellId::new(13, 9),
+                remaining_ticks: 20,
+            });
+        })
+        .unwrap();
+    let mut escape_work = WorkBudget::new(8_192);
+    assert!(
+        super::reactive_assumptions::ReactivePlantAssumptions::certify_escape(
+            &observation,
+            &history,
+            observation.parts().tick,
+            &mut escape_work,
+        )
+        .is_some()
+    );
+    let mut plant_work = WorkBudget::new(8_192);
+    assert!(
+        super::reactive_assumptions::ReactivePlantAssumptions::certify(
+            &observation,
+            &history,
+            observation.parts().tick,
+            &mut plant_work,
+        )
+        .is_none()
+    );
+}

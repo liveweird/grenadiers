@@ -1,7 +1,6 @@
 use grenadiers_core::cpu::Observation;
 #[cfg(test)]
 use grenadiers_core::cpu::routing::PlantPresence;
-#[cfg(test)]
 use grenadiers_core::cpu::survival::CommittedRoute;
 use grenadiers_core::cpu::survival::{RouteCommand, RouteStatus};
 use grenadiers_core::game::Tick;
@@ -24,6 +23,7 @@ pub(in crate::game::rooms) struct RouteTrace {
     pub status: RouteStatus,
     pub invalidator: Option<grenadiers_core::cpu::survival::RouteInvalidator>,
     pub plant: Option<PlantPresence>,
+    pub reactive_support: bool,
     pub escape_origin_after: bool,
 }
 
@@ -59,6 +59,11 @@ impl CpuController {
             .committed_route
             .as_ref()
             .and_then(|route| route.first_invalidator(observation));
+        #[cfg(test)]
+        let reactive_support = self
+            .committed_route
+            .as_ref()
+            .is_some_and(CommittedRoute::requires_reactive_support);
         let status = self
             .committed_route
             .as_mut()?
@@ -84,6 +89,7 @@ impl CpuController {
             status,
             invalidator,
             plant,
+            reactive_support,
             escape_origin_after: self.escape_origin.is_some(),
         });
         Some(status)
@@ -99,10 +105,19 @@ impl CpuController {
             self.clear_route(true);
             return Some(RouteStatus::Invalidated);
         }
-        let status = self
-            .committed_route
-            .as_ref()?
-            .poll_command(current_tick, self.settled_stop_tick);
+        let route = self.committed_route.as_ref()?;
+        let reactive = route.requires_reactive_support();
+        let status = if reactive {
+            if self.profile != grenadiers_core::room::CpuProfile::HARD_V65 {
+                RouteStatus::Invalidated
+            } else if let Some(current) = self.latest_observation.as_ref() {
+                route.poll_reactive_command(current_tick, current, self.settled_stop_tick)
+            } else {
+                RouteStatus::Invalidated
+            }
+        } else {
+            route.poll_command(current_tick, self.settled_stop_tick)
+        };
         #[cfg(test)]
         let plant = self
             .committed_route
@@ -118,16 +133,34 @@ impl CpuController {
             status,
             invalidator: None,
             plant,
+            reactive_support: reactive,
             escape_origin_after: self.escape_origin.is_some(),
         });
         Some(status)
     }
 
     pub(in crate::game::rooms) fn commit_route_command(&mut self, command: RouteCommand) -> bool {
-        let committed = self
+        let reactive = self
             .committed_route
-            .as_mut()
-            .is_some_and(|route| route.commit_command(command));
+            .as_ref()
+            .is_some_and(CommittedRoute::requires_reactive_support);
+        let committed = if reactive {
+            if self.profile != grenadiers_core::room::CpuProfile::HARD_V65 {
+                false
+            } else {
+                match (
+                    self.latest_observation.as_ref(),
+                    self.committed_route.as_mut(),
+                ) {
+                    (Some(current), Some(route)) => route.commit_reactive_command(command, current),
+                    _ => false,
+                }
+            }
+        } else {
+            self.committed_route
+                .as_mut()
+                .is_some_and(|route| route.commit_command(command))
+        };
         #[cfg(test)]
         self.route_trace.push(RouteTrace {
             tick: command.admission_tick(),
@@ -142,6 +175,7 @@ impl CpuController {
                 .committed_route
                 .as_ref()
                 .and_then(CommittedRoute::plant_presence),
+            reactive_support: reactive,
             escape_origin_after: self.escape_origin.is_some(),
         });
         committed

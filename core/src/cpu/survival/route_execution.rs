@@ -58,6 +58,7 @@ pub struct CommittedRoute {
     pub(super) last_observation_tick: Tick,
     pub(super) last_observation: Observation,
     pub(super) movement: MovementIntent,
+    pub(super) reactive: Option<super::reactive_assumptions::ReactivePlantAssumptions>,
 }
 #[derive(Clone, Debug)]
 pub(super) struct CommittedPlant {
@@ -85,6 +86,11 @@ impl CommittedRoute {
             .is_some_and(|proof| proof.requires_blocked_birth_support())
     }
 
+    #[must_use]
+    pub fn requires_reactive_support(&self) -> bool {
+        self.reactive.is_some()
+    }
+
     #[cfg(test)]
     pub(crate) fn plant_presence_for_test(&self) -> Option<PlantPresence> {
         self.plant.as_ref().map(|plant| plant.presence)
@@ -97,6 +103,12 @@ impl CommittedRoute {
         admission_tick: Tick,
         accepted_movement: MovementIntent,
     ) -> Result<Self, PolicyError> {
+        if matches!(
+            certificate.assurance(),
+            crate::cpu::routing::RouteAssurance::ReactiveStationary { .. }
+        ) {
+            return Err(PolicyError::InvalidObservation);
+        }
         Self::admit_inner(
             certificate,
             None,
@@ -207,6 +219,7 @@ impl CommittedRoute {
             last_observation_tick: current.parts().tick,
             last_observation: current.clone(),
             movement: accepted_movement,
+            reactive: None,
         })
     }
 
@@ -304,8 +317,11 @@ impl CommittedRoute {
         self.active_status()
     }
 
-    #[must_use]
-    pub fn poll_command(&self, current_tick: Tick, settled_stop_tick: Option<Tick>) -> RouteStatus {
+    pub(super) fn poll_command_inner(
+        &self,
+        current_tick: Tick,
+        settled_stop_tick: Option<Tick>,
+    ) -> RouteStatus {
         if self.plant.as_ref().is_some_and(|plant| {
             plant.contact.as_ref().is_some_and(|proof| {
                 current_tick
@@ -340,7 +356,7 @@ impl CommittedRoute {
         }
     }
 
-    pub fn commit_command(&mut self, command: RouteCommand) -> bool {
+    pub(super) fn commit_command_inner(&mut self, command: RouteCommand) -> bool {
         let Some(expected) = self.transitions.get(self.next_transition) else {
             return false;
         };

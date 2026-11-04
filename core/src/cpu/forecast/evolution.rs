@@ -223,6 +223,12 @@ impl ForecastEvolution {
         self.block_removals.iter().copied()
     }
 
+    pub(crate) fn removes_block_by(&self, cell: CellId, tick: Tick) -> bool {
+        self.block_removals
+            .iter()
+            .any(|(removed, at)| *removed == cell && *at <= tick)
+    }
+
     fn blocks_match(&self, basis: &Observation, current: &Observation) -> bool {
         let expected = basis
             .parts()

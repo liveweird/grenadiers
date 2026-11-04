@@ -97,6 +97,50 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.24 — 2026-11-04
+
+Hard65 can conditionally plant beside visible stationary rival bombs and clear a forward wall
+while retaining its opponent goal. After interruption it can prove a fresh nonmanual OwnEscape
+route through its owned bombs' complete flame lifetime. New contradictory publications still
+revoke authority. These are visible-state predictions, not guarantees against unseen actions or
+loot. Easy/Standard62, generation7, pit-layout2, gameplay21/rules10, navigation3 and ContactV2
+remain unchanged; private replay34 closes the new CPU family.
+
+The controlled queued match has two useful surviving plants. An actual safe pose correctly uses
+stationary recovery; a separately labelled unsafe-position counterfactual proves a directional
+escape. The fixed comparison is mixed, with slightly fewer plants and more stalled-objective
+switches despite fewer ever-eliminated seats and more completed-objective switches. It does not
+establish a general strength increase. See the [dated evidence](history/reactive-hard-cpu-2026-11-04.md)
+and [planning contract](game/cpu-contracts.md#reactive-hard-planning).
+
+### Verification
+
+- Full local Rust verification passes on `a5fced0840c4cce4f505a49fb076faaa862b79a3`:
+  2,004 core tests and two doctests, 818 ordinary server cases and four isolated timing cases
+  in each debug/release/coverage profile. All 4,194,304 item masks pass per profile with
+  32 partitions, four workers and no retries. Coverage is 80,756/86,740 lines (93.10%), above
+  the unchanged 90% floor, using 40 raw profiles. Wall time is 1,033.65 seconds.
+- The separate native Hard65 production-pacing test passes with lairs off/on in 31.74 seconds.
+  Independent review findings are resolved; strict Clippy, formatting, repository and size gates pass.
+  [Linux debug/release verification](https://github.com/liveweird/grenadiers/actions/runs/41926894973)
+  passes on the same verification source.
+- Web coverage passes 172 files/7,435 tests, with 95.51% lines, 92.54% statements, 91.77% functions
+  and 88.90% branches. API/type/validator drift, lint, Knip and E2E static checks pass,
+  including 122 scenario-documentation matches.
+  Compressed JS is 399,060/400,000 bytes; CSS is 16,228/20,000. All nine exact-image web files
+  are byte-identical to v1.3.23.
+- Five Chromium scenarios pass. Compose and restricted OrbStack Kubernetes verify the same image,
+  three moving/bombing Hard CPUs, two spawned/moving mobs, probes and security settings. Temporary
+  stacks/namespaces are removed. Rust dependency policies and high-severity npm audits pass;
+  existing moderate findings remain 10 web/11 E2E. Pinned Trivy reports zero fixable high/critical findings.
+
+The accepted image is `sha256:724b6f06bf3f37900caea7eae9006a4e7028a31bff7f1a1cb7dd9d51466875b7`,
+labelled v1.3.24 and build source `14e5392482af02c3c427a0abb5e71852a94d2acf`. The later verification
+commit corrects only two `#[cfg(test)]` fixture modules and a history document. Independent review
+confirmed that production compilation excludes those changes; Docker build contexts are not
+claimed byte-identical. Image labels retain the actual build source. Later release-document
+changes leave the verified code unchanged. Promote this exact image and retain v1.3.23 for rollback.
+
 ## v1.3.23 — 2026-11-04
 
 New matches reserve a connected floor ring around each lair and keep spike pits away from its

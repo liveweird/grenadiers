@@ -2,6 +2,8 @@ use std::{collections::BTreeSet, sync::Arc};
 
 #[path = "layout_episode_trace_profile.rs"]
 mod profile;
+#[path = "layout_reactive_schedule.rs"]
+mod reactive_schedule;
 #[path = "layout_episode_runtime.rs"]
 mod runtime_support;
 #[path = "layout_episode_witness.rs"]
@@ -110,6 +112,7 @@ pub(super) struct LayoutTrace {
     pub first_death: Option<DeathWitness>,
     pub pump: PumpReport,
     pub plan_witnesses: Vec<PlanSnapshot>,
+    pub publication_observations: Vec<grenadiers_core::cpu::Observation>,
     pub route_traces: [Vec<RouteTrace>; 3],
     pub continuation_traces: [ContinuationTrace; 3],
     pub stationary_preflight: Vec<StationaryPreflight>,
@@ -155,7 +158,7 @@ fn run_layout_trace_inner(
     matrix_identity: bool,
 ) -> LayoutTrace {
     let identity = trace_identity(matrix_identity);
-    let mut runtime = runtime_support::runtime(case, &identity);
+    let mut runtime = runtime_support::runtime(case, &identity, profile == CpuProfile::HARD_V65);
     let admission = runtime.prepare_join(SeatId::One).unwrap();
     runtime.commit_admission(admission);
     runtime
@@ -184,7 +187,7 @@ fn run_layout_trace_inner(
         })
         .into_iter()
         .collect::<Vec<_>>();
-    if profile == CpuProfile::HARD_V64 {
+    if matches!(profile, CpuProfile::HARD_V64 | CpuProfile::HARD_V65) {
         assert_eq!(validate_cpus(&runtime, &cpus), Ok(()));
     } else if profile == CpuProfile::HARD_V63 {
         assert_eq!(
@@ -227,14 +230,19 @@ fn run_layout_trace_inner(
     let mut first_death = None;
     let mut frames = Vec::with_capacity(ticks);
     let mut pump = PumpReport::default();
-    let witness = case.profile == ArenaConstructionProfile::LairClearanceV5
-        && case.board == BoardSize::ThirteenByEleven
+    let witness = matches!(
+        case.profile,
+        ArenaConstructionProfile::LairClearanceV5
+            | ArenaConstructionProfile::WeightedLairClearanceV7
+    ) && case.board == BoardSize::ThirteenByEleven
         && case.lairs
         && case.pit_settings == SpikePitSettings::new(60, 300).unwrap();
     let mut plan_witnesses = Vec::new();
+    let mut publication_observations = Vec::new();
     let mut step_replay = None;
     let mut stationary_preflight = Vec::new();
     for _ in 0..ticks {
+        reactive_schedule::apply(&mut driver.runtime, case.profile);
         let before = witness
             .then(|| driver.runtime.state_for_test().cloned())
             .flatten()
@@ -253,6 +261,21 @@ fn run_layout_trace_inner(
         };
         merge(&mut pump, pumped);
         driver.tick(Instant::now()).unwrap();
+        if let Some((seat, _, _)) = capture {
+            let index = CPU_SEATS
+                .iter()
+                .position(|candidate| *candidate == seat)
+                .unwrap();
+            if let Some(observation) = driver.cpus[index].latest_observation_for_test()
+                && publication_observations.last().is_none_or(
+                    |previous: &grenadiers_core::cpu::Observation| {
+                        previous.parts().tick != observation.parts().tick
+                    },
+                )
+            {
+                publication_observations.push(observation);
+            }
+        }
         let inspection = driver.runtime.replay_inspection();
         let state = &inspection.simulation.as_ref().unwrap().state;
         let (inputs, report) = driver.runtime.last_step_trace_for_test().unwrap();
@@ -352,6 +375,7 @@ fn run_layout_trace_inner(
         first_death,
         pump,
         plan_witnesses,
+        publication_observations,
         route_traces,
         continuation_traces,
         stationary_preflight,

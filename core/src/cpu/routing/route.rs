@@ -43,7 +43,9 @@ pub fn plan_route(
     request: RouteRequest,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
-    if observation.parts().rules.version >= 8 {
+    if observation.parts().rules.version >= 8
+        || request.mode == RouteMode::ReactiveStationaryAssumptions
+    {
         return Err(RouteFailure::InvalidRequest);
     }
     plan_route_seeded(observation, &[forecast], request, None, None, None, work)
@@ -326,10 +328,10 @@ fn move_lengths(
     direction: Direction,
     work: &mut WorkBudget,
 ) -> Result<Vec<u8>, RouteFailure> {
-    let cap = if node.assumptions.is_empty() {
-        CERTIFIED_MOVE_UPDATES
-    } else {
+    let cap = if !node.assumptions.is_empty() && mode == RouteMode::AllowStationaryAssumptions {
         CONDITIONAL_MOVE_UPDATES
+    } else {
+        CERTIFIED_MOVE_UPDATES
     };
     let mut simulations = node.lanes.clone();
     let mut centered = None;

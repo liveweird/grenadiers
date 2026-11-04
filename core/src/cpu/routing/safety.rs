@@ -58,9 +58,11 @@ pub(super) fn check_segments_with_grace(
                 continue;
             }
             match (mode, uncertain.reason) {
-                (RouteMode::AllowStationaryAssumptions, UncertaintyReason::BombMotion(id))
-                    if forecast.stationary_assumptions().contains(&id) =>
-                {
+                (
+                    RouteMode::AllowStationaryAssumptions
+                    | RouteMode::ReactiveStationaryAssumptions,
+                    UncertaintyReason::BombMotion(id),
+                ) if forecast.stationary_assumptions().contains(&id) => {
                     assumptions.insert(id);
                     if assumptions.len()
                         > if forecast.evolution().bomb_limit()

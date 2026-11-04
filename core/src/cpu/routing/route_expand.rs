@@ -121,7 +121,8 @@ pub(super) fn apply_move(
         && starts.iter().zip(&node.lanes).all(|(start, lane)| {
             *start == (lane.motion.position, lane.motion.heading)
         }))
-        || (!node.assumptions.is_empty()
+        || (mode == RouteMode::AllowStationaryAssumptions
+        && !node.assumptions.is_empty()
         && (updates > CONDITIONAL_MOVE_UPDATES
             || node.steps.iter().any(|step| {
                 matches!(step, RouteStep::Move { updates, .. } if *updates > CONDITIONAL_MOVE_UPDATES)
@@ -301,7 +302,8 @@ pub(super) fn terminal(
             }
         }
     }
-    if !assumptions.is_empty()
+    if request.mode == RouteMode::AllowStationaryAssumptions
+        && !assumptions.is_empty()
         && node.steps.iter().any(|step| {
             matches!(step, RouteStep::Move { updates, .. } if *updates > CONDITIONAL_MOVE_UPDATES)
         })
@@ -319,12 +321,14 @@ pub(super) fn finish(
     node: SearchNode,
     work: &mut WorkBudget,
 ) -> Result<RouteCertificate, RouteFailure> {
-    let assurance = if node.assumptions.is_empty() {
-        RouteAssurance::Certified
-    } else {
-        RouteAssurance::ConditionalStationary {
+    let assurance = match request.mode {
+        RouteMode::ReactiveStationaryAssumptions => RouteAssurance::ReactiveStationary {
             bombs: node.assumptions.into_iter().collect(),
-        }
+        },
+        _ if node.assumptions.is_empty() => RouteAssurance::Certified,
+        _ => RouteAssurance::ConditionalStationary {
+            bombs: node.assumptions.into_iter().collect(),
+        },
     };
     let lanes = build_lanes(context, request, &node.steps, work)?;
     RouteCertificate::new(

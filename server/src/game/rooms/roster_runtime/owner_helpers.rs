@@ -34,14 +34,6 @@ impl RosterRuntime {
         )
     }
 
-    pub(in crate::game::rooms) const fn uses_clearance_cpu_profiles(&self) -> bool {
-        matches!(
-            self.construction_profile,
-            grenadiers_core::game::ArenaConstructionProfile::LairClearanceV5
-                | grenadiers_core::game::ArenaConstructionProfile::WeightedLairClearanceV7
-        )
-    }
-
     pub(in crate::game::rooms) const fn uses_contact_cpu_profiles(&self) -> bool {
         matches!(
             self.spike_publication,

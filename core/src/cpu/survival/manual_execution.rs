@@ -5,7 +5,10 @@ use crate::cpu::routing::{
 use crate::cpu::{ManualIntent, MovementIntent, Observation};
 use crate::game::Tick;
 
-use super::compatibility::{actor, actor_compatible, plant_actor_compatible, route_compatible};
+use super::compatibility::{
+    actor, actor_compatible, charge_route_actor_compatibility, plant_actor_compatible,
+    plant_actor_compatible_charged, route_compatible,
+};
 use super::route_execution::CommittedPlant;
 use super::{CommittedRoute, PlantContactCertificate};
 
@@ -15,6 +18,8 @@ pub enum ExecutionCertificate {
     Plant(Box<PlantCertificate>),
     ContactPlant(Box<PlantContactCertificate>),
     Punch(Box<PunchCertificate>),
+    ReactivePlant(Box<super::ReactivePlantCertificate>),
+    ReactiveRoute(Box<super::ReactiveRouteCertificate>),
 }
 
 impl ExecutionCertificate {
@@ -25,6 +30,8 @@ impl ExecutionCertificate {
             Self::Plant(plant) => plant.route(),
             Self::ContactPlant(plant) => plant.route(),
             Self::Punch(punch) => punch.route(),
+            Self::ReactivePlant(plant) => plant.plant().route(),
+            Self::ReactiveRoute(route) => route.route(),
         }
     }
 
@@ -33,7 +40,8 @@ impl ExecutionCertificate {
         match self {
             Self::Plant(plant) => Some(plant),
             Self::ContactPlant(plant) => Some(plant.plant()),
-            Self::Route(_) | Self::Punch(_) => None,
+            Self::ReactivePlant(plant) => Some(plant.plant()),
+            Self::Route(_) | Self::Punch(_) | Self::ReactiveRoute(_) => None,
         }
     }
 
@@ -41,15 +49,21 @@ impl ExecutionCertificate {
     pub const fn punch(&self) -> Option<&PunchCertificate> {
         match self {
             Self::Punch(punch) => Some(punch),
-            Self::Route(_) | Self::Plant(_) | Self::ContactPlant(_) => None,
+            Self::Route(_)
+            | Self::Plant(_)
+            | Self::ContactPlant(_)
+            | Self::ReactivePlant(_)
+            | Self::ReactiveRoute(_) => None,
         }
     }
 
     #[must_use]
     pub const fn manual_intent(&self) -> Option<ManualIntent> {
         match self {
-            Self::Route(_) => None,
-            Self::Plant(_) | Self::ContactPlant(_) => Some(ManualIntent::Bomb),
+            Self::Route(_) | Self::ReactiveRoute(_) => None,
+            Self::Plant(_) | Self::ContactPlant(_) | Self::ReactivePlant(_) => {
+                Some(ManualIntent::Bomb)
+            }
             Self::Punch(_) => Some(ManualIntent::Equipment),
         }
     }
@@ -57,10 +71,11 @@ impl ExecutionCertificate {
     #[must_use]
     pub fn manual_execution_tick(&self) -> Option<Tick> {
         match self {
-            Self::Route(_) => None,
+            Self::Route(_) | Self::ReactiveRoute(_) => None,
             Self::Plant(plant) => Some(plant.placement().placed_at),
             Self::ContactPlant(plant) => Some(plant.plant().placement().placed_at),
             Self::Punch(punch) => Some(punch.execution_tick()),
+            Self::ReactivePlant(plant) => Some(plant.plant().placement().placed_at),
         }
     }
 
@@ -69,7 +84,48 @@ impl ExecutionCertificate {
     pub const fn contact_plant_requires_blocked_birth_support(&self) -> Option<bool> {
         match self {
             Self::ContactPlant(plant) => Some(plant.requires_blocked_birth_support()),
-            Self::Route(_) | Self::Plant(_) | Self::Punch(_) => None,
+            Self::Route(_)
+            | Self::Plant(_)
+            | Self::Punch(_)
+            | Self::ReactivePlant(_)
+            | Self::ReactiveRoute(_) => None,
+        }
+    }
+
+    #[must_use]
+    pub const fn requires_reactive_support(&self) -> bool {
+        matches!(self, Self::ReactivePlant(_) | Self::ReactiveRoute(_))
+    }
+
+    pub fn strategic_plant_still_targets(
+        &self,
+        observation: &Observation,
+        intent: crate::cpu::policy::StrategicIntent,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> bool {
+        match self {
+            Self::Plant(plant) => {
+                super::strategic_plant_still_targets(observation, intent, plant, work)
+            }
+            Self::ContactPlant(plant) => {
+                super::strategic_plant_still_targets(observation, intent, plant.plant(), work)
+            }
+            Self::ReactivePlant(plant) => {
+                plant.strategic_plant_still_targets(observation, intent, work)
+            }
+            Self::Route(_) | Self::Punch(_) | Self::ReactiveRoute(_) => false,
+        }
+    }
+
+    #[must_use]
+    pub const fn reactive_block_contribution(&self) -> Option<crate::game::CellId> {
+        match self {
+            Self::ReactivePlant(plant) => Some(plant.block_contribution()),
+            Self::Route(_)
+            | Self::Plant(_)
+            | Self::ContactPlant(_)
+            | Self::Punch(_)
+            | Self::ReactiveRoute(_) => None,
         }
     }
 }
@@ -88,6 +144,14 @@ impl CommittedRoute {
         admission_tick: Tick,
         accepted_movement: MovementIntent,
     ) -> Result<Self, PolicyError> {
+        if execution.requires_reactive_support()
+            || matches!(
+                execution.route().assurance(),
+                crate::cpu::routing::RouteAssurance::ReactiveStationary { .. }
+            )
+        {
+            return Err(PolicyError::InvalidObservation);
+        }
         match execution {
             ExecutionCertificate::Route(certificate) => Self::admit(
                 *certificate,
@@ -146,6 +210,9 @@ impl CommittedRoute {
                 });
                 Ok(route)
             }
+            ExecutionCertificate::ReactivePlant(_) | ExecutionCertificate::ReactiveRoute(_) => {
+                Err(PolicyError::InvalidObservation)
+            }
         }
     }
 
@@ -191,9 +258,58 @@ impl CommittedRoute {
             }
             return compatible;
         }
+        let mut reactive_work = self.reactive.as_ref().and_then(|assumptions| {
+            let mut work =
+                crate::cpu::WorkBudget::new(super::reactive_plant::REACTIVE_GUARD_ALLOWANCE);
+            assumptions.matches(current, &mut work).then_some(work)
+        });
+        if self.reactive.is_some() && reactive_work.is_none() {
+            return false;
+        }
         let Some(plant) = self.plant.as_mut() else {
+            if let Some(work) = reactive_work.as_mut() {
+                let Some(charge) = self
+                    .certificate
+                    .evolution()
+                    .reactive_scene_work(&self.basis, current)
+                else {
+                    return false;
+                };
+                if work.try_take(charge).is_err() {
+                    return false;
+                }
+                if !charge_route_actor_compatibility(
+                    &self.basis,
+                    current,
+                    self.certificate.evolution(),
+                    work,
+                ) {
+                    return false;
+                }
+            }
             return route_compatible(&self.basis, current, self.certificate.evolution());
         };
+        if let Some(work) = reactive_work.as_mut() {
+            let Some(candidate) = plant.certificate.reactive_scene_candidate(
+                &self.basis,
+                current,
+                plant.presence,
+                work,
+            ) else {
+                return false;
+            };
+            if !plant_actor_compatible_charged(
+                &self.basis,
+                current,
+                &plant.certificate,
+                candidate,
+                work,
+            ) {
+                return false;
+            }
+            plant.presence = candidate;
+            return true;
+        }
         if let Some(contact) = &plant.contact {
             let Some(candidate) = super::contact_plant::contact_scene_candidate(
                 &self.basis,

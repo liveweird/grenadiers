@@ -24,6 +24,7 @@ pub(super) struct Outcome {
     pub attack_intents: [usize; 3],
     pub attack_bombs: [usize; 3],
     pub completed_switches: [usize; 3],
+    pub stalled_switches: [usize; 3],
     pub alive: [bool; 3],
     pub ever_dead: [bool; 3],
     pub dequeued: usize,

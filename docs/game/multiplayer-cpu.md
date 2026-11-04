@@ -1,7 +1,7 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy60 on Easy/Standard and policy61 on Hard for every live
-two-to-four-seat gameplay20/rules10 room. Policy56/59 remains the archived replay30 pair and policy58
+The live environment CPU implementation uses policy62 on Easy/Standard and policy64 on Hard for every live
+two-to-four-seat gameplay21/rules10 room. The explicit generator6 construction retains policy60/61. Policy56/59 remains the archived replay30 pair and policy58
 remains the archived Hard identity for replay29, while
 the legacy multiplayer profiles remain policy17 for archived/reference paths. See the
 [board profile table](board-sizes.md). The
@@ -14,16 +14,17 @@ Rules 1–5 require two canonical actors and retain the 16-bomb observation/fore
 Rules 6 accepts two to four canonical actors and 32 bombs. Forecast evolution, history and
 hypothetical placement use the selected rules' limit rather than raising a global legacy cap.
 
-`protocol::v20::observe_cpu_recipient` derives observations from the same checked recipient
+`protocol::v21::observe_cpu_recipient` derives observations from the same checked recipient
 projection used by humans. Cloaked actors, unavailable bomb knowledge, timed effects and
 individual Teleporter markers remain private. Planning never receives the complete simulation
 or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::CONTACT_PUNCH_V60_STANDARD` and `CONTACT_PUNCH_V60_EASY` select Utility60
-for live rules10 Easy/Standard rooms. `CpuProfile::HARD_V61` selects Utility61 for Hard rooms
-with the same observation boundary. Private replay31 binds this exact current pair and ContactV2;
+`CpuProfile::RECOVERY_V62_STANDARD` and `RECOVERY_V62_EASY` select Utility62 for live
+Easy/Standard rooms. `CpuProfile::HARD_V64` selects Utility64 for Hard rooms with the same
+observation boundary. Private replay33 binds this pair to generator7, pit-layout2 and ContactV2.
+The published generator6/replay32 construction and archived replay31 retain CPU60/61;
 replay30 retains CPU56/59 with ManualV1.
 `RELIABLE_V27_STANDARD`/`RELIABLE_V27_EASY` and `HARD_V29` retain their archived behavior.
 `SPIKE_PITS_STANDARD`/`SPIKE_PITS_EASY` retain Utility26 for archived/reference paths.
@@ -50,7 +51,7 @@ These additional multiplayer guards do not change rules-5 admission semantics.
 
 ## Contact Punch routing
 
-CPU60/61 do not intentionally emit the archived manual Equipment action or use an intentional
+CPU62/64 inherit CPU60/61’s routing guards. They do not intentionally emit the archived manual Equipment action or use an intentional
 contact-Punch tactic. Because ContactV2 can relocate a bomb on movement contact, every certified
 forward segment checks the immediate swept contact cells for a visible bomb or a forecasted
 punchable moving bomb. Any possible unmodelled relocation rejects that route. Exact retained
@@ -300,3 +301,19 @@ The v18/v19/v20 adapter tests compare CPU facts with human recipient projections
 cover forecast capacity, rival interference, all three difficulties, independent controllers and
 player four. Live multi-CPU scheduling is owned by the room owner/socket integration rather than
 this projection API.
+
+## Recovery and initial demolition
+
+CPU62/64 keep a certified escape through its complete own-bomb flame horizon. A nonfinal route
+anchor counts as reached when actual movement crosses it in the planned direction, avoiding an
+exact-coordinate stall. Stationary suffixes and every renewal remain charged and checked against
+fresh publications, contact hazards, equipment, pit state and the actual final physics update.
+A changed scene can withdraw authority; this does not predict unseen rival actions.
+
+When Hard64 has no incoming strategic commitment, its first completed preferred attack proof
+may reveal that the bomb would miss its selected opponent. If that same proof hits a named
+visible soft block, it can instead create a bounded farming commitment at the certified origin.
+A useful attack retains its existing choice. Failed proofs spend their original allowance and
+leave the remaining canonical candidates available. This adds no reroute, hidden-loot access,
+random draw or work budget; ordinary contact checks and queued admission still decide whether
+the bomb can actually be placed. Archived policies60/61 retain their original behavior.

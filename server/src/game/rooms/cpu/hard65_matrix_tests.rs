@@ -3,7 +3,7 @@ use grenadiers_core::room::{BoardSize, CpuDifficulty, CpuProfile};
 use super::{outcome::Outcome, support};
 
 #[test]
-fn fixed_gen7_matrix_reports_hard64_hard65_cost_and_unchanged_controls() {
+fn fixed_gen7_matrix_reports_hard64_hard65_hard66_cost_and_unchanged_controls() {
     let boards = [
         BoardSize::ElevenByNine,
         BoardSize::ThirteenByEleven,
@@ -40,6 +40,7 @@ fn fixed_gen7_matrix_reports_hard64_hard65_cost_and_unchanged_controls() {
 
     let mut archived = Vec::new();
     let mut reactive = Vec::new();
+    let mut pickup = Vec::new();
     for board in boards {
         for lairs in [false, true] {
             let case = support::Case {
@@ -52,18 +53,25 @@ fn fixed_gen7_matrix_reports_hard64_hard65_cost_and_unchanged_controls() {
             };
             let hard64 = support::run_inner(case, 840, CpuProfile::HARD_V64, true, |_| {});
             let hard65 = support::run_inner(case, 840, CpuProfile::HARD_V65, true, |_| {});
+            let hard66 = support::run_inner(case, 840, CpuProfile::HARD_V66, true, |_| {});
             assert_eq!(hard64.construction_profile, hard65.construction_profile);
+            assert_eq!(hard65.construction_profile, hard66.construction_profile);
             assert_eq!(hard64.generation_version, hard65.generation_version);
+            assert_eq!(hard65.generation_version, hard66.generation_version);
             assert_eq!(hard64.pit_layout, hard65.pit_layout);
+            assert_eq!(hard65.pit_layout, hard66.pit_layout);
             assert_eq!(hard64.multiplier, hard65.multiplier);
+            assert_eq!(hard65.multiplier, hard66.multiplier);
             assert_bounded(&hard64);
             assert_bounded(&hard65);
+            assert_bounded(&hard66);
             archived.push(metrics(board, lairs, &hard64));
             reactive.push(metrics(board, lairs, &hard65));
+            pickup.push(metrics(board, lairs, &hard66));
         }
     }
     eprintln!(
-        "HARD65_FIXED_MATRIX controls={controls:#?} hard64={archived:#?} hard65={reactive:#?}"
+        "HARD66_FIXED_MATRIX controls={controls:#?} hard64={archived:#?} hard65={reactive:#?} hard66={pickup:#?}"
     );
 }
 

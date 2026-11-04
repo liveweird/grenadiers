@@ -150,7 +150,7 @@ use its restricted tactic.
 
 Archived ManualV1 CPU profiles can check one stopped Equipment action against a single adjacent,
 unpaused Standard timed bomb. Their complete relocation/cooldown-failure escape proof and scene
-restrictions remain frozen for replay compatibility. Live CPU62/65 intentionally emit no manual
+restrictions remain frozen for replay compatibility. Live CPU62/66 intentionally emit no manual
 Equipment action and do not currently use an intentional contact-Punch tactic. ContactV2 can
 activate Punch through movement, so their route guard declines forward bomb contact that could
 cause an unmodelled relocation. Exact retained origin grace permits safe departure from an overlap;

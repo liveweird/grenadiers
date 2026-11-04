@@ -72,6 +72,8 @@ impl CpuProfile {
     pub const HARD_V64: Self = Self::profile(CpuPolicy::UtilityV64, CpuDifficulty::Hard);
     /// Measured-risk reactive foreign-bomb demolition; Hard-only and opt-in.
     pub const HARD_V65: Self = Self::profile(CpuPolicy::UtilityV65, CpuDifficulty::Hard);
+    /// Fresh equal-cost pickup contention, retaining the complete Hard65 tactic stack.
+    pub const HARD_V66: Self = Self::profile(CpuPolicy::UtilityV66, CpuDifficulty::Hard);
 
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

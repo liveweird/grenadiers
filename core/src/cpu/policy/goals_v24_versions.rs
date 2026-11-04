@@ -108,13 +108,15 @@ pub(in crate::cpu::policy) fn select_pits(
     )
 }
 
-pub(in crate::cpu::policy) fn select_pits_v59(
+#[allow(clippy::too_many_arguments)]
+pub(in crate::cpu::policy) fn select_pits_v59_modes(
     observation: &Observation,
     actor: &VisibleActor,
     current: CellId,
     memory: &UtilityMemory,
     work: &mut WorkBudget,
     farm_origin_recovery: bool,
+    goal_modes: GoalModes,
 ) -> Option<GuidanceV24> {
     select_inner(
         observation,
@@ -123,7 +125,7 @@ pub(in crate::cpu::policy) fn select_pits_v59(
         memory,
         work,
         true,
-        GoalModes::visible_yield(),
+        goal_modes,
         farm_origin_recovery,
         true,
     )

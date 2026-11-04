@@ -18,9 +18,16 @@ pub(crate) enum FarmOriginMode {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum PickupMode {
+    Legacy,
+    VisibleContention,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct GoalModes {
     pub(crate) pressure: PressureMode,
     pub(crate) farm_origin: FarmOriginMode,
+    pub(crate) pickup: PickupMode,
 }
 
 impl GoalModes {
@@ -28,6 +35,7 @@ impl GoalModes {
         Self {
             pressure,
             farm_origin: FarmOriginMode::Nearest,
+            pickup: PickupMode::Legacy,
         }
     }
 
@@ -35,6 +43,14 @@ impl GoalModes {
         Self {
             pressure: PressureMode::ExitCoverage,
             farm_origin: FarmOriginMode::VisibleYield,
+            pickup: PickupMode::Legacy,
+        }
+    }
+
+    pub(crate) const fn visible_yield_contention() -> Self {
+        Self {
+            pickup: PickupMode::VisibleContention,
+            ..Self::visible_yield()
         }
     }
 }

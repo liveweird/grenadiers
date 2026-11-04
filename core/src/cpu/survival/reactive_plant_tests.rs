@@ -131,6 +131,48 @@ fn stale_history_ending_before_the_basis_cannot_enable_hard65() {
 }
 
 #[test]
+fn hard65_retains_the_v64_contact_policy_gate_and_preflight_accounting() {
+    let (observation, history, memory, key) = reactive_basis();
+    let wrong_policy = observation
+        .map_parts(|parts| {
+            parts.rules.punch_activation_policy = PunchActivationPolicy::ManualV1;
+        })
+        .unwrap();
+    let mut expected = WorkBudget::new(super::reactive_plant::REACTIVE_GUARD_ALLOWANCE);
+    let assumptions = super::reactive_assumptions::ReactivePlantAssumptions::certify(
+        &wrong_policy,
+        &history,
+        wrong_policy.parts().tick,
+        &mut expected,
+    );
+    if assumptions.is_none() {
+        let _ = super::reactive_assumptions::ReactivePlantAssumptions::certify_escape(
+            &wrong_policy,
+            &history,
+            wrong_policy.parts().tick,
+            &mut expected,
+        );
+    }
+    let mut v65_rng = CpuRng::from_seed(key, [65; 32]);
+    let mut v65_work = WorkBudget::new(WORK_ALLOWANCE);
+    let v65 = plan_hard_reactive_v65_with_origin(
+        &wrong_policy,
+        &memory,
+        &history,
+        wrong_policy.parts().tick,
+        None,
+        &mut v65_rng,
+        &mut v65_work,
+    );
+    assert_eq!(
+        v65.err(),
+        Some(crate::cpu::policy::PolicyError::InvalidObservation)
+    );
+    assert_eq!(v65_work.spent(), expected.spent());
+    assert_eq!(v65_rng.draws(), 0);
+}
+
+#[test]
 fn own_escape_preflight_accepts_finite_flames_but_plant_preflight_does_not() {
     let (observation, history, _, _) = reactive_basis();
     let observation = observation

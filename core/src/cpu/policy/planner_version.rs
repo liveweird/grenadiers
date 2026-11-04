@@ -18,6 +18,7 @@ pub(in crate::cpu::policy) enum PlannerVersion {
     HardPitsExitPressureV58,
     HardFarmYieldV59,
     HardPitsYieldV59,
+    HardPickupV66,
 }
 
 impl PlannerVersion {
@@ -43,6 +44,7 @@ impl PlannerVersion {
                 | Self::HardPitsExitPressureV58
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
+                | Self::HardPickupV66
         )
     }
 
@@ -63,6 +65,7 @@ impl PlannerVersion {
                 | Self::HardPitsExitPressureV58
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
+                | Self::HardPickupV66
         )
     }
 
@@ -82,6 +85,7 @@ impl PlannerVersion {
                 | Self::HardPitsExitPressureV58
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
+                | Self::HardPickupV66
         )
     }
 
@@ -92,6 +96,7 @@ impl PlannerVersion {
                 | Self::HardPitsExitPressureV58
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
+                | Self::HardPickupV66
         ) {
             super::super::PressureMode::ExitCoverage
         } else if matches!(
@@ -113,6 +118,7 @@ impl PlannerVersion {
                 | Self::HardFarmPitsV53
                 | Self::HardFarmExitPressureV58
                 | Self::HardFarmYieldV59
+                | Self::HardPickupV66
         )
     }
 
@@ -127,14 +133,26 @@ impl PlannerVersion {
                 | Self::HardPitsExitPressureV58
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
+                | Self::HardPickupV66
         )
     }
 
     pub(super) const fn farm_origin_mode(self) -> super::super::FarmOriginMode {
-        if matches!(self, Self::HardFarmYieldV59 | Self::HardPitsYieldV59) {
+        if matches!(
+            self,
+            Self::HardFarmYieldV59 | Self::HardPitsYieldV59 | Self::HardPickupV66
+        ) {
             super::super::FarmOriginMode::VisibleYield
         } else {
             super::super::FarmOriginMode::Nearest
+        }
+    }
+
+    pub(super) const fn pickup_mode(self) -> super::super::PickupMode {
+        if matches!(self, Self::HardPickupV66) {
+            super::super::PickupMode::VisibleContention
+        } else {
+            super::super::PickupMode::Legacy
         }
     }
 }

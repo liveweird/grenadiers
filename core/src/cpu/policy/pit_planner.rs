@@ -32,14 +32,16 @@ pub(super) fn select_guidance_v59(
     memory: &UtilityMemory,
     work: &mut WorkBudget,
     farm_origin_recovery: bool,
+    goal_modes: super::GoalModes,
 ) -> Option<super::goals::v24::GuidanceV24> {
-    super::goals::v24::select_pits_v59(
+    super::goals::v24::select_pits_v59_modes(
         observation,
         actor,
         current,
         memory,
         work,
         farm_origin_recovery,
+        goal_modes,
     )
 }
 
@@ -154,6 +156,21 @@ pub(crate) fn plan_hard_pits_yield_v59(
         rng,
         work,
         PlannerVersion::HardPitsYieldV59,
+    )
+}
+
+pub(crate) fn plan_hard_pickup_contention_v66(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    plan_rules10(
+        observation,
+        memory,
+        rng,
+        work,
+        PlannerVersion::HardPickupV66,
     )
 }
 

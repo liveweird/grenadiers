@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.25 — 2026-11-05
+
+- Let Hard CPU prefer a visibly contested capacity/range upgrade over an equally valuable, equally close uncontested alternative, while retaining valid goals.
+- Bound rival-distance comparisons within the existing decision allowance and preserve archived Hard65, Easy/Standard behavior, arena generation and physics.
+- Bind the selected Hard66 profile to a distinct runtime family and private replay35.
+
 ## 1.3.24 — 2026-11-04
 
 - Let Hard CPU attempt useful wall bombing beside visible stationary rival bombs with a complete nominal escape and fresh assumption checks.

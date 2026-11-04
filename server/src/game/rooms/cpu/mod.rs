@@ -22,3 +22,5 @@ mod worker_teleporter_tests;
 mod worker_v27_tests;
 #[cfg(test)]
 mod worker_v65_tests;
+#[cfg(test)]
+mod worker_v66_tests;

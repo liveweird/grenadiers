@@ -23,6 +23,7 @@ pub(super) fn strategic(
             memory,
             work,
             farm_origin_recovery,
+            modes,
         )
     } else if avoid_pits {
         super::super::pit_planner::select_guidance(

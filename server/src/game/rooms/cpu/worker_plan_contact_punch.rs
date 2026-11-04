@@ -5,7 +5,7 @@ use grenadiers_core::{
         survival::{
             LairSurvivalPlan, plan_contact_punch_v60_with_origin,
             plan_hard_contact_punch_v61_with_origin, plan_hard_demolition_v64_with_origin,
-            plan_hard_reactive_v65_with_origin,
+            plan_hard_pickup_v66_with_origin, plan_hard_reactive_v65_with_origin,
         },
     },
     room::CpuPolicy,
@@ -22,7 +22,8 @@ pub(super) fn plan(
         CpuPolicy::UtilityV61 | CpuPolicy::UtilityV63 => plan_hard_contact_punch_v61_with_origin,
         CpuPolicy::UtilityV64 => plan_hard_demolition_v64_with_origin,
         CpuPolicy::UtilityV65 => plan_hard_reactive_v65_with_origin,
-        _ => unreachable!("contact-punch dispatch is closed to policies 60-65"),
+        CpuPolicy::UtilityV66 => plan_hard_pickup_v66_with_origin,
+        _ => unreachable!("contact-punch dispatch is closed to policies 60-66"),
     };
     planner(
         &job.observation,

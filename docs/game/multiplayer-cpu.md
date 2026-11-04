@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy62 on Easy/Standard and policy65 on Hard for every live
+The live environment CPU implementation uses policy62 on Easy/Standard and policy66 on Hard for every live
 two-to-four-seat gameplay21/rules10 room. The explicit generator6 construction retains policy60/61. Policy56/59 remains the archived replay30 pair and policy58
 remains the archived Hard identity for replay29, while
 the legacy multiplayer profiles remain policy17 for archived/reference paths. See the
@@ -8,11 +8,13 @@ the legacy multiplayer profiles remain policy17 for archived/reference paths. Se
 [CPU contract guide](cpu-contracts.md) describes planner boundaries; the
 [roster runtime](multiplayer-runtime.md) supplies the certified publication seam.
 
-Hard65 may conditionally bomb a useful visible wall beside stationary rival bombs, while
+Hard66 retains Hard65's conditional bombing of a useful visible wall beside stationary rival bombs, while
 retaining its primary opponent goal. After interruption it can prove a fresh nonmanual escape
 for an existing owned bomb. These paths use explicit visible-state assumptions and publication
 checks; unknown actions can still invalidate them. See the
 [reactive planning contract](cpu-contracts.md#reactive-hard-planning).
+For fresh equally valuable, equally close capacity/range upgrades, it may prefer a winnable
+visible contest. See the [pickup contention contract](cpu-contracts.md#hard-pickup-contention).
 
 ## Observations and compatibility
 
@@ -28,8 +30,9 @@ or a private arena/simulation random stream.
 ## Policies and controller ownership
 
 `CpuProfile::RECOVERY_V62_STANDARD` and `RECOVERY_V62_EASY` select Utility62 for live
-Easy/Standard rooms. `CpuProfile::HARD_V65` selects Utility65 for Hard rooms with the same
-observation boundary. Private replay34 binds this pair to generator7, pit-layout2 and ContactV2.
+Easy/Standard rooms. `CpuProfile::HARD_V66` selects Utility66 for Hard rooms with the same
+observation boundary. Private replay35 binds this pair to generator7, pit-layout2 and ContactV2.
+Archived replay34 retains CPU62/65.
 Archived replay33 preserves the earlier CPU62/64 family on the same construction.
 The published generator6/replay32 construction and archived replay31 retain CPU60/61;
 replay30 retains CPU56/59 with ManualV1.
@@ -58,7 +61,7 @@ These additional multiplayer guards do not change rules-5 admission semantics.
 
 ## Contact Punch routing
 
-CPU62/65 inherit CPU60/61’s routing guards. They do not intentionally emit the archived manual Equipment action or use an intentional
+CPU62/66 inherit CPU60/61’s routing guards. They do not intentionally emit the archived manual Equipment action or use an intentional
 contact-Punch tactic. Because ContactV2 can relocate a bomb on movement contact, every certified
 forward segment checks the immediate swept contact cells for a visible bomb or a forecasted
 punchable moving bomb. Any possible unmodelled relocation rejects that route. Exact retained
@@ -311,7 +314,7 @@ this projection API.
 
 ## Recovery and initial demolition
 
-CPU62/65 keep a checked escape through its complete own-bomb flame horizon. A nonfinal route
+CPU62/66 keep a checked escape through its complete own-bomb flame horizon. A nonfinal route
 anchor counts as reached when actual movement crosses it in the planned direction, avoiding an
 exact-coordinate stall. Stationary suffixes and every renewal remain charged and checked against
 fresh publications, contact hazards, equipment, pit state and the actual final physics update.

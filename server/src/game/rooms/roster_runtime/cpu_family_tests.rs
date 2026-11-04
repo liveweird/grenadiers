@@ -6,7 +6,8 @@ use grenadiers_core::{
         StormCloudConfig,
     },
     room::{
-        BoardSize, BombCapacityDropMultiplier, RespawnLairTuning, RoomSettings, SpikePitTuning,
+        BoardSize, BombCapacityDropMultiplier, CpuProfile, RespawnLairTuning, RoomSettings,
+        SpikePitTuning,
     },
 };
 
@@ -14,10 +15,19 @@ use super::{RosterRuntime, SpikeRuntimeEnvironment, cpu_family::CpuPolicyFamily,
 use crate::round_seed::RoundSeedSource;
 
 fn runtime(reactive: bool) -> RosterRuntime {
-    let constructor = if reactive {
-        RosterRuntime::new_spike_v21_reactive_with_navigation
+    runtime_with_family(if reactive {
+        CpuPolicyFamily::ReactiveHardV65
     } else {
-        RosterRuntime::new_spike_v21_clearance_with_navigation
+        CpuPolicyFamily::Clearance
+    })
+}
+
+fn runtime_with_family(family: CpuPolicyFamily) -> RosterRuntime {
+    let constructor = match family {
+        CpuPolicyFamily::Historical => panic!("use the historical runtime fixture"),
+        CpuPolicyFamily::Clearance => RosterRuntime::new_spike_v21_clearance_with_navigation,
+        CpuPolicyFamily::ReactiveHardV65 => RosterRuntime::new_spike_v21_reactive_with_navigation,
+        CpuPolicyFamily::PickupHardV66 => RosterRuntime::new_spike_v21_pickup_with_navigation,
     };
     constructor(
         tests::identity(tests::configuration_for(2, BoardSize::ThirteenByEleven)),
@@ -45,8 +55,8 @@ fn planner_family_changes_do_not_reinterpret_the_arena_or_simulation() {
     let mut reactive = runtime(true);
     assert_eq!(archived.cpu_family, CpuPolicyFamily::Clearance);
     assert_eq!(reactive.cpu_family, CpuPolicyFamily::ReactiveHardV65);
-    assert!(!archived.uses_reactive_hard_profile());
-    assert!(reactive.uses_reactive_hard_profile());
+    assert_eq!(archived.hard_cpu_profile(), Some(CpuProfile::HARD_V64));
+    assert_eq!(reactive.hard_cpu_profile(), Some(CpuProfile::HARD_V65));
     assert!(archived.uses_clearance_cpu_profiles());
     assert!(reactive.uses_clearance_cpu_profiles());
     tests::start(&mut archived, 2);
@@ -65,8 +75,17 @@ fn planner_family_changes_do_not_reinterpret_the_arena_or_simulation() {
 
 #[test]
 fn cpu_family_survives_settings_updates_and_simulation_resets() {
+    for family in [
+        CpuPolicyFamily::ReactiveHardV65,
+        CpuPolicyFamily::PickupHardV66,
+    ] {
+        assert_family_survives_settings_and_resets(family);
+    }
+}
+
+fn assert_family_survives_settings_and_resets(family: CpuPolicyFamily) {
     use grenadiers_core::game::SeatId;
-    let mut runtime = runtime(true);
+    let mut runtime = runtime_with_family(family);
     tests::admit_all(&mut runtime, 2);
     let settings = runtime
         .lifecycle
@@ -83,7 +102,7 @@ fn cpu_family_survives_settings_updates_and_simulation_resets() {
             SpikePitTuning::DEFAULT,
         )
         .unwrap();
-    assert_eq!(runtime.cpu_family, CpuPolicyFamily::ReactiveHardV65);
+    assert_eq!(runtime.cpu_family, family);
     ready_all(&mut runtime);
     runtime
         .interrupt(grenadiers_core::room::InterruptReason::ServerStopped)
@@ -105,7 +124,7 @@ fn cpu_family_survives_settings_updates_and_simulation_resets() {
         grenadiers_core::room::MatchPhase::Waiting
     );
     ready_all(&mut runtime);
-    assert_eq!(runtime.cpu_family, CpuPolicyFamily::ReactiveHardV65);
+    assert_eq!(runtime.cpu_family, family);
     assert_eq!(
         runtime
             .lifecycle
@@ -140,4 +159,21 @@ fn ready_all(runtime: &mut RosterRuntime) {
         runtime.lifecycle.phase(),
         grenadiers_core::room::MatchPhase::Running
     );
+}
+
+#[test]
+fn pickup_family_changes_only_the_selected_hard_planner() {
+    let mut reactive = runtime(true);
+    let mut pickup = runtime_with_family(CpuPolicyFamily::PickupHardV66);
+    assert_eq!(pickup.hard_cpu_profile(), Some(CpuProfile::HARD_V66));
+    assert!(pickup.uses_clearance_cpu_profiles());
+    tests::start(&mut reactive, 2);
+    tests::start(&mut pickup, 2);
+    let previous = reactive.replay_inspection();
+    let current = pickup.replay_inspection();
+    assert_eq!(previous.simulation, current.simulation);
+    assert_eq!(previous.lifecycle, current.lifecycle);
+    assert_eq!(previous.construction_profile, current.construction_profile);
+    assert_ne!(previous.cpu_family, current.cpu_family);
+    assert_eq!(tests::runtime(2).hard_cpu_profile(), None);
 }

@@ -1,11 +1,8 @@
-use std::collections::VecDeque;
-
 use crate::cpu::policy::{FarmOriginMode, GoalModes};
 use crate::cpu::{Observation, VisibleActor, WorkBudget};
 use crate::game::arena::ARENA_CELL_COUNT;
 use crate::game::{CellId, Position, Tick};
 
-use super::super::movement::{STEPS, offset};
 use super::super::{
     FAILED_TARGET_DEFER_TICKS, STRATEGIC_COMMITMENT_TICKS, STRATEGIC_PROGRESS_TICKS,
     StrategicIntent, StrategicObjectiveKind, StrategicPhase, StrategicSwitchReason,
@@ -22,6 +19,13 @@ mod exit_pressure;
 #[path = "goals_v59_farm_yield.rs"]
 mod farm_yield;
 
+#[path = "goals_v66_pickup_contention.rs"]
+mod pickup_contention;
+
+#[path = "goals_v24_reachable.rs"]
+mod reachability;
+pub(in crate::cpu::policy) use reachability::reachable;
+
 #[path = "goals_v24_order.rs"]
 mod order;
 use order::{add_ticks, fallback, position_distance, target_order};
@@ -36,7 +40,7 @@ mod farm;
 #[path = "goals_v24_versions.rs"]
 mod versions;
 pub(in crate::cpu::policy) use versions::{
-    select, select_pits, select_pits_v59, select_v25, select_v28, select_v38,
+    select, select_pits, select_pits_v59_modes, select_v25, select_v28, select_v38,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -279,6 +283,16 @@ fn select_inner(
     };
 
     if let Some(mut chosen) = chosen {
+        if goal_modes.pickup == crate::cpu::policy::PickupMode::VisibleContention {
+            chosen = pickup_contention::promote_fresh(
+                observation,
+                actor,
+                chosen,
+                &candidates,
+                &pit_sites,
+                work,
+            );
+        }
         if goal_modes.farm_origin == FarmOriginMode::VisibleYield
             && let Some(remainder) = &mut pressure_remainder
         {
@@ -354,43 +368,6 @@ fn select_inner(
             deferred_until: None,
         },
     })
-}
-
-pub(in crate::cpu::policy) fn reachable(
-    observation: &Observation,
-    current: CellId,
-    map: &super::SearchMap,
-    work: &mut WorkBudget,
-) -> Option<(DistanceMap, FirstStepMap)> {
-    let mut distance: [Option<u16>; ARENA_CELL_COUNT] = [None; ARENA_CELL_COUNT];
-    let mut first_step = [None; ARENA_CELL_COUNT];
-    let start = cell_index(observation, current)?;
-    distance[start] = Some(0);
-    first_step[start] = Some(current);
-    let mut queue = VecDeque::from([current]);
-    while let Some(cell) = queue.pop_front() {
-        work.try_take(1).ok()?;
-        let index = cell_index(observation, cell)?;
-        let next_distance = distance[index]?.saturating_add(1);
-        for (_, dc, dr) in STEPS {
-            let Some(next) = offset(cell, dc, dr) else {
-                continue;
-            };
-            let Some(next_index) = cell_index(observation, next) else {
-                continue;
-            };
-            if distance[next_index].is_none() && map.transitable(observation, next) {
-                distance[next_index] = Some(next_distance);
-                first_step[next_index] = Some(if cell == current {
-                    next
-                } else {
-                    first_step[index]?
-                });
-                queue.push_back(next);
-            }
-        }
-    }
-    Some((distance, first_step))
 }
 
 #[cfg(test)]

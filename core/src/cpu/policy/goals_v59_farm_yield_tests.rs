@@ -1,4 +1,4 @@
-use crate::cpu::policy::{PressureMode, StrategicTarget, UtilityMemory};
+use crate::cpu::policy::{GoalModes, PressureMode, StrategicTarget, UtilityMemory};
 use crate::cpu::survival::farm_yield_fixture::{
     BASELINE_ORIGIN, CPU, FARM_TARGET, HIGH_YIELD_ORIGIN, START, collected_basis_at,
 };
@@ -7,7 +7,7 @@ use crate::game::{
     BlastKind, CellId, EffectKind, OilBarrelState, PickupKind, Position, SpecialWeapon, Tick,
 };
 
-use super::super::{select_pits, select_pits_v59};
+use super::super::{select_pits, select_pits_v59_modes};
 
 fn choose(
     observation: &Observation,
@@ -25,13 +25,14 @@ fn choose(
         })
         .unwrap();
     let mut work = WorkBudget::new(allowance);
-    let guidance = select_pits_v59(
+    let guidance = select_pits_v59_modes(
         observation,
         actor,
         actor.position.cell().unwrap(),
         memory,
         &mut work,
         farm_origin_recovery,
+        GoalModes::visible_yield(),
     )
     .unwrap();
     (guidance, work.spent())
@@ -372,13 +373,14 @@ fn partial_optional_comparison_charges_work_and_preserves_the_exact_baseline() {
     )
     .unwrap();
     let mut work = WorkBudget::new(5_200);
-    let selected = select_pits_v59(
+    let selected = select_pits_v59_modes(
         &observation,
         actor,
         actor.position.cell().unwrap(),
         &memory,
         &mut work,
         true,
+        GoalModes::visible_yield(),
     )
     .unwrap();
     assert_eq!(selected, baseline);

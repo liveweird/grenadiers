@@ -1,5 +1,5 @@
 use crate::cpu::policy::{
-    ControlPlan, FarmOriginMode, GoalModes, PolicyError, PressureMode, UtilityMemory,
+    ControlPlan, FarmOriginMode, GoalModes, PickupMode, PolicyError, PressureMode, UtilityMemory,
 };
 use crate::cpu::{CpuRng, Observation, WorkBudget};
 
@@ -18,7 +18,11 @@ pub(super) fn plan(
     avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let pressure_mode = goal_modes.pressure;
-    if avoid_pits && farm_origin_recovery && goal_modes.farm_origin == FarmOriginMode::VisibleYield
+    if goal_modes.pickup == PickupMode::VisibleContention {
+        crate::cpu::policy::plan_hard_pickup_contention_v66(observation, memory, rng, work)
+    } else if avoid_pits
+        && farm_origin_recovery
+        && goal_modes.farm_origin == FarmOriginMode::VisibleYield
     {
         crate::cpu::policy::plan_hard_farm_yield_v59(observation, memory, rng, work)
     } else if avoid_pits && goal_modes.farm_origin == FarmOriginMode::VisibleYield {

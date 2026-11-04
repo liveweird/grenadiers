@@ -9,7 +9,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
 Two. Live selection uses `RECOVERY_V62_STANDARD` or `RECOVERY_V62_EASY` and
-`HARD_V65`; private replay34 binds those identities, generator7, pit-layout2 and ContactV2.
+`HARD_V66`; private replay35 binds those identities, generator7, pit-layout2 and ContactV2.
+Archived generator7/replay34 retains Easy/Standard62 and Hard65.
 Archived generator7/replay33 retains Easy/Standard62 and Hard64.
 Published generator6/replay32 and archived replay31 retain CPU60/61. Archived replay30 retains
 CPU56/59 with ManualV1, and replay29 retains CPU56/58. Named
@@ -23,7 +24,7 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-archived Equipment intent. Current CPU62/65 do not intentionally request Equipment or contact
+archived Equipment intent. Current CPU62/66 do not intentionally request Equipment or contact
 Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
 forward bomb contact. Intent carries no credentials, seat authority, readiness,
 settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
@@ -90,6 +91,27 @@ Stable ordering and the independent RNG resolve genuine ties; exhausted work yie
 
 This is static guidance. Existing hazard checks, planting certificates and pickup-changing-path
 restrictions retain authority, and hidden contents never enter goal selection.
+
+### Hard pickup contention
+
+Hard66 can change a fresh Collect choice when two useful upgrades have equal intrinsic value
+and equal CPU path distance. It prefers the one a visible rival is approaching when the CPU
+has a two-to-four-cell distance advantage, rather than leaving that contested upgrade for the
+rival. An already valid commitment stays intact; closer or ambiguous races retain the baseline.
+
+This first comparison supports exposed Bomb Capacity and Blast Range upgrades only, equal
+observed speed, and no frozen actor, Slow Foot, Stopwatch, Wall Pass or teleport within six
+updates. Every living rival must be visible and compatible. Rival distances respect permanent
+terrain, soft blocks and unlit Oil; temporary occupancy, bombs, spikes and burning Oil are
+optimistically passable, so they cannot manufacture a favorable detour. Distances guide
+selection rather than certify arrival or safety.
+
+The optional comparison uses at most 2,048 units and one sixteenth of remaining work, charges
+its scans and flood fills, and discards partial results on exhaustion. It changes no category
+score, commitment deadline, RNG draw, movement authority or planting proof. Hard66 retains
+Hard65's reactive and OwnEscape checks; archived Hard65 retains its original decisions and
+work accounting. Physical paired evidence belongs in the
+[history record](../history/cpu-pickup-contention-2026-11-05.md).
 
 ## Planning and committed execution
 
@@ -207,7 +229,7 @@ Manual fallback decisions are preserved. A complete reactive plant may replace a
 nonmanual route or pulse. Candidate guidance comes from the fallback or a valid incoming
 commitment, with one bounded ordinary Hard goal selection if needed. Failed attempts return
 the retained fallback with its prospective RNG; proof search draws no randomness. Only the
-actual Hard65 controller can admit the distinct reactive certificate.
+actual Hard65 or Hard66 controller can admit the distinct reactive certificate.
 
 The extension requires visible actors and timed bombs, two current stationary observations,
 no known bomb-moving equipment, and a named useful visible block contribution. Farm retains its
@@ -667,10 +689,12 @@ Room construction fixes a single `ArenaConstructionProfile`. Its generator and s
 identities are checked at publication and admission; settings, rounds and rematches retain it.
 A separate CPU family fixes planner identity without changing arena generation. The clearance
 family admits exactly CPU62 on Easy/Standard and CPU64 on Hard; the reactive family retains
-CPU62 on Easy/Standard and selects Hard65. Published weighted generator6 retains CPU60/61.
+CPU62 on Easy/Standard and selects Hard65. The pickup family retains CPU62 and selects Hard66.
+Published weighted generator6 retains CPU60/61.
 Settings changes, rounds and rematches retain both construction and planner families.
 ContactV2 or gameplay21 alone cannot select a family. A forged policy or difficulty is rejected
-before work. Private replay33 closes the clearance family; replay34 closes the reactive family.
+before work. Private replay33 closes the clearance family; replay34 closes the reactive family;
+replay35 closes the pickup family.
 
 The recovery suffix and initial-demolition behavior are described in the
 [multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared

@@ -1,7 +1,7 @@
 # Lair and mob simulation
 
-Live rules10/gameplay20 gives each lair exactly one living mob. A lair waits for its mob to die,
-then starts a fresh respawn delay. See [the wire contract](protocol-v20.md) and
+Live rules10/gameplay21 gives each lair exactly one living mob. A lair waits for its mob to die,
+then starts a fresh respawn delay. See [the wire contract](protocol-v21.md) and
 [CPU boundaries](multiplayer-cpu.md#lair-profile-boundaries).
 
 ## Configuration and lifecycle
@@ -21,8 +21,10 @@ every Oil state. At most two mobs exist across the two lairs. IDs use the checke
 allocator; newborns first move on the following tick.
 
 The indestructible pillars use `lair_layout_v1(board)`: `(6,6)/(8,6)` on 15×13,
-`(6,4)/(6,6)` on 13×11 and `(4,4)/(6,4)` on 11×9. Generator and randomness versions are
-unchanged. Construction rejects a lair cell without a hard wall.
+`(6,4)/(6,6)` on 13×11 and `(4,4)/(6,4)` on 11×9. Generator7 clears a connected floor ring around each enabled lair without consuming
+randomness. Spike layout2 keeps pits outside that ring and preserves a usable exit. Later bombs,
+actors and other dynamic obstacles may still delay a birth. Construction rejects a lair cell
+without a hard wall. See [generation](generation.md) and the [live arena example](../screenshots/lair-clearance.png).
 
 ## Movement and combat
 

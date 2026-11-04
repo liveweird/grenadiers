@@ -2,68 +2,14 @@
 
 use std::sync::Arc;
 
-use crate::cpu::routing::{ContinuationCertificate, PreparedFrame, PreparedGrant, RouteFailure};
-use crate::cpu::{DecisionId, MemoryKey, MovementIntent, Observation, WorkBudget};
+pub(super) use super::continuation_execution_types::{
+    ContinuationCommand, ContinuationPublication, ContinuationStatus, EpisodeToken,
+};
+use crate::cpu::routing::{
+    ContinuationCertificate, PreparedFrame, PreparedGrant, PreparedHold, RouteFailure,
+};
+use crate::cpu::{MovementIntent, Observation, WorkBudget};
 use crate::game::Tick;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct ContinuationPublication {
-    pub(crate) decision: DecisionId,
-    pub(crate) key: MemoryKey,
-    pub(crate) sequence: u64,
-    pub(crate) tick: Tick,
-}
-
-impl ContinuationPublication {
-    pub fn new(
-        decision: DecisionId,
-        key: MemoryKey,
-        sequence: u64,
-        tick: Tick,
-    ) -> Result<Self, RouteFailure> {
-        if decision.world != key.world || tick < decision.observation_tick {
-            return Err(RouteFailure::IdentityMismatch);
-        }
-        Ok(Self {
-            decision,
-            key,
-            sequence,
-            tick,
-        })
-    }
-}
-
-#[derive(Debug)]
-struct EpisodeToken;
-
-#[cfg_attr(test, derive(Clone))]
-#[derive(Debug)]
-pub struct ContinuationCommand {
-    token: Arc<EpisodeToken>,
-    movement: MovementIntent,
-    admission_tick: Tick,
-    input_index: u8,
-}
-
-impl ContinuationCommand {
-    pub const fn movement(&self) -> MovementIntent {
-        self.movement
-    }
-
-    pub const fn admission_tick(&self) -> Tick {
-        self.admission_tick
-    }
-}
-
-#[derive(Debug)]
-pub enum ContinuationStatus {
-    Continue,
-    Wait,
-    Submit(ContinuationCommand),
-    RenewalRequired,
-    Completed,
-    Invalidated,
-}
 
 pub struct PreparedContinuation {
     token: Arc<EpisodeToken>,
@@ -82,6 +28,7 @@ pub struct PreparedRenewal {
 
 enum PreparedRenewalKind {
     Grant(Box<PreparedGrant>),
+    Hold(PreparedHold),
     Complete,
 }
 
@@ -96,6 +43,7 @@ pub struct CommittedContinuation {
     revoked: bool,
     completed: bool,
     pending: Option<ContinuationPublication>,
+    hold_until: Option<Tick>,
 }
 
 pub(super) fn prepare_admission(
@@ -153,6 +101,7 @@ impl PreparedContinuation {
             revoked: false,
             completed: false,
             pending: None,
+            hold_until: None,
         })
     }
 }
@@ -169,6 +118,12 @@ impl PreparedRenewal {
     fn expected_command(&self) -> ContinuationCommand {
         match &self.kind {
             PreparedRenewalKind::Grant(frame) => command(&self.token, frame, 0),
+            PreparedRenewalKind::Hold(frame) => ContinuationCommand {
+                token: Arc::clone(&self.token),
+                movement: MovementIntent::Stop,
+                admission_tick: frame.publication(),
+                input_index: 0,
+            },
             PreparedRenewalKind::Complete => ContinuationCommand {
                 token: Arc::clone(&self.token),
                 movement: MovementIntent::Stop,
@@ -190,12 +145,37 @@ impl PreparedRenewal {
     pub(crate) fn movements_for_test(&self) -> Option<[MovementIntent; 3]> {
         match &self.kind {
             PreparedRenewalKind::Grant(frame) => Some(frame.movements()),
-            PreparedRenewalKind::Complete => None,
+            PreparedRenewalKind::Hold(_) | PreparedRenewalKind::Complete => None,
         }
     }
 }
 
 impl CommittedContinuation {
+    pub fn complete_at_publication(
+        &mut self,
+        current: &Observation,
+        publication: ContinuationPublication,
+    ) -> bool {
+        let horizon = self.certificate.survive_until();
+        let expected_sequence = self.publication.sequence.checked_add(1);
+        if !self.revoked
+            && !self.completed
+            && self.pending.is_none()
+            && self.hold_until == Some(horizon)
+            && current.parts().tick == horizon
+            && publication.tick == horizon
+            && publication.decision == self.publication.decision
+            && publication.key == self.publication.key
+            && expected_sequence == Some(publication.sequence)
+        {
+            self.publication = publication;
+            self.completed = true;
+            true
+        } else {
+            false
+        }
+    }
+
     #[cfg(test)]
     pub(crate) fn fork_for_test(&self) -> Self {
         Self {
@@ -209,6 +189,7 @@ impl CommittedContinuation {
             revoked: self.revoked,
             completed: self.completed,
             pending: self.pending,
+            hold_until: self.hold_until,
         }
     }
 
@@ -223,13 +204,13 @@ impl CommittedContinuation {
         publication: ContinuationPublication,
         work: &mut WorkBudget,
     ) -> Result<PreparedRenewal, RouteFailure> {
-        let expected_tick = self
-            .frame
-            .publication()
-            .0
-            .checked_add(3)
-            .map(Tick)
-            .ok_or(RouteFailure::InvalidRequest)?;
+        let expected_tick = self.hold_until.unwrap_or(Tick(
+            self.frame
+                .publication()
+                .0
+                .checked_add(3)
+                .ok_or(RouteFailure::InvalidRequest)?,
+        ));
         let expected_sequence = self
             .publication
             .sequence
@@ -265,6 +246,7 @@ impl CommittedContinuation {
             publication,
             kind: match frame {
                 PreparedFrame::Grant(frame) => PreparedRenewalKind::Grant(frame),
+                PreparedFrame::Hold(frame) => PreparedRenewalKind::Hold(frame),
                 PreparedFrame::Complete => PreparedRenewalKind::Complete,
             },
             command_issued: false,
@@ -272,10 +254,18 @@ impl CommittedContinuation {
     }
 
     pub fn poll_command(&mut self, current_tick: Tick, command_epoch: u64) -> ContinuationStatus {
-        if self.revoked
-            || current_tick >= self.certificate.survive_until()
-            || command_epoch != self.publication.decision.command_epoch
+        if self.revoked || command_epoch != self.publication.decision.command_epoch {
+            self.revoked = true;
+            return ContinuationStatus::Invalidated;
+        }
+        if current_tick == self.certificate.survive_until()
+            && self.hold_until == Some(current_tick)
+            && self.pending.is_none()
         {
+            self.completed = true;
+            return ContinuationStatus::Completed;
+        }
+        if current_tick >= self.certificate.survive_until() {
             self.revoked = true;
             return ContinuationStatus::Invalidated;
         }
@@ -300,7 +290,9 @@ impl CommittedContinuation {
                 }
             };
         }
-        let renewal_tick = Tick(self.frame.publication().0.saturating_add(3));
+        let renewal_tick = self
+            .hold_until
+            .unwrap_or(Tick(self.frame.publication().0.saturating_add(3)));
         match current_tick.cmp(&renewal_tick) {
             std::cmp::Ordering::Less => self.active_status(),
             std::cmp::Ordering::Equal => ContinuationStatus::RenewalRequired,
@@ -350,9 +342,16 @@ impl CommittedContinuation {
         match prepared.kind {
             PreparedRenewalKind::Grant(frame) => {
                 self.frame = frame;
+                self.hold_until = None;
                 self.next_input = 1;
                 self.input_issued = false;
                 self.movement = accepted.movement;
+            }
+            PreparedRenewalKind::Hold(frame) => {
+                self.movement = MovementIntent::Stop;
+                self.hold_until = Some(frame.renew_at());
+                self.next_input = 3;
+                self.input_issued = false;
             }
             PreparedRenewalKind::Complete => {
                 self.movement = MovementIntent::Stop;
@@ -381,14 +380,5 @@ fn command(token: &Arc<EpisodeToken>, frame: &PreparedGrant, index: usize) -> Co
         movement: frame.movements()[index],
         admission_tick: Tick(frame.publication().0.saturating_add(index as u64)),
         input_index: index as u8,
-    }
-}
-
-impl ContinuationCommand {
-    fn matches(&self, other: &Self) -> bool {
-        Arc::ptr_eq(&self.token, &other.token)
-            && self.movement == other.movement
-            && self.admission_tick == other.admission_tick
-            && self.input_index == other.input_index
     }
 }

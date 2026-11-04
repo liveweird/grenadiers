@@ -6,8 +6,9 @@ use super::State;
 use super::contract::ForcedMovement;
 use crate::game::{
     Arena, CellId, EntityId, MovementTrace, Position, SpikePitClock, SpikePitClockError,
-    SpikePitPhase, SpikePitView, StepEvent, Tick, position_contacts_spike_pit,
-    segment_contacts_spike_pit, spike_pit_layout_v1, trace_contacts_spike_pit,
+    SpikePitLayoutPolicy, SpikePitPhase, SpikePitView, StepEvent, Tick,
+    position_contacts_spike_pit, segment_contacts_spike_pit, spike_pit_layout_v1,
+    spike_pit_layout_v2, trace_contacts_spike_pit,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -26,14 +27,24 @@ pub(super) struct SpikePitState {
 impl SpikePitState {
     pub(super) fn new(
         config: SpikePitConfig,
+        layout_policy: SpikePitLayoutPolicy,
         arena: &Arena,
         excluded: impl IntoIterator<Item = CellId>,
+        active_lairs: impl IntoIterator<Item = CellId>,
         at: Tick,
     ) -> Option<Self> {
         let SpikePitConfig::Enabled(settings) = config else {
             return None;
         };
-        let sites = spike_pit_layout_v1(arena, excluded)
+        let excluded = excluded.into_iter().collect::<Vec<_>>();
+        let active_lairs = active_lairs.into_iter().collect::<Vec<_>>();
+        let layout = match layout_policy {
+            SpikePitLayoutPolicy::LegacyV1 => spike_pit_layout_v1(arena, excluded),
+            SpikePitLayoutPolicy::LairClearanceV2 => {
+                spike_pit_layout_v2(arena, excluded, active_lairs)
+            }
+        };
+        let sites = layout
             .into_iter()
             .map(|cell| {
                 let mut clock = SpikePitClock::new();

@@ -6,12 +6,12 @@ use crate::game::{EntityId, MovementSegment, Tick};
 
 use super::continuation_contact::ContinuationContact;
 use super::continuation_proof::{
-    ProofContext, ProofState, advance_checked, certify_stationary_suffix, certify_stop_branch,
-    reject_initial_scene,
+    ProofContext, ProofState, advance_checked, certify_stationary_suffix,
+    certify_stationary_suffix_retained, certify_stop_branch, reject_initial_scene,
 };
 use super::continuation_types::{
-    ContinuationCertificate, ContinuationParts, ContinuationRequest, MAX_CONTINUATION_LEGS,
-    MAX_CONTINUATION_MOVES, NominalLeg,
+    CertifiedStationarySuffix, ContinuationCertificate, ContinuationParts, ContinuationRequest,
+    MAX_CONTINUATION_LEGS, MAX_CONTINUATION_MOVES, NominalLeg,
 };
 use super::motion::Motion;
 use super::pulse::PulseOriginGrace;
@@ -37,6 +37,27 @@ pub(crate) fn certify_continuation(
         nominal_legs,
         origin,
         true,
+        false,
+        work,
+    )
+}
+
+pub(crate) fn certify_continuation_v62(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: ContinuationRequest,
+    nominal_legs: &[NominalLeg],
+    origin: PulseOriginGrace,
+    work: &mut WorkBudget,
+) -> Result<ContinuationCertificate, RouteFailure> {
+    certify_continuation_inner(
+        observation,
+        forecast,
+        request,
+        nominal_legs,
+        origin,
+        true,
+        true,
         work,
     )
 }
@@ -57,6 +78,7 @@ pub(crate) fn certify_nominal_for_test(
         nominal_legs,
         origin,
         false,
+        false,
         work,
     )
 }
@@ -69,6 +91,7 @@ fn certify_continuation_inner(
     nominal_legs: &[NominalLeg],
     origin: PulseOriginGrace,
     certify_stop_branches: bool,
+    retain_stationary_suffix: bool,
     work: &mut WorkBudget,
 ) -> Result<ContinuationCertificate, RouteFailure> {
     reject_initial_scene(observation, forecast, work)?;
@@ -179,14 +202,28 @@ fn certify_continuation_inner(
             tick = Tick(tick.0.checked_add(1).ok_or(RouteFailure::InvalidRequest)?);
         }
     }
-    certify_stationary_suffix(
-        &proof,
-        &mut state,
-        tick,
-        request.survive_until,
-        work,
-        &mut assumptions,
-    )?;
+    let stationary_suffix = if retain_stationary_suffix {
+        Some(CertifiedStationarySuffix {
+            checkpoints: certify_stationary_suffix_retained(
+                &proof,
+                &mut state,
+                tick,
+                request.survive_until,
+                work,
+                &mut assumptions,
+            )?,
+        })
+    } else {
+        certify_stationary_suffix(
+            &proof,
+            &mut state,
+            tick,
+            request.survive_until,
+            work,
+            &mut assumptions,
+        )?;
+        None
+    };
     ContinuationCertificate::from_parts(ContinuationParts {
         key: context.key,
         basis: observation.clone(),
@@ -197,6 +234,7 @@ fn certify_continuation_inner(
         legs: nominal_legs.to_vec(),
         checkpoints,
         stop_branches,
+        stationary_suffix,
         assumptions,
         evolution: forecast.evolution().clone(),
         contact,

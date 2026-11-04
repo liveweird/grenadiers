@@ -57,18 +57,31 @@ pub(crate) fn bind_expanded_with_punch_activation(
     generation: GenerationRecord,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<BoundPublication, ProjectionError> {
-    let base = room.configuration.domain().base().base();
-    let expected_generator = if base.board() == crate::room::BoardSize::FifteenByThirteen {
-        crate::game::MULTIPLAYER_GENERATOR_VERSION
-    } else {
-        crate::game::VARIABLE_GENERATOR_VERSION
-    };
     bind_expanded_with_expected_settings(
         room,
         state_epoch,
         capture,
         generation,
-        expected_generator,
+        crate::game::ArenaConstructionProfile::ReflectedV3V4,
+        wire_domain_settings(room)?,
+        punch_activation,
+    )
+}
+
+pub(crate) fn bind_expanded_with_profile(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    construction: crate::game::ArenaConstructionProfile,
+    punch_activation: crate::game::PunchActivationPolicy,
+) -> Result<BoundPublication, ProjectionError> {
+    bind_expanded_with_expected_settings(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        construction,
         wire_domain_settings(room)?,
         punch_activation,
     )
@@ -79,7 +92,7 @@ pub(crate) fn bind_expanded_with_expected_settings(
     state_epoch: Counter,
     capture: &ExpandedCapture,
     generation: GenerationRecord,
-    expected_generator: u16,
+    construction: crate::game::ArenaConstructionProfile,
     expected_settings: crate::room::RoomSettings,
     punch_activation: crate::game::PunchActivationPolicy,
 ) -> Result<BoundPublication, ProjectionError> {
@@ -119,6 +132,7 @@ pub(crate) fn bind_expanded_with_expected_settings(
             expected_settings,
             facts.rules.mob_navigation_policy(),
             punch_activation,
+            construction.spike_pit_layout_policy(),
         )?
         || facts.world.rules_version != 10
         || facts.world.actors.len() != base.controllers().len()
@@ -126,7 +140,7 @@ pub(crate) fn bind_expanded_with_expected_settings(
         || u16::from(facts.world.arena.height) != height
         || facts.world.enabled_items != room.settings.base.enabled_items()
         || facts.world.available_items != room.available_items
-        || generation.version() != expected_generator
+        || generation.version() != construction.generator_version(base.board())
         || !state_bound
         || !valid_lairs(room, capture)
         || !super::projection_validation::valid_spike_pits(room, capture)
@@ -255,6 +269,7 @@ fn expected_rules(
     settings: crate::room::RoomSettings,
     navigation: crate::game::MobNavigationPolicy,
     punch_activation: crate::game::PunchActivationPolicy,
+    spike_pit_layout: crate::game::SpikePitLayoutPolicy,
 ) -> Result<RulesConfig, ProjectionError> {
     let (cloud, lairs, spike_pits) = room
         .settings
@@ -270,7 +285,8 @@ fn expected_rules(
         spike_pits.config(),
         navigation,
     )
-    .with_punch_activation_policy(punch_activation))
+    .with_punch_activation_policy(punch_activation)
+    .with_spike_pit_layout_policy(spike_pit_layout))
 }
 
 fn wire_domain_settings(room: &RoomView) -> Result<crate::room::RoomSettings, ProjectionError> {

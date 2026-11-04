@@ -289,7 +289,7 @@ fn actor_weapon(observation: &Observation) -> Option<SpecialWeapon> {
         })
 }
 
-fn effect_active(
+pub(super) fn effect_active(
     basis: Tick,
     at: Tick,
     actor: &crate::cpu::VisibleActor,
@@ -331,7 +331,7 @@ pub(crate) fn derive_bomb_modifiers(
     Ok((range, fuse))
 }
 
-fn origin_is_free(observation: &Observation, cell: crate::game::CellId) -> bool {
+pub(super) fn origin_is_free(observation: &Observation, cell: crate::game::CellId) -> bool {
     let parts = observation.parts();
     parts
         .arena
@@ -346,7 +346,7 @@ fn origin_is_free(observation: &Observation, cell: crate::game::CellId) -> bool 
         && matches!(&parts.bombs, BombKnowledge::Visible(bombs) if !bombs.iter().any(|bomb| bomb.cell == cell))
 }
 
-fn add_tick(tick: Tick, amount: u64) -> Result<Tick, PlantFailure> {
+pub(super) fn add_tick(tick: Tick, amount: u64) -> Result<Tick, PlantFailure> {
     tick.0
         .checked_add(amount)
         .map(Tick)

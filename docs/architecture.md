@@ -31,11 +31,11 @@ The owner executes bounded logical intentions; public snapshots carry the accept
 
 Matches configure two to four seats and require at least one human controller. Transport sockets
 are not player seats; the diagnostic v2 welcome's `maxPlayers: 4` describes the live match-capacity
-ceiling, not a connection limit. Live two-to-four-seat matches use CPU50 on Easy/Standard and
-CPU51 on Hard, rules10 physics and mob navigation3; cloud, lair and spike-pit settings may be
-enabled or disabled per room. These policies add the typed Teleporter recovery to CPU44/45's
-unchanged ordinary result, memory and RNG behavior. Confirmed-origin continuation still delegates
-to CPU44/45, and older profiles retain their historical policies and rules. The board
+ceiling, not a connection limit. Live two-to-four-seat matches use CPU62 on Easy/Standard and
+CPU64 on Hard, rules10 physics and mob navigation3. Cloud, lair and spike-pit settings may be
+enabled or disabled per room. The [CPU guide](game/multiplayer-cpu.md) defines their recovery
+and demolition behavior. Typed construction pairs generator7 with spike layout2; archived
+construction and replay retain their original identities. The board
 choice is immutable, defaults to 15×13 and is documented in [board geometry](game/board-sizes.md).
 Match configuration, rather than global connections, determines the participant roster.
 
@@ -107,15 +107,15 @@ V4 checked room projection derives facts directly from `MatchLifecycle`; its pub
 rejects semantically impossible bounded DTOs before server adapters publish them.
 
 The active `roster_runtime` server adapter owns real per-round physics, assignment-aware
-generation, epoch-fenced input, settled reconnect grace, and checked v20 publication. Result
+generation, epoch-fenced input, settled reconnect grace, and checked v21 publication. Result
 physics freezes while the global lifecycle clock and reservation deadlines advance.
 
-The active v20 client/panel shares the Three.js presentation boundary, validates v20 messages, keeps
+The active v21 client/panel shares the Three.js presentation boundary, validates v21 messages, keeps
 the resume capability only in tab memory, and renders scores, recovery, grace, and rematch from
-authoritative facts. Production routing uses v20 on `/api/v1/game/ws`; versions 1 through 19 are
+authoritative facts. Production routing uses v21 on `/api/v1/game/ws`; versions 1 through 20 are
 rejected before credential claim. Gameplay v7–v11 added
 the expanded item inventory and recipient-private projections; the live contract is
-[protocol v20](game/protocol-v20.md). See [reconnect browser](game/reconnect-browser.md).
+[protocol v21](game/protocol-v21.md). See [reconnect browser](game/reconnect-browser.md).
 
 The active [bounded match owner](game/match-owner.md) adds generation-fenced admission,
 scheduled departure batches, absolute deadlines, retention, and sticky shutdown. Its closing

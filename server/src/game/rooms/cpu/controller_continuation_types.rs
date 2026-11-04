@@ -73,6 +73,8 @@ pub(in crate::game::rooms) struct ContinuationTrace {
     pub(in crate::game::rooms) first_movement_command_tick: Option<Tick>,
     pub(in crate::game::rooms) renewal_commits: u32,
     pub(in crate::game::rooms) command_commits: u32,
+    pub(in crate::game::rooms) maximum_renewal_work: u32,
+    pub(in crate::game::rooms) completion_tick: Option<Tick>,
 }
 
 #[cfg(test)]

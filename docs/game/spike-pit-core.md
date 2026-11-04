@@ -37,6 +37,11 @@ Every chosen cell must already be unblocked floor, outside the supplied overlay 
 and the protected escape cells of all four potential corner spawns. The helper neither carves
 blocks nor samples randomness, so it cannot change base generation or RNG progress.
 
+`spike_pit_layout_v2(arena, excluded, active_lairs)` retains the same ranking and exclusions,
+adds the full lair floor ring, and rejects a candidate orbit if it disconnects lair exits from
+the corner opening network. With no active lairs it produces the layout1 result. Live typed
+construction selects layout2; the default rules constructor keeps layout1 for compatibility.
+
 ## Opt-in simulation
 
 `RulesConfig::environment_v10` and its explicit mob-navigation variant accept the existing

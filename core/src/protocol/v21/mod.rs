@@ -17,11 +17,13 @@ pub use crate::protocol::v19::{
     SeatStatus, SnapshotEvents, SpikePitPhase, SpikePitView, SpikePits, StormCloudView, Terrain,
     WeaponId, Wins, WireEvent,
 };
-pub use admission::{AdmissionProjection, PersonalAdmission, prepare_admission};
+pub use admission::{
+    AdmissionProjection, PersonalAdmission, prepare_admission, prepare_admission_with_construction,
+};
 pub use client::{GameClientMessage, ManualActionKind};
 pub use projection::{
-    BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded, capture_expanded,
-    prepare_snapshots, project_recipient,
+    BoundPublication, ExpandedCapture, RecipientProjection, bind_expanded,
+    bind_expanded_with_construction, capture_expanded, prepare_snapshots, project_recipient,
 };
 pub use settings::RoomSettings;
 
@@ -95,3 +97,6 @@ pub fn encode_server_message(
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod construction_tests;

@@ -8,16 +8,26 @@ use super::oil::{generated_pair_fits, ordinary_pickup_count};
 use super::pickups::PickupKind;
 use super::types::CellId;
 use random_words::{ChaChaWords, RandomWords};
+mod construction_profile;
 mod generated_v3;
 mod generated_v4;
+mod generated_v5;
+mod generated_v7;
 mod random_words;
 mod sampling;
 mod weighted_sampling;
+pub use construction_profile::ArenaConstructionProfile;
 pub use generated_v3::{
     ArenaGenerationConfig, GenerationError, MULTIPLAYER_GENERATOR_VERSION,
     generate_multiplayer_arena,
 };
 pub use generated_v4::{VARIABLE_GENERATOR_VERSION, generate_variable_multiplayer_arena};
+pub use generated_v5::{
+    LAIR_CLEARANCE_GENERATOR_VERSION, generate_lair_clearance_multiplayer_arena,
+};
+pub use generated_v7::{
+    WEIGHTED_LAIR_CLEARANCE_GENERATOR_VERSION, generate_weighted_lair_clearance_multiplayer_arena,
+};
 use sampling::{sample_percent, sample_pickup};
 use weighted_sampling::{PickupSelectionPolicy, sample_pickup_with_policy};
 
@@ -83,8 +93,8 @@ impl fmt::Debug for GenerationRecord {
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct GeneratedArena {
-    arena: Arena,
-    concealed_pickups: BTreeMap<CellId, PickupKind>,
+    pub(super) arena: Arena,
+    pub(super) concealed_pickups: BTreeMap<CellId, PickupKind>,
     record: GenerationRecord,
 }
 

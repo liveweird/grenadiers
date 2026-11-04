@@ -8,8 +8,9 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `CONTACT_PUNCH_V60_STANDARD` or `CONTACT_PUNCH_V60_EASY` and
-`HARD_V61`; private replay31 binds those identities and ContactV2. Archived replay30 retains
+Two. Live selection uses `RECOVERY_V62_STANDARD` or `RECOVERY_V62_EASY` and
+`HARD_V64`; private replay33 binds those identities, generator7, pit-layout2 and ContactV2.
+Published generator6/replay32 and archived replay31 retain CPU60/61. Archived replay30 retains
 CPU56/59 with ManualV1, and replay29 retains CPU56/58. Named
 archive constants preserve historical replay identities. Policy identity describes decision
 semantics, not measured strength; seeds stay
@@ -21,7 +22,7 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-archived Equipment intent. Current CPU60/61 do not intentionally request Equipment or contact
+archived Equipment intent. Current CPU62/64 do not intentionally request Equipment or contact
 Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
 forward bomb contact. Intent carries no credentials, seat authority, readiness,
 settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
@@ -29,7 +30,7 @@ validation; tests exercise accepted actions through the existing runtime and rep
 
 ## Information boundary
 
-The current-protocol adapter converts the already filtered v20 recipient projection and records
+The current-protocol adapter converts the already filtered v21 recipient projection and records
 the closed ContactV2 activation identity. It must
 never feed the policy `State::public_view` or reconstruct an authoritative `State`. A cloaked
 rival exposes only identity, seat and alive status. Invisible Bombs makes all bomb knowledge
@@ -607,3 +608,17 @@ progress is measured against the replacement rather than the stale origin. Every
 still requires the unchanged usefulness, absent/present escape, contact, admission and fresh-
 publication checks. Archived Hard58/replay29 keep the coordinate-selected farming approach;
 current Hard61 inherits Hard59's selected approach unchanged.
+
+## Clearance construction and CPU admission
+
+Room construction fixes a single `ArenaConstructionProfile`. Its generator and spike-layout
+identities are checked at publication and admission; settings, rounds and rematches retain it.
+The owner admits exactly CPU62 on Easy/Standard or CPU64 on Hard for clearance profiles, and
+exactly CPU60/61 for the published weighted generator6 profile. ContactV2 or gameplay21 alone
+cannot select between these families. A forged policy or difficulty is rejected before work.
+
+The recovery suffix and initial-demolition behavior are described in the
+[multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared
+65,536-work ceiling, complete physical escape proof, recipient privacy, unchanged collision
+rules and publication revalidation. Dated before/after evidence belongs in history and release
+records; archived policy semantics remain executable regression contracts.

@@ -1,6 +1,6 @@
 # CPU intent and developer diagnostics
 
-Live Easy/Standard CPU60 and Hard CPU61 retain CPU56/59 and CPU26's persistent objective model and checked
+Live Easy/Standard CPU62 and Hard CPU64 retain CPU60/61, CPU56/59 and CPU26's persistent objective model and checked
 spike-pit execution. A subject is an exact exposed
 pickup (cell and kind), destructible block, or visible opponent seat. Firing/approach cells can
 change without changing that subject. When no productive subject is available, the CPU explicitly
@@ -25,7 +25,7 @@ placement must still threaten the selected exact subject and pass the existing e
 proofs. Admission rechecks the target against fresh visible facts. Easy retains its slower cadence.
 
 Reaching an approach tile does not imply a safe bomb is available. If planting is refused,
-These policies attempt a certified movement pulse and temporarily defers that exact subject instead
+these policies attempt a certified movement pulse and temporarily defer that exact subject instead
 of repeatedly stopping beside it. Safety and contact proofs remain mandatory; a genuinely
 trapped CPU may still have to stop. CPU25 and CPU24 retain their archived decision behavior.
 

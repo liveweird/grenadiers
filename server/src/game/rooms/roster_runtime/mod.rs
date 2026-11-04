@@ -5,6 +5,7 @@ mod admission_commit;
 mod admission_projection;
 mod admission_spike;
 mod environment;
+mod environment_clearance;
 mod environment_notice;
 mod environment_spike;
 mod error;
@@ -60,3 +61,6 @@ mod terminal_transport_tests;
 mod tests;
 #[cfg(test)]
 mod weighted_settings_tests;
+
+#[cfg(test)]
+mod clearance_settings_tests;

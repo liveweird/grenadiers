@@ -60,6 +60,7 @@ pub fn plan_lairs_with_origin(
         false,
         ContactTopology::Disabled,
         false,
+        false,
     )
 }
 
@@ -94,6 +95,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v23(
         crate::cpu::survival::joint_refuge::FarmRefugeMode::Disabled,
         false,
         ContactTopology::Disabled,
+        false,
         false,
     )
 }
@@ -130,6 +132,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v24(
         false,
         ContactTopology::Disabled,
         false,
+        false,
     )
 }
 
@@ -164,6 +167,7 @@ pub(in crate::cpu::survival) fn plan_lairs_v25(
         crate::cpu::survival::joint_refuge::FarmRefugeMode::Disabled,
         false,
         ContactTopology::Disabled,
+        false,
         false,
     )
 }

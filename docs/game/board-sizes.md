@@ -6,8 +6,7 @@ create 15×13 rooms regardless of the custom form's selected **Board size** / **
 
 | Configuration | Runtime profile | Rules | Generator | CPU policy |
 | --- | --- | --- | --- | --- |
-| Two to four seats, 15×13 | Roster owner | 10 | 3 | Easy/Standard27, Hard28 |
-| Two to four seats, 11×9 or 13×11 | Roster owner | 10 | 4 | Easy/Standard27, Hard28 |
+| Two to four seats, all supported boards | Roster owner | 10 | 7 | Easy/Standard62, Hard64 |
 
 ## Checked presets
 
@@ -35,8 +34,10 @@ board preset, player count and round assignment. Soft blocks and concealed items
 reflection orbits; Oil retains the global eight-site cap. Exhausted bounded random sampling
 produces an empty fallback with the same dimensions and spawn assignment.
 
-Generators 1–3 keep their existing outputs and accepted geometry. Live rooms use generator 3 on
-15×13 and generator 4 on 11×9/13×11. New geometry does not change item durations, movement speeds,
+Generators 1–6 retain their existing outputs and accepted geometry. Live rooms use weighted
+generator7 and lair-aware pit layout2 on every supported board; see [generation](generation.md).
+The published generator6/replay32 construction remains explicit and reproducible. This does not
+change item durations, movement speeds,
 the 32-bomb multiplayer limit, range/item bounds or
 historical replay identities.
 

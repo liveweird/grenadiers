@@ -375,5 +375,6 @@ fn plan_respawn_policy(
         false,
         super::contact_plant::ContactTopology::Disabled,
         false,
+        false,
     )
 }

@@ -42,18 +42,6 @@ impl ContinuationSubmission {
 }
 
 impl CpuController {
-    #[cfg(test)]
-    pub(in crate::game::rooms) const fn has_continuation_authority_for_test(&self) -> bool {
-        self.continuation.is_some()
-    }
-
-    #[cfg(test)]
-    pub(in crate::game::rooms) const fn continuation_trace_for_test(
-        &self,
-    ) -> super::continuation_types::ContinuationTrace {
-        self.continuation_trace
-    }
-
     pub(in crate::game::rooms) fn observe_continuation_publication(
         &mut self,
         sequence: u64,
@@ -90,11 +78,24 @@ impl CpuController {
             return false;
         };
         let mut work = WorkBudget::new(CONTINUATION_RENEWAL_ALLOWANCE);
+        if authority
+            .committed
+            .complete_at_publication(current, publication)
+        {
+            return true;
+        }
         match authority
             .committed
             .prepare_grant(current, publication, &mut work)
         {
             Ok(prepared) => {
+                #[cfg(test)]
+                {
+                    self.continuation_trace.maximum_renewal_work = self
+                        .continuation_trace
+                        .maximum_renewal_work
+                        .max(work.spent());
+                }
                 authority.renewal = Some(prepared);
                 true
             }
@@ -166,6 +167,12 @@ impl CpuController {
                 ContinuationService::Invalidated
             }
             ContinuationStatus::Completed => {
+                #[cfg(test)]
+                {
+                    self.continuation_trace
+                        .completion_tick
+                        .get_or_insert(current_tick);
+                }
                 self.continuation = None;
                 ContinuationService::Completed
             }

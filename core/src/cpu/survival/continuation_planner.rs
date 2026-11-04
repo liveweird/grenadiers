@@ -33,6 +33,31 @@ pub(crate) fn certify_continuation(
     )
 }
 
+pub(crate) fn certify_continuation_v62(
+    observation: &Observation,
+    forecast: &HazardForecast,
+    request: ContinuationRequest,
+    nominal_legs: &[NominalLeg],
+    origin: &PlantEscapeOrigin,
+    work: &mut WorkBudget,
+) -> Result<ContinuationCertificate, crate::cpu::routing::RouteFailure> {
+    charge_origin_validation(origin, observation, work)?;
+    origin
+        .retain_stopped(observation)
+        .ok_or(crate::cpu::routing::RouteFailure::IdentityMismatch)?;
+    crate::cpu::routing::certify_continuation_v62(
+        observation,
+        forecast,
+        request,
+        nominal_legs,
+        PulseOriginGrace {
+            cell: origin.cell(),
+            bomb_id: origin.bomb_id(),
+        },
+        work,
+    )
+}
+
 #[cfg(test)]
 pub(super) fn certify_nominal_without_stop_branches(
     observation: &Observation,

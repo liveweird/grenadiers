@@ -20,6 +20,7 @@ pub(super) fn opening(
     strategic: bool,
     pickup_progress: bool,
     avoid_pits: bool,
+    initial_demolition: bool,
     work: &mut WorkBudget,
 ) -> Option<LairSurvivalPlan> {
     if ordinary.intent.manual.is_some() {
@@ -70,16 +71,27 @@ pub(super) fn opening(
         )?
     };
     let mut tactic_work = WorkBudget::new(work.remaining().saturating_mul(7) / 8);
-    let plant = super::plant_tactic::certified_plant_candidates(
-        observation,
-        history,
-        settled_stop_tick,
-        memory,
-        ordinary,
-        strategic,
-        super::plant_tactic::PlantSupport::Strict,
-        &mut tactic_work,
-    );
+    let plant = if initial_demolition && super::plant_demolition::eligible(memory, ordinary) {
+        super::plant_demolition::certified_initial_demolition(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            ordinary,
+            &mut tactic_work,
+        )
+    } else {
+        super::plant_tactic::certified_plant_candidates(
+            observation,
+            history,
+            settled_stop_tick,
+            memory,
+            ordinary,
+            strategic,
+            super::plant_tactic::PlantSupport::Strict,
+            &mut tactic_work,
+        )
+    };
     work.try_take(tactic_work.spent()).ok()?;
     let Some(plant) = plant else {
         return Some(fallback);
@@ -95,3 +107,9 @@ pub(super) fn opening(
         contact: Some(contact),
     })
 }
+
+#[path = "lair_v23_diagnostic.rs"]
+mod diagnostic;
+pub use diagnostic::{
+    DemolitionCounterfactual, HardPlantDiagnostic, HardPlantOutcome, diagnose_hard_v61_plant,
+};

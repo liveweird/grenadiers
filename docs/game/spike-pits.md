@@ -1,6 +1,6 @@
 # Spike pits
 
-Spike pits are an authoritative rules10 environmental hazard in live gameplay18 rooms. Their
+Spike pits are an authoritative rules10 environmental hazard in live gameplay21 rooms. Their
 availability, timing and current phase are shared room facts; open work and priority remain in
 the [backlog](../../BACKLOG.md).
 
@@ -35,21 +35,23 @@ the default tuning. All on and Restore enable pits; All off and Classic disable 
 retains the checked timing values for later re-enabling. Settings lock with the rest of the room
 configuration when the match begins.
 
-`spike_pit_layout_v1` selects zero, two or four immutable cells on already-clear floor. The
+Live `spike_pit_layout_v2` selects zero, two or four immutable cells on already-clear floor. The
 result is symmetric across both arena axes, row-major, outside all corner-spawn escape
 reservations, lairs, Oil and other excluded overlays. Placement never carves terrain, consumes
 randomness or changes block/item sampling, so enabling or disabling pits does not alter the base
-generation path or RNG progress.
+generation path or RNG progress. Layout2 also excludes the floor ring around each lair and
+preserves a path from a lair exit to the player-opening network. Historical layout1 remains
+available for archived construction and replay.
 
 Every new round resets the selected pits to idle. The authoritative snapshot publishes their
 sorted `cell`, `phase` and `remainingTicks`; it never publishes an activator, seed, hidden
-position, target or route. See the [gameplay20 contract](protocol-v20.md).
+position, target or route. See the [gameplay21 contract](protocol-v21.md).
 
 ## CPU, mobs and presentation
 
 CPU26 introduced forecasts of path-dependent warning and raised intervals, including warnings its own route
 would trigger. Route execution is guarded by the observed public pit state and retains the
-existing bounded work, normal protection, movement and planting safety budgets. Current CPU60/61 retain this pit behavior alongside later recovery and contact-Punch guards;
+existing bounded work, normal protection, movement and planting safety budgets. Current CPU62/64 retain this pit behavior alongside later recovery and contact-Punch guards;
 archived CPU25 behavior and historical replay identities remain closed.
 
 Mobs do not deliberately enter pits from safe floor. A mob already overlapping a pit is allowed

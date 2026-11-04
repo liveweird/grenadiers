@@ -18,11 +18,29 @@ pub fn bind_expanded(
     capture: &ExpandedCapture,
     generation: GenerationRecord,
 ) -> Result<BoundPublication, ProjectionError> {
-    crate::protocol::v19::bind_expanded_with_punch_activation(
+    bind_expanded_with_construction(
         room,
         state_epoch,
         capture,
         generation,
+        crate::game::ArenaConstructionProfile::ReflectedV3V4,
+    )
+}
+
+pub fn bind_expanded_with_construction(
+    room: &RoomView,
+    state_epoch: Counter,
+    capture: &ExpandedCapture,
+    generation: GenerationRecord,
+    construction: crate::game::ArenaConstructionProfile,
+) -> Result<BoundPublication, ProjectionError> {
+    validate_construction(construction)?;
+    crate::protocol::v19::bind_expanded_with_profile(
+        room,
+        state_epoch,
+        capture,
+        generation,
+        construction,
         crate::game::PunchActivationPolicy::ContactV2,
     )
 }
@@ -59,4 +77,14 @@ pub fn prepare_snapshots(
             Ok((recipient, encoded))
         })
         .collect()
+}
+
+pub(super) fn validate_construction(
+    construction: crate::game::ArenaConstructionProfile,
+) -> Result<(), ProjectionError> {
+    match construction {
+        crate::game::ArenaConstructionProfile::ReflectedV3V4
+        | crate::game::ArenaConstructionProfile::LairClearanceV5 => Ok(()),
+        _ => Err(ProjectionError::InvalidExpandedBinding),
+    }
 }

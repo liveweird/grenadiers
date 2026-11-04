@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## 1.3.23 — 2026-11-04
+
+- Clear connected movement space around each lair and keep spike pits away from its initial exits.
+- Preserve configurable weighted item drops through the new deterministic arena construction.
+- Keep CPU escape authority through its own bomb's complete flame lifetime and accept crossed route anchors.
+- Let Hard CPU reuse a complete ineffective attack proof for a useful visible-wall demolition.
+- Bind snapshots, reconnects and private replay33 to the selected construction and CPU family.
+
 ## 1.3.22 — 2026-11-02
 
 - Make extra-bomb upgrade selection weight configurable from ×1 to ×10, defaulting to ×5, with unchanged overall concealment and item switches.

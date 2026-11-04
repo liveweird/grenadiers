@@ -313,7 +313,7 @@ required alongside geometric separation tests.
 
 ## Ordinary pit avoidance
 
-Live CPU60/61 inherit CPU56/59 and CPU52/53's fair observation, shared work limit and
+Live CPU62/64 inherit CPU56/59 and CPU52/53's fair observation, shared work limit and
 multi-Teleporter recovery, while excluding pit sites from ordinary goals, retained routes and short movement pulses. The
 pulse check covers swept footprint contact, including partial overlaps; a rejected candidate can
 fall through to another checked direction. This prevents choosing a locally safe approach that
@@ -321,7 +321,7 @@ leaves the CPU standing on a pit when its warning expires.
 
 Complete planting and continuation routes keep their time-dependent pit proofs and may cross
 pits when the entire escape is certified. Already-on-pit recovery remains checked and can still
-be impossible. Private replay31 binds the current profiles and ContactV2; archived replay30 retains
+be impossible. Private replay33 binds the current CPU62/64 profiles and ContactV2; replay31/32 retain CPU60/61; archived replay30 retains
 CPU56/59 with ManualV1, replay29 retains CPU56/58,
 and older formats retain their original policy identities. See the
 [pit contract](cpu-contracts.md#voluntary-pit-avoidance).

@@ -17,25 +17,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
   boundary while commissioning any required models, rigs and animation.
 
-## Arena layout and environment
-
-- [next] **LAYOUT-CLEARANCE — improve generated lair surroundings.** Review the current
-  generation and placement rules. Reserve connected, usable spawn/movement space beside every
-  lair, and keep spike pits away from lairs and their initial spawn exits. Cover supported board
-  sizes and seeded layouts with regressions for enclosed lairs and immediate pit deaths;
-  preserve deterministic generation and player spawn safety.
-  - A separate, unmerged prototype clears connected lair exits and excludes nearby pits.
-    Versioned CPU recovery and demolition now pass queued-owner before/after witnesses,
-    including real planting, wall destruction and full flame survival. These use the earlier,
-    unweighted generator; acceptance must also pass on the combined weighted layouts.
-    See the [controlled investigation](docs/history/lair-clearance-cpu-2026-11-02.md).
-  - Before delivery, integrate with the published weighted-drop generator and protocol v21.
-    Allocate new generation/replay identities; published generator 6 and replay 32 must retain
-    their existing semantics. Complete review and the relevant release checks on that integration.
-
 ## Single-player
 
-- [todo] **CPU-RELIABILITY — extend foreign-bomb support only from complete witnesses.**
+- [next] **CPU-RELIABILITY — extend foreign-bomb support only from complete witnesses.**
   Version 1.3.15 delivers useful planting in the demonstrated clear farming window. Preserve
   its natural owner planting/flame survival, archived choices/work, pit/publication checks,
   v54 continuation and v50 Teleporter recovery. The exact foreign-bomb tick-234 raw proof

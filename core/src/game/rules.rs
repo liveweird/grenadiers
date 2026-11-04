@@ -1,3 +1,4 @@
+use super::spike_pits::SpikePitLayoutPolicy;
 use super::types::{HALF_FOOTPRINT, TICKS_PER_SECOND, TURN_ASSIST, UNITS_PER_CELL};
 use crate::room::{LairConfig, RespawnLairConfig, RoomSettings, SpikePitConfig};
 
@@ -59,6 +60,7 @@ pub struct RulesConfig {
     spike_pit_config: SpikePitConfig,
     mob_navigation_policy: MobNavigationPolicy,
     punch_activation_policy: PunchActivationPolicy,
+    spike_pit_layout_policy: SpikePitLayoutPolicy,
 }
 
 impl RulesConfig {
@@ -84,6 +86,7 @@ impl RulesConfig {
             spike_pit_config: SpikePitConfig::Disabled,
             mob_navigation_policy: MobNavigationPolicy::LegacyV1,
             punch_activation_policy: PunchActivationPolicy::ManualV1,
+            spike_pit_layout_policy: SpikePitLayoutPolicy::LegacyV1,
         }
     }
 
@@ -258,6 +261,22 @@ impl RulesConfig {
     #[must_use]
     pub const fn spike_pit_config(self) -> SpikePitConfig {
         self.spike_pit_config
+    }
+
+    #[must_use]
+    pub const fn with_spike_pit_layout_policy(
+        self,
+        spike_pit_layout_policy: SpikePitLayoutPolicy,
+    ) -> Self {
+        Self {
+            spike_pit_layout_policy,
+            ..self
+        }
+    }
+
+    #[must_use]
+    pub const fn spike_pit_layout_policy(self) -> SpikePitLayoutPolicy {
+        self.spike_pit_layout_policy
     }
 
     #[must_use]

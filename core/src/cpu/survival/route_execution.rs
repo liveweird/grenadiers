@@ -359,7 +359,7 @@ impl CommittedRoute {
         }
     }
 
-    fn finish(&mut self, current: &Observation) -> RouteStatus {
+    pub(super) fn finish(&mut self, current: &Observation) -> RouteStatus {
         let current_key = MemoryKey {
             world: current.parts().world,
             cpu_seat: current.parts().recipient,

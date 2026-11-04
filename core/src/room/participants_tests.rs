@@ -343,3 +343,23 @@ fn contact_punch_profiles_preserve_the_archived_manual_pair() {
     assert_eq!(CpuProfile::CURRENT.policy.version(), 16);
     assert_eq!(CpuProfile::CURRENT_EASY.policy.version(), 16);
 }
+
+#[test]
+fn crossing_recovery_profiles_preserve_the_contact_punch_ordinary_pair() {
+    for (profile, policy, difficulty) in [
+        (
+            CpuProfile::RECOVERY_V62_STANDARD,
+            62,
+            CpuDifficulty::Standard,
+        ),
+        (CpuProfile::RECOVERY_V62_EASY, 62, CpuDifficulty::Easy),
+        (CpuProfile::HARD_V63, 63, CpuDifficulty::Hard),
+        (CpuProfile::HARD_V64, 64, CpuDifficulty::Hard),
+    ] {
+        assert_eq!(profile.policy.version(), policy);
+        assert_eq!(profile.difficulty, difficulty);
+    }
+    assert_eq!(CpuProfile::CONTACT_PUNCH_V60_STANDARD.policy.version(), 60);
+    assert_eq!(CpuProfile::CONTACT_PUNCH_V60_EASY.policy.version(), 60);
+    assert_eq!(CpuProfile::HARD_V61.policy.version(), 61);
+}

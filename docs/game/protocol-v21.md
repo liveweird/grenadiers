@@ -13,11 +13,14 @@ A genuine multiplier-only change advances the settings revision and resets human
 an identical update does neither. Creator, phase, epoch and stale-revision checks are unchanged.
 
 V21 retains rules10, navigation3, ContactV2 Punch, Bomb-only manual input, recipient privacy,
-board sizes and bounded frames. CPU60/61 observe the accepted settings without learning
-concealed items or changing their algorithms. All new room modes use deterministic generator6;
-old construction/replay profiles retain their original generators and multiplier1.
+board sizes and bounded frames. CPU62/64 observe accepted settings and public pit facts without learning concealed items.
+New rooms use generator7 with lair clearance and pit-layout2. The explicit published v21
+constructor remains pinned to generator6/pits1 and CPU60/61; older construction/replay profiles
+retain their original settings and algorithms. Snapshot and admission binding validate the
+expected construction profile as well as accepted settings; they never infer it from a capture.
 
-Private replay32 binds gameplay21, generator6, pit-layout1 and complete accepted settings.
+Private replay33 binds gameplay21, generator7, pit-layout2, CPU62/64 and complete accepted
+settings. Published replay32 retains generator6, pit-layout1 and CPU60/61.
 Reconstruction uses the same initial configuration and accepted updates. Historical replay
 profiles reject new multiplier provenance rather than silently ignoring it. The
 [archived v20 contract](protocol-v20.md) remains a reference for the unchanged contact controls.

@@ -10,7 +10,7 @@ use crate::game::Tick;
 
 use super::{LairSurvivalPlan, MAX_PLAN_AGE_TICKS, PlantEscapeOrigin, SurvivalPlan};
 
-const GENERATION_ALLOWANCE: u32 = 2_048;
+pub(super) const GENERATION_ALLOWANCE: u32 = 2_048;
 
 pub enum OriginRecoveryChoice {
     Continuation(Box<ContinuationCertificate>),
@@ -121,7 +121,7 @@ pub fn plan_lairs_v54(
     Some(OriginRecoveryChoice::Pulse(Box::new(plan)))
 }
 
-fn v54_optional_allowance(incoming: u32, common: u32) -> u32 {
+pub(super) fn v54_optional_allowance(incoming: u32, common: u32) -> u32 {
     let legacy_half = incoming / 2;
     if common <= legacy_half {
         legacy_half - common
@@ -229,7 +229,7 @@ fn try_continuation(
     })
 }
 
-fn select_two_slots<T>(
+pub(super) fn select_two_slots<T>(
     candidates: &[Vec<NominalLeg>],
     remaining: u32,
     work: &mut WorkBudget,
@@ -247,7 +247,7 @@ fn select_two_slots<T>(
     None
 }
 
-fn continuation_request(
+pub(super) fn continuation_request(
     observation: &Observation,
     settled_stop_tick: Tick,
     forecast: &HazardForecast,

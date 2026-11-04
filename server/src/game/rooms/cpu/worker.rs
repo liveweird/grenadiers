@@ -50,6 +50,16 @@ pub(in crate::game::rooms) struct PlanningBasis<'a> {
     pub escape_origin: Option<&'a PlantEscapeOrigin>,
 }
 
+#[cfg(test)]
+pub(in crate::game::rooms) struct PlannedResultWitness<'a> {
+    pub basis: PlanningBasis<'a>,
+    pub plan: Option<&'a grenadiers_core::cpu::survival::SurvivalPlan>,
+    pub has_contact: bool,
+    pub work_spent: u32,
+    pub rng_draws_before: u64,
+    pub rng_draws_after: u64,
+}
+
 pub(super) enum WorkerPlan {
     Ordinary {
         plan: Box<SurvivalPlan>,
@@ -221,7 +231,7 @@ impl CpuPlanner {
                 rng: &job.rng,
                 escape_origin: job.escape_origin.as_ref(),
             });
-            record(&mut report, execute_job(job, true));
+            record(&mut report, execute_job(job, true, None));
         }
         report
     }
@@ -260,7 +270,7 @@ fn worker_loop(receiver: &Arc<Mutex<Receiver<PlanJob>>>, trace: &Arc<Mutex<PumpR
         let Ok(job) = job else {
             return;
         };
-        let result = execute_job(job, true);
+        let result = execute_job(job, true, None);
         record(
             &mut trace.lock().unwrap_or_else(|error| error.into_inner()),
             result,
@@ -294,6 +304,7 @@ fn record(
 fn execute_job(
     mut job: PlanJob,
     measure: bool,
+    #[cfg(test)] inspect: Option<&mut dyn FnMut(PlannedResultWitness<'_>)>,
 ) -> (
     JobStatus,
     u32,
@@ -304,6 +315,8 @@ fn execute_job(
         return (JobStatus::Cancelled, 0, None, None);
     }
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
+    #[cfg(test)]
+    let rng_draws_before = job.rng.draws();
     let started = measure.then(std::time::Instant::now);
     let planned = plan::plan(&mut job, &mut work);
     let Ok(outcome) = planned else {
@@ -314,6 +327,29 @@ fn execute_job(
             started.map(|value| value.elapsed()),
         );
     };
+    #[cfg(test)]
+    if let Some(inspect) = inspect {
+        let (plan, has_contact) = match &outcome {
+            WorkerPlan::Ordinary { plan, contact } => (Some(plan.as_ref()), contact.is_some()),
+            WorkerPlan::Continuation(_) | WorkerPlan::TeleporterStep(_) => (None, false),
+        };
+        inspect(PlannedResultWitness {
+            basis: PlanningBasis {
+                policy: &job.policy,
+                observation: &job.observation,
+                memory: &job.memory,
+                hazard_memory: &job.hazard_memory,
+                settled_stop_tick: job.settled_stop_tick,
+                rng: &job.rng,
+                escape_origin: job.escape_origin.as_ref(),
+            },
+            plan,
+            has_contact,
+            work_spent: work.spent(),
+            rng_draws_before,
+            rng_draws_after: job.rng.draws(),
+        });
+    }
     let planner_time = started.map(|value| value.elapsed());
     let intent = match &outcome {
         WorkerPlan::Ordinary { plan, .. } => Some(plan.control.intent),
@@ -340,6 +376,10 @@ fn execute_job(
     };
     (status, work.spent(), intent, planner_time)
 }
+
+#[cfg(test)]
+#[path = "worker_witness.rs"]
+mod witness;
 
 #[path = "worker_plan.rs"]
 mod plan;

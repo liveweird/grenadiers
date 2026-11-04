@@ -93,3 +93,77 @@ fn live_spike_owner_accepts_only_exact_current_difficulty() {
         }
     }
 }
+
+#[test]
+fn future_clearance_owner_accepts_only_its_versioned_cpu_family() {
+    use grenadiers_core::game::SeatId;
+    for (difficulty, accepted, old_family, wrong_tier, prototype) in [
+        (
+            CpuDifficulty::Standard,
+            CpuProfile::RECOVERY_V62_STANDARD,
+            CpuProfile::CONTACT_PUNCH_V60_STANDARD,
+            CpuProfile::RECOVERY_V62_EASY,
+            CpuProfile::HARD_V63,
+        ),
+        (
+            CpuDifficulty::Easy,
+            CpuProfile::RECOVERY_V62_EASY,
+            CpuProfile::CONTACT_PUNCH_V60_EASY,
+            CpuProfile::RECOVERY_V62_STANDARD,
+            CpuProfile::HARD_V63,
+        ),
+        (
+            CpuDifficulty::Hard,
+            CpuProfile::HARD_V64,
+            CpuProfile::HARD_V61,
+            CpuProfile::RECOVERY_V62_STANDARD,
+            CpuProfile::HARD_V63,
+        ),
+    ] {
+        let configuration = RoomConfiguration::new(
+            &[SeatControl::Human, SeatControl::Cpu],
+            Some(difficulty),
+            BoardSize::FifteenByThirteen,
+        )
+        .unwrap();
+        let runtime = RosterRuntime::new_spike_v21_clearance_with_navigation(
+            RosterIdentity {
+                id: RoomId::new("1123456789abcdef0123456789abcdef").unwrap(),
+                code: RoomCode::new("HBCDEFGH").unwrap(),
+                registry_serial: 128,
+                configuration,
+            },
+            RoomSettings::DEFAULT.with_bomb_capacity_drop_multiplier(
+                grenadiers_core::room::BombCapacityDropMultiplier::DEFAULT,
+            ),
+            SpikeRuntimeEnvironment {
+                cloud: StormCloudConfig::Single,
+                lairs: RespawnLairTuning::DEFAULT,
+                spike_pits: SpikePitTuning::DEFAULT,
+                navigation: MobNavigationPolicy::TimedEscapeV3,
+            },
+            RoundSeedSource::with_entropy(|bytes| {
+                bytes.fill(28);
+                Ok(())
+            }),
+            Arc::new(|epoch| Ok(SimulationSeed::new([epoch as u8; 32]))),
+        )
+        .unwrap();
+        let controller = |profile| {
+            CpuController::new(
+                CpuPlanner::without_workers(),
+                SeatId::Two,
+                128,
+                [28; 32],
+                profile,
+            )
+        };
+        assert_eq!(validate_cpus(&runtime, &[controller(accepted)]), Ok(()));
+        for rejected in [old_family, wrong_tier, prototype] {
+            assert_eq!(
+                validate_cpus(&runtime, &[controller(rejected)]),
+                Err(RosterRuntimeError::UnsupportedConfiguration)
+            );
+        }
+    }
+}

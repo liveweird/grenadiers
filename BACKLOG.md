@@ -22,9 +22,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
-  - Restore safe Easy pacing after completed certified ordinary navigation; current Easy62
-    cannot arm the archived cadence under current movement/spike paths. Preserve urgent
-    execution, bounded stopped safety and archived identities; record real default-feature deferrals.
   - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,
     stalls, fairness, unexpected item/death behavior and the difference between levels. Turn
     reproducible weaknesses into bounded tuning or further combat/equipment tactics. Preserve

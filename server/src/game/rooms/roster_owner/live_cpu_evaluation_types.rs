@@ -45,7 +45,7 @@ pub(super) struct EvaluationCase {
 impl EvaluationCase {
     pub(super) const fn profile(self) -> CpuProfile {
         match self.difficulty {
-            CpuDifficulty::Easy => CpuProfile::RECOVERY_V62_EASY,
+            CpuDifficulty::Easy => CpuProfile::CERTIFIED_CADENCE_V68_EASY,
             CpuDifficulty::Standard => CpuProfile::RECOVERY_V62_STANDARD,
             CpuDifficulty::Hard => CpuProfile::HARD_V67,
         }
@@ -113,6 +113,16 @@ pub(super) struct QueueMetrics {
     pub outstanding: usize,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct CadenceMetrics {
+    pub pause_armed: u64,
+    pub pause_completed: u64,
+    pub planning_deferred: u64,
+    pub planning_bypassed: u64,
+    pub guard_work: u64,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(super) struct DeterministicMeasurement {
@@ -135,6 +145,7 @@ pub(super) struct DeterministicMeasurement {
     pub block_delta_unattributed: usize,
     pub intents: [IntentMetrics; 3],
     pub admissions: [AdmissionMetrics; 3],
+    pub cadence: [CadenceMetrics; 3],
     pub queue: QueueMetrics,
     pub accepted_cpu_actions: AcceptedCpuActions,
     pub rng_draws: [u64; 3],

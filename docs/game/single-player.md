@@ -7,10 +7,11 @@ round target and damage as a human duel. All available items start enabled.
 
 ## Difficulty
 
-Standard retains the existing decision cadence. Easy adds a provisional 12-tick pause after the
-confirmed Stop ending ordinary clear-board navigation. Initial decisions remain immediate.
-The pause does not delay committed escapes, Stops or manual confirmation; newly observed danger
-or unavailable bomb knowledge bypasses it. All levels share permitted observations, physics and
+Standard retains the existing decision cadence. Easy adds a bounded 12-tick pause after an
+ordinary certified movement pulse completes and physical Stop is confirmed. Initial decisions
+remain immediate. The deadline cannot be extended by repeated observations. Committed escapes,
+Stops and manual confirmation remain immediate; newly observed danger or unavailable bomb
+knowledge bypasses the pause. Distant spikes and storm clouds do not disable safe pauses. All levels share permitted observations, physics and
 planning limits. Hard uses range-aware firing positions and prioritizes certified
 opponent pressure over routine wall farming. Among equally close supported firing positions, Hard
 favors blasts covering more of a visible rival’s open adjacent branches; valuable pickups can still

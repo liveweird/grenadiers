@@ -26,6 +26,7 @@ impl CpuController {
                     .without_execution_authority(),
             );
         }
+        self.easy68_pulse_status(status);
         Some(status)
     }
 }

@@ -76,6 +76,9 @@ impl CpuProfile {
     pub const HARD_V66: Self = Self::profile(CpuPolicy::UtilityV66, CpuDifficulty::Hard);
     /// One handoff-authorized useful owned-bomb combination, retaining Hard66 ordinary play.
     pub const HARD_V67: Self = Self::profile(CpuPolicy::UtilityV67, CpuDifficulty::Hard);
+    /// Easy62 ordinary decisions with certified post-navigation cadence guidance.
+    pub const CERTIFIED_CADENCE_V68_EASY: Self =
+        Self::profile(CpuPolicy::UtilityV68, CpuDifficulty::Easy);
 
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

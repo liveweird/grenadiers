@@ -180,7 +180,7 @@ impl GameRooms {
             registry_serial: parts.serial,
             configuration: base,
         };
-        let runtime = RosterRuntime::new_spike_v21_combination_with_navigation(
+        let runtime = RosterRuntime::new_spike_v21_easy_cadence_with_navigation(
             identity,
             RoomSettings::DEFAULT
                 .with_enabled_items(EnabledItems::ALL)
@@ -196,7 +196,7 @@ impl GameRooms {
         )
         .map_err(|_| RoomError::CapacityReached)?;
         let profile = match base.cpu_difficulty() {
-            Some(CpuDifficulty::Easy) => CpuProfile::RECOVERY_V62_EASY,
+            Some(CpuDifficulty::Easy) => CpuProfile::CERTIFIED_CADENCE_V68_EASY,
             Some(CpuDifficulty::Standard) => CpuProfile::RECOVERY_V62_STANDARD,
             Some(CpuDifficulty::Hard) => CpuProfile::HARD_V67,
             None => CpuProfile::RECOVERY_V62_STANDARD,

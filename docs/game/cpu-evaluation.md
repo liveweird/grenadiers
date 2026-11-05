@@ -12,8 +12,8 @@ scripts/measure-game.sh --cpu-live-rounds
 
 This separate release-profile matrix uses the actual four-seat roster owner with one human and
 three CPUs, all items enabled, live ×5 extra-bomb weighting, storm, lairs and spikes. It binds
-generator7, pit-layout2, gameplay21/ContactV2, Easy62, Standard62 and Hard67 through private
-Replay36. The 15×13 arena, environment and initial physical state match across difficulties.
+generator7, pit-layout2, gameplay21/ContactV2, Easy68, Standard62 and Hard67 through private
+Replay37. The 15×13 arena, environment and initial physical state match across difficulties.
 Arena, simulation-root and CPU seeds are explicit independent inputs.
 
 The 48 cases combine four arena seeds, two CPU seed sets, `fixed-idle` and `bomb-retreat` human
@@ -23,13 +23,15 @@ Natural timeout is a draw; reaching a measurement bound without a result is cens
 
 A test-only bounded trace captures committed operations from the real owner. A retained shadow
 uses the existing recorder; its complete inspection must match the owner, and accepted-input
-Replay36 must reconstruct that same inspection. Tracing stays disabled in production. Overflow,
+Replay37 must reconstruct that same inspection. Tracing stays disabled in production. Overflow,
 unsupported post-setup admissions, incomplete queue accounting and replay divergence fail the
 measurement. Short tests require actual queued work, accepted CPU inputs and physical progress.
 
 Reports include real bomb/pickup/elimination events, living-cell movement and stationary spans,
 alive updates, unattributed block destruction, intent, admission denials, complete queue/work
-counts and RNG draws. Dead time does not inflate stationary metrics. Planner timing excludes
+counts and RNG draws. Easy cadence counters record arms, completed pauses, deferred planning,
+bypasses and guard work; Standard/Hard counters stay zero. The full matrix requires actual Easy
+deferral and completed pauses, alongside physical progress. Dead time does not inflate stationary metrics. Planner timing excludes
 shadow/replay work; wrapper wall time includes the whole workload. Run timing comparisons on a
 quiet host. Output under `target/cpu-live-round-measurements/` retains source, toolchain, binary
 identity and terminal/censored results. Interpret pressure and movement alongside survival;

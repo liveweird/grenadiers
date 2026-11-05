@@ -4,6 +4,7 @@
 //! authoritative simulation state and return only ordinary [`Intent`] values.
 
 mod capabilities;
+mod easy_cadence;
 pub mod forecast;
 mod identity;
 mod intent;
@@ -75,6 +76,7 @@ pub(crate) const fn observed_bomb_capacity(rules_version: u16) -> usize {
     }
 }
 
+pub use easy_cadence::can_pause_easy_v68;
 pub use identity::{
     AdmissionContext, DecisionAdmission, DecisionId, RejectionReason, WorldId, admit_decision,
 };
@@ -93,6 +95,8 @@ pub use observation::{
 pub use random::{CpuRng, RandomError};
 pub use work::{WorkBudget, WorkError};
 
+#[cfg(test)]
+mod easy_cadence_tests;
 #[cfg(test)]
 mod observation_multiplayer_tests;
 #[cfg(test)]

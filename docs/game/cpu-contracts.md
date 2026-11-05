@@ -8,8 +8,9 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
-Two. Live selection uses `RECOVERY_V62_STANDARD` or `RECOVERY_V62_EASY` and
-`HARD_V67`; private replay36 binds those identities, generator7, pit-layout2 and ContactV2.
+Two. Live selection uses `CERTIFIED_CADENCE_V68_EASY`, `RECOVERY_V62_STANDARD` and
+`HARD_V67`; private replay37 binds those identities, generator7, pit-layout2 and ContactV2.
+Archived generator7/replay36 retains Easy/Standard62 and Hard67.
 Archived generator7/replay35 retains Easy/Standard62 and Hard66.
 Archived generator7/replay34 retains Easy/Standard62 and Hard65.
 Archived generator7/replay33 retains Easy/Standard62 and Hard64.
@@ -25,7 +26,7 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-archived Equipment intent. Current CPU62/67 do not intentionally request Equipment or contact
+archived Equipment intent. Current CPU68/62/67 do not intentionally request Equipment or contact
 Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
 forward bomb contact. Intent carries no credentials, seat authority, readiness,
 settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
@@ -66,17 +67,23 @@ publishes the chosen difficulty; archived v12 remains Standard-only.
 
 ## Difficulty cadence
 
-Standard does not add delays. The archived Easy cadence arms one bounded pause after accepted
-ordinary navigation, starting its 12-tick deadline once the stopped pose is confirmed. Repeated observations cannot
-restart it. Deferral happens before a fresh request, preserving six-tick result admission and
-exact manual execution times. Active escapes/routes/pulses and unavailable or newly dangerous
-observations bypass the pause. Reconnect preserves cadence; world/command-epoch changes reset
-it. Goal scores, RNG, worker budgets and known-hazard mechanics are shared.
+Standard does not add delays. Easy68 uses the same planner as Standard62, then adds one
+bounded pause after an admitted ordinary certified movement pulse actually completes. It first
+confirms physical Stop and fixes the deadline at that confirmation plus 12 ticks. Repeated
+publications cannot extend it; movement resumes through normal planning after expiry.
 
-Live Easy62 does not reach that archived cadence path with current certified navigation and
-spike support. The matched default-feature comparison therefore records the same Easy62 and
-Standard62 trajectories. The [backlog](../../BACKLOG.md#single-player) owns the cadence correction;
-this limitation does not change either archived policy identity.
+Each publication rechecks the world/command epoch, recipient pose and stopped safety through
+the deadline. Visible bombs, flames, burning Oil, unknown actors/bombs, unsupported effects,
+nearby mob/lair threats or footprint contact with any spike pit bypass the optional pause.
+Distant pits and storm clouds do not disable it: cloud contact only changes a speed timer and
+cannot displace a stopped actor. Variable scans consume the existing bounded guard allowance.
+
+Active routes, escapes, continuation, Teleporter execution, manual actions and invalidated
+pulses do not acquire a pause. Deferral precedes fresh work, preserving decision admission and
+manual timing. Reconnect preserves state; world/command-epoch changes clear it. Goal scores,
+RNG and planner budgets remain Standard62's. Archived Easy62 retains its earlier semantics;
+its unreachable cadence in the previous live matrix is recorded in
+[history](../history/cpu-live-evaluation-2026-11-05.md).
 
 ## Goal guidance
 
@@ -721,12 +728,14 @@ identities are checked at publication and admission; settings, rounds and rematc
 A separate CPU family fixes planner identity without changing arena generation. The clearance
 family admits exactly CPU62 on Easy/Standard and CPU64 on Hard; the reactive family retains
 CPU62 on Easy/Standard and selects Hard65. The pickup family retains CPU62 and selects Hard66.
-The combination family retains CPU62 and selects Hard67.
+The combination family retains CPU62 and selects Hard67. The certified-cadence family
+selects Easy68, Standard62 and Hard67 without changing arena construction.
 Published weighted generator6 retains CPU60/61.
 Settings changes, rounds and rematches retain both construction and planner families.
 ContactV2 or gameplay21 alone cannot select a family. A forged policy or difficulty is rejected
 before work. Private replay33 closes the clearance family; replay34 closes the reactive family;
-replay35 closes the pickup family; replay36 closes the combination family.
+replay35 closes the pickup family; replay36 closes the combination family; replay37 closes
+the certified-cadence family.
 
 The recovery suffix and initial-demolition behavior are described in the
 [multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared

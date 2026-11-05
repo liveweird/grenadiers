@@ -162,12 +162,32 @@ fn live_difficulty_round_evaluation_measurement() {
                         "{result:?}"
                     );
                     assert!(result.queue.max_work <= WORK_ALLOWANCE, "{result:?}");
+                    if difficulty != CpuDifficulty::Easy {
+                        assert!(
+                            result
+                                .cadence
+                                .iter()
+                                .all(|metrics| *metrics == Default::default())
+                        );
+                    }
                     planner_times.extend(evidence.measurement.planner_times);
                     results.push(serde_json::to_value(result).unwrap());
                 }
             }
         }
     }
+    assert!(
+        results
+            .iter()
+            .filter(|result| result["difficulty"] == "Easy")
+            .any(|result| {
+                result["cadence"].as_array().unwrap().iter().any(|metrics| {
+                    metrics["pauseArmed"].as_u64().unwrap() > 0
+                        && metrics["pauseCompleted"].as_u64().unwrap() > 0
+                        && metrics["planningDeferred"].as_u64().unwrap() > 0
+                })
+            })
+    );
     assert_eq!(results.len(), 48);
     assert!(!planner_times.is_empty());
 
@@ -183,12 +203,12 @@ fn live_difficulty_round_evaluation_measurement() {
         json!({
             "metadata": metadata,
             "identity": {
-                "replayFormat": 36,
+                "replayFormat": 37,
                 "generatorVersion": 7,
                 "spikePitLayoutVersion": 2,
                 "gameplayVersion": 21,
                 "punchActivation": "ContactV2",
-                "easyPolicyVersion": 62,
+                "easyPolicyVersion": 68,
                 "standardPolicyVersion": 62,
                 "hardPolicyVersion": 67,
                 "enabledItems": "all",

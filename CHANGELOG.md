@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.28 — 2026-11-05
+
+- Restore a bounded Easy pause after actual certified ordinary navigation completion and stopped confirmation, with fresh hazard checks and immediate bypass for danger.
+- Keep Easy62 archived, select Easy68 alongside Standard62/Hard67 through private replay37, and measure actual cadence coverage in the live comparison.
+
 ## 1.3.27 — 2026-11-05
 
 - Add a 48-case live Easy/Standard/Hard comparison with independent seed axes, real owner inputs and exact accepted-input replay.

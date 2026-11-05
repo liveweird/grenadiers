@@ -7,7 +7,7 @@ use grenadiers_core::{
 
 use super::super::cpu::{AdmissionTrace, CpuController};
 use super::live_cpu_evaluation_types::{
-    AdmissionMetrics, EventMetrics, IntentMetrics, MobilityMetrics,
+    AdmissionMetrics, CadenceMetrics, EventMetrics, IntentMetrics, MobilityMetrics,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -180,6 +180,19 @@ fn convert_admission(value: AdmissionTrace) -> AdmissionMetrics {
 
 pub(super) fn rng_draws(cpus: &[CpuController]) -> [u64; 3] {
     std::array::from_fn(|index| cpus[index].rng_draws())
+}
+
+pub(super) fn cadence_metrics(cpus: &[CpuController]) -> [CadenceMetrics; 3] {
+    std::array::from_fn(|index| {
+        let metrics = cpus[index].easy68_cadence_metrics_for_test();
+        CadenceMetrics {
+            pause_armed: metrics.pause_armed,
+            pause_completed: metrics.pause_completed,
+            planning_deferred: metrics.planning_deferred,
+            planning_bypassed: metrics.planning_bypassed,
+            guard_work: metrics.guard_work,
+        }
+    })
 }
 
 #[cfg(test)]

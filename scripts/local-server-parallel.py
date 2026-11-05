@@ -26,6 +26,7 @@ ISOLATED_TESTS = (
     "game::rooms::roster_owner::spike_cpu_acceptance_tests::real_worker_tests::real_workers_record_cpu27_progress_and_scheduling_with_bounded_plans",
     "game::rooms::roster_owner::hard_episode_tests::native_hard_v61_seed73_progresses_with_two_workers_at_production_pacing",
     "game::rooms::roster_owner::teleporter_owner_tests::native_worker_completes_collection_stop_and_productive_follow_up",
+    "game::rooms::roster_owner::easy68_cadence_owner_tests::native_easy68_workers_complete_pause_resume_bomb_progress_and_danger_bypass",
 )
 INSTRUMENTATION_PROBE_TEST = "tests::blank_database_url_disables_postgres"
 SUMMARY_PREFIX = "GRENADIERS_SERVER_REPLAY_ITEM_MASK_SUMMARY="

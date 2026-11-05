@@ -366,3 +366,17 @@ fn crossing_recovery_profiles_preserve_the_contact_punch_ordinary_pair() {
     assert_eq!(CpuProfile::CONTACT_PUNCH_V60_EASY.policy.version(), 60);
     assert_eq!(CpuProfile::HARD_V61.policy.version(), 61);
 }
+
+#[test]
+fn certified_easy_cadence_has_a_new_identity_without_relabeling_easy62_or_hard67() {
+    assert_eq!(
+        CpuProfile::CERTIFIED_CADENCE_V68_EASY.policy,
+        CpuPolicy::UtilityV68
+    );
+    assert_eq!(
+        CpuProfile::CERTIFIED_CADENCE_V68_EASY.difficulty,
+        CpuDifficulty::Easy
+    );
+    assert_eq!(CpuProfile::RECOVERY_V62_EASY.policy.version(), 62);
+    assert_eq!(CpuProfile::HARD_V67.policy.version(), 67);
+}

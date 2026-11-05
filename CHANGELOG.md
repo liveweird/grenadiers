@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.29 — 2026-11-05
+
+- Do not renew Hard CPU strategic progress solely because a rival or approach moves closer while the CPU remains stationary.
+- Preserve archived goal semantics and all physical proof limits; select Hard69 with Easy68/Standard62 through private replay38.
+
 ## 1.3.28 — 2026-11-05
 
 - Refresh the runtime OS layer to install available Debian apt security fixes.

@@ -9,7 +9,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
 Two. Live selection uses `CERTIFIED_CADENCE_V68_EASY`, `RECOVERY_V62_STANDARD` and
-`HARD_V67`; private replay37 binds those identities, generator7, pit-layout2 and ContactV2.
+`HARD_V69`; private replay38 binds those identities, generator7, pit-layout2 and ContactV2.
+Archived generator7/replay37 retains Easy68, Standard62 and Hard67.
 Archived generator7/replay36 retains Easy/Standard62 and Hard67.
 Archived generator7/replay35 retains Easy/Standard62 and Hard66.
 Archived generator7/replay34 retains Easy/Standard62 and Hard65.
@@ -26,7 +27,7 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-archived Equipment intent. Current CPU68/62/67 do not intentionally request Equipment or contact
+archived Equipment intent. Current CPU68/62/69 do not intentionally request Equipment or contact
 Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
 forward bomb contact. Intent carries no credentials, seat authority, readiness,
 settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
@@ -85,6 +86,16 @@ RNG and planner budgets remain Standard62's. Archived Easy62 retains its earlier
 its unreachable cadence in the previous live matrix is recorded in
 [history](../history/cpu-live-evaluation-2026-11-05.md). The restored behavior has a separate
 [acceptance record](../history/cpu-easy-cadence-2026-11-05.md).
+
+## Actor progress
+
+Hard69 retains Hard67 tactics and physical safety proofs, but tightens strategic progress
+accounting. A rival, waypoint or computed approach moving closer cannot renew the progress
+deadline while the CPU remains stationary. Renewal requires actual actor displacement and the
+existing progress predicate; valid cell and subcell movement still count. Stalls use the normal
+failed-target deferral and alternative-goal selection. Older profiles retain their exact rules.
+This corrects accounting; it does not alter fresh goal scores or shorten distant pursuits.
+The [acceptance record](../history/cpu-actor-progress-2026-11-05.md) separates these behaviors.
 
 ## Goal guidance
 
@@ -298,7 +309,7 @@ retains its exact block. Hidden contents do not establish usefulness or safety.
 
 Planning consumes the existing allowance and draws no RNG. Decline, late/canceled work, queue
 pressure and rejected manual submission preserve the installed route and live memory/RNG.
-Only the actual Hard67 controller with the still-installed handoff can admit the sealed
+Only a canonical Hard67 or Hard69 controller with the still-installed handoff can admit the sealed
 combination; polling and command commit enforce the profile again. Generic reactive authority
 and copied certificates/routes under Hard65/66 cannot grant this capability.
 
@@ -730,13 +741,14 @@ A separate CPU family fixes planner identity without changing arena generation. 
 family admits exactly CPU62 on Easy/Standard and CPU64 on Hard; the reactive family retains
 CPU62 on Easy/Standard and selects Hard65. The pickup family retains CPU62 and selects Hard66.
 The combination family retains CPU62 and selects Hard67. The certified-cadence family
-selects Easy68, Standard62 and Hard67 without changing arena construction.
+selects Easy68, Standard62 and Hard67 without changing arena construction. The actor-progress
+family retains Easy68/Standard62 and selects Hard69.
 Published weighted generator6 retains CPU60/61.
 Settings changes, rounds and rematches retain both construction and planner families.
 ContactV2 or gameplay21 alone cannot select a family. A forged policy or difficulty is rejected
 before work. Private replay33 closes the clearance family; replay34 closes the reactive family;
 replay35 closes the pickup family; replay36 closes the combination family; replay37 closes
-the certified-cadence family.
+the certified-cadence family; replay38 closes the actor-progress family.
 
 The recovery suffix and initial-demolition behavior are described in the
 [multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared

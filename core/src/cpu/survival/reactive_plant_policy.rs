@@ -48,3 +48,25 @@ pub fn plan_hard_pickup_v66_with_origin(
         GoalModes::visible_yield_contention(),
     )
 }
+
+#[allow(clippy::too_many_arguments)]
+pub fn plan_hard_progress_v69_with_origin(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    super::reactive_plant::plan_hard_reactive_with_modes(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        GoalModes::visible_yield_actor_progress(),
+    )
+}

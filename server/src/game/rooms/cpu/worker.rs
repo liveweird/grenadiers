@@ -53,6 +53,7 @@ pub(in crate::game::rooms) struct PlanningBasis<'a> {
 #[cfg(test)]
 pub(in crate::game::rooms) struct PlannedResultWitness<'a> {
     pub basis: PlanningBasis<'a>,
+    pub rng_before: &'a CpuRng,
     pub plan: Option<&'a grenadiers_core::cpu::survival::SurvivalPlan>,
     pub has_contact: bool,
     pub work_spent: u32,
@@ -321,6 +322,8 @@ fn execute_job(
     let mut work = WorkBudget::new(WORK_ALLOWANCE);
     #[cfg(test)]
     let rng_draws_before = job.rng.draws();
+    #[cfg(test)]
+    let rng_before = job.rng.clone();
     let started = measure.then(std::time::Instant::now);
     let planned = plan::plan(&mut job, &mut work);
     let Ok(outcome) = planned else {
@@ -349,6 +352,7 @@ fn execute_job(
                 rng: &job.rng,
                 escape_origin: job.escape_origin.as_ref(),
             },
+            rng_before: &rng_before,
             plan,
             has_contact,
             work_spent: work.spent(),

@@ -24,10 +24,17 @@ pub(crate) enum PickupMode {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ProgressMode {
+    Legacy,
+    ActorMovement,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct GoalModes {
     pub(crate) pressure: PressureMode,
     pub(crate) farm_origin: FarmOriginMode,
     pub(crate) pickup: PickupMode,
+    pub(crate) progress: ProgressMode,
 }
 
 impl GoalModes {
@@ -36,6 +43,7 @@ impl GoalModes {
             pressure,
             farm_origin: FarmOriginMode::Nearest,
             pickup: PickupMode::Legacy,
+            progress: ProgressMode::Legacy,
         }
     }
 
@@ -44,6 +52,7 @@ impl GoalModes {
             pressure: PressureMode::ExitCoverage,
             farm_origin: FarmOriginMode::VisibleYield,
             pickup: PickupMode::Legacy,
+            progress: ProgressMode::Legacy,
         }
     }
 
@@ -51,6 +60,13 @@ impl GoalModes {
         Self {
             pickup: PickupMode::VisibleContention,
             ..Self::visible_yield()
+        }
+    }
+
+    pub(crate) const fn visible_yield_actor_progress() -> Self {
+        Self {
+            progress: ProgressMode::ActorMovement,
+            ..Self::visible_yield_contention()
         }
     }
 }

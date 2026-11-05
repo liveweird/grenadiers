@@ -22,9 +22,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
-  - Correct false progress renewal when a rival/approach moves closer while the CPU remains
-    stationary, preserving genuine actor progress and archived policies. The exact selector
-    regression confirms this independently of the live opening comparison.
   - Tune distant opponent pursuit versus nearby useful demolition: the same-basis seed53
     comparison delays Hard's first bomb by 174 ticks. Retain complete escape/contact proofs,
     private observations and bounded work; verify real accepted bombing and later progress.

@@ -380,3 +380,10 @@ fn certified_easy_cadence_has_a_new_identity_without_relabeling_easy62_or_hard67
     assert_eq!(CpuProfile::RECOVERY_V62_EASY.policy.version(), 62);
     assert_eq!(CpuProfile::HARD_V67.policy.version(), 67);
 }
+
+#[test]
+fn hard69_actor_progress_has_a_new_identity_without_relabeling_hard67() {
+    assert_eq!(CpuProfile::HARD_V69.policy, CpuPolicy::UtilityV69);
+    assert_eq!(CpuProfile::HARD_V69.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::HARD_V67.policy.version(), 67);
+}

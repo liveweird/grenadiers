@@ -263,24 +263,26 @@ fn full_shared_queue_leaves_the_old_hold_and_live_state_untouched() {
 }
 
 #[test]
-fn optional_hard67_decline_preserves_installed_route_memory_and_rng() {
-    let mut fixture = queued_refuge_for(CpuProfile::HARD_V67);
-    let memory = fixture.controller.memory;
-    let rng_draws = fixture.controller.rng_draws();
-    assert_eq!(fixture.planner.pump_for_test(1).delivered, 1);
-    let pending = fixture.controller.pending.as_mut().unwrap();
-    let mut result = pending.receiver.try_recv().unwrap();
-    result.outcome = crate::game::rooms::cpu::worker::WorkerPlan::NoReplacement;
-    pending.completed = Some(result);
+fn optional_hard67_and_hard69_declines_preserve_installed_route_memory_and_rng() {
+    for profile in [CpuProfile::HARD_V67, CpuProfile::HARD_V69] {
+        let mut fixture = queued_refuge_for(profile);
+        let memory = fixture.controller.memory;
+        let rng_draws = fixture.controller.rng_draws();
+        assert_eq!(fixture.planner.pump_for_test(1).delivered, 1);
+        let pending = fixture.controller.pending.as_mut().unwrap();
+        let mut result = pending.receiver.try_recv().unwrap();
+        result.outcome = crate::game::rooms::cpu::worker::WorkerPlan::NoReplacement;
+        pending.completed = Some(result);
 
-    assert!(
-        fixture
-            .controller
-            .poll(fixture.state.tick(), EPOCH)
-            .is_none()
-    );
-    assert!(!fixture.controller.has_pending());
-    assert!(fixture.controller.has_committed_route());
-    assert_eq!(fixture.controller.memory, memory);
-    assert_eq!(fixture.controller.rng_draws(), rng_draws);
+        assert!(
+            fixture
+                .controller
+                .poll(fixture.state.tick(), EPOCH)
+                .is_none()
+        );
+        assert!(!fixture.controller.has_pending());
+        assert!(fixture.controller.has_committed_route());
+        assert_eq!(fixture.controller.memory, memory);
+        assert_eq!(fixture.controller.rng_draws(), rng_draws);
+    }
 }

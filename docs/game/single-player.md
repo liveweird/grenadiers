@@ -28,6 +28,10 @@ those predictions; the [reactive planning contract](cpu-contracts.md#reactive-ha
 defines the limits. The labels describe policy choices, not a measured strength ranking;
 balance still needs human playtesting.
 
+Hard counts strategic progress only when the CPU actually moves and meets its existing progress
+test. An opponent or approach moving closer cannot restart a stationary CPU's deadline.
+Expired progress still triggers normal target deferral; fresh target scoring is unchanged.
+
 ## Settings, start and rematch
 
 Configure the match before marking yourself Ready. The CPU acknowledges the current settings
@@ -151,7 +155,7 @@ use its restricted tactic.
 
 Archived ManualV1 CPU profiles can check one stopped Equipment action against a single adjacent,
 unpaused Standard timed bomb. Their complete relocation/cooldown-failure escape proof and scene
-restrictions remain frozen for replay compatibility. Live CPU62/67 intentionally emit no manual
+restrictions remain frozen for replay compatibility. Live CPU68/62/69 intentionally emit no manual
 Equipment action and do not currently use an intentional contact-Punch tactic. ContactV2 can
 activate Punch through movement, so their route guard declines forward bomb contact that could
 cause an unmodelled relocation. Exact retained origin grace permits safe departure from an overlap;

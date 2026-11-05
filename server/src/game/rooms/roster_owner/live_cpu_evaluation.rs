@@ -17,7 +17,7 @@ use super::{
     super::{
         RandomFill,
         cpu::{CpuController, CpuPlanner, PumpReport},
-        replay_v37::{self, RecordingRosterRuntime, ReplayAction},
+        replay_v38::{self, RecordingRosterRuntime, ReplayAction},
         roster_runtime::{EvaluationOperation, RosterAction, RosterRuntime},
     },
     RosterOwnerNotice,
@@ -54,7 +54,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
             .map(|(index, seat)| (seat, case.difficulty, cpu_seeds[index]))
             .collect(),
     )
-    .map_err(|error| format!("construct Replay37 evaluation fixture: {error:?}"))?;
+    .map_err(|error| format!("construct Replay38 evaluation fixture: {error:?}"))?;
     start_round(&mut shadow)?;
 
     let mut runtime = shadow.runtime().clone();
@@ -153,7 +153,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
         return Err("retained shadow diverged from actual driver runtime".to_owned());
     }
     let (_, journal) = shadow.into_parts();
-    replay_v37::verify_exact(&journal, &actual)?;
+    replay_v38::verify_exact(&journal, &actual)?;
 
     let state = actual.simulation.as_ref().unwrap().state.clone();
     let terminal = state.result().is_some();

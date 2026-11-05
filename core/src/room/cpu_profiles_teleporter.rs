@@ -79,6 +79,8 @@ impl CpuProfile {
     /// Easy62 ordinary decisions with certified post-navigation cadence guidance.
     pub const CERTIFIED_CADENCE_V68_EASY: Self =
         Self::profile(CpuPolicy::UtilityV68, CpuDifficulty::Easy);
+    /// Hard67 tactics with actor-motion-only strategic progress renewal.
+    pub const HARD_V69: Self = Self::profile(CpuPolicy::UtilityV69, CpuDifficulty::Hard);
 
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

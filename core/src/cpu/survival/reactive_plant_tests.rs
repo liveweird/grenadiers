@@ -8,7 +8,8 @@ use crate::game::{BlastKind, CellId, EntityId, PunchActivationPolicy, Tick};
 
 use super::foreign_bomb_farming_clear_fixture::captured_clear_basis;
 use super::{
-    WORK_ALLOWANCE, plan_hard_demolition_v64_with_origin, plan_hard_reactive_v65_with_origin,
+    WORK_ALLOWANCE, plan_hard_demolition_v64_with_origin, plan_hard_pickup_v66_with_origin,
+    plan_hard_progress_v69_with_origin, plan_hard_reactive_v65_with_origin,
 };
 
 fn reactive_basis() -> (Observation, ObservedHazardMemory, UtilityMemory, MemoryKey) {
@@ -60,6 +61,40 @@ fn previous_sample(observation: &Observation) -> Observation {
             *remaining_ticks += 1;
         })
         .unwrap()
+}
+
+#[test]
+fn hard69_fresh_reactive_plan_preserves_hard66_output_work_and_rng() {
+    let (observation, history, _, key) = reactive_basis();
+    let memory = UtilityMemory::new(key);
+    let mut old_rng = CpuRng::from_seed(key, [69; 32]);
+    let mut new_rng = old_rng.clone();
+    let mut old_work = WorkBudget::new(WORK_ALLOWANCE);
+    let mut new_work = WorkBudget::new(WORK_ALLOWANCE);
+    let old = plan_hard_pickup_v66_with_origin(
+        &observation,
+        &memory,
+        &history,
+        observation.parts().tick,
+        None,
+        &mut old_rng,
+        &mut old_work,
+    );
+    let new = plan_hard_progress_v69_with_origin(
+        &observation,
+        &memory,
+        &history,
+        observation.parts().tick,
+        None,
+        &mut new_rng,
+        &mut new_work,
+    );
+    let old = old.unwrap();
+    let new = new.unwrap();
+    assert_eq!(new.survival, old.survival);
+    assert_eq!(format!("{:?}", new.contact), format!("{:?}", old.contact));
+    assert_eq!(new_work.spent(), old_work.spent());
+    assert_eq!(new_rng.draws(), old_rng.draws());
 }
 
 #[test]

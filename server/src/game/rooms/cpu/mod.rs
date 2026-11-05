@@ -30,3 +30,5 @@ mod worker_v66_tests;
 mod worker_v67_tests;
 #[cfg(test)]
 mod worker_v68_tests;
+#[cfg(test)]
+mod worker_v69_tests;

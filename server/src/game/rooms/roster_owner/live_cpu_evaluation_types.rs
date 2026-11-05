@@ -9,6 +9,22 @@ pub(super) const CPU_SEATS: [grenadiers_core::game::SeatId; 3] = [
     grenadiers_core::game::SeatId::Four,
 ];
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct AcceptedCpuActions {
+    pub movement: [u64; 3],
+    pub bombs: [u64; 3],
+}
+
+impl AcceptedCpuActions {
+    pub(super) fn merge(&mut self, next: Self) {
+        for index in 0..3 {
+            self.movement[index] += next.movement[index];
+            self.bombs[index] += next.bombs[index];
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub(super) enum ReferenceScript {
@@ -31,7 +47,7 @@ impl EvaluationCase {
         match self.difficulty {
             CpuDifficulty::Easy => CpuProfile::RECOVERY_V62_EASY,
             CpuDifficulty::Standard => CpuProfile::RECOVERY_V62_STANDARD,
-            CpuDifficulty::Hard => CpuProfile::HARD_V66,
+            CpuDifficulty::Hard => CpuProfile::HARD_V67,
         }
     }
 
@@ -43,6 +59,7 @@ impl EvaluationCase {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct EventMetrics {
     pub bomb_placed: [u64; 4],
     pub bomb_detonated: [u64; 4],
@@ -51,7 +68,9 @@ pub(super) struct EventMetrics {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct MobilityMetrics {
+    pub alive_updates: u64,
     pub distinct_cells: usize,
     pub cell_transitions: u64,
     pub stationary_updates: u64,
@@ -59,12 +78,14 @@ pub(super) struct MobilityMetrics {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct IntentMetrics {
     pub phases: BTreeMap<String, u64>,
     pub targets: BTreeMap<String, u64>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct AdmissionMetrics {
     pub expired_or_wrong_decision: u32,
     pub missed_manual_tick: u32,
@@ -80,21 +101,25 @@ pub(super) struct AdmissionMetrics {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct QueueMetrics {
     pub dequeued: usize,
     pub delivered: usize,
     pub cancelled: usize,
     pub failed: usize,
     pub dropped: usize,
+    pub total_work: u64,
     pub max_work: u32,
     pub outstanding: usize,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct DeterministicMeasurement {
     pub label: &'static str,
     pub difficulty: String,
     pub profile_version: u16,
+    pub bomb_capacity_drop_multiplier: u64,
     pub arena_seed: u8,
     pub simulation_root_seed: u8,
     pub cpu_seed_set: u8,
@@ -111,12 +136,14 @@ pub(super) struct DeterministicMeasurement {
     pub intents: [IntentMetrics; 3],
     pub admissions: [AdmissionMetrics; 3],
     pub queue: QueueMetrics,
+    pub accepted_cpu_actions: AcceptedCpuActions,
     pub rng_draws: [u64; 3],
     pub shadow_exact: bool,
     pub replay_exact: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub(super) struct EpisodeMeasurement {
     pub deterministic: DeterministicMeasurement,
     #[serde(skip)]

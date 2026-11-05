@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
+#[path = "live_cpu_evaluation_identity.rs"]
+mod identity;
+
 use grenadiers_core::{
     game::{Direction, EnabledItems, SeatId, StormCloudConfig},
     room::{
-        BoardSize, CpuDifficulty, LairRoomConfiguration, RespawnLairTuning, RoomConfiguration,
-        RoomSettings, SeatControl, SpikePitSettings, SpikePitTuning, SpikeRoomConfiguration,
+        BoardSize, BombCapacityDropMultiplier, CpuDifficulty, LairRoomConfiguration,
+        RespawnLairTuning, RoomConfiguration, RoomSettings, SeatControl, SpikePitSettings,
+        SpikePitTuning, SpikeRoomConfiguration,
     },
 };
 use tokio::{sync::watch, time::Instant};
@@ -13,28 +17,28 @@ use super::{
     super::{
         RandomFill,
         cpu::{CpuController, CpuPlanner, PumpReport},
-        replay_v35::{self, RecordingRosterRuntime, ReplayAction},
-        roster_runtime::{
-            EvaluationOperation, RosterAction, RosterRuntime, RosterRuntimeInspection,
-        },
+        replay_v36::{self, RecordingRosterRuntime, ReplayAction},
+        roster_runtime::{EvaluationOperation, RosterAction, RosterRuntime},
     },
     RosterOwnerNotice,
     driver::Driver,
     live_cpu_evaluation_metrics::{MetricsCollector, admissions, rng_draws},
     live_cpu_evaluation_types::{
-        CPU_SEATS, DeterministicMeasurement, EpisodeEvidence, EpisodeMeasurement, EvaluationCase,
-        QueueMetrics, ReferenceScript,
+        AcceptedCpuActions, CPU_SEATS, DeterministicMeasurement, EpisodeEvidence,
+        EpisodeMeasurement, EvaluationCase, QueueMetrics, ReferenceScript,
     },
 };
 use crate::round_seed::RoundSeedSource;
+use identity::assert_identity;
 
-const ROOM_INSTANCE: u64 = 40_067;
 pub(super) const FULL_ROUND_CAP: usize = 10_800;
 
 pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEvidence, String> {
     let cpu_seeds = case.cpu_seeds();
     let configuration = configuration(case.difficulty);
-    let settings = RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL);
+    let settings = RoomSettings::DEFAULT
+        .with_enabled_items(EnabledItems::ALL)
+        .with_bomb_capacity_drop_multiplier(BombCapacityDropMultiplier::DEFAULT);
     let arena_seed = case.arena_seed;
     let mut shadow = RecordingRosterRuntime::new_for_evaluation(
         configuration,
@@ -50,15 +54,16 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
             .map(|(index, seat)| (seat, case.difficulty, cpu_seeds[index]))
             .collect(),
     )
-    .map_err(|error| format!("construct Replay35 evaluation fixture: {error:?}"))?;
+    .map_err(|error| format!("construct Replay36 evaluation fixture: {error:?}"))?;
     start_round(&mut shadow)?;
 
     let mut runtime = shadow.runtime().clone();
+    let room_instance = runtime.identity().registry_serial;
     runtime.enable_evaluation_trace_for_test();
     let notice = runtime
         .current_notice()
         .map_err(|error| format!("initial evaluation publication: {error:?}"))?;
-    drain_trace(&mut runtime, &mut shadow)?;
+    let mut accepted_cpu_actions = drain_trace(&mut runtime, &mut shadow)?;
 
     let planner = CpuPlanner::without_workers();
     let cpus = CPU_SEATS
@@ -68,7 +73,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
             CpuController::new(
                 planner.clone(),
                 seat,
-                ROOM_INSTANCE,
+                room_instance,
                 cpu_seeds[index],
                 case.profile(),
             )
@@ -111,12 +116,12 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
             break;
         }
         script.apply(case.script, &mut driver.runtime)?;
-        drain_trace(&mut driver.runtime, &mut shadow)?;
+        accepted_cpu_actions.merge(drain_trace(&mut driver.runtime, &mut shadow)?);
         merge_planning(&mut planning, planner.pump_for_test(usize::MAX));
         driver
             .tick(Instant::now())
             .map_err(|error| format!("evaluation driver tick: {error:?}"))?;
-        drain_trace(&mut driver.runtime, &mut shadow)?;
+        accepted_cpu_actions.merge(drain_trace(&mut driver.runtime, &mut shadow)?);
         let state = driver.runtime.state_for_test().unwrap();
         let (_, report) = driver.runtime.last_step_trace_for_test().unwrap();
         collector.observe(
@@ -124,7 +129,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
             report,
             &driver.cpus,
             grenadiers_core::cpu::WorldId {
-                room_instance: ROOM_INSTANCE,
+                room_instance,
                 physical_round: 1,
             },
         );
@@ -148,7 +153,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
         return Err("retained shadow diverged from actual driver runtime".to_owned());
     }
     let (_, journal) = shadow.into_parts();
-    replay_v35::verify_exact(&journal, &actual)?;
+    replay_v36::verify_exact(&journal, &actual)?;
 
     let state = actual.simulation.as_ref().unwrap().state.clone();
     let terminal = state.result().is_some();
@@ -162,6 +167,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
         cancelled: planning.cancelled,
         failed: planning.failed,
         dropped: planning.dropped,
+        total_work: planning.work.iter().map(|value| u64::from(*value)).sum(),
         max_work: planning.work.iter().copied().max().unwrap_or(0),
         outstanding,
     };
@@ -174,6 +180,11 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
                 label: case.label,
                 difficulty: format!("{:?}", case.difficulty),
                 profile_version: case.profile().policy.version(),
+                bomb_capacity_drop_multiplier: actual
+                    .lifecycle
+                    .settings()
+                    .bomb_capacity_drop_multiplier()
+                    .value(),
                 arena_seed: case.arena_seed,
                 simulation_root_seed: case.simulation_root_seed,
                 cpu_seed_set: case.cpu_seed_set,
@@ -190,6 +201,7 @@ pub(super) fn run(case: EvaluationCase, tick_cap: usize) -> Result<EpisodeEviden
                 intents,
                 admissions,
                 queue,
+                accepted_cpu_actions,
                 rng_draws,
                 shadow_exact,
                 replay_exact: true,
@@ -247,28 +259,11 @@ pub(super) fn start_round(recording: &mut RecordingRosterRuntime) -> Result<(), 
         .map_err(|error| format!("initial evaluation flush: {error:?}"))
 }
 
-fn assert_identity(
-    inspection: &RosterRuntimeInspection,
-    case: EvaluationCase,
-) -> Result<(), String> {
-    let simulation = inspection.simulation.as_ref().unwrap();
-    let valid = inspection.construction_profile
-        == grenadiers_core::game::ArenaConstructionProfile::WeightedLairClearanceV7
-        && simulation.generation.version() == 7
-        && simulation.state.rules().spike_pit_layout_policy()
-            == grenadiers_core::game::SpikePitLayoutPolicy::LairClearanceV2
-        && simulation.state.rules().punch_activation_policy()
-            == grenadiers_core::game::PunchActivationPolicy::ContactV2
-        && case.profile().difficulty == case.difficulty;
-    valid
-        .then_some(())
-        .ok_or_else(|| "live evaluation identity mismatch".to_owned())
-}
-
 pub(super) fn drain_trace(
     actual: &mut RosterRuntime,
     shadow: &mut RecordingRosterRuntime,
-) -> Result<(), String> {
+) -> Result<AcceptedCpuActions, String> {
+    let mut accepted = AcceptedCpuActions::default();
     let operations = actual
         .drain_evaluation_trace_for_test()
         .map_err(|error| format!("evaluation trace failed: {error:?}"))?;
@@ -285,9 +280,16 @@ pub(super) fn drain_trace(
                 seat,
                 epoch,
                 action,
-            } => shadow
-                .cpu_action(seat, epoch, replay_action(action)?)
-                .map_err(|error| format!("shadow CPU action: {error:?}"))?,
+            } => {
+                if let Some(index) = CPU_SEATS.iter().position(|candidate| *candidate == seat) {
+                    accepted.movement[index] +=
+                        u64::from(matches!(action, RosterAction::Movement(_)));
+                    accepted.bombs[index] += u64::from(matches!(action, RosterAction::Bomb(_)));
+                }
+                shadow
+                    .cpu_action(seat, epoch, replay_action(action)?)
+                    .map_err(|error| format!("shadow CPU action: {error:?}"))?;
+            }
             EvaluationOperation::InputFence(seat) => shadow.input_fence(seat),
             EvaluationOperation::Settle { tick, departures } => {
                 if shadow.runtime().lifecycle().tick() != tick {
@@ -302,7 +304,7 @@ pub(super) fn drain_trace(
                 .map_err(|error| format!("shadow publication flush: {error:?}"))?,
         }
     }
-    Ok(())
+    Ok(accepted)
 }
 
 fn replay_action(action: RosterAction) -> Result<ReplayAction, String> {
@@ -341,10 +343,10 @@ impl ScriptState {
         }
         let tick = state.running_updates();
         let epoch = runtime.lifecycle().round_attempt();
-        if tick % 12 == 0 {
+        if tick.is_multiple_of(12) {
             let movement = match script {
                 ReferenceScript::FixedIdle => None,
-                ReferenceScript::BombRetreat => Some(if (tick / 48) % 2 == 0 {
+                ReferenceScript::BombRetreat => Some(if (tick / 48).is_multiple_of(2) {
                     Direction::East
                 } else {
                     Direction::West
@@ -354,7 +356,7 @@ impl ScriptState {
                 .action(SeatId::One, epoch, RosterAction::Movement(movement))
                 .map_err(|error| format!("reference movement rejected: {error:?}"))?;
         }
-        if script == ReferenceScript::BombRetreat && tick % 90 == 0 {
+        if script == ReferenceScript::BombRetreat && tick.is_multiple_of(90) {
             self.manual_id = self
                 .manual_id
                 .checked_add(1)

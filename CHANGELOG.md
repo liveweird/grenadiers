@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.27 — 2026-11-05
+
+- Add a 48-case live Easy/Standard/Hard comparison with independent seed axes, real owner inputs and exact accepted-input replay.
+- Measure living movement, bomb/pickup events, intent, complete planning costs and natural versus censored outcomes through bounded test-only tracing.
+
 ## 1.3.26 — 2026-11-05
 
 - Let Hard CPU use spare capacity for a second useful bomb from a confirmed refuge while an owned timed bomb remains live.

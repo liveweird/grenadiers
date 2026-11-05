@@ -37,7 +37,7 @@ impl MetricsCollector {
             events: EventMetrics::default(),
             intents: std::array::from_fn(|_| IntentMetrics::default()),
         };
-        collector.observe_positions(state);
+        collector.observe_positions(state, false);
         collector
     }
 
@@ -51,7 +51,7 @@ impl MetricsCollector {
         self.minimum_blocks = self
             .minimum_blocks
             .min(state.world().arena().blocks().len());
-        self.observe_positions(state);
+        self.observe_positions(state, true);
         for event in &report.events {
             match event.kind {
                 StepEventKind::BombPlaced(bomb) => {
@@ -96,29 +96,10 @@ impl MetricsCollector {
         }
     }
 
-    fn observe_positions(&mut self, state: &State) {
+    fn observe_positions(&mut self, state: &State, count_update: bool) {
         for (index, actor) in state.actors().iter().enumerate() {
             let cell = actor.position().cell();
-            if let Some(cell) = cell {
-                self.mobility[index].visited.insert(cell);
-            }
-            let tracker = &mut self.mobility[index];
-            match tracker.previous {
-                Some(previous) if Some(previous) == cell => {
-                    tracker.output.stationary_updates += 1;
-                    tracker.stationary_span += 1;
-                    tracker.output.longest_stationary_span = tracker
-                        .output
-                        .longest_stationary_span
-                        .max(tracker.stationary_span);
-                }
-                Some(_) => {
-                    tracker.output.cell_transitions += 1;
-                    tracker.stationary_span = 0;
-                }
-                None => {}
-            }
-            tracker.previous = cell;
+            self.mobility[index].observe(cell, actor.alive(), count_update);
         }
     }
 
@@ -140,6 +121,40 @@ impl MetricsCollector {
             self.initial_blocks - self.minimum_blocks,
             self.intents,
         )
+    }
+}
+
+impl MobilityTracker {
+    fn observe(&mut self, cell: Option<CellId>, alive: bool, count_update: bool) {
+        if !alive {
+            self.previous = None;
+            self.stationary_span = 0;
+            return;
+        }
+        if let Some(cell) = cell {
+            self.visited.insert(cell);
+        }
+        if !count_update {
+            self.previous = cell;
+            return;
+        }
+        self.output.alive_updates += 1;
+        match self.previous {
+            Some(previous) if Some(previous) == cell => {
+                self.output.stationary_updates += 1;
+                self.stationary_span += 1;
+                self.output.longest_stationary_span = self
+                    .output
+                    .longest_stationary_span
+                    .max(self.stationary_span);
+            }
+            Some(_) => {
+                self.output.cell_transitions += 1;
+                self.stationary_span = 0;
+            }
+            None => {}
+        }
+        self.previous = cell;
     }
 }
 
@@ -165,4 +180,39 @@ fn convert_admission(value: AdmissionTrace) -> AdmissionMetrics {
 
 pub(super) fn rng_draws(cpus: &[CpuController]) -> [u64; 3] {
     std::array::from_fn(|index| cpus[index].rng_draws())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dead_updates_do_not_inflate_living_mobility_or_stationary_spans() {
+        let first = CellId::new(1, 1);
+        let second = CellId::new(2, 1);
+        let third = CellId::new(3, 1);
+        let mut eliminated = MobilityTracker::default();
+        let mut survivor = MobilityTracker::default();
+        eliminated.observe(Some(first), true, false);
+        survivor.observe(Some(first), true, false);
+        eliminated.observe(Some(first), true, true);
+        eliminated.observe(Some(second), true, true);
+        eliminated.observe(Some(second), true, true);
+        survivor.observe(Some(second), true, true);
+        let living = eliminated.output.clone();
+
+        for _ in 0..4 {
+            eliminated.observe(Some(second), false, true);
+        }
+        survivor.observe(Some(third), true, true);
+
+        assert_eq!(eliminated.output, living);
+        assert_eq!(eliminated.stationary_span, 0);
+        assert_eq!(eliminated.output.alive_updates, 3);
+        assert_eq!(eliminated.output.cell_transitions, 1);
+        assert_eq!(eliminated.output.stationary_updates, 2);
+        assert_eq!(eliminated.output.longest_stationary_span, 1);
+        assert_eq!(survivor.output.alive_updates, 2);
+        assert_eq!(survivor.output.cell_transitions, 2);
+    }
 }

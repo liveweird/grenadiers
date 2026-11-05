@@ -1,5 +1,6 @@
 //! Private format36 envelope for Hard CPU owned-bomb combinations.
 //! Production recording and export intentionally remain disabled.
+mod evaluation_fixture;
 #[path = "../replay_v24/recording.rs"]
 #[expect(
     clippy::duplicate_mod,

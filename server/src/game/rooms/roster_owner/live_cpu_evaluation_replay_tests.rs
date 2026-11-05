@@ -1,11 +1,11 @@
 use grenadiers_core::{
     game::{Direction, EnabledItems, SeatId},
-    room::{CpuDifficulty, RoomSettings},
+    room::{BombCapacityDropMultiplier, CpuDifficulty, RoomSettings},
 };
 
 use super::{
     super::{
-        replay_v35::{self, RecordingRosterRuntime},
+        replay_v36::{self, RecordingRosterRuntime},
         roster_runtime::RosterAction,
     },
     live_cpu_evaluation::{configuration, drain_trace, start_round},
@@ -16,7 +16,9 @@ use crate::round_seed::RoundSeedSource;
 fn live_evaluation_partial_flush_stop_bomb_and_fence_replay_exactly() {
     let mut shadow = RecordingRosterRuntime::new_for_evaluation(
         configuration(CpuDifficulty::Hard),
-        RoomSettings::DEFAULT.with_enabled_items(EnabledItems::ALL),
+        RoomSettings::DEFAULT
+            .with_enabled_items(EnabledItems::ALL)
+            .with_bomb_capacity_drop_multiplier(BombCapacityDropMultiplier::DEFAULT),
         RoundSeedSource::with_entropy(|bytes| {
             bytes.fill(41);
             Ok(())
@@ -49,5 +51,5 @@ fn live_evaluation_partial_flush_stop_bomb_and_fence_replay_exactly() {
     let expected = actual.replay_inspection();
     assert_eq!(shadow.runtime().replay_inspection(), expected);
     let (_, journal) = shadow.into_parts();
-    replay_v35::verify_exact(&journal, &expected).unwrap();
+    replay_v36::verify_exact(&journal, &expected).unwrap();
 }

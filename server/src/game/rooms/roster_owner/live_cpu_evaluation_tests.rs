@@ -1,4 +1,7 @@
-use grenadiers_core::{cpu::survival::WORK_ALLOWANCE, room::CpuDifficulty};
+use grenadiers_core::{
+    cpu::survival::WORK_ALLOWANCE,
+    room::{BombCapacityDropMultiplier, CpuDifficulty},
+};
 use serde_json::json;
 
 use super::{
@@ -27,8 +30,8 @@ fn live_difficulty_short_episodes_repeat_exactly_at_every_level() {
         CpuDifficulty::Standard,
         CpuDifficulty::Hard,
     ] {
-        let first = run(case(difficulty), 180).unwrap();
-        let second = run(case(difficulty), 180).unwrap();
+        let first = run(case(difficulty), 240).unwrap();
+        let second = run(case(difficulty), 240).unwrap();
         assert_eq!(
             first.measurement.deterministic,
             second.measurement.deterministic
@@ -36,12 +39,44 @@ fn live_difficulty_short_episodes_repeat_exactly_at_every_level() {
         assert_eq!(first.final_inspection, second.final_inspection);
         assert!(first.measurement.deterministic.shadow_exact);
         assert!(first.measurement.deterministic.replay_exact);
+        let measurement = &first.measurement.deterministic;
+        assert_eq!(
+            measurement.bomb_capacity_drop_multiplier,
+            BombCapacityDropMultiplier::DEFAULT.value()
+        );
+        assert!(measurement.queue.dequeued > 0, "{measurement:?}");
+        assert!(measurement.queue.delivered > 0, "{measurement:?}");
+        assert!(
+            measurement
+                .accepted_cpu_actions
+                .movement
+                .into_iter()
+                .all(|actions| actions > 0),
+            "{measurement:?}"
+        );
+        assert!(
+            measurement.mobility[1..]
+                .iter()
+                .all(|mobility| mobility.cell_transitions > 0),
+            "{measurement:?}"
+        );
+        let serialized = serde_json::to_value(measurement).unwrap();
+        assert!(serialized.get("profileVersion").is_some());
+        assert!(serialized.get("profile_version").is_none());
+        assert!(serialized["queue"].get("totalWork").is_some());
+        assert!(serialized["queue"].get("total_work").is_none());
+        assert!(serialized["mobility"][0].get("aliveUpdates").is_some());
+        assert!(serialized["mobility"][0].get("alive_updates").is_none());
     }
 }
 
 #[test]
 fn live_difficulty_seed_axes_are_independent() {
     let baseline = run(case(CpuDifficulty::Standard), 1).unwrap();
+    for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Hard] {
+        let other = run(case(difficulty), 1).unwrap();
+        assert_eq!(baseline.initial_state, other.initial_state);
+    }
     let cpu_changed = run(
         EvaluationCase {
             cpu_seed_set: 91,
@@ -95,6 +130,9 @@ fn live_difficulty_round_evaluation_measurement() {
                     CpuDifficulty::Standard,
                     CpuDifficulty::Hard,
                 ] {
+                    eprintln!(
+                        "LIVE_CPU_CASE_START arena={arena_seed} cpu={cpu_seed_set} script={script:?} difficulty={difficulty:?}"
+                    );
                     let evidence = run(
                         EvaluationCase {
                             label: "live-difficulty-full-round",
@@ -114,10 +152,16 @@ fn live_difficulty_round_evaluation_measurement() {
                     assert!(result.shadow_exact && result.replay_exact, "{result:?}");
                     assert_eq!(result.queue.outstanding, 0, "{result:?}");
                     assert_eq!(result.queue.failed, 0, "{result:?}");
+                    assert!(result.queue.delivered > 0, "{result:?}");
+                    assert!(
+                        result
+                            .accepted_cpu_actions
+                            .movement
+                            .into_iter()
+                            .all(|actions| actions > 0),
+                        "{result:?}"
+                    );
                     assert!(result.queue.max_work <= WORK_ALLOWANCE, "{result:?}");
-                    if result.running_updates == FULL_ROUND_CAP as u64 {
-                        assert_eq!(result.round_result.as_deref(), Some("Draw(Timeout)"));
-                    }
                     planner_times.extend(evidence.measurement.planner_times);
                     results.push(serde_json::to_value(result).unwrap());
                 }
@@ -139,15 +183,16 @@ fn live_difficulty_round_evaluation_measurement() {
         json!({
             "metadata": metadata,
             "identity": {
-                "replayFormat": 35,
+                "replayFormat": 36,
                 "generatorVersion": 7,
                 "spikePitLayoutVersion": 2,
                 "gameplayVersion": 21,
                 "punchActivation": "ContactV2",
                 "easyPolicyVersion": 62,
                 "standardPolicyVersion": 62,
-                "hardPolicyVersion": 66,
+                "hardPolicyVersion": 67,
                 "enabledItems": "all",
+                "bombCapacityDropMultiplier": BombCapacityDropMultiplier::DEFAULT.value(),
             },
             "matrix": {
                 "arenaSeeds": 4,

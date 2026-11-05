@@ -15,8 +15,10 @@ elif [[ "$#" -eq 1 && "${1:-}" == --cpu-easy-rounds ]]; then
   mode=cpu-easy-rounds
 elif [[ "$#" -eq 1 && "${1:-}" == --cpu-live-rounds ]]; then
   mode=cpu-live-rounds
+elif [[ "$#" -eq 1 && "${1:-}" == --cpu-live-soak ]]; then
+  mode=cpu-live-soak
 elif [[ "$#" -ne 0 ]]; then
-  echo 'usage: scripts/measure-game.sh [--cpu|--cpu-rounds|--cpu-easy|--cpu-easy-rounds|--cpu-live-rounds]' >&2
+  echo 'usage: scripts/measure-game.sh [--cpu|--cpu-rounds|--cpu-easy|--cpu-easy-rounds|--cpu-live-rounds|--cpu-live-soak]' >&2
   exit 2
 fi
 
@@ -31,6 +33,8 @@ elif [[ "$mode" == cpu-easy-rounds ]]; then
   output="$root/target/cpu-easy-round-measurements"
 elif [[ "$mode" == cpu-live-rounds ]]; then
   output="$root/target/cpu-live-round-measurements"
+elif [[ "$mode" == cpu-live-soak ]]; then
+  output="$root/target/cpu-live-soak-measurements"
 fi
 mkdir -p "$output"
 : > "$output/results.jsonl"
@@ -155,12 +159,14 @@ run_case() {
       <<< "$record" >> "$output/results.jsonl"
 }
 
-if [[ "$mode" == cpu || "$mode" == cpu-rounds || "$mode" == cpu-easy || "$mode" == cpu-easy-rounds || "$mode" == cpu-live-rounds ]]; then
+if [[ "$mode" == cpu || "$mode" == cpu-rounds || "$mode" == cpu-easy || "$mode" == cpu-easy-rounds || "$mode" == cpu-live-rounds || "$mode" == cpu-live-soak ]]; then
   export GRENADIERS_MEASUREMENT_SOURCE="$source_commit:$source_state"
   GRENADIERS_MEASUREMENT_TOOLCHAIN="$(rustc -Vv)"
   export GRENADIERS_MEASUREMENT_TOOLCHAIN
   if [[ "$mode" == cpu-live-rounds ]]; then
     run_case cpu-live-rounds live_difficulty_round_evaluation_measurement
+  elif [[ "$mode" == cpu-live-soak ]]; then
+    run_case cpu-live-soak live_difficulty_seed_sweep_soak
   elif [[ "$mode" == cpu-rounds ]]; then
     run_case cpu-rounds cpu_full_round_evaluation_measurement
   elif [[ "$mode" == cpu-easy ]]; then

@@ -269,6 +269,8 @@ mod live_cpu_evaluation_tests;
 #[cfg(test)]
 mod live_cpu_evaluation_types;
 #[cfg(test)]
+mod live_cpu_soak_tests;
+#[cfg(test)]
 mod owned_combination_owner_support;
 #[cfg(test)]
 mod owned_combination_owner_tests;

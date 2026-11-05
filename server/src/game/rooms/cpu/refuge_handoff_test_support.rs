@@ -168,9 +168,11 @@ fn state(profile: CpuProfile) -> (State, RoomSettings) {
     terrain[4 * 15 + 6] = grenadiers_core::game::Terrain::Floor;
     let arena = Arena::new(
         terrain,
-        (profile == CpuProfile::HARD_V67)
-            .then(|| BTreeSet::from([CellId::new(7, 3)]))
-            .unwrap_or_default(),
+        if profile == CpuProfile::HARD_V67 {
+            BTreeSet::from([CellId::new(7, 3)])
+        } else {
+            BTreeSet::new()
+        },
         [CellId::new(1, 1), CellId::new(13, 11), CellId::new(13, 1)],
     )
     .unwrap();

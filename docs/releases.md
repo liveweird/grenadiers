@@ -97,6 +97,47 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.26 — 2026-11-05
+
+Hard67 can use spare capacity for a useful second bomb from a confirmed refuge while its first
+owned timed bomb is live. Complete present/absent proofs preserve both flame horizons, and
+admission binds the exact handoff, stop time and Hard67 capability. Decline or rejection retains
+the installed route and live memory/RNG. Ordinary planning remains Hard66; Easy/Standard62,
+generation7, pit-layout2, gameplay21/rules10 and ContactV2 remain unchanged. Private replay36
+closes the combination family.
+
+The paired queued-owner scene collects real capacity, overlaps two distinct bombs, attributes
+additional block destruction to the second bomb's sole detonation, survives both flame windows
+and makes settled-cell progress. Six generated reference cases retain identical Hard66/67
+recorded metrics. This establishes a scoped opportunity, not a general strength claim. See the
+[physical evidence](history/cpu-owned-combinations-2026-11-05.md) and
+[contract](game/cpu-contracts.md#owned-bomb-combinations).
+
+### Verification
+
+- Frozen source `4a0c9e288ccc2ed163ea78d840d9cda71522b421` passes full local Rust checks:
+  2,022 core tests and two doctests, 836 ordinary server cases and four isolated timing cases
+  per debug/release/coverage profile. All 4,194,304 item masks pass per profile with 32 partitions,
+  four workers and no retries. Coverage is 82,479/88,528 lines (93.17%), above the unchanged
+  90% floor, with 40 raw profiles. Wall time is 1,063.10 seconds.
+- Isolated native Hard67 pacing passes in 34.62 seconds on the source-equivalent candidate.
+  Independent review findings are resolved. Strict formatting/lint, repository and source-size
+  checks pass. The initial full command stopped before tests on a test-fixture Clippy expression;
+  its equivalent explicit `if/else` correction passes the restarted full gate.
+- [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41942652293)
+  pass on `df3bff9d749f3bf76afbfdddffffeb9a219fc1cc`. The final candidate differs only in that
+  equivalent test-fixture expression; the platform run was reused without duplication.
+- Web/API/assets/E2E/deployment inputs and third-party dependency resolution are unchanged from
+  v1.3.25; reuse its web/static/tooling/schema/dependency-policy, npm-audit and five Chromium
+  scenario results. Fresh same-image Compose and restricted OrbStack Kubernetes smoke checks
+  pass with three moving/bombing Hard CPUs, two moving mobs, configured spikes and rendered
+  canvas. All nine served assets are byte-identical; CSP/cache/security, probes and readiness
+  pass. Pinned Trivy reports zero fixable high/critical findings. Temporary resources are removed.
+
+The accepted image is `sha256:504132bd017de9a6f6883c5a35bb02634a66cd588930e823c75efe01c5f3e97b`, labelled v1.3.26 and source
+`4a0c9e288ccc2ed163ea78d840d9cda71522b421`. Later release-document changes preserve the verified
+code. Promote this exact image and retain v1.3.25 for rollback.
+
 ## v1.3.25 — 2026-11-05
 
 Hard66 can prefer a visibly contested capacity/range upgrade over an equally useful, equally

@@ -48,4 +48,4 @@ manually injected positive certificate.
 Finalization explicitly drains/cancels pending work instead of omitting a last enqueued job.
 Ordinary Hard67/Hard66 parity compares the full plan, contact, work, RNG state and future outputs.
 The isolated native production-pacing check passes in 34.62 seconds. Full release verification
-and exact source/image identities belong in the release record.
+and exact source/image identities belong in the [v1.3.26 release record](../releases.md#v1326--2026-11-05).

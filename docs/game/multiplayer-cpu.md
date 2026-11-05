@@ -1,6 +1,6 @@
 # Multiplayer CPU foundation
 
-The live environment CPU implementation uses policy62 on Easy/Standard and policy67 on Hard for every live
+The live environment CPU implementation uses policy68 on Easy, policy62 on Standard and policy67 on Hard for every live
 two-to-four-seat gameplay21/rules10 room. The explicit generator6 construction retains policy60/61. Policy56/59 remains the archived replay30 pair and policy58
 remains the archived Hard identity for replay29, while
 the legacy multiplayer profiles remain policy17 for archived/reference paths. See the
@@ -33,9 +33,11 @@ or a private arena/simulation random stream.
 
 ## Policies and controller ownership
 
-`CpuProfile::RECOVERY_V62_STANDARD` and `RECOVERY_V62_EASY` select Utility62 for live
-Easy/Standard rooms. `CpuProfile::HARD_V67` selects Utility67 for Hard rooms with the same
-observation boundary. Private replay36 binds this pair to generator7, pit-layout2 and ContactV2.
+`CpuProfile::CERTIFIED_CADENCE_V68_EASY` selects Utility68 for live Easy rooms; its planner
+retains Standard62 decisions and adds checked post-navigation pacing. `RECOVERY_V62_STANDARD`
+selects Utility62 for Standard; `HARD_V67` selects Utility67 for Hard with the same observation
+boundary. Private replay37 binds these profiles to generator7, pit-layout2 and ContactV2.
+Archived replay36 retains Easy/Standard62 and Hard67.
 Archived replay35 retains CPU62/66; replay34 retains CPU62/65.
 Archived replay33 preserves the earlier CPU62/64 family on the same construction.
 The published generator6/replay32 construction and archived replay31 retain CPU60/61;
@@ -65,7 +67,7 @@ These additional multiplayer guards do not change rules-5 admission semantics.
 
 ## Contact Punch routing
 
-CPU62/67 inherit CPU60/61’s routing guards. They do not intentionally emit the archived manual Equipment action or use an intentional
+CPU68/62/67 inherit CPU60/61’s routing guards. They do not intentionally emit the archived manual Equipment action or use an intentional
 contact-Punch tactic. Because ContactV2 can relocate a bomb on movement contact, every certified
 forward segment checks the immediate swept contact cells for a visible bomb or a forecasted
 punchable moving bomb. Any possible unmodelled relocation rejects that route. Exact retained

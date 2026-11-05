@@ -28,6 +28,9 @@ fn runtime_with_family(family: CpuPolicyFamily) -> RosterRuntime {
         CpuPolicyFamily::Clearance => RosterRuntime::new_spike_v21_clearance_with_navigation,
         CpuPolicyFamily::ReactiveHardV65 => RosterRuntime::new_spike_v21_reactive_with_navigation,
         CpuPolicyFamily::PickupHardV66 => RosterRuntime::new_spike_v21_pickup_with_navigation,
+        CpuPolicyFamily::CertifiedEasyV68 => {
+            RosterRuntime::new_spike_v21_easy_cadence_with_navigation
+        }
         CpuPolicyFamily::CombinationHardV67 => {
             RosterRuntime::new_spike_v21_combination_with_navigation
         }
@@ -82,6 +85,7 @@ fn cpu_family_survives_settings_updates_and_simulation_resets() {
         CpuPolicyFamily::ReactiveHardV65,
         CpuPolicyFamily::PickupHardV66,
         CpuPolicyFamily::CombinationHardV67,
+        CpuPolicyFamily::CertifiedEasyV68,
     ] {
         assert_family_survives_settings_and_resets(family);
     }
@@ -196,4 +200,24 @@ fn combination_family_preserves_the_simulation_and_selects_only_hard67() {
     assert_eq!(previous.lifecycle, current.lifecycle);
     assert_eq!(previous.construction_profile, current.construction_profile);
     assert_ne!(previous.cpu_family, current.cpu_family);
+}
+
+#[test]
+fn certified_easy_family_changes_only_easy_cadence_identity() {
+    let mut old = runtime_with_family(CpuPolicyFamily::CombinationHardV67);
+    let mut new = runtime_with_family(CpuPolicyFamily::CertifiedEasyV68);
+    assert_eq!(
+        new.easy_cpu_profile(),
+        Some(CpuProfile::CERTIFIED_CADENCE_V68_EASY)
+    );
+    assert_eq!(old.easy_cpu_profile(), Some(CpuProfile::RECOVERY_V62_EASY));
+    assert_eq!(new.hard_cpu_profile(), Some(CpuProfile::HARD_V67));
+    tests::start(&mut old, 2);
+    tests::start(&mut new, 2);
+    let before = old.replay_inspection();
+    let after = new.replay_inspection();
+    assert_eq!(before.simulation, after.simulation);
+    assert_eq!(before.lifecycle, after.lifecycle);
+    assert_eq!(before.construction_profile, after.construction_profile);
+    assert_ne!(before.cpu_family, after.cpu_family);
 }

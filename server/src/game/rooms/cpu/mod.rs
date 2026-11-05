@@ -2,6 +2,8 @@ mod controller;
 mod worker;
 
 #[cfg(test)]
+pub(in crate::game::rooms) use controller::Easy68CadenceMetrics;
+#[cfg(test)]
 pub(in crate::game::rooms) use controller::admission::AdmissionTrace;
 pub(super) use controller::{
     AcceptedPlan, ContinuationService, CpuController, TeleporterService, contact::ContactStatus,
@@ -26,3 +28,5 @@ mod worker_v65_tests;
 mod worker_v66_tests;
 #[cfg(test)]
 mod worker_v67_tests;
+#[cfg(test)]
+mod worker_v68_tests;

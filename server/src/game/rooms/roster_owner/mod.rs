@@ -83,7 +83,7 @@ fn validate_cpus(
         identity.configuration.cpu_difficulty(),
     ) {
         (Some(_), _, _, _, Some(CpuDifficulty::Easy)) if runtime.uses_clearance_cpu_profiles() => {
-            Some(CpuProfile::RECOVERY_V62_EASY)
+            runtime.easy_cpu_profile()
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Standard))
             if runtime.uses_clearance_cpu_profiles() =>
@@ -248,6 +248,10 @@ mod farm_refuge_owner_tests;
 #[cfg(test)]
 mod reliable_profile_tests;
 
+#[cfg(test)]
+mod easy68_cadence_owner_support;
+#[cfg(test)]
+mod easy68_cadence_owner_tests;
 #[cfg(test)]
 mod live_cpu_evaluation;
 #[cfg(test)]

@@ -73,6 +73,7 @@ pub enum CpuPolicy {
     UtilityV65,
     UtilityV66,
     UtilityV67,
+    UtilityV68,
 }
 
 impl CpuPolicy {
@@ -145,6 +146,7 @@ impl CpuPolicy {
             Self::UtilityV65 => 65,
             Self::UtilityV66 => 66,
             Self::UtilityV67 => 67,
+            Self::UtilityV68 => 68,
         }
     }
 }

@@ -17,6 +17,8 @@ pub(in crate::game::rooms) use self::continuation::ContinuationService;
 #[cfg(test)]
 pub(in crate::game::rooms) use self::continuation_types::ContinuationTrace;
 use self::continuation_types::{ContinuationAuthority, ContinuationClock, PreparedAdmission};
+#[cfg(test)]
+pub(in crate::game::rooms) use self::easy68_cadence::Easy68CadenceMetrics;
 pub(in crate::game::rooms) use self::teleporter::TeleporterService;
 pub(in crate::game::rooms) use self::types::AcceptedPlan;
 use self::types::{Pending, StopAdmission};
@@ -46,6 +48,7 @@ pub(in crate::game::rooms) struct CpuController {
     escape_origin_epoch: Option<u64>,
     profile: CpuProfile,
     cadence: CadenceState,
+    easy68_cadence: easy68_cadence::Easy68CadenceState,
     strategic_blast: Option<intent::StrategicBlastContext>,
     refuge_attempt: Option<refuge_handoff::AttemptIdentity>,
     publication_sequence: Option<u64>,
@@ -94,6 +97,7 @@ impl CpuController {
             escape_origin_epoch: None,
             profile,
             cadence: CadenceState::default(),
+            easy68_cadence: easy68_cadence::Easy68CadenceState::default(),
             strategic_blast: None,
             refuge_attempt: None,
             publication_sequence: None,
@@ -133,7 +137,9 @@ impl CpuController {
         let Some(settled_stop_tick) = self.settled_stop_tick else {
             return false;
         };
-        if self.defer_planning(&observation, command_epoch) {
+        if self.defer_easy68_planning(&observation, command_epoch)
+            || self.defer_planning(&observation, command_epoch)
+        {
             return false;
         }
         let Some(serial) = self.request_serial.checked_add(1) else {
@@ -186,6 +192,7 @@ impl CpuController {
         true
     }
     pub(in crate::game::rooms) fn commit(&mut self, accepted: AcceptedPlan, actual_intent: Intent) {
+        self.arm_easy68_cadence_after(&accepted, actual_intent);
         self.arm_cadence_after(&accepted, actual_intent);
         let manual_admitted =
             accepted.intent.manual.is_some() && actual_intent.manual == accepted.intent.manual;
@@ -277,6 +284,7 @@ impl CpuController {
     }
 
     pub(in crate::game::rooms) fn validate_escape_epoch(&mut self, command_epoch: u64) {
+        self.validate_easy68_epoch(command_epoch);
         if self.escape_origin.is_some() && self.escape_origin_epoch != Some(command_epoch) {
             self.clear_escape_origin();
             self.cancel();
@@ -291,47 +299,38 @@ impl Drop for CpuController {
 }
 #[path = "controller_debug.rs"]
 mod debug;
-
 #[path = "controller_observation.rs"]
 mod observation;
-
 #[path = "controller_route.rs"]
 mod route;
 #[cfg(test)]
 pub(in crate::game::rooms) use route::RouteTrace;
-
 #[path = "controller_admission.rs"]
 pub(in crate::game::rooms) mod admission;
-
 #[path = "controller_intent.rs"]
 mod intent;
-
 #[path = "controller_pulse.rs"]
 mod pulse;
 
 #[path = "controller_cadence.rs"]
 mod cadence;
-
 #[path = "controller_contact.rs"]
 pub(in crate::game::rooms) mod contact;
-
+#[path = "controller_easy68_cadence.rs"]
+mod easy68_cadence;
 #[path = "controller_escape.rs"]
 mod escape;
-
-#[path = "controller_seed.rs"]
-mod seed;
-
-#[cfg(test)]
-#[path = "controller_test_support.rs"]
-mod test_support;
-
-#[cfg(test)]
-#[path = "controller_tests.rs"]
-mod tests;
-
 #[cfg(test)]
 #[path = "controller_route_tests.rs"]
 mod route_tests;
+#[path = "controller_seed.rs"]
+mod seed;
+#[cfg(test)]
+#[path = "controller_test_support.rs"]
+mod test_support;
+#[cfg(test)]
+#[path = "controller_tests.rs"]
+mod tests;
 
 #[cfg(test)]
 #[path = "controller_bracelet_tests.rs"]

@@ -46,6 +46,7 @@ impl CpuController {
         self.escape_origin = None;
         self.escape_origin_epoch = None;
         self.cadence = super::CadenceState::default();
+        self.easy68_cadence = super::easy68_cadence::Easy68CadenceState::default();
         self.strategic_blast = None;
         self.refuge_attempt = None;
         self.publication_sequence = None;
@@ -87,6 +88,7 @@ impl CpuController {
         self.observe_strategic_intent(observation);
         self.last_observation_tick = Some(observation.parts().tick);
         self.confirm_stop(observation);
+        self.observe_easy68_cadence(observation);
         self.observe_cadence(observation);
         self.retain_escape_origin(observation);
         self.latest_observation = Some(observation.clone());

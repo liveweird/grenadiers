@@ -42,6 +42,15 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         )
     };
     let hard = controller(CpuProfile::HARD_V45);
+    for difficulty in [CpuDifficulty::Standard, CpuDifficulty::Hard] {
+        assert!(
+            !controller(CpuProfile {
+                policy: CpuPolicy::UtilityV68,
+                difficulty,
+            })
+            .profile_supports(10)
+        );
+    }
     assert!(hard.profile_supports(10));
     assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
@@ -67,6 +76,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V65).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V66).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V67).profile_supports(10));
+    assert!(controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).profile_supports(10));
     for rules in 5..10 {
         assert!(!hard.profile_supports(rules));
     }
@@ -185,6 +195,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V59).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V61).supports_refuge_handoff());
     assert!(!controller(CpuProfile::HARD_V34).supports_refuge_handoff());
+    assert!(!controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).supports_refuge_handoff());
     assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_STANDARD).supports_contact_topology());
     assert!(controller(CpuProfile::CONTACT_TOPOLOGY_V40_EASY).supports_contact_topology());
     assert!(controller(CpuProfile::HARD_V41).supports_contact_topology());
@@ -192,15 +203,19 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V43).supports_contact_topology());
     assert!(controller(CpuProfile::HARD_V45).supports_contact_topology());
     assert!(controller(CpuProfile::HARD_V47).supports_contact_topology());
+    assert!(controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).supports_contact_topology());
     assert!(controller(CpuProfile::BLOCKED_BIRTHS_V42_STANDARD).supports_blocked_birth_contact());
     assert!(controller(CpuProfile::HARD_V43).supports_blocked_birth_contact());
     assert!(controller(CpuProfile::HARD_V45).supports_blocked_birth_contact());
     assert!(controller(CpuProfile::HARD_V47).supports_blocked_birth_contact());
+    assert!(controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).supports_blocked_birth_contact());
     assert!(controller(CpuProfile::CONTINUATION_V44_STANDARD).supports_continuation());
     assert!(controller(CpuProfile::HARD_V45).supports_continuation());
     assert!(controller(CpuProfile::HARD_V47).supports_continuation());
     assert!(controller(CpuProfile::TELEPORTER_V46_STANDARD).supports_continuation());
     assert!(controller(CpuProfile::TELEPORTER_V46_EASY).supports_teleporter_step());
+    assert!(controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).supports_continuation());
+    assert!(controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).supports_teleporter_step());
     assert!(controller(CpuProfile::HARD_V47).supports_teleporter_step());
     for profile in [
         CpuProfile::TELEPORTER_V48_STANDARD,

@@ -17,7 +17,8 @@ connected seat first fences queued movement and bomb intent, then installs a fre
 socket receives `seatReplaced` and closes with code 4001. Commands and delayed drops include the
 exact connection ID and generation; an old binding cannot act on or disconnect its replacement.
 The personal admission includes the authoritative room, optional current physics state, and bomb
-action high-water for the current physics epoch. Reading it does not consume pending reports or
+action high-water for the current physics epoch. The prepared admission owns its recipient seat;
+encoding derives the personal projection from that seat. Reading it does not consume pending reports or
 change shared watch history.
 
 The room owner settles each simulation boundary before processing deferred admissions. Running

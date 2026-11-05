@@ -97,6 +97,46 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.31 — 2026-11-05
+
+Personal admission encoding derives its recipient from the prepared authoritative seat in both
+current and legacy room paths. Removing the redundant argument closes an internal mismatch
+opportunity; existing production callers already supplied matching seats, and no externally
+reachable exploit was observed. Asymmetric Cloak/Invisible Bombs cases exercise the real encoder.
+The Remote Bomb regression now loses its transport after arming, waits beyond the ordinary fuse,
+restores the same bomb and action high-water without historical events, then detonates and replays
+exactly. Gameplay, physics, CPU policies, API contracts and static assets stay unchanged.
+
+The separate test-only [PR #352](https://github.com/liveweird/grenadiers/pull/352) adds
+`scripts/measure-game.sh --cpu-live-soak`. Clean source
+`19aea8d665d2152bf798c7130f64457872765274` completes 192 natural full-round episodes in 48.21s
+with exact owner/shadow/accepted-input replay and bounded complete queue accounting. Its eight
+arena seeds, two simulation roots, two CPU sets, both scripts and all difficulties broaden the
+fixed comparison workload. Repeated zero-RNG CPU seed streams are not independent strength samples.
+Long stationary spans trigger diagnosis; neither a timeout nor a no-cell-transition span alone
+proves a planning defect. Raw accepted evidence is retained under ignored
+`target/quality-review/soak-accepted-measurements/`.
+
+### Verification
+
+- Clean candidate `997254f789934313b29943d39c5bc24cbdcea50a` passes the complete local
+  debug/release/coverage gate in 1,162.11s: 2,048 core cases, two doctests, 876 ordinary
+  server cases and five serial native worker cases per profile. Every profile completes all
+  4,194,304 masks in 32 partitions with four workers and no retries. Official coverage is
+  85,011/91,218 lines (93.20%), with 40 raw profiles and the unchanged 90% floor.
+- Unique Linux run `42075154907` passes that same source. Independent review found no issues;
+  formatting, strict lint, repository pins and source caps pass. Unchanged web/API/art/dependency
+  checks are reused under the local-first policy.
+- Accepted image `sha256:aea33c5687ed24e1a31194677a152f414597a5b18901cd80724483b10b0a9100`
+  carries version 1.3.31 and the tested source label. Pinned Trivy 0.74.0 reports no fixable
+  HIGH/CRITICAL vulnerabilities. Isolated Compose Hard and restricted OrbStack Kubernetes Easy
+  checks pass with three moving/bombing CPUs, two moving mobs, pits, protocol21 and an error-free
+  canvas. All nine served assets match the accepted baseline, including CSP/cache/security checks.
+- All three classic browser reconnect scenarios pass against that exact candidate in 48.2s.
+  The first setup attempt used an invalid repository-qualified image ID; correcting the local
+  recipe required no product change. Temporary projects, namespace and port-forward are removed.
+  The preceding v1.3.30 baseline also passed all three scenarios.
+
 ## v1.3.30 — 2026-11-05
 
 Hard70 can choose a substantially nearer visible Farm before a distant fresh opponent pursuit.

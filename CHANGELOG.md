@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.31 — 2026-11-05
+
+- Bind personal admission encoding to the prepared authoritative seat, removing the redundant recipient argument.
+- Verify armed Remote Bomb survival, action high-water and exact replay across actual transport loss and restoration.
+
 ## 1.3.30 — 2026-11-05
 
 - Let Hard prefer a substantially nearer productive farming route over a distant fresh opponent pursuit, while preserving nearby pressure and item opportunities.

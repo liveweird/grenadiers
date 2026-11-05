@@ -74,6 +74,8 @@ impl CpuProfile {
     pub const HARD_V65: Self = Self::profile(CpuPolicy::UtilityV65, CpuDifficulty::Hard);
     /// Fresh equal-cost pickup contention, retaining the complete Hard65 tactic stack.
     pub const HARD_V66: Self = Self::profile(CpuPolicy::UtilityV66, CpuDifficulty::Hard);
+    /// One handoff-authorized useful owned-bomb combination, retaining Hard66 ordinary play.
+    pub const HARD_V67: Self = Self::profile(CpuPolicy::UtilityV67, CpuDifficulty::Hard);
 
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

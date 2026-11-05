@@ -28,6 +28,9 @@ fn runtime_with_family(family: CpuPolicyFamily) -> RosterRuntime {
         CpuPolicyFamily::Clearance => RosterRuntime::new_spike_v21_clearance_with_navigation,
         CpuPolicyFamily::ReactiveHardV65 => RosterRuntime::new_spike_v21_reactive_with_navigation,
         CpuPolicyFamily::PickupHardV66 => RosterRuntime::new_spike_v21_pickup_with_navigation,
+        CpuPolicyFamily::CombinationHardV67 => {
+            RosterRuntime::new_spike_v21_combination_with_navigation
+        }
     };
     constructor(
         tests::identity(tests::configuration_for(2, BoardSize::ThirteenByEleven)),
@@ -78,6 +81,7 @@ fn cpu_family_survives_settings_updates_and_simulation_resets() {
     for family in [
         CpuPolicyFamily::ReactiveHardV65,
         CpuPolicyFamily::PickupHardV66,
+        CpuPolicyFamily::CombinationHardV67,
     ] {
         assert_family_survives_settings_and_resets(family);
     }
@@ -176,4 +180,20 @@ fn pickup_family_changes_only_the_selected_hard_planner() {
     assert_eq!(previous.construction_profile, current.construction_profile);
     assert_ne!(previous.cpu_family, current.cpu_family);
     assert_eq!(tests::runtime(2).hard_cpu_profile(), None);
+}
+
+#[test]
+fn combination_family_preserves_the_simulation_and_selects_only_hard67() {
+    let mut pickup = runtime_with_family(CpuPolicyFamily::PickupHardV66);
+    let mut combination = runtime_with_family(CpuPolicyFamily::CombinationHardV67);
+    assert_eq!(combination.hard_cpu_profile(), Some(CpuProfile::HARD_V67));
+    assert!(combination.uses_clearance_cpu_profiles());
+    tests::start(&mut pickup, 2);
+    tests::start(&mut combination, 2);
+    let previous = pickup.replay_inspection();
+    let current = combination.replay_inspection();
+    assert_eq!(previous.simulation, current.simulation);
+    assert_eq!(previous.lifecycle, current.lifecycle);
+    assert_eq!(previous.construction_profile, current.construction_profile);
+    assert_ne!(previous.cpu_family, current.cpu_family);
 }

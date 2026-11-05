@@ -167,6 +167,7 @@ impl CpuController {
             settled_stop_tick,
             rng: self.rng.as_ref().expect("world rng initialized").clone(),
             escape_origin: self.escape_origin.clone(),
+            refuge_handoff: None,
             live: Arc::clone(&live),
             result: sender,
         };
@@ -184,7 +185,6 @@ impl CpuController {
         });
         true
     }
-
     pub(in crate::game::rooms) fn commit(&mut self, accepted: AcceptedPlan, actual_intent: Intent) {
         self.arm_cadence_after(&accepted, actual_intent);
         let manual_admitted =

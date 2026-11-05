@@ -19,6 +19,8 @@ use grenadiers_core::cpu::{
 };
 use grenadiers_core::room::CpuPolicy;
 
+#[path = "worker_plan_combination.rs"]
+mod combination;
 #[path = "worker_plan_contact_punch.rs"]
 mod contact_punch;
 #[path = "worker_plan_continuation.rs"]
@@ -31,6 +33,9 @@ mod legacy;
 mod teleporter;
 
 pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPlan, PolicyError> {
+    if let Some(plan) = combination::plan(job, work) {
+        return plan;
+    }
     if let Some(plan) = continuation::plan(job, work) {
         return plan;
     }
@@ -77,6 +82,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV64
                 | CpuPolicy::UtilityV65
                 | CpuPolicy::UtilityV66
+                | CpuPolicy::UtilityV67
         )
     {
         let plan = if matches!(
@@ -88,6 +94,7 @@ pub(super) fn plan(job: &mut PlanJob, work: &mut WorkBudget) -> Result<WorkerPla
                 | CpuPolicy::UtilityV64
                 | CpuPolicy::UtilityV65
                 | CpuPolicy::UtilityV66
+                | CpuPolicy::UtilityV67
         ) {
             contact_punch::plan(job, work)
         } else if job.policy == CpuPolicy::UtilityV59 {

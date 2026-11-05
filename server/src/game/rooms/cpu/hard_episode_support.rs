@@ -99,7 +99,9 @@ pub(super) fn run_inner(case: Case, ticks: usize, profile: CpuProfile, clearance
             [case.seed.wrapping_add(epoch as u8); 32],
         ))
     });
-    let mut runtime = if profile == CpuProfile::HARD_V66 {
+    let mut runtime = if profile == CpuProfile::HARD_V67 {
+        RosterRuntime::new_spike_v21_combination_with_navigation(identity, settings, environment, seeds, simulation_seed)
+    } else if profile == CpuProfile::HARD_V66 {
         RosterRuntime::new_spike_v21_pickup_with_navigation(identity, settings, environment, seeds, simulation_seed)
     } else if profile == CpuProfile::HARD_V65 {
         RosterRuntime::new_spike_v21_reactive_with_navigation(

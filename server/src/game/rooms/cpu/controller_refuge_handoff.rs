@@ -102,6 +102,8 @@ impl CpuController {
             settled_stop_tick,
             rng: self.rng.as_ref().expect("world rng initialized").clone(),
             escape_origin: None,
+            refuge_handoff: (self.profile.policy == grenadiers_core::room::CpuPolicy::UtilityV67)
+                .then_some(handoff.clone()),
             live: Arc::clone(&live),
             result: sender,
         };

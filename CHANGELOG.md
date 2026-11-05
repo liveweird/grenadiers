@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## 1.3.26 — 2026-11-05
+
+- Let Hard CPU use spare capacity for a second useful bomb from a confirmed refuge while an owned timed bomb remains live.
+- Preserve both blast horizons, bind combination authority to the exact handoff and Hard67 profile, and retain previous policies and physics.
+- Bind the combination planner to a distinct runtime family and private replay36.
+
 ## 1.3.25 — 2026-11-05
 
 - Let Hard CPU prefer a visibly contested capacity/range upgrade over an equally valuable, equally close uncontested alternative, while retaining valid goals.

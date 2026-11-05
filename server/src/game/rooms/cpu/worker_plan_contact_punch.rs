@@ -22,8 +22,8 @@ pub(super) fn plan(
         CpuPolicy::UtilityV61 | CpuPolicy::UtilityV63 => plan_hard_contact_punch_v61_with_origin,
         CpuPolicy::UtilityV64 => plan_hard_demolition_v64_with_origin,
         CpuPolicy::UtilityV65 => plan_hard_reactive_v65_with_origin,
-        CpuPolicy::UtilityV66 => plan_hard_pickup_v66_with_origin,
-        _ => unreachable!("contact-punch dispatch is closed to policies 60-66"),
+        CpuPolicy::UtilityV66 | CpuPolicy::UtilityV67 => plan_hard_pickup_v66_with_origin,
+        _ => unreachable!("contact-punch dispatch is closed to policies 60-67"),
     };
     planner(
         &job.observation,

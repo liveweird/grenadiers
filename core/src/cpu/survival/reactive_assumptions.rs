@@ -39,6 +39,88 @@ impl ReactivePlantAssumptions {
         Self::certify_inner(observation, history, settled_stop_tick, true, true, work)
     }
 
+    pub(super) fn certify_owned_combination(
+        observation: &Observation,
+        history: &ObservedHazardMemory,
+        settled_stop_tick: Tick,
+        handoff: &super::TerminalRefugeHandoff,
+        work: &mut WorkBudget,
+    ) -> Option<Self> {
+        work.try_take(1).ok()?;
+        let parts = observation.parts();
+        let key = crate::cpu::MemoryKey {
+            world: parts.world,
+            cpu_seat: parts.recipient,
+        };
+        if parts.rules.version != 10
+            || parts.rules.punch_activation_policy != crate::game::PunchActivationPolicy::ContactV2
+            || settled_stop_tick > parts.tick
+            || history.key() != key
+            || handoff.key() != key
+            || !parts.flames.is_empty()
+            || !parts.oil.is_empty()
+            || !parts.pickups.is_empty()
+        {
+            return None;
+        }
+        if !handoff.authorizes_combination_planning(observation, settled_stop_tick, work) {
+            return None;
+        }
+        work.try_take(u32::try_from(parts.actors.len()).ok()?)
+            .ok()?;
+        for observed in &parts.actors {
+            let effects = match observed {
+                ObservedActor::Visible(actor) => actor.effects.len(),
+                ObservedActor::Hidden { .. } => 0,
+            };
+            work.try_take(u32::try_from(effects).ok()?).ok()?;
+        }
+        let actors = actor_guards(observation, work)?;
+        work.try_take(u32::try_from(parts.actors.len()).ok()?)
+            .ok()?;
+        let actor = parts.actors.iter().find_map(|observed| match observed {
+            ObservedActor::Visible(actor) if actor.seat == parts.recipient => Some(actor),
+            _ => None,
+        })?;
+        if !actor.alive
+            || actor.position != handoff.refuge()
+            || actor.bomb_capacity < 2
+            || actor.live_bomb_count != 1
+        {
+            return None;
+        }
+        let BombKnowledge::Visible(bombs) = &parts.bombs else {
+            return None;
+        };
+        work.try_take(u32::try_from(bombs.len()).ok()?).ok()?;
+        let [bomb] = bombs.as_slice() else {
+            return None;
+        };
+        let remaining = match bomb.trigger {
+            ObservedBombTrigger::Timed {
+                remaining_ticks,
+                paused: false,
+            } => remaining_ticks,
+            ObservedBombTrigger::Timed { paused: true, .. }
+            | ObservedBombTrigger::Remote
+            | ObservedBombTrigger::Contact => {
+                return None;
+            }
+        };
+        if bomb.id != handoff.bomb_id()
+            || bomb.owner != actor.id
+            || remaining <= 9
+            || !history.is_stationary_candidate(bomb.id, parts.tick, bomb.cell)
+        {
+            return None;
+        }
+        Some(Self {
+            eligible_bombs: vec![bomb.id],
+            actors,
+            contact: None,
+        })
+    }
+
     fn certify_inner(
         observation: &Observation,
         history: &ObservedHazardMemory,

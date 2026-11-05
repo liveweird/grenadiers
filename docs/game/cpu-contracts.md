@@ -9,7 +9,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
 Two. Live selection uses `RECOVERY_V62_STANDARD` or `RECOVERY_V62_EASY` and
-`HARD_V66`; private replay35 binds those identities, generator7, pit-layout2 and ContactV2.
+`HARD_V67`; private replay36 binds those identities, generator7, pit-layout2 and ContactV2.
+Archived generator7/replay35 retains Easy/Standard62 and Hard66.
 Archived generator7/replay34 retains Easy/Standard62 and Hard65.
 Archived generator7/replay33 retains Easy/Standard62 and Hard64.
 Published generator6/replay32 and archived replay31 retain CPU60/61. Archived replay30 retains
@@ -24,7 +25,7 @@ solo construction still authorizes only seat Two; an explicit identity does not 
 seat CPU input authority.
 
 `core::cpu` accepts neutral observations and emits movement or Stop, with at most one Bomb or
-archived Equipment intent. Current CPU62/66 do not intentionally request Equipment or contact
+archived Equipment intent. Current CPU62/67 do not intentionally request Equipment or contact
 Punch; because ContactV2 activation can arise from ordinary movement, their route guard declines
 forward bomb contact. Intent carries no credentials, seat authority, readiness,
 settings mutation or manual action ID. The server allocates those IDs and uses ordinary input
@@ -266,6 +267,31 @@ invalidate it before the next publication, cause damage or leave no recoverable 
 Hard-only tradeoff is the accepted [measured-risk decision](../decisions/0030-reactive-hard-planning.md).
 Dated comparisons and the interrupted-escape investigation belong in the
 [history record](../history/reactive-hard-cpu-2026-11-04.md).
+
+## Owned bomb combinations
+
+Hard67 ordinarily uses Hard66's planner unchanged. At a confirmed terminal refuge it may make
+one optional attempt to use spare capacity while an owned timed bomb remains live. The opaque
+handoff binds the exact publication, world, recipient, refuge, real settled-stop tick and
+previous survival horizon. Exactly one bomb must be visible: owned, unpaused, stationary and timed, with two
+observations, capacity of at least two and more than nine fuse updates left.
+Exposed pickups, Oil, flames and incompatible actor capabilities withhold the attempt.
+
+The proposal is Stop plus Bomb at basis update +7. Existing absent/present forecasts must prove
+the full escape through both bombs' flame windows, without shortening the installed guarantee.
+A useful named block must survive the first bomb's absent forecast through the proposed
+second detonation. Attack retains its opponent and a separate forward-block purpose; Farm
+retains its exact block. Hidden contents do not establish usefulness or safety.
+
+Planning consumes the existing allowance and draws no RNG. Decline, late/canceled work, queue
+pressure and rejected manual submission preserve the installed route and live memory/RNG.
+Only the actual Hard67 controller with the still-installed handoff can admit the sealed
+combination; polling and command commit enforce the profile again. Generic reactive authority
+and copied certificates/routes under Hard65/66 cannot grant this capability.
+
+The [paired physical evidence](../history/cpu-owned-combinations-2026-11-05.md) records actual
+capacity collection, overlapping owned bombs, additional damage and survival. Unknown future
+actions or drops retain the measured-risk limits of reactive Hard planning.
 
 ## Certified timed weapons
 
@@ -690,11 +716,12 @@ identities are checked at publication and admission; settings, rounds and rematc
 A separate CPU family fixes planner identity without changing arena generation. The clearance
 family admits exactly CPU62 on Easy/Standard and CPU64 on Hard; the reactive family retains
 CPU62 on Easy/Standard and selects Hard65. The pickup family retains CPU62 and selects Hard66.
+The combination family retains CPU62 and selects Hard67.
 Published weighted generator6 retains CPU60/61.
 Settings changes, rounds and rematches retain both construction and planner families.
 ContactV2 or gameplay21 alone cannot select a family. A forged policy or difficulty is rejected
 before work. Private replay33 closes the clearance family; replay34 closes the reactive family;
-replay35 closes the pickup family.
+replay35 closes the pickup family; replay36 closes the combination family.
 
 The recovery suffix and initial-demolition behavior are described in the
 [multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared

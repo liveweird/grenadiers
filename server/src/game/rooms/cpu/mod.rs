@@ -24,3 +24,5 @@ mod worker_v27_tests;
 mod worker_v65_tests;
 #[cfg(test)]
 mod worker_v66_tests;
+#[cfg(test)]
+mod worker_v67_tests;

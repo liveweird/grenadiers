@@ -10,7 +10,7 @@ use grenadiers_core::cpu::{
     forecast::ObservedHazardMemory,
     policy::UtilityMemory,
     routing::ContinuationCertificate,
-    survival::{PlantEscapeOrigin, SurvivalPlan, WORK_ALLOWANCE},
+    survival::{PlantEscapeOrigin, SurvivalPlan, TerminalRefugeHandoff, WORK_ALLOWANCE},
 };
 use grenadiers_core::game::Tick;
 use grenadiers_core::room::CpuPolicy;
@@ -67,6 +67,7 @@ pub(super) enum WorkerPlan {
     },
     Continuation(Box<ContinuationCertificate>),
     TeleporterStep(Box<grenadiers_core::cpu::survival::TeleporterStepPlan>),
+    NoReplacement,
 }
 
 pub(super) struct PlanResult {
@@ -83,6 +84,7 @@ impl PlanResult {
             WorkerPlan::Ordinary { plan, .. } => plan.as_ref(),
             WorkerPlan::Continuation(_) => panic!("expected ordinary worker result"),
             WorkerPlan::TeleporterStep(_) => panic!("expected ordinary worker result"),
+            WorkerPlan::NoReplacement => panic!("expected ordinary worker result"),
         }
     }
 
@@ -91,6 +93,7 @@ impl PlanResult {
             WorkerPlan::Ordinary { plan, .. } => plan.as_mut(),
             WorkerPlan::Continuation(_) => panic!("expected ordinary worker result"),
             WorkerPlan::TeleporterStep(_) => panic!("expected ordinary worker result"),
+            WorkerPlan::NoReplacement => panic!("expected ordinary worker result"),
         }
     }
 }
@@ -103,6 +106,7 @@ pub(super) struct PlanJob {
     pub(super) settled_stop_tick: Tick,
     pub(super) rng: CpuRng,
     pub(super) escape_origin: Option<PlantEscapeOrigin>,
+    pub(super) refuge_handoff: Option<TerminalRefugeHandoff>,
     pub(super) live: Arc<AtomicBool>,
     pub(super) result: SyncSender<PlanResult>,
 }
@@ -331,7 +335,9 @@ fn execute_job(
     if let Some(inspect) = inspect {
         let (plan, has_contact) = match &outcome {
             WorkerPlan::Ordinary { plan, contact } => (Some(plan.as_ref()), contact.is_some()),
-            WorkerPlan::Continuation(_) | WorkerPlan::TeleporterStep(_) => (None, false),
+            WorkerPlan::Continuation(_)
+            | WorkerPlan::TeleporterStep(_)
+            | WorkerPlan::NoReplacement => (None, false),
         };
         inspect(PlannedResultWitness {
             basis: PlanningBasis {
@@ -355,6 +361,7 @@ fn execute_job(
         WorkerPlan::Ordinary { plan, .. } => Some(plan.control.intent),
         WorkerPlan::Continuation(_) => None,
         WorkerPlan::TeleporterStep(_) => None,
+        WorkerPlan::NoReplacement => None,
     };
     let escape_origin = job.escape_origin;
     if !job.live.load(Ordering::Acquire) {

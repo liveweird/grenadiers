@@ -8,6 +8,7 @@ pub(in crate::game::rooms) enum CpuPolicyFamily {
     Clearance,
     ReactiveHardV65,
     PickupHardV66,
+    CombinationHardV67,
 }
 
 impl RosterRuntime {
@@ -17,6 +18,7 @@ impl RosterRuntime {
             CpuPolicyFamily::Clearance
                 | CpuPolicyFamily::ReactiveHardV65
                 | CpuPolicyFamily::PickupHardV66
+                | CpuPolicyFamily::CombinationHardV67
         )
     }
 
@@ -26,6 +28,7 @@ impl RosterRuntime {
             CpuPolicyFamily::Clearance => Some(CpuProfile::HARD_V64),
             CpuPolicyFamily::ReactiveHardV65 => Some(CpuProfile::HARD_V65),
             CpuPolicyFamily::PickupHardV66 => Some(CpuProfile::HARD_V66),
+            CpuPolicyFamily::CombinationHardV67 => Some(CpuProfile::HARD_V67),
         }
     }
 }

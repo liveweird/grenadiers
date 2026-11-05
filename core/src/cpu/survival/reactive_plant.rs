@@ -17,6 +17,7 @@ pub struct ReactivePlantCertificate {
     plant: PlantCertificate,
     assumptions: ReactivePlantAssumptions,
     purpose: ReactivePlantPurpose,
+    pub(super) owned_combination: Option<super::TerminalRefugeHandoff>,
 }
 
 impl ReactivePlantCertificate {
@@ -39,15 +40,37 @@ impl ReactivePlantCertificate {
             plant,
             assumptions,
             purpose,
+            owned_combination: None,
         })
+    }
+
+    pub(super) fn new_owned_combination(
+        plant: PlantCertificate,
+        assumptions: ReactivePlantAssumptions,
+        purpose: ReactivePlantPurpose,
+        handoff: &super::TerminalRefugeHandoff,
+    ) -> Option<Self> {
+        let mut certificate = Self::new(plant, assumptions, purpose)?;
+        certificate.owned_combination = Some(handoff.clone());
+        Some(certificate)
     }
 
     pub(crate) const fn plant(&self) -> &PlantCertificate {
         &self.plant
     }
 
-    pub(super) fn into_parts(self) -> (PlantCertificate, ReactivePlantAssumptions) {
-        (self.plant, self.assumptions)
+    pub(super) fn into_parts(
+        self,
+    ) -> (
+        PlantCertificate,
+        ReactivePlantAssumptions,
+        Option<super::TerminalRefugeHandoff>,
+    ) {
+        (self.plant, self.assumptions, self.owned_combination)
+    }
+
+    pub(crate) const fn requires_owned_combination_support(&self) -> bool {
+        self.owned_combination.is_some()
     }
 
     pub(crate) fn strategic_plant_still_targets(

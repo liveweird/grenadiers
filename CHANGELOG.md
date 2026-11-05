@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.32 — 2026-11-05
+
+- Prevent monsters already in their target cell from selecting a blocked neighbor and becoming permanently stuck against a wall.
+- Preserve timed bomb/spike escapes and archived navigation while binding navigation4 to private replay40 with unchanged CPU policies.
+
 ## 1.3.31 — 2026-11-05
 
 - Bind personal admission encoding to the prepared authoritative seat, removing the redundant recipient argument.

@@ -97,6 +97,44 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.32 — 2026-11-05
+
+Monsters already in their target cell now stop ordinary pursuit instead of treating an
+unreachable neighbor as a valid zero-distance route. This prevents off-center wall deadlocks,
+while retaining timed bomb/spike escape precedence and stationary contact damage. Navigation4
+is bound through private Replay40 with unchanged Easy68/Standard62/Hard70; Replay39/navigation3
+and earlier algorithms remain reproducible. Public protocol21, construction, item settings,
+CPU scoring and movement speeds stay unchanged.
+
+The real Standard seed3 regression clears a dependent CPU stall without changing its policy:
+Seat Four's longest stay in one cell falls from 5,276 to 183 updates, remains alive and wins the
+scripted round at update 2,851. A death-only reduction does not pass. The
+[diagnosis and physical controls](history/mob-reached-target-2026-11-05.md) distinguish this
+bounded result from a general difficulty ranking. Current documentation is updated to navigation4
+and Replay40, with historical identities retained.
+
+### Verification
+
+- Clean code source `b16f9beaf14b4a037b8ed624f87fb648d04d1dae` passes the 48-case reference
+  runner (12.66s) and 192-case seed sweep (48.74s): all natural results, exact owner/shadow/input
+  replay and complete bounded queue/work accounting. All 48 reference reports and 188/192 seed
+  reports match navigation3; four Standard/arena3 reports change. Repeated zero-RNG CPU seed
+  streams are not independent strength trials.
+- Full local debug/release/coverage passes in 1,102.48s: 2,052 core cases, two doctests,
+  881 ordinary server cases and five serial native worker cases per profile. Every profile
+  completes all 4,194,304 masks in 32 partitions, four workers and no retries. Official coverage
+  is 85,362/91,564 lines (93.23%), with 40 raw profiles and the unchanged 90% floor. Formatting,
+  strict lint, source caps, core contact/retarget/escape controls and independent review pass.
+- Unique Linux run `42082935915` passes that source. Accepted image
+  `sha256:74a44fac29bbb1f0e08f4cd618fd10740ce9daeb99b8c77ba5a91757207e0d79`
+  carries version 1.3.32 and the tested source label; pinned Trivy 0.74.0 reports no fixable
+  HIGH/CRITICAL vulnerabilities.
+- Exact-image Compose Standard and restricted OrbStack Kubernetes Hard acceptance pass with
+  three moving/bombing CPUs, two moving mobs, pits, protocol21 and an error-free canvas. Nine
+  served assets match the accepted baseline with CSP/cache/security policies intact. Temporary
+  resources are removed. Unchanged web/API/art/dependency checks and v1.3.31 browser reconnect
+  evidence are reused; real socket tests run again in the full native gate.
+
 ## v1.3.31 — 2026-11-05
 
 Personal admission encoding derives its recipient from the prepared authoritative seat in both

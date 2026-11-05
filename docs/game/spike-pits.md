@@ -51,7 +51,7 @@ position, target or route. See the [gameplay21 contract](protocol-v21.md).
 
 CPU26 introduced forecasts of path-dependent warning and raised intervals, including warnings its own route
 would trigger. Route execution is guarded by the observed public pit state and retains the
-existing bounded work, normal protection, movement and planting safety budgets. Current CPU62/64 retain this pit behavior alongside later recovery and contact-Punch guards;
+existing bounded work, normal protection, movement and planting safety budgets. The current [CPU profiles](multiplayer-cpu.md#policies-and-controller-ownership) retain this pit behavior alongside later recovery and contact-Punch guards;
 archived CPU25 behavior and historical replay identities remain closed.
 
 Mobs do not deliberately enter pits from safe floor. A mob already overlapping a pit is allowed

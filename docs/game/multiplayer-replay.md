@@ -156,6 +156,11 @@ incomplete journals are rejected. A failed round
 construction records the attempted boundary as incomplete rather than fabricating a seed or round.
 The lifecycle profile is pinned to the core implementation at compile time and checked at replay.
 
+Format40 retains gameplay21, rules10, generator7, pit-layout2 and CPU68/62/70, selecting
+reached-target mob navigation4. Its reader rejects navigation3 and previous outer versions.
+Replay39 retains navigation3 and rejects navigation4; older profiles reconstruct their recorded
+rules. This changes no public frame shape and does not enable production recording or export.
+
 Run `cargo test -p grenadiers-server replay_v4 --no-fail-fast` for the focused verification suite.
 The [runtime guide](multiplayer-runtime.md) owns physical settlement; the
 [CPU guide](multiplayer-cpu.md) owns observation and policy boundaries.

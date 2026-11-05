@@ -1,11 +1,12 @@
 use grenadiers_core::{
     cpu::survival::WORK_ALLOWANCE,
+    game::{MobNavigationPolicy, Position, SeatId},
     room::{BombCapacityDropMultiplier, CpuDifficulty},
 };
 use serde_json::json;
 
 use super::{
-    live_cpu_evaluation::{FULL_ROUND_CAP, run},
+    live_cpu_evaluation::{FULL_ROUND_CAP, run, run_archived_v39},
     live_cpu_evaluation_types::{EvaluationCase, ReferenceScript},
 };
 use crate::game::rooms::measurement;
@@ -21,6 +22,80 @@ fn case(difficulty: CpuDifficulty) -> EvaluationCase {
         cpu_seed_set: 71,
         script: ReferenceScript::FixedIdle,
     }
+}
+
+#[test]
+fn standard_seed3_reached_target_navigation_physically_clears_the_archived_stall() {
+    let case = EvaluationCase {
+        label: "standard-seed3-reached-target",
+        difficulty: CpuDifficulty::Standard,
+        arena_seed: 3,
+        simulation_root_seed: SIMULATION_ROOT_SEED,
+        cpu_seed_set: 71,
+        script: ReferenceScript::FixedIdle,
+    };
+    let archived = run_archived_v39(case, FULL_ROUND_CAP).unwrap();
+    let evidence = run(case, FULL_ROUND_CAP).unwrap();
+    let measurement = &evidence.measurement.deterministic;
+    let archived_measurement = &archived.measurement.deterministic;
+    assert_eq!(archived_measurement.profile_version, 62);
+    assert!(archived_measurement.shadow_exact && archived_measurement.replay_exact);
+    assert_eq!(
+        archived.final_inspection.mob_navigation,
+        MobNavigationPolicy::TimedEscapeV3
+    );
+    assert_eq!(
+        archived_measurement.mobility[SeatId::Four.index()].longest_stationary_span,
+        5_276,
+        "archived control no longer reproduces the measured stall"
+    );
+    assert_eq!(measurement.profile_version, 62);
+    assert!(measurement.terminal && !measurement.censored);
+    assert!(measurement.shadow_exact && measurement.replay_exact);
+    assert_eq!(
+        evidence.final_inspection.mob_navigation,
+        MobNavigationPolicy::ReachedTargetV4
+    );
+    assert!(
+        measurement.mobility[SeatId::Four.index()].longest_stationary_span
+            < archived_measurement.mobility[SeatId::Four.index()].longest_stationary_span,
+        "current={measurement:?} archived={archived_measurement:?}"
+    );
+    let actor = &evidence
+        .final_inspection
+        .simulation
+        .as_ref()
+        .unwrap()
+        .state
+        .actors()[SeatId::Four.index()];
+    assert!(
+        actor.alive(),
+        "clearing the stall must not rely on eliminating Seat Four"
+    );
+    assert!(
+        actor.position() != (Position { x: 1_536, y: 8_608 }),
+        "Seat Four retained the archived exact stall position"
+    );
+    let archived_actor = &archived
+        .final_inspection
+        .simulation
+        .as_ref()
+        .unwrap()
+        .state
+        .actors()[SeatId::Four.index()];
+    eprintln!(
+        "MOB4_SEED3 archived_span={} archived_updates={} archived_alive={} archived_pos={:?} current_span={} current_updates={} current_alive={} current_pos={:?} current_terminal={} result={:?}",
+        archived_measurement.mobility[SeatId::Four.index()].longest_stationary_span,
+        archived_measurement.running_updates,
+        archived_actor.alive(),
+        archived_actor.position(),
+        measurement.mobility[SeatId::Four.index()].longest_stationary_span,
+        measurement.running_updates,
+        actor.alive(),
+        actor.position(),
+        measurement.terminal,
+        measurement.round_result,
+    );
 }
 
 #[test]
@@ -203,7 +278,7 @@ fn live_difficulty_round_evaluation_measurement() {
         json!({
             "metadata": metadata,
             "identity": {
-                "replayFormat": 39,
+                "replayFormat": 40,
                 "generatorVersion": 7,
                 "spikePitLayoutVersion": 2,
                 "gameplayVersion": 21,

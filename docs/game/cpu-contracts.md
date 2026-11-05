@@ -9,7 +9,8 @@ These Rust contracts support the [solo opponent](single-player.md) and the broad
 `core::room::RoomMode` derives controller kinds independently of occupancy and socket state.
 Human duels have two human controllers. Solo fixes the human at seat One and the CPU at seat
 Two. Live selection uses `CERTIFIED_CADENCE_V68_EASY`, `RECOVERY_V62_STANDARD` and
-`HARD_V70`; private replay39 binds those identities, generator7, pit-layout2 and ContactV2.
+`HARD_V70`; private replay40 binds those identities, generator7, pit-layout2, ContactV2 and
+reached-target mob navigation4. Archived replay39 retains the same CPU profiles with navigation3.
 Archived generator7/replay38 retains Easy68, Standard62 and Hard69.
 Archived generator7/replay37 retains Easy68, Standard62 and Hard67.
 Archived generator7/replay36 retains Easy/Standard62 and Hard67.
@@ -768,7 +769,8 @@ Settings changes, rounds and rematches retain both construction and planner fami
 ContactV2 or gameplay21 alone cannot select a family. A forged policy or difficulty is rejected
 before work. Private replay33 closes the clearance family; replay34 closes the reactive family;
 replay35 closes the pickup family; replay36 closes the combination family; replay37 closes
-the certified-cadence family; replay38 closes the actor-progress family; replay39 closes the opportunity family.
+the certified-cadence family; replay38 closes the actor-progress family; replay39 closes the opportunity family
+with navigation3. Replay40 retains the opportunity family and binds navigation4.
 
 The recovery suffix and initial-demolition behavior are described in the
 [multiplayer guide](multiplayer-cpu.md#recovery-and-initial-demolition). They retain the shared

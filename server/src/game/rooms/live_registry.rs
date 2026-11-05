@@ -189,7 +189,7 @@ impl GameRooms {
                 cloud,
                 lairs: tuning,
                 spike_pits,
-                navigation: grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3,
+                navigation: grenadiers_core::game::MobNavigationPolicy::ReachedTargetV4,
             },
             self.round_seed_source.clone(),
             simulation_seed as Arc<dyn Fn(u64) -> Result<SimulationSeed, ()> + Send + Sync>,

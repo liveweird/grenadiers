@@ -135,6 +135,8 @@ mod replay_v39;
 #[allow(dead_code)] // Replay4 is exercised through its test-only recording facade.
 mod replay_v4;
 #[cfg(test)]
+mod replay_v40;
+#[cfg(test)]
 #[allow(dead_code)]
 mod replay_v6;
 #[cfg(test)]

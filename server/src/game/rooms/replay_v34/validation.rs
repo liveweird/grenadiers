@@ -25,8 +25,7 @@ pub(super) fn validate_header(header: &ReplayHeader, body: &replay_v8::Journal) 
             != grenadiers_core::game::STORM_CLOUD_RANDOMNESS_VERSION
         || header.lair_layout_version != grenadiers_core::game::LAIR_LAYOUT_VERSION
         || header.spike_pit_layout_version != super::SPIKE_PIT_LAYOUT_VERSION
-        || header.mob_navigation_version
-            != grenadiers_core::game::MobNavigationPolicy::TimedEscapeV3.version()
+        || header.mob_navigation_version != super::MOB_NAVIGATION_VERSION
         || header.punch_activation_version != super::PUNCH_ACTIVATION_VERSION
         || header.initial_settings_revision != 1
         || header

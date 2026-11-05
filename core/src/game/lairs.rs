@@ -175,7 +175,7 @@ impl LairState {
     ) -> Vec<MovementTrace> {
         let danger = super::explosions::bomb_danger_cells(world);
         let mut budget = super::mob_hazards::WorkBudget::new();
-        let timed = if self.navigation_policy == MobNavigationPolicy::TimedEscapeV3 && !frozen {
+        let timed = if self.navigation_policy.has_timed_escape_navigation() && !frozen {
             super::mob_hazards::TimedMobHazards::build(world, tick, &mut budget)
         } else {
             None

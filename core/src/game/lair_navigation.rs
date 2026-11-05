@@ -182,7 +182,7 @@ fn choose_direction(
     {
         return direction;
     }
-    if policy == MobNavigationPolicy::TimedEscapeV3
+    if policy.has_timed_escape_navigation()
         && let Some(timed) = hazards.timed
         && let Some(direction) = crate::game::mob_escape::escape_direction(
             crate::game::mob_escape::EscapeEnvironment {
@@ -271,6 +271,9 @@ fn choose_direction(
         .min_by_key(|(distance, actor, _)| (*distance, *actor))
         .and_then(|(_, _, distances)| {
             let current = distances[cell_index(world, cell)]?;
+            if policy == MobNavigationPolicy::ReachedTargetV4 && current == 0 {
+                return None;
+            }
             (0..4).find(|&dir| {
                 let next = super::adjacent(cell, dir);
                 distances[cell_index(world, next)] == current.checked_sub(1)
@@ -352,3 +355,7 @@ mod tests;
 #[cfg(test)]
 #[path = "lair_navigation_policy_tests.rs"]
 mod policy_tests;
+
+#[cfg(test)]
+#[path = "lair_reached_target_tests.rs"]
+mod reached_target_tests;

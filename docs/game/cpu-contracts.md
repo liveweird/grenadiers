@@ -114,6 +114,7 @@ Existing pickup contention and same-block origin yield still run afterward. The 
 at most `min(512, remaining work / 16)`; incomplete analysis keeps the original winner while
 charging spent work. It adds no search, forecast, RNG draw or execution authority. Older profiles
 retain their original choices. Actual planting still needs the complete existing safety proof.
+See the [physical acceptance](../history/cpu-farming-opportunity-2026-11-05.md).
 
 ## Goal guidance
 

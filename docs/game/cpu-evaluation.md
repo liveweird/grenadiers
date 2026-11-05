@@ -35,6 +35,12 @@ quiet host. Output under `target/cpu-live-round-measurements/` retains source, t
 identity and terminal/censored results. Interpret pressure and movement alongside survival;
 these scripts do not establish a monotonic difficulty or win-rate ordering.
 
+`stationaryUpdates` and its longest span mean no **cell transition**, including movement within
+one cell. They do not measure complete physical stillness. Intent counts sample the last-known
+controller summary and may persist after elimination; they are not active-goal durations.
+The [dated comparison](../history/cpu-live-evaluation-2026-11-05.md) records the observed seed
+coverage and current Easy/Standard equivalence.
+
 ## Archived Solo workloads
 
 The archived native Solo evaluation retains CPU15 and generated ExpandedV5 rounds. Its

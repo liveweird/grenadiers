@@ -97,6 +97,48 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.27 — 2026-11-05
+
+A separate `--cpu-live-rounds` measurement now exercises the actual live four-seat owner with
+matched Easy62/Standard62/Hard67 worlds, independent seed axes and live settings. Test-only
+operation tracing drives the existing recorder as a shadow; complete owner/shadow/accepted-input
+replay inspections must agree. Living mobility, real events, intent snapshots and complete
+queue/work metrics replace inference from proposals. Production recording remains disabled.
+Archived measurement modes keep their meanings.
+
+All 48 cases terminate naturally and replay exactly. Both CPU seed sets make zero RNG draws,
+so there are eight distinct arena/script trajectories per level. Easy and Standard match in
+this sample because current cadence gates are unreachable. Hard records fewer bombs and more
+work; the sample does not establish general strength. See the
+[dated comparison](history/cpu-live-evaluation-2026-11-05.md) and
+[measurement guide](game/cpu-evaluation.md#live-roster-difficulty-comparison).
+
+### Verification
+
+- Clean source `b0ccf05e85930a5fbf0bf33fdeb82b9672da2af7` passes the real release runner and
+  all 48 cases with actual bot work, movement, full queue accounting and exact replay. The initial
+  gameplay run passed before sandboxed BSD timing failed; the authorized resource-capture rerun
+  completes in 10.45 seconds. All deterministic results match between those runs.
+- Full local debug/release/coverage passes on the same source: 2,022 core tests and two doctests,
+  845 ordinary server cases and four isolated timing cases per profile. All 4,194,304 item masks
+  pass per profile with 32 partitions, four workers and no retries. Coverage is 83,048/89,145 lines
+  (93.16%), above the unchanged 90% floor, with 40 raw profiles; wall time is 1,044.19 seconds.
+- Strict lint, formatting, source-size and repository gates pass. Independent review findings
+  about runtime identity, nonvacuous progress, overflow/admission tracing, alive-only mobility,
+  last-update outcomes and comparison fairness are resolved.
+  [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41947456847)
+  pass on the same source.
+- Web/API/assets/E2E/deployment and third-party dependencies are unchanged from v1.3.26; reuse
+  its unaffected web/browser/static/audit results. Fresh same-image Compose and restricted
+  OrbStack Kubernetes smoke checks pass with three moving/bombing Hard CPUs, two moving mobs,
+  spikes, authenticated protocol21 and rendered canvas. Nine served assets, CSP/cache/security,
+  probes and readiness pass. Pinned Trivy reports zero fixable high/critical findings. Temporary
+  resources are removed.
+
+The accepted image is `sha256:d3b7794c8880f8500a37648ba0debbfb387429204a60e2a4a3dab54a66d5a6fe`, labelled v1.3.27 and source
+`b0ccf05e85930a5fbf0bf33fdeb82b9672da2af7`. Later release-document changes preserve the verified
+code. Promote this exact image and retain v1.3.26 for rollback.
+
 ## v1.3.26 — 2026-11-05
 
 Hard67 can use spare capacity for a useful second bomb from a confirmed refuge while its first

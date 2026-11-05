@@ -38,3 +38,10 @@ passable rather than overestimating a shielded rival's distance.
 Independent review also found that parameterizing Hard65's fallback had bypassed its
 ContactV2 observation gate. Restoring the original guard and testing its exact preflight work
 and zero RNG draws preserves the archive; the new policy retains that capability boundary.
+
+## Accepted release checks
+
+The reviewed implementation passes the full debug/release/coverage suite, exact-input replay
+permutations, isolated native pacing, Linux platform tests and same-image runtime acceptance.
+The [v1.3.25 release record](../releases.md#v1325--2026-11-05) owns the source/image identities,
+coverage totals, initial browser timing failure and isolated rerun, and Kubernetes harness correction.

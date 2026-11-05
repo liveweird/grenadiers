@@ -59,6 +59,7 @@ pub struct CommittedRoute {
     pub(super) last_observation: Observation,
     pub(super) movement: MovementIntent,
     pub(super) reactive: Option<super::reactive_assumptions::ReactivePlantAssumptions>,
+    pub(super) owned_combination: bool,
 }
 #[derive(Clone, Debug)]
 pub(super) struct CommittedPlant {
@@ -220,6 +221,7 @@ impl CommittedRoute {
             last_observation: current.clone(),
             movement: accepted_movement,
             reactive: None,
+            owned_combination: false,
         })
     }
 

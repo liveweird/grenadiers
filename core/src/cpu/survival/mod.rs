@@ -25,6 +25,11 @@ mod manual_execution;
 mod ordinary_planner;
 mod origin;
 mod origin_planner;
+mod owned_combination;
+#[cfg(test)]
+mod owned_combination_fixture;
+#[cfg(test)]
+mod owned_combination_tests;
 mod pickup_handoff;
 mod pickup_progress;
 mod pit_avoidance;
@@ -90,6 +95,7 @@ pub use lair_v23::{
 };
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
+pub use owned_combination::plan_hard_combination_v67_with_handoff;
 pub use pickup_progress::{
     plan_hard_pickup_progress_v32_with_origin, plan_pickup_progress_v31_with_origin,
 };

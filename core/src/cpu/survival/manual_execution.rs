@@ -97,6 +97,21 @@ impl ExecutionCertificate {
         matches!(self, Self::ReactivePlant(_) | Self::ReactiveRoute(_))
     }
 
+    #[must_use]
+    pub const fn requires_owned_combination_support(&self) -> bool {
+        matches!(self, Self::ReactivePlant(plant) if plant.requires_owned_combination_support())
+    }
+
+    pub(super) fn owned_combination_handoff_matches(
+        &self,
+        handoff: &super::TerminalRefugeHandoff,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> bool {
+        matches!(self, Self::ReactivePlant(plant)
+            if plant.owned_combination.as_ref()
+                .is_some_and(|sealed| sealed.matches_sealed_charged(handoff, work)))
+    }
+
     pub fn strategic_plant_still_targets(
         &self,
         observation: &Observation,

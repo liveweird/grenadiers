@@ -6,6 +6,31 @@ use grenadiers_core::{
 };
 
 #[test]
+fn owned_combination_support_is_exactly_hard67() {
+    for (profile, expected) in [
+        (CpuProfile::HARD_V65, false),
+        (CpuProfile::HARD_V66, false),
+        (CpuProfile::HARD_V67, true),
+        (
+            CpuProfile {
+                policy: CpuPolicy::UtilityV67,
+                difficulty: CpuDifficulty::Standard,
+            },
+            false,
+        ),
+    ] {
+        let controller = CpuController::new(
+            CpuPlanner::without_workers(),
+            SeatId::Two,
+            7,
+            [67; 32],
+            profile,
+        );
+        assert_eq!(controller.supports_owned_combination(), expected);
+    }
+}
+
+#[test]
 fn hard_requires_an_exact_supported_policy_and_rules10() {
     let controller = |profile| {
         CpuController::new(
@@ -41,6 +66,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V64).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V65).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V66).profile_supports(10));
+    assert!(controller(CpuProfile::HARD_V67).profile_supports(10));
     for rules in 5..10 {
         assert!(!hard.profile_supports(rules));
     }
@@ -96,6 +122,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuPolicy::UtilityV64,
         CpuPolicy::UtilityV65,
         CpuPolicy::UtilityV66,
+        CpuPolicy::UtilityV67,
     ] {
         for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
             let forged = controller(CpuProfile { policy, difficulty });
@@ -142,6 +169,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V64).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V65).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V66).supports_refuge_handoff());
+    assert!(controller(CpuProfile::HARD_V67).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V37).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V39).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V41).supports_refuge_handoff());
@@ -197,6 +225,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuProfile::HARD_V61,
         CpuProfile::HARD_V65,
         CpuProfile::HARD_V66,
+        CpuProfile::HARD_V67,
     ] {
         let current = controller(profile);
         assert!(current.supports_contact_topology());

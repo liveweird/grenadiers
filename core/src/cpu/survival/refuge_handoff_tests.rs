@@ -328,12 +328,12 @@ fn live_first_bomb_can_yield_a_second_full_v29_plant_certificate() {
     let (route_basis, first_update) = handoff.route_identity();
     let shorter = super::TerminalRefugeHandoff::new(
         handoff.key(),
-        route_basis,
-        first_update,
+        (route_basis, first_update),
         handoff.bomb_id(),
         handoff.refuge(),
         handoff.checkpoint().clone(),
         Tick(second_deadline.0 + 1),
+        handoff.settled_stop_tick(),
     );
     assert!(!shorter.accepts_replacement(second.survival.execution.as_ref().unwrap()));
 

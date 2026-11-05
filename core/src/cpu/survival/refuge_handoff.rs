@@ -9,7 +9,7 @@ use super::compatibility::actor;
 use super::{CommittedRoute, ExecutionCertificate};
 
 /// Opaque proof that an observed live plant route reached its confirmed refuge.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TerminalRefugeHandoff {
     key: MemoryKey,
     route_basis_tick: Tick,
@@ -18,26 +18,28 @@ pub struct TerminalRefugeHandoff {
     refuge: Position,
     checkpoint: Observation,
     old_survive_until: Tick,
+    settled_stop_tick: Tick,
 }
 
 impl TerminalRefugeHandoff {
     pub(super) fn new(
         key: MemoryKey,
-        route_basis_tick: Tick,
-        route_first_update: Tick,
+        route_identity: (Tick, Tick),
         bomb_id: EntityId,
         refuge: Position,
         checkpoint: Observation,
         old_survive_until: Tick,
+        settled_stop_tick: Tick,
     ) -> Self {
         Self {
             key,
-            route_basis_tick,
-            route_first_update,
+            route_basis_tick: route_identity.0,
+            route_first_update: route_identity.1,
             bomb_id,
             refuge,
             checkpoint,
             old_survive_until,
+            settled_stop_tick,
         }
     }
 
@@ -69,6 +71,75 @@ impl TerminalRefugeHandoff {
     #[must_use]
     pub const fn old_survive_until(&self) -> Tick {
         self.old_survive_until
+    }
+
+    #[must_use]
+    pub const fn settled_stop_tick(&self) -> Tick {
+        self.settled_stop_tick
+    }
+
+    pub(super) fn authorizes_combination_planning(
+        &self,
+        observation: &Observation,
+        settled_stop_tick: Tick,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> bool {
+        charge_observation_equality(&self.checkpoint, observation, work)
+            && self.checkpoint == *observation
+            && self.settled_stop_tick == settled_stop_tick
+    }
+
+    pub(super) fn authorizes_owned_combination(
+        &self,
+        basis: &Observation,
+        current: &Observation,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> bool {
+        let actor_scan = u32::try_from(basis.parts().actors.len());
+        let bomb_scan = match &basis.parts().bombs {
+            BombKnowledge::Visible(bombs) => u32::try_from(bombs.len()),
+            BombKnowledge::Unavailable => Ok(1),
+        };
+        self.authorizes_combination_planning(basis, self.settled_stop_tick, work)
+            && actor_scan.is_ok_and(|units| work.try_take(units).is_ok())
+            && bomb_scan.is_ok_and(|units| work.try_take(units).is_ok())
+            && current.parts().world == basis.parts().world
+            && current.parts().recipient == basis.parts().recipient
+            && self.key
+                == MemoryKey {
+                    world: basis.parts().world,
+                    cpu_seat: basis.parts().recipient,
+                }
+            && actor(basis).is_some_and(|actor| actor.position == self.refuge)
+            && matches!(&basis.parts().bombs, BombKnowledge::Visible(bombs)
+                if bombs.len() == 1 && bombs[0].id == self.bomb_id)
+    }
+
+    pub(super) fn matches_sealed_charged(
+        &self,
+        other: &Self,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> bool {
+        charge_observation_equality(&self.checkpoint, &other.checkpoint, work) && self == other
+    }
+
+    pub(super) fn accepts_replacement_charged(
+        &self,
+        replacement: &ExecutionCertificate,
+        work: &mut crate::cpu::WorkBudget,
+    ) -> bool {
+        let Some(plant) = replacement.plant() else {
+            return false;
+        };
+        plant.route().key() == self.key
+            && plant.route().basis_tick() == self.checkpoint.parts().tick
+            && horizon_preserved(plant.route().survive_until(), self.old_survive_until)
+            && plant.reactive_scene_candidate(
+                &self.checkpoint,
+                &self.checkpoint,
+                PlantPresence::Awaiting,
+                work,
+            ) == Some(PlantPresence::Awaiting)
     }
 
     /// Checks only the replacement certificate. Contact and usefulness remain
@@ -149,14 +220,57 @@ impl CommittedRoute {
         }
         Some(TerminalRefugeHandoff::new(
             key,
-            self.certificate.basis_tick(),
-            self.first_update,
+            (self.certificate.basis_tick(), self.first_update),
             bomb_id,
             actor.position,
             current.clone(),
             self.certificate.survive_until(),
+            settled,
         ))
     }
+}
+
+fn charge_observation_equality(
+    left: &Observation,
+    right: &Observation,
+    work: &mut crate::cpu::WorkBudget,
+) -> bool {
+    fn charge(observation: &Observation, work: &mut crate::cpu::WorkBudget) -> Option<()> {
+        let parts = observation.parts();
+        let bombs = match &parts.bombs {
+            BombKnowledge::Unavailable => 1,
+            BombKnowledge::Visible(bombs) => bombs.len(),
+        };
+        let lairs = observation.respawn_lairs().map_or(0, |value| {
+            value.lairs().len().saturating_add(value.mobs().len())
+        });
+        let pits = observation
+            .spike_pits()
+            .map_or(0, |value| value.pits().len());
+        let flat = parts
+            .arena
+            .terrain
+            .len()
+            .checked_add(parts.arena.blocks.len())?
+            .checked_add(parts.actors.len())?
+            .checked_add(bombs)?
+            .checked_add(parts.flames.len())?
+            .checked_add(parts.oil.len())?
+            .checked_add(parts.pickups.len())?
+            .checked_add(lairs)?
+            .checked_add(pits)?
+            .checked_add(8)?;
+        work.try_take(u32::try_from(flat).ok()?).ok()?;
+        for actor in &parts.actors {
+            let effects = match actor {
+                crate::cpu::ObservedActor::Visible(actor) => actor.effects.len(),
+                crate::cpu::ObservedActor::Hidden { .. } => 0,
+            };
+            work.try_take(u32::try_from(effects).ok()?).ok()?;
+        }
+        Some(())
+    }
+    charge(left, work).is_some() && charge(right, work).is_some()
 }
 
 #[cfg(test)]

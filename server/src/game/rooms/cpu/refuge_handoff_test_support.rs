@@ -30,7 +30,7 @@ pub(super) struct RefugeFixture {
 
 impl RefugeFixture {
     pub fn publication(&self) -> Observation {
-        observe(&self.state, self.settings)
+        observe(&self.state, self.settings, self.controller.profile)
     }
 
     pub fn advance_publication(&mut self) -> Observation {
@@ -50,12 +50,12 @@ pub(super) fn queued_refuge() -> RefugeFixture {
 }
 
 pub(super) fn queued_refuge_for(profile: CpuProfile) -> RefugeFixture {
-    let (mut state, settings) = state();
+    let (mut state, settings) = state(profile);
     for _ in 0..48 {
         state.step(&input(Some(Direction::North), false)).unwrap();
     }
     state.step(&input(None, false)).unwrap();
-    let basis = observe(&state, settings);
+    let basis = observe(&state, settings, profile);
     let planner = CpuPlanner::without_workers();
     let mut controller =
         CpuController::new(planner.clone(), CPU, WORLD.room_instance, [30; 32], profile);
@@ -80,7 +80,7 @@ pub(super) fn queued_refuge_for(profile: CpuProfile) -> RefugeFixture {
     while state.tick() < admission {
         state.step(&[]).unwrap();
     }
-    let current = observe(&state, settings);
+    let current = observe(&state, settings, profile);
     assert!(controller.accept_observation(&current));
     controller.inject_plan_result_for_test(basis, EPOCH, first.survival);
     let accepted = controller.poll(admission, EPOCH).unwrap();
@@ -95,7 +95,7 @@ pub(super) fn queued_refuge_for(profile: CpuProfile) -> RefugeFixture {
         .step(&input(movement_direction(actual.movement), true))
         .unwrap();
     loop {
-        let observation = observe(&state, settings);
+        let observation = observe(&state, settings, profile);
         assert!(controller.accept_observation(&observation));
         assert_ne!(
             controller.observe_route(&observation),
@@ -155,7 +155,7 @@ fn movement_direction(movement: grenadiers_core::cpu::MovementIntent) -> Option<
     }
 }
 
-fn state() -> (State, RoomSettings) {
+fn state(profile: CpuProfile) -> (State, RoomSettings) {
     let settings = RoomSettings::new(SpeedLevel::Four, 256, 3, 240)
         .unwrap()
         .with_enabled_items(EnabledItems::TELEPORTER);
@@ -168,7 +168,11 @@ fn state() -> (State, RoomSettings) {
     terrain[4 * 15 + 6] = grenadiers_core::game::Terrain::Floor;
     let arena = Arena::new(
         terrain,
-        BTreeSet::new(),
+        if profile == CpuProfile::HARD_V67 {
+            BTreeSet::from([CellId::new(7, 3)])
+        } else {
+            BTreeSet::new()
+        },
         [CellId::new(1, 1), CellId::new(13, 11), CellId::new(13, 1)],
     )
     .unwrap();
@@ -229,7 +233,7 @@ fn state() -> (State, RoomSettings) {
     )
 }
 
-fn observe(state: &State, settings: RoomSettings) -> Observation {
+fn observe(state: &State, settings: RoomSettings, profile: CpuProfile) -> Observation {
     let view = state.public_view();
     let actors = view
         .actors
@@ -283,7 +287,11 @@ fn observe(state: &State, settings: RoomSettings) -> Observation {
         tick: view.tick,
         recipient: CPU,
         rules: ObservedRules {
-            punch_activation_policy: grenadiers_core::game::PunchActivationPolicy::ManualV1,
+            punch_activation_policy: if profile == CpuProfile::HARD_V67 {
+                grenadiers_core::game::PunchActivationPolicy::ContactV2
+            } else {
+                grenadiers_core::game::PunchActivationPolicy::ManualV1
+            },
             version: 10,
             tick_rate: 60,
             running_updates: view.running_updates as u16,

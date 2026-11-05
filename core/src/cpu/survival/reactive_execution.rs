@@ -8,6 +8,11 @@ use super::route_execution::CommittedPlant;
 use super::{CommittedRoute, ExecutionCertificate, RouteCommand, RouteStatus};
 
 impl CommittedRoute {
+    #[must_use]
+    pub const fn requires_owned_combination_support(&self) -> bool {
+        self.owned_combination
+    }
+
     pub fn admit_reactive_execution(
         execution: ExecutionCertificate,
         basis: Observation,
@@ -48,7 +53,10 @@ impl CommittedRoute {
             ExecutionCertificate::ReactivePlant(certificate) => certificate,
             _ => return Err(PolicyError::InvalidObservation),
         };
-        let (plant, assumptions) = certificate.into_parts();
+        let (plant, assumptions, owned_combination) = certificate.into_parts();
+        if owned_combination.is_some() {
+            return Err(PolicyError::InvalidObservation);
+        }
         let route = plant.route().clone();
         let mut work = WorkBudget::new(super::reactive_plant::REACTIVE_GUARD_ALLOWANCE);
         if !assumptions.matches(current, &mut work)
@@ -77,6 +85,60 @@ impl CommittedRoute {
             accepted_movement,
         )?;
         admitted.reactive = Some(assumptions);
+        Ok(admitted)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn admit_owned_combination_execution(
+        execution: ExecutionCertificate,
+        basis: Observation,
+        current: &Observation,
+        admission_tick: Tick,
+        accepted_movement: MovementIntent,
+        handoff: &super::TerminalRefugeHandoff,
+    ) -> Result<Self, PolicyError> {
+        let mut work = WorkBudget::new(super::reactive_plant::REACTIVE_GUARD_ALLOWANCE);
+        if !execution.requires_owned_combination_support()
+            || !execution.owned_combination_handoff_matches(handoff, &mut work)
+            || !handoff.authorizes_owned_combination(&basis, current, &mut work)
+            || !handoff.accepts_replacement_charged(&execution, &mut work)
+        {
+            return Err(PolicyError::InvalidObservation);
+        }
+        let ExecutionCertificate::ReactivePlant(certificate) = execution else {
+            return Err(PolicyError::InvalidObservation);
+        };
+        let (plant, assumptions, Some(_owned_combination)) = certificate.into_parts() else {
+            return Err(PolicyError::InvalidObservation);
+        };
+        let route = plant.route().clone();
+        if !assumptions.matches(current, &mut work)
+            || plant.reactive_scene_candidate(&basis, current, PlantPresence::Awaiting, &mut work)
+                != Some(PlantPresence::Awaiting)
+            || !plant_actor_compatible_charged(
+                &basis,
+                current,
+                &plant,
+                PlantPresence::Awaiting,
+                &mut work,
+            )
+        {
+            return Err(PolicyError::InvalidObservation);
+        }
+        let mut admitted = Self::admit_inner(
+            route,
+            Some(CommittedPlant {
+                certificate: plant,
+                presence: PlantPresence::Awaiting,
+                contact: None,
+            }),
+            basis,
+            current,
+            admission_tick,
+            accepted_movement,
+        )?;
+        admitted.reactive = Some(assumptions);
+        admitted.owned_combination = true;
         Ok(admitted)
     }
 

@@ -114,8 +114,12 @@ impl CpuController {
             self.pending.as_mut()?.completed = Some(result);
         }
         let result = self.pending.as_ref()?.completed.as_ref()?;
-        let WorkerPlan::Ordinary { plan, .. } = &result.outcome else {
-            return None;
+        let plan = match &result.outcome {
+            WorkerPlan::Ordinary { plan, .. } => plan,
+            WorkerPlan::NoReplacement => {
+                return self.admit_completed(current_tick, command_epoch);
+            }
+            _ => return None,
         };
         let manual_admission = plan
             .execution
@@ -155,8 +159,10 @@ impl CpuController {
     fn admit_completed(&mut self, current_tick: Tick, command_epoch: u64) -> Option<AcceptedPlan> {
         let pending = self.pending.take()?;
         let result = pending.completed?;
-        let WorkerPlan::Ordinary { plan, contact } = result.outcome else {
-            return self.reject(AdmissionRejection::InvalidShape);
+        let (plan, contact) = match result.outcome {
+            WorkerPlan::Ordinary { plan, contact } => (plan, contact),
+            WorkerPlan::NoReplacement => return None,
+            _ => return self.reject(AdmissionRejection::InvalidShape),
         };
         let ordinary_navigation = plan.lease.is_none()
             && plan.execution.is_none()
@@ -220,6 +226,12 @@ impl CpuController {
         let reactive_plant = execution
             .as_ref()
             .is_some_and(ExecutionCertificate::requires_reactive_support);
+        let owned_combination = execution
+            .as_ref()
+            .is_some_and(ExecutionCertificate::requires_owned_combination_support);
+        if owned_combination && (!self.supports_owned_combination() || refuge_handoff.is_none()) {
+            return self.reject(AdmissionRejection::InvalidShape);
+        }
         if execution
             .as_ref()
             .is_some_and(|execution| !self.supports_execution_certificate(execution))
@@ -278,7 +290,16 @@ impl CpuController {
             None => None,
         };
         let committed_route = match execution {
-            Some(execution) => match if reactive_plant {
+            Some(execution) => match if owned_combination {
+                CommittedRoute::admit_owned_combination_execution(
+                    execution,
+                    result.basis,
+                    latest,
+                    current_tick,
+                    control.intent.movement,
+                    refuge_handoff.expect("owned combinations require handoff context"),
+                )
+            } else if reactive_plant {
                 CommittedRoute::admit_reactive_execution(
                     execution,
                     result.basis,

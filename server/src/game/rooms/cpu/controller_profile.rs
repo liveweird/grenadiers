@@ -5,12 +5,23 @@ impl CpuController {
         &self,
         execution: &grenadiers_core::cpu::survival::ExecutionCertificate,
     ) -> bool {
-        !execution.requires_reactive_support()
-            || matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::HARD_V65
-                    | grenadiers_core::room::CpuProfile::HARD_V66
-            )
+        if execution.requires_owned_combination_support() {
+            return self.supports_owned_combination();
+        }
+        !execution.requires_reactive_support() || self.supports_reactive_execution()
+    }
+
+    pub(super) const fn supports_owned_combination(&self) -> bool {
+        matches!(self.profile, grenadiers_core::room::CpuProfile::HARD_V67)
+    }
+
+    pub(super) const fn supports_reactive_execution(&self) -> bool {
+        matches!(
+            self.profile,
+            grenadiers_core::room::CpuProfile::HARD_V65
+                | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
+        )
     }
 
     #[cfg(test)]
@@ -53,6 +64,7 @@ impl CpuController {
                         | grenadiers_core::room::CpuProfile::HARD_V64
                         | grenadiers_core::room::CpuProfile::HARD_V65
                         | grenadiers_core::room::CpuProfile::HARD_V66
+                        | grenadiers_core::room::CpuProfile::HARD_V67
                 );
         }
         match rules_version {
@@ -152,6 +164,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V64
                 | grenadiers_core::room::CpuProfile::HARD_V65
                 | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
         )
     }
 
@@ -196,6 +209,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V64
                 | grenadiers_core::room::CpuProfile::HARD_V65
                 | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
         )
     }
 
@@ -237,6 +251,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V64
                 | grenadiers_core::room::CpuProfile::HARD_V65
                 | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
         )
     }
 
@@ -275,6 +290,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V64
                 | grenadiers_core::room::CpuProfile::HARD_V65
                 | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
         )
     }
 
@@ -310,6 +326,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V64
                 | grenadiers_core::room::CpuProfile::HARD_V65
                 | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
         )
     }
 
@@ -342,6 +359,7 @@ impl CpuController {
                 | grenadiers_core::room::CpuProfile::HARD_V64
                 | grenadiers_core::room::CpuProfile::HARD_V65
                 | grenadiers_core::room::CpuProfile::HARD_V66
+                | grenadiers_core::room::CpuProfile::HARD_V67
         )
     }
 }

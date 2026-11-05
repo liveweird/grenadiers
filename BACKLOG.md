@@ -19,14 +19,7 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [next] **HARD-CPU — deepen fair tactics.** Add useful bomb combinations. Preserve bounded
-  pickup contention, opponent-exit guidance and productive equal-distance farming.
-  Use permitted observations, bounded planning and unchanged physics. Require authoritative
-  before/after witnesses and independent review; preserve archived policies and complete seeded
-  episodes. The [farming comparison](docs/history/cpu-farming-yield-2026-11-02.md) retains the
-  paired productive-route evidence.
-
-- [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
+- [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
   - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,

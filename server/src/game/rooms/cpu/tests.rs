@@ -117,13 +117,13 @@ fn job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
             hazard_memory,
             rng: CpuRng::from_seed(key(), [4; 32]),
             escape_origin: None,
+            refuge_handoff: None,
             live,
             result: sender,
         },
         receiver,
     )
 }
-
 fn respawn_job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
     let observation = respawn_observation();
     let mut hazards = ObservedHazardMemory::new(key());
@@ -138,6 +138,7 @@ fn respawn_job(live: Arc<AtomicBool>) -> (PlanJob, Receiver<PlanResult>) {
             hazard_memory: hazards,
             rng: CpuRng::from_seed(key(), [21; 32]),
             escape_origin: None,
+            refuge_handoff: None,
             live,
             result,
         },
@@ -168,7 +169,6 @@ pub(super) fn respawn_observation() -> Observation {
     )
     .unwrap()
 }
-
 pub(super) fn spike_observation() -> Observation {
     let mut parts = observation().into_parts();
     parts.rules.version = 10;
@@ -209,6 +209,7 @@ pub(super) fn spike_job(
             hazard_memory: hazards,
             rng: CpuRng::from_seed(key(), [26; 32]),
             escape_origin: None,
+            refuge_handoff: None,
             live: Arc::new(AtomicBool::new(true)),
             result,
         },

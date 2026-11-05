@@ -253,6 +253,14 @@ pub(super) fn running_runtime_and_scene() -> (RosterRuntime, State) {
 }
 
 fn controlled_state(basis: &State, settings: RoomSettings) -> State {
+    controlled_state_with_blocks(basis, settings, BTreeSet::new())
+}
+
+pub(super) fn controlled_state_with_blocks(
+    basis: &State,
+    settings: RoomSettings,
+    blocks: BTreeSet<CellId>,
+) -> State {
     let fixed = fixed_arena();
     let terrain = std::array::from_fn(|index| {
         fixed
@@ -261,7 +269,7 @@ fn controlled_state(basis: &State, settings: RoomSettings) -> State {
     });
     let arena = Arena::new(
         terrain,
-        BTreeSet::new(),
+        blocks,
         [CellId::new(1, 1), CellId::new(13, 11), CellId::new(13, 1)],
     )
     .unwrap();

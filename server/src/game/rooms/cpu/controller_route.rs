@@ -46,6 +46,28 @@ impl CpuController {
             .and_then(CommittedRoute::plant_presence)
     }
 
+    fn supports_route_execution(&self, route: &CommittedRoute) -> bool {
+        if route.requires_owned_combination_support() {
+            return self.supports_owned_combination();
+        }
+        !route.requires_reactive_support() || self.supports_reactive_execution()
+    }
+
+    #[cfg(test)]
+    pub(in crate::game::rooms) fn committed_route_support_for_profile_test(
+        &mut self,
+        profile: grenadiers_core::room::CpuProfile,
+    ) -> Option<bool> {
+        let retained = self.profile;
+        self.profile = profile;
+        let supported = self
+            .committed_route
+            .as_ref()
+            .map(|route| self.supports_route_execution(route));
+        self.profile = retained;
+        supported
+    }
+
     pub(in crate::game::rooms) fn observe_route(
         &mut self,
         observation: &Observation,
@@ -108,11 +130,7 @@ impl CpuController {
         let route = self.committed_route.as_ref()?;
         let reactive = route.requires_reactive_support();
         let status = if reactive {
-            if !matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::HARD_V65
-                    | grenadiers_core::room::CpuProfile::HARD_V66
-            ) {
+            if !self.supports_route_execution(route) {
                 RouteStatus::Invalidated
             } else if let Some(current) = self.latest_observation.as_ref() {
                 route.poll_reactive_command(current_tick, current, self.settled_stop_tick)
@@ -149,11 +167,11 @@ impl CpuController {
             .as_ref()
             .is_some_and(CommittedRoute::requires_reactive_support);
         let committed = if reactive {
-            if !matches!(
-                self.profile,
-                grenadiers_core::room::CpuProfile::HARD_V65
-                    | grenadiers_core::room::CpuProfile::HARD_V66
-            ) {
+            if self
+                .committed_route
+                .as_ref()
+                .is_none_or(|route| !self.supports_route_execution(route))
+            {
                 false
             } else {
                 match (

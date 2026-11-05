@@ -203,15 +203,17 @@ fn select_inner(
             } else {
                 previous.approach_cell
             };
-            let progressed = retained.distance < previous.last_distance
-                || progress_approach.is_some_and(|approach| {
-                    actor.position != previous.last_cpu_position
-                        && position_distance(actor.position, Position::center(approach))
-                            < position_distance(
-                                previous.last_cpu_position,
-                                Position::center(approach),
-                            )
-                });
+            let progressed = (goal_modes.progress == super::super::ProgressMode::Legacy
+                || actor.position != previous.last_cpu_position)
+                && (retained.distance < previous.last_distance
+                    || progress_approach.is_some_and(|approach| {
+                        actor.position != previous.last_cpu_position
+                            && position_distance(actor.position, Position::center(approach))
+                                < position_distance(
+                                    previous.last_cpu_position,
+                                    Position::center(approach),
+                                )
+                    }));
             let suspended = matches!(
                 previous.phase,
                 StrategicPhase::Plant

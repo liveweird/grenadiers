@@ -3,7 +3,10 @@ use crate::cpu::{BombKnowledge, ObservedActor, WorkBudget};
 use crate::game::{EntityId, Tick};
 
 use super::owned_combination_fixture::{CombinationBasis, basis, replace_observation};
-use super::{TerminalRefugeHandoff, WORK_ALLOWANCE, plan_hard_combination_v67_with_handoff};
+use super::{
+    TerminalRefugeHandoff, WORK_ALLOWANCE, plan_hard_combination_v67_with_handoff,
+    plan_hard_combination_v69_with_handoff,
+};
 
 fn plan(value: &CombinationBasis, allowance: u32) -> Option<super::LairSurvivalPlan> {
     let mut work = WorkBudget::new(allowance);
@@ -16,6 +19,34 @@ fn plan(value: &CombinationBasis, allowance: u32) -> Option<super::LairSurvivalP
         &mut work,
     )
     .unwrap()
+}
+
+#[test]
+fn hard69_combination_identity_preserves_the_v67_proof_and_work() {
+    let value = basis();
+    let mut old_work = WorkBudget::new(WORK_ALLOWANCE);
+    let mut new_work = WorkBudget::new(WORK_ALLOWANCE);
+    let old = plan_hard_combination_v67_with_handoff(
+        &value.observation,
+        &value.memory,
+        &value.history,
+        value.settled,
+        &value.handoff,
+        &mut old_work,
+    );
+    let new = plan_hard_combination_v69_with_handoff(
+        &value.observation,
+        &value.memory,
+        &value.history,
+        value.settled,
+        &value.handoff,
+        &mut new_work,
+    );
+    let old = old.unwrap().expect("v67 curated combination");
+    let new = new.unwrap().expect("v69 curated combination");
+    assert_eq!(new.survival, old.survival);
+    assert_eq!(format!("{:?}", new.contact), format!("{:?}", old.contact));
+    assert_eq!(new_work.spent(), old_work.spent());
 }
 
 #[test]

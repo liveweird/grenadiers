@@ -19,6 +19,7 @@ pub(in crate::cpu::policy) enum PlannerVersion {
     HardFarmYieldV59,
     HardPitsYieldV59,
     HardPickupV66,
+    HardProgressV69,
 }
 
 impl PlannerVersion {
@@ -45,6 +46,7 @@ impl PlannerVersion {
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
+                | Self::HardProgressV69
         )
     }
 
@@ -66,6 +68,7 @@ impl PlannerVersion {
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
+                | Self::HardProgressV69
         )
     }
 
@@ -86,6 +89,7 @@ impl PlannerVersion {
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
+                | Self::HardProgressV69
         )
     }
 
@@ -97,6 +101,7 @@ impl PlannerVersion {
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
+                | Self::HardProgressV69
         ) {
             super::super::PressureMode::ExitCoverage
         } else if matches!(
@@ -119,6 +124,7 @@ impl PlannerVersion {
                 | Self::HardFarmExitPressureV58
                 | Self::HardFarmYieldV59
                 | Self::HardPickupV66
+                | Self::HardProgressV69
         )
     }
 
@@ -134,13 +140,17 @@ impl PlannerVersion {
                 | Self::HardFarmYieldV59
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
+                | Self::HardProgressV69
         )
     }
 
     pub(super) const fn farm_origin_mode(self) -> super::super::FarmOriginMode {
         if matches!(
             self,
-            Self::HardFarmYieldV59 | Self::HardPitsYieldV59 | Self::HardPickupV66
+            Self::HardFarmYieldV59
+                | Self::HardPitsYieldV59
+                | Self::HardPickupV66
+                | Self::HardProgressV69
         ) {
             super::super::FarmOriginMode::VisibleYield
         } else {
@@ -149,10 +159,34 @@ impl PlannerVersion {
     }
 
     pub(super) const fn pickup_mode(self) -> super::super::PickupMode {
-        if matches!(self, Self::HardPickupV66) {
+        if matches!(self, Self::HardPickupV66 | Self::HardProgressV69) {
             super::super::PickupMode::VisibleContention
         } else {
             super::super::PickupMode::Legacy
         }
     }
+
+    pub(super) const fn progress_mode(self) -> super::super::ProgressMode {
+        if matches!(self, Self::HardProgressV69) {
+            super::super::ProgressMode::ActorMovement
+        } else {
+            super::super::ProgressMode::Legacy
+        }
+    }
+}
+
+#[cfg(test)]
+pub(in crate::cpu::policy) fn assert_hard69_inherits_hard66() {
+    let old = PlannerVersion::HardPickupV66;
+    let new = PlannerVersion::HardProgressV69;
+    assert_eq!(new.follow_committed(), old.follow_committed());
+    assert_eq!(new.persistent_goals(), old.persistent_goals());
+    assert_eq!(new.strategic_goals(), old.strategic_goals());
+    assert_eq!(new.failed_plant_recovery(), old.failed_plant_recovery());
+    assert_eq!(new.pressure_mode(), old.pressure_mode());
+    assert_eq!(new.farm_origin_recovery(), old.farm_origin_recovery());
+    assert_eq!(new.avoid_pits(), old.avoid_pits());
+    assert_eq!(new.farm_origin_mode(), old.farm_origin_mode());
+    assert_eq!(new.pickup_mode(), old.pickup_mode());
+    assert_ne!(new.progress_mode(), old.progress_mode());
 }

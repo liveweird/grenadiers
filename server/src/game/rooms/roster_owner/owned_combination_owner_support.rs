@@ -53,7 +53,7 @@ pub(super) struct Outcome {
     pub additional_destroyed_by: Option<EntityId>,
     pub detonations: Vec<(Tick, EntityId)>,
     pub selected_rival_at_second: bool,
-    pub route_profile_support_at_second: Option<[bool; 3]>,
+    pub route_profile_support_at_second: Option<[bool; 4]>,
     pub survived_both_windows: bool,
     pub settled_progress_after_windows: bool,
     pub manual_attempts_after_first: usize,
@@ -176,6 +176,9 @@ pub(super) fn run(profile: CpuProfile) -> Outcome {
                             .unwrap_or(false),
                         owner.cpus[0]
                             .committed_route_support_for_profile_test(CpuProfile::HARD_V67)
+                            .unwrap_or(false),
+                        owner.cpus[0]
+                            .committed_route_support_for_profile_test(CpuProfile::HARD_V69)
                             .unwrap_or(false),
                     ]);
                     windows_complete_at = plants.iter().map(|plant| plant.clears_at).max();
@@ -312,6 +315,14 @@ fn running_scene(
     let simulation_seed = Arc::new(|_| Ok(SimulationSeed::new([67; 32])));
     let mut runtime = if profile == CpuProfile::HARD_V67 {
         RosterRuntime::new_spike_v21_combination_with_navigation(
+            identity,
+            settings,
+            environment,
+            seeds,
+            simulation_seed,
+        )
+    } else if profile == CpuProfile::HARD_V69 {
+        RosterRuntime::new_spike_v21_progress_with_navigation(
             identity,
             settings,
             environment,

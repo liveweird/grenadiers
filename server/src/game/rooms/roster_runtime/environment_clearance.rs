@@ -123,4 +123,22 @@ impl RosterRuntime {
         runtime.cpu_family = super::cpu_family::CpuPolicyFamily::CertifiedEasyV68;
         Ok(runtime)
     }
+
+    pub(in crate::game::rooms) fn new_spike_v21_progress_with_navigation(
+        identity: RosterIdentity,
+        settings: RoomSettings,
+        environment: SpikeRuntimeEnvironment,
+        seeds: RoundSeedSource,
+        simulation_seed: Arc<SimulationSeedDerivation>,
+    ) -> Result<Self, RosterRuntimeError> {
+        let mut runtime = Self::new_spike_v21_easy_cadence_with_navigation(
+            identity,
+            settings,
+            environment,
+            seeds,
+            simulation_seed,
+        )?;
+        runtime.cpu_family = super::cpu_family::CpuPolicyFamily::ProgressHardV69;
+        Ok(runtime)
+    }
 }

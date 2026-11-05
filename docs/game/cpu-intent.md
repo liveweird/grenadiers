@@ -61,3 +61,10 @@ fully unavailable rows. The browser rechecks its latest recipient view and clear
 responses on reconnect. An unavailable row is a privacy/availability result, not proof of no intent.
 
 See [CPU boundaries](multiplayer-cpu.md), [security](../security.md) and [testing](../testing.md).
+
+## Current Hard progress boundary
+
+Hard69 requires actual actor displacement before its existing progress test can renew a goal
+deadline. Moving opponents or recomputed approaches cannot provide progress for a stationary
+CPU. Real cell and subcell progress, commitment timing, failed-target cooldowns and known-hazard
+proofs retain their existing meaning. Older planner identities keep their archived semantics.

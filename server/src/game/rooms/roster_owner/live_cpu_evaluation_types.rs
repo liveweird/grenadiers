@@ -47,7 +47,7 @@ impl EvaluationCase {
         match self.difficulty {
             CpuDifficulty::Easy => CpuProfile::CERTIFIED_CADENCE_V68_EASY,
             CpuDifficulty::Standard => CpuProfile::RECOVERY_V62_STANDARD,
-            CpuDifficulty::Hard => CpuProfile::HARD_V67,
+            CpuDifficulty::Hard => CpuProfile::HARD_V69,
         }
     }
 

@@ -8,41 +8,54 @@ fn queued_hard67_overlaps_one_useful_owned_bomb_after_a_real_capacity_pickup() {
     let hard67 = run(CpuProfile::HARD_V67);
     eprintln!("HARD67_OWNED_COMBINATION hard66={hard66:#?} hard67={hard67:#?}");
 
-    assert_eq!(hard66.pickups, hard67.pickups);
+    assert_positive(&hard66, &hard67);
+}
+
+#[test]
+fn queued_hard69_reuses_the_exact_physical_combination_proof() {
+    let hard66 = run(CpuProfile::HARD_V66);
+    let hard69 = run(CpuProfile::HARD_V69);
+    eprintln!("HARD69_OWNED_COMBINATION hard66={hard66:#?} hard69={hard69:#?}");
+
+    assert_positive(&hard66, &hard69);
+}
+
+fn assert_positive(hard66: &Outcome, current: &Outcome) {
+    assert_eq!(hard66.pickups, current.pickups);
     assert!(
-        hard67
+        current
             .pickups
             .iter()
             .any(|(_, kind)| *kind == PickupKind::BombCapacity)
     );
-    assert_baseline(&hard66);
-    assert_eq!(hard67.plants.len(), 2, "{hard67:#?}");
-    assert_eq!(hard66.plants[0], hard67.plants[0]);
-    assert_ne!(hard67.plants[0].id, hard67.plants[1].id);
-    assert!(hard67.plants[1].tick < hard67.plants[0].detonates_at);
-    assert!(hard67.simultaneous_owned >= 2);
-    assert!(hard67.additional_intact_at_second);
-    assert!(second_reaches_additional_block(&hard67));
-    assert_eq!(hard67.additional_destroyed_by, Some(hard67.plants[1].id));
+    assert_baseline(hard66);
+    assert_eq!(current.plants.len(), 2, "{current:#?}");
+    assert_eq!(hard66.plants[0], current.plants[0]);
+    assert_ne!(current.plants[0].id, current.plants[1].id);
+    assert!(current.plants[1].tick < current.plants[0].detonates_at);
+    assert!(current.simultaneous_owned >= 2);
+    assert!(current.additional_intact_at_second);
+    assert!(second_reaches_additional_block(current));
+    assert_eq!(current.additional_destroyed_by, Some(current.plants[1].id));
     assert_eq!(
-        hard67.additional_destroyed_at,
-        Some(hard67.plants[1].detonates_at)
+        current.additional_destroyed_at,
+        Some(current.plants[1].detonates_at)
     );
     assert!(
-        hard67
+        current
             .detonations
-            .contains(&(hard67.plants[1].detonates_at, hard67.plants[1].id))
+            .contains(&(current.plants[1].detonates_at, current.plants[1].id))
     );
-    assert!(hard67.selected_rival_at_second);
+    assert!(current.selected_rival_at_second);
     assert_eq!(
-        hard67.route_profile_support_at_second,
-        Some([false, false, true])
+        current.route_profile_support_at_second,
+        Some([false, false, true, true])
     );
-    assert!(hard67.survived_both_windows);
-    assert!(hard67.settled_progress_after_windows);
-    assert_eq!(hard67.manual_attempts_after_first, 1, "{hard67:#?}");
-    assert_accounted(&hard67);
-    assert_eq!(hard67.admission, Default::default(), "{hard67:#?}");
+    assert!(current.survived_both_windows);
+    assert!(current.settled_progress_after_windows);
+    assert_eq!(current.manual_attempts_after_first, 1, "{current:#?}");
+    assert_accounted(current);
+    assert_eq!(current.admission, Default::default(), "{current:#?}");
 }
 
 fn assert_baseline(outcome: &Outcome) {

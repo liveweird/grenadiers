@@ -203,14 +203,14 @@ fn live_difficulty_round_evaluation_measurement() {
         json!({
             "metadata": metadata,
             "identity": {
-                "replayFormat": 37,
+                "replayFormat": 38,
                 "generatorVersion": 7,
                 "spikePitLayoutVersion": 2,
                 "gameplayVersion": 21,
                 "punchActivation": "ContactV2",
                 "easyPolicyVersion": 68,
                 "standardPolicyVersion": 62,
-                "hardPolicyVersion": 67,
+                "hardPolicyVersion": 69,
                 "enabledItems": "all",
                 "bombCapacityDropMultiplier": BombCapacityDropMultiplier::DEFAULT.value(),
             },

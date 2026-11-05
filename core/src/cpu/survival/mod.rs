@@ -41,6 +41,7 @@ mod punch_tactic;
 mod reactive_assumptions;
 mod reactive_escape;
 mod reactive_execution;
+mod reactive_goal_selection;
 mod reactive_plant;
 mod reactive_plant_policy;
 #[cfg(test)]
@@ -95,7 +96,9 @@ pub use lair_v23::{
 };
 pub use manual_execution::ExecutionCertificate;
 pub use origin::PlantEscapeOrigin;
-pub use owned_combination::plan_hard_combination_v67_with_handoff;
+pub use owned_combination::{
+    plan_hard_combination_v67_with_handoff, plan_hard_combination_v69_with_handoff,
+};
 pub use pickup_progress::{
     plan_hard_pickup_progress_v32_with_origin, plan_pickup_progress_v31_with_origin,
 };
@@ -113,7 +116,8 @@ pub use plant_value::strategic_plant_still_targets;
 pub use reactive_escape::ReactiveRouteCertificate;
 pub use reactive_plant::ReactivePlantCertificate;
 pub use reactive_plant_policy::{
-    plan_hard_pickup_v66_with_origin, plan_hard_reactive_v65_with_origin,
+    plan_hard_pickup_v66_with_origin, plan_hard_progress_v69_with_origin,
+    plan_hard_reactive_v65_with_origin,
 };
 pub use refuge_guidance::{
     plan_blocked_births_v42_with_origin, plan_contact_topology_v40_with_origin,

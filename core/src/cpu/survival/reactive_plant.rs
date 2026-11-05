@@ -203,21 +203,13 @@ pub(super) fn plan_hard_reactive_with_modes(
         let allowance = work.remaining().min(4_096).min(work.remaining() / 8);
         let mut goal_work = WorkBudget::new(allowance);
         let mut goal_rng = entry_rng;
-        let goal = if goal_modes.pickup == crate::cpu::policy::PickupMode::VisibleContention {
-            crate::cpu::policy::plan_hard_pickup_contention_v66(
-                observation,
-                memory,
-                &mut goal_rng,
-                &mut goal_work,
-            )
-        } else {
-            crate::cpu::policy::plan_hard_farm_yield_v59(
-                observation,
-                memory,
-                &mut goal_rng,
-                &mut goal_work,
-            )
-        };
+        let goal = super::reactive_goal_selection::plan(
+            observation,
+            memory,
+            &mut goal_rng,
+            &mut goal_work,
+            goal_modes,
+        );
         if let Ok(goal) = goal {
             target = guidance_target(goal.next_memory.strategic_intent());
             if target.is_some() {

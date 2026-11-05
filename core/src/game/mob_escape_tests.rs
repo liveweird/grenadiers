@@ -62,10 +62,13 @@ fn state_with_range(policy: MobNavigationPolicy, deadline: u64, range: u16) -> S
 fn nav2_waits_in_a_multi_cell_blast_corridor_while_nav3_reaches_refuge() {
     let mut nav2 = state(MobNavigationPolicy::EscapeV2, 100);
     let mut nav3 = state(MobNavigationPolicy::TimedEscapeV3, 100);
+    let mut nav4 = state(MobNavigationPolicy::ReachedTargetV4, 100);
 
     for _ in 0..90 {
         nav2.step(&[]).unwrap();
         nav3.step(&[]).unwrap();
+        nav4.step(&[]).unwrap();
+        assert_eq!(nav4.mobs(), nav3.mobs());
     }
 
     assert_eq!(nav2.mobs()[0].position, Position::center(START));
@@ -73,6 +76,8 @@ fn nav2_waits_in_a_multi_cell_blast_corridor_while_nav3_reaches_refuge() {
     for _ in 90..100 {
         nav2.step(&[]).unwrap();
         nav3.step(&[]).unwrap();
+        nav4.step(&[]).unwrap();
+        assert_eq!(nav4.mobs(), nav3.mobs());
     }
     assert!(nav2.mobs().is_empty());
     assert_eq!(nav3.mobs().len(), 1);

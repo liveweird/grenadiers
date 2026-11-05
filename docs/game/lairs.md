@@ -34,7 +34,10 @@ collision and committed retreat anchors prevent wall crossing. Navigation3 can c
 future blast cells to reach refuge before stationary timed bombs detonate. It accounts for whole
 mob footprints, fuse deadlines and chain ignition rather than requiring the first neighbouring
 cell to be outside every future blast. Turns remain aligned to cell centers and changed hazards
-or obstructions are rechecked.
+or obstructions are rechecked. Navigation4 retains these escapes and stops ordinary pursuit when
+a mob reaches its target cell. Stationary contact still deals damage; if the target leaves or dies,
+the next update can choose a new direction. A reached target cannot select an unreachable
+neighbor and strand the mob against a wall.
 
 The temporal search shares a bounded work allowance. Concealed/Pending Oil uses conservative
 potential blast geometry; Pending cells cannot be used as transit or refuge. Unrelated flames
@@ -65,7 +68,8 @@ obstructed. `State::mobs()` omits pursuit targets, paths and private thaw deadli
 Rules8 retains its periodic 1–8-mob lifecycle and finite `State::lairs()` view for historical
 contracts/replay7. Rules9 and rules10 use the separate view. Mob AI has its own immutable identity: all existing rules
 constructors and replay8 retain navigation1; replay9/10 retain navigation2. Live construction
-explicitly selects navigation3; private replay11 binds CPU26 and replay12 binds CPU27 under gameplay18. Replay13 binds
+explicitly selects navigation4 through private replay40, with unchanged CPU68/62/70.
+Archived replay39 retains navigation3; private replay11 binds CPU26 and replay12 binds CPU27 under gameplay18. Replay13 binds
 gameplay19 with CPU27 on Easy/Standard and CPU28 on Hard; replay14 retains navigation3
 and advances Hard to CPU29. Replay15 retains navigation3 and binds Easy/Standard31 or Hard32. Replay16 retains navigation3 and binds
 Easy/Standard33 or Hard34 with certified one-update pickup handoffs. Replay17 retains navigation3 and binds

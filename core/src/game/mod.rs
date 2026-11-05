@@ -124,6 +124,9 @@ mod variable_board_tests;
 mod mob_escape_tests;
 
 #[cfg(test)]
+mod mob_target_contact_tests;
+
+#[cfg(test)]
 mod mob_hazard_phase_tests;
 
 #[cfg(test)]

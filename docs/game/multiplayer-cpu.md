@@ -39,7 +39,8 @@ or a private arena/simulation random stream.
 `CpuProfile::CERTIFIED_CADENCE_V68_EASY` selects Utility68 for live Easy rooms; its planner
 retains Standard62 decisions and adds checked post-navigation pacing. `RECOVERY_V62_STANDARD`
 selects Utility62 for Standard; `HARD_V70` selects Utility70 for Hard with the same observation
-boundary. Private replay39 binds these profiles to generator7, pit-layout2 and ContactV2.
+boundary. Private replay40 binds these profiles to generator7, pit-layout2, ContactV2 and mob navigation4;
+replay39 retains the same CPU profiles with navigation3.
 Archived replay38 retains Easy68/Standard62/Hard69.
 Archived replay37 retains Easy68/Standard62/Hard67.
 Archived replay36 retains Easy/Standard62 and Hard67.
@@ -142,7 +143,7 @@ Easy keeps its normal clear-navigation cadence. Old policies27–32 remain uncha
 retains Easy/Standard31 and Hard32, while replay16 binds Easy/Standard33 and Hard34; replay17 binds
 Easy/Standard33 and Hard35. Replay18 binds Easy/Standard36 and Hard37; earlier replay versions retain
 their exact policy identities. Replay19 binds archived Easy/Standard38 and Hard39, without
-changing gameplay19. Later private formats advance closed CPU identities; current replay31 binds
+changing gameplay19. Later private formats advance closed CPU identities; published replay31 binds
 Easy/Standard60 and Hard61 with ContactV2.
 
 ## Alternate farming refuges
@@ -189,7 +190,7 @@ survival horizon must cover the old deadline. Queue refusal, stale or failed pro
 displacement or submission refusal retain the old hold. Optional jobs follow every seat's urgent jobs.
 The existing two workers, 32-job queue, 65,536-work limit and all forecast, motion, contact and usefulness
 proofs remain unchanged. Hard35 reuses the Core34 planner; archived Hard39 adds the bounded
-farming refuges above, and current Hard61 retains them. Teleporter counter-pressure still requires
+farming refuges above, and the Hard61 planner retains them. Teleporter counter-pressure still requires
 globally clear soft blocks and its prior support rules.
 
 ## Footprint-boundary recovery

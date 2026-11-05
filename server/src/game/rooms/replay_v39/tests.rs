@@ -200,6 +200,14 @@ fn replay39_rejects_cross_format_generation_pit_and_gameplay_identities() {
 }
 
 #[test]
+fn replay39_rejects_reached_target_navigation_identity() {
+    let (_, journal) = recorder(Some(CpuDifficulty::Standard), 5).into_parts();
+    let mut reached_target = journal;
+    reached_target.header.mob_navigation_version = 4;
+    assert_eq!(replay(&reached_target), Err(ReplayError::InvalidHeader));
+}
+
+#[test]
 fn replay39_closes_cpu_family_and_difficulty_pairing() {
     for (difficulty, policy) in [
         (CpuDifficulty::Easy, 68),

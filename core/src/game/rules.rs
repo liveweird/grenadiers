@@ -15,6 +15,7 @@ pub enum MobNavigationPolicy {
     LegacyV1,
     EscapeV2,
     TimedEscapeV3,
+    ReachedTargetV4,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -30,7 +31,12 @@ impl MobNavigationPolicy {
             Self::LegacyV1 => 1,
             Self::EscapeV2 => 2,
             Self::TimedEscapeV3 => 3,
+            Self::ReachedTargetV4 => 4,
         }
+    }
+
+    pub(crate) const fn has_timed_escape_navigation(self) -> bool {
+        matches!(self, Self::TimedEscapeV3 | Self::ReachedTargetV4)
     }
 
     pub(crate) const fn has_escape_navigation(self) -> bool {

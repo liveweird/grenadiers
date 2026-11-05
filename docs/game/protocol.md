@@ -257,7 +257,8 @@ capability, never to invitation code. See [bounded owner](match-owner.md).
 
 An immutable server room profile owns state construction and its rules/map labels. Publication
 rejects state whose checked rules version disagrees with that profile. Every live two-to-four-seat
-room uses rules10, navigation3 and CPU62 on Easy/Standard or CPU64 on Hard, with weighted generator7 and pit-layout2 on every board; see
+room uses rules10 and navigation4 with the [selected CPU profiles](multiplayer-cpu.md#policies-and-controller-ownership),
+weighted generator7 and pit-layout2 on every board; see
 [board geometry](board-sizes.md). Snapshot pickup arrays begin empty because contents remain
 concealed until exposed. Fixed-classic and earlier expanded profiles remain retained fixtures.
 

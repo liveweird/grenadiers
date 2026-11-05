@@ -35,11 +35,11 @@ Released credentials remain retired and cannot resume or be minted for replaceme
 rooms accept at most 256 lifetime human admissions, bounding the retired-credential set. A
 replacement cannot inherit the departed creator's settings authority.
 
-Round construction uses rules10, navigation3, ContactV2 Punch activation and the actual
+Round construction uses rules10, navigation4, ContactV2 Punch activation and the actual
 physical-round assignment. A typed construction profile pairs weighted generator7 with pit-layout2
 on all supported boards and persists through settings changes, rounds and rematches.
 The configured roster remains intact, with departed participants initially inactive. Live rooms
-use CPU62 on Easy/Standard and CPU64 on Hard. Published generator6 construction remains pinned
+use Easy68, Standard62 and Hard70. Published generator6 construction remains pinned
 to CPU60/61 for replay compatibility. The exact profile table is in
 [CPU boundaries](multiplayer-cpu.md#policies-and-controller-ownership).
 

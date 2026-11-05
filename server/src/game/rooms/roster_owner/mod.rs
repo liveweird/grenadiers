@@ -263,6 +263,8 @@ mod live_cpu_evaluation;
 #[cfg(test)]
 mod live_cpu_evaluation_metrics;
 #[cfg(test)]
+mod live_cpu_evaluation_recording;
+#[cfg(test)]
 mod live_cpu_evaluation_replay_tests;
 #[cfg(test)]
 mod live_cpu_evaluation_tests;

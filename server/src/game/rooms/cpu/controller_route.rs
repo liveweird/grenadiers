@@ -108,7 +108,11 @@ impl CpuController {
         let route = self.committed_route.as_ref()?;
         let reactive = route.requires_reactive_support();
         let status = if reactive {
-            if self.profile != grenadiers_core::room::CpuProfile::HARD_V65 {
+            if !matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::HARD_V65
+                    | grenadiers_core::room::CpuProfile::HARD_V66
+            ) {
                 RouteStatus::Invalidated
             } else if let Some(current) = self.latest_observation.as_ref() {
                 route.poll_reactive_command(current_tick, current, self.settled_stop_tick)
@@ -145,7 +149,11 @@ impl CpuController {
             .as_ref()
             .is_some_and(CommittedRoute::requires_reactive_support);
         let committed = if reactive {
-            if self.profile != grenadiers_core::room::CpuProfile::HARD_V65 {
+            if !matches!(
+                self.profile,
+                grenadiers_core::room::CpuProfile::HARD_V65
+                    | grenadiers_core::room::CpuProfile::HARD_V66
+            ) {
                 false
             } else {
                 match (

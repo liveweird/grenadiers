@@ -40,7 +40,8 @@ for branch pushes, pull requests, merges, and release tags.
 
 Run independent checks and isolated test groups in parallel. Reuse dependency/build caches and
 verified artifacts, while retaining assertions, coverage floors, source identity and failure
-reporting. Keep latency measurements isolated from competing test workloads. Retain each running command's
+reporting. Keep latency measurements and browser assertions of short-lived lifecycle states
+isolated from competing heavy workloads. Retain each running command's
 session ID and log; resume it when execution yields instead of launching another copy.
 Do not rebuild shared-target executables while partition workers still launch them; keep Cargo
 ownership exclusive until those partitions finish, or use a separate target directory.

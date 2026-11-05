@@ -97,6 +97,52 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.25 — 2026-11-05
+
+Hard66 can prefer a visibly contested capacity/range upgrade over an equally useful, equally
+close uncontested alternative when choosing a fresh goal. Existing commitments remain stable.
+The comparison uses bounded public-state distances; movement and planting proofs retain their
+existing authority. Easy/Standard62, generation7, pit-layout2, gameplay21/rules10 and ContactV2
+remain unchanged; private replay35 closes the pickup family.
+
+The paired queued-owner scene proves actual contested collection, an available alternative and
+subsequent cell progress. Six generated reference cases record identical Hard65/Hard66 metrics;
+the demonstrated improvement is this tie decision, not a general strength claim. See the
+[physical evidence](history/cpu-pickup-contention-2026-11-05.md) and
+[contract](game/cpu-contracts.md#hard-pickup-contention).
+
+### Verification
+
+- Frozen source `a2b0ea04bc5f96f13082275069e5e89af6cfa8fe` passes full local Rust checks:
+  2,017 core tests and two doctests, 826 ordinary server cases and four isolated timing cases
+  per debug/release/coverage profile. All 4,194,304 item masks pass per profile with 32 partitions,
+  four workers and no retries. Coverage is 81,313/87,318 lines (93.12%), above the unchanged 90%
+  floor, using 40 raw profiles. Wall time is 1,044.19 seconds.
+- The separate native Hard66 pacing test passes with lairs off/on in 34.64 seconds. Independent
+  review findings are resolved; formatting, strict Clippy, repository and source-size checks pass.
+  [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41936538403)
+  pass on the same source.
+- Web/API/assets/E2E/build/deployment configuration and third-party dependency resolution are
+  unchanged from v1.3.24. Reuse its web/static/tooling/schema/dependency-policy and npm-audit
+  results; only the two local Cargo package versions changed in the lockfile. Exact served-file
+  equivalence and fresh runtime/image acceptance are recorded below.
+
+- The initial five-scenario Chromium run passed four cases; the duel's three-second result UI
+  assertion missed its window despite agreeing authoritative results. An isolated rerun of that
+  unchanged scenario passed in 24.1 seconds against the same image. Short-lived browser lifecycle
+  assertions now explicitly share the quiet-host rule in contributor guidance.
+- The first Kubernetes smoke helper expected diagnostics while its test overlay disabled them.
+  Correcting the disposable test overlay enables the existing diagnostic assertions; production
+  deployment defaults and application code remain unchanged. Failed-run logs are retained.
+- The completed Compose and restricted OrbStack Kubernetes smoke checks pass with three moving/
+  bombing Hard CPUs, two moving mobs, rendered canvas and configured spikes. Exact-image asset,
+  CSP, cache, readiness, probe and security checks pass. Temporary resources are removed.
+  Pinned Trivy 0.74.0 reports zero fixable high/critical findings.
+
+The accepted image is `sha256:06b8a4cf4c7e8e5a51bad445eb12a5ad7a7a209e5fbe22c827b26d73b9cbe302`, labelled v1.3.25 and source
+`a2b0ea04bc5f96f13082275069e5e89af6cfa8fe`. Later release-document changes preserve the verified
+code. Promote this exact image and retain v1.3.24 for rollback.
+
 ## v1.3.24 — 2026-11-04
 
 Hard65 can conditionally plant beside visible stationary rival bombs and clear a forward wall

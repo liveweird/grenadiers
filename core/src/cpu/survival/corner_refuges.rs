@@ -165,7 +165,7 @@ pub fn plan_hard_demolition_v64_with_origin(
     )
 }
 
-fn require_contact_punch(observation: &Observation) -> Result<(), PolicyError> {
+pub(super) fn require_contact_punch(observation: &Observation) -> Result<(), PolicyError> {
     (observation.parts().rules.version == 10
         && observation.parts().rules.punch_activation_policy
             == crate::game::PunchActivationPolicy::ContactV2)

@@ -19,8 +19,8 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Single-player
 
-- [todo] **HARD-CPU — deepen fair tactics.** Improve pickup contention and useful bomb
-  combinations. Preserve bounded opponent-exit guidance and productive equal-distance farming.
+- [next] **HARD-CPU — deepen fair tactics.** Add useful bomb combinations. Preserve bounded
+  pickup contention, opponent-exit guidance and productive equal-distance farming.
   Use permitted observations, bounded planning and unchanged physics. Require authoritative
   before/after witnesses and independent review; preserve archived policies and complete seeded
   episodes. The [farming comparison](docs/history/cpu-farming-yield-2026-11-02.md) retains the

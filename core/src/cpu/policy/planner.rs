@@ -255,6 +255,7 @@ pub(super) fn plan_inner(
         super::GoalModes {
             pressure: version.pressure_mode(),
             farm_origin: version.farm_origin_mode(),
+            pickup: version.pickup_mode(),
         },
         version.farm_origin_recovery(),
         avoid_pits,

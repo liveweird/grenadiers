@@ -125,11 +125,8 @@ fn validate_cpus(
             Some(CpuProfile::MULTIPLAYER_STANDARD)
         }
         (_, _, _, _, None) => None,
-        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_reactive_hard_profile() => {
-            Some(CpuProfile::HARD_V65)
-        }
-        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_clearance_cpu_profiles() => {
-            Some(CpuProfile::HARD_V64)
+        (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.hard_cpu_profile().is_some() => {
+            runtime.hard_cpu_profile()
         }
         (Some(_), _, _, _, Some(CpuDifficulty::Hard)) if runtime.uses_contact_cpu_profiles() => {
             Some(CpuProfile::HARD_V61)
@@ -250,6 +247,9 @@ mod farm_refuge_owner_tests;
 
 #[cfg(test)]
 mod reliable_profile_tests;
+
+#[cfg(test)]
+mod pickup_contention_owner_tests;
 
 #[cfg(test)]
 mod foreign_bomb_farming_owner_tests;

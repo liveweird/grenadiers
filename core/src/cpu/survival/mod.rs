@@ -37,6 +37,7 @@ mod reactive_assumptions;
 mod reactive_escape;
 mod reactive_execution;
 mod reactive_plant;
+mod reactive_plant_policy;
 #[cfg(test)]
 mod reactive_plant_tests;
 mod reactive_purpose;
@@ -104,7 +105,10 @@ pub use plant_tactic::{
 pub(crate) use plant_value::ObservedBlastGeometry;
 pub use plant_value::strategic_plant_still_targets;
 pub use reactive_escape::ReactiveRouteCertificate;
-pub use reactive_plant::{ReactivePlantCertificate, plan_hard_reactive_v65_with_origin};
+pub use reactive_plant::ReactivePlantCertificate;
+pub use reactive_plant_policy::{
+    plan_hard_pickup_v66_with_origin, plan_hard_reactive_v65_with_origin,
+};
 pub use refuge_guidance::{
     plan_blocked_births_v42_with_origin, plan_contact_topology_v40_with_origin,
     plan_farm_origins_v38_with_origin, plan_farm_refuges_v36_with_origin,

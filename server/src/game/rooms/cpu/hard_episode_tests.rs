@@ -220,6 +220,31 @@ fn native_hard_v65_gen7_multiplier5_progresses_at_production_pacing() {
     }
 }
 
+#[test]
+#[ignore = "run in isolation because production worker pacing is timing-sensitive"]
+fn native_hard_v66_gen7_multiplier5_progresses_at_production_pacing() {
+    for lairs in [false, true] {
+        let outcome = support::run_inner(
+            Case {
+                label: "native-hard-v66-gen7-mult5",
+                difficulty: CpuDifficulty::Hard,
+                board: BoardSize::FifteenByThirteen,
+                lairs,
+                seed: 73,
+                native: true,
+            },
+            840,
+            CpuProfile::HARD_V66,
+            true,
+            |_| {},
+        );
+        assert_eq!(outcome.profile, CpuProfile::HARD_V66);
+        assert_clearance_identity(&outcome);
+        assert_eq!(outcome.event_placements, outcome.owned_bombs);
+        assert_operational(&outcome);
+    }
+}
+
 fn assert_clearance_identity(outcome: &outcome::Outcome) {
     assert_eq!(
         outcome.construction_profile,

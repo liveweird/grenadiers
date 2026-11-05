@@ -4,7 +4,7 @@ use grenadiers_core::{
         ArenaConstructionProfile, CellId, EntityId, InputAction, SeatId, StepEventKind, Terrain,
         Tick,
     },
-    room::{BoardSize, CpuProfile, SpikePitSettings},
+    room::{BoardSize, CpuDifficulty, CpuPolicy, CpuProfile, SpikePitSettings},
 };
 
 use super::trace::{LayoutCase, LayoutTrace, run_zero_bomber_trace_with_profile};
@@ -102,6 +102,10 @@ fn queued_hard65_uses_a_controlled_foreign_bomb_and_survives_its_useful_plant() 
         CpuProfile::HARD_V64,
         CpuProfile::RECOVERY_V62_STANDARD,
         CpuProfile::RECOVERY_V62_EASY,
+        CpuProfile {
+            policy: CpuPolicy::UtilityV66,
+            difficulty: CpuDifficulty::Standard,
+        },
     ] {
         let controller = CpuController::new(
             CpuPlanner::without_workers(),
@@ -112,14 +116,16 @@ fn queued_hard65_uses_a_controlled_foreign_bomb_and_survives_its_useful_plant() 
         );
         assert!(!controller.supports_execution_certificate_for_test(execution));
     }
-    let hard65 = CpuController::new(
-        CpuPlanner::without_workers(),
-        SeatId::Two,
-        4_028,
-        [65; 32],
-        CpuProfile::HARD_V65,
-    );
-    assert!(hard65.supports_execution_certificate_for_test(execution));
+    for profile in [CpuProfile::HARD_V65, CpuProfile::HARD_V66] {
+        let controller = CpuController::new(
+            CpuPlanner::without_workers(),
+            SeatId::Two,
+            4_028,
+            [65; 32],
+            profile,
+        );
+        assert!(controller.supports_execution_certificate_for_test(execution));
+    }
     assert_copied_reactive_certificate_is_rejected(&reactive, witness, plan);
     assert_eq!(plan.control.intent.manual, Some(ManualIntent::Bomb));
     let incoming = witness.memory.strategic_intent().unwrap();

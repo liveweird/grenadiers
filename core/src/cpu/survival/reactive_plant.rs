@@ -1,5 +1,5 @@
 use crate::cpu::forecast::ObservedHazardMemory;
-use crate::cpu::policy::{PolicyError, StrategicPhase, StrategicTarget, UtilityMemory};
+use crate::cpu::policy::{GoalModes, PolicyError, StrategicPhase, StrategicTarget, UtilityMemory};
 use crate::cpu::routing::{
     PlantCertificate, PlantRequest, RouteAssurance, RouteLimits, plan_lair_reactive_ordinary_plant,
 };
@@ -66,7 +66,7 @@ impl ReactivePlantCertificate {
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn plan_hard_reactive_v65_with_origin(
+pub(super) fn plan_hard_reactive_with_modes(
     observation: &Observation,
     memory: &UtilityMemory,
     history: &ObservedHazardMemory,
@@ -74,9 +74,10 @@ pub fn plan_hard_reactive_v65_with_origin(
     origin: Option<&PlantEscapeOrigin>,
     rng: &mut CpuRng,
     work: &mut WorkBudget,
+    goal_modes: GoalModes,
 ) -> Result<LairSurvivalPlan, PolicyError> {
     if origin.is_some() {
-        return super::plan_hard_demolition_v64_with_origin(
+        return fallback(
             observation,
             memory,
             history,
@@ -84,6 +85,7 @@ pub fn plan_hard_reactive_v65_with_origin(
             origin,
             rng,
             work,
+            goal_modes,
         );
     }
     let entry_rng = rng.clone();
@@ -104,7 +106,7 @@ pub fn plan_hard_reactive_v65_with_origin(
     work.try_take(guard_work.spent())
         .map_err(|_| PolicyError::InvalidObservation)?;
     if assumptions.is_none() && !escape_preflight {
-        return super::plan_hard_demolition_v64_with_origin(
+        return fallback(
             observation,
             memory,
             history,
@@ -112,12 +114,13 @@ pub fn plan_hard_reactive_v65_with_origin(
             None,
             rng,
             work,
+            goal_modes,
         );
     }
     let fallback_allowance = work.remaining().min(32_768).min(work.remaining() / 2);
     let mut fallback_work = WorkBudget::new(fallback_allowance);
     let mut fallback_rng = entry_rng.clone();
-    let fallback = super::plan_hard_demolition_v64_with_origin(
+    let fallback = fallback(
         observation,
         memory,
         history,
@@ -125,6 +128,7 @@ pub fn plan_hard_reactive_v65_with_origin(
         None,
         &mut fallback_rng,
         &mut fallback_work,
+        goal_modes,
     )?;
     work.try_take(fallback_work.spent())
         .map_err(|_| PolicyError::InvalidObservation)?;
@@ -176,12 +180,22 @@ pub fn plan_hard_reactive_v65_with_origin(
         let allowance = work.remaining().min(4_096).min(work.remaining() / 8);
         let mut goal_work = WorkBudget::new(allowance);
         let mut goal_rng = entry_rng;
-        if let Ok(goal) = crate::cpu::policy::plan_hard_farm_yield_v59(
-            observation,
-            memory,
-            &mut goal_rng,
-            &mut goal_work,
-        ) {
+        let goal = if goal_modes.pickup == crate::cpu::policy::PickupMode::VisibleContention {
+            crate::cpu::policy::plan_hard_pickup_contention_v66(
+                observation,
+                memory,
+                &mut goal_rng,
+                &mut goal_work,
+            )
+        } else {
+            crate::cpu::policy::plan_hard_farm_yield_v59(
+                observation,
+                memory,
+                &mut goal_rng,
+                &mut goal_work,
+            )
+        };
+        if let Ok(goal) = goal {
             target = guidance_target(goal.next_memory.strategic_intent());
             if target.is_some() {
                 candidate.control = goal;
@@ -231,6 +245,30 @@ pub fn plan_hard_reactive_v65_with_origin(
         }
     }
     Ok(fallback)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn fallback(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    origin: Option<&PlantEscapeOrigin>,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+    goal_modes: GoalModes,
+) -> Result<LairSurvivalPlan, PolicyError> {
+    super::corner_refuges::require_contact_punch(observation)?;
+    super::refuge_guidance_policy::plan_policy_v64(
+        observation,
+        memory,
+        history,
+        settled_stop_tick,
+        origin,
+        rng,
+        work,
+        goal_modes,
+    )
 }
 
 fn guidance_target(intent: Option<crate::cpu::policy::StrategicIntent>) -> Option<StrategicTarget> {

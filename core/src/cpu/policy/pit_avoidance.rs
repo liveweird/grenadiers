@@ -11,6 +11,13 @@ impl PitMask {
     pub(super) fn contains(&self, observation: &Observation, cell: CellId) -> bool {
         cell_index(observation, cell).is_some_and(|index| self.0[index])
     }
+
+    #[cfg(test)]
+    pub(super) fn containing(observation: &Observation, cell: CellId) -> Self {
+        let mut mask = Self::EMPTY;
+        mask.0[cell_index(observation, cell).expect("test pit cell")] = true;
+        mask
+    }
 }
 
 pub(super) fn block_search_map(

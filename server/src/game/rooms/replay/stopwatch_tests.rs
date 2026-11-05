@@ -1,12 +1,37 @@
 use grenadiers_core::{
     game::{CellId, Direction, EffectKind, EnabledItems, SeatId},
-    protocol::Counter,
+    protocol::{Counter, v13::ResumeToken},
+    room::DepartureReason,
 };
 
 use super::replay;
 use crate::game::rooms::match_runtime::{
-    MatchAction, collect_generated_pickup, move_cells, plant, start_optional_runtime, wait_clear,
+    MatchAction, ResumeKind, collect_generated_pickup, move_cells, plant, start_optional_runtime,
+    wait_clear,
 };
+
+fn remaining_effect(state: &serde_json::Value, kind: &str) -> u64 {
+    state["actors"][0]["effects"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|effect| effect["kind"] == kind)
+        .and_then(|effect| effect["remainingTicks"].as_u64())
+        .unwrap()
+}
+
+fn remaining_bomb(state: &serde_json::Value, id: u64) -> (u64, bool) {
+    let trigger = &state["bombs"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|candidate| candidate["id"] == id)
+        .unwrap()["trigger"];
+    (
+        trigger["remainingTicks"].as_u64().unwrap(),
+        trigger["paused"].as_bool().unwrap(),
+    )
+}
 
 #[test]
 fn stopwatch_freeze_action_floor_thaw_and_natural_bomb_replay_deterministically() {
@@ -53,6 +78,60 @@ fn stopwatch_freeze_action_floor_thaw_and_natural_bomb_replay_deterministically(
     assert_eq!(runtime.sim().unwrap().state.world().bombs().len(), 1);
     let prepared = runtime.prepare_resume(SeatId::Two).unwrap();
     assert_eq!(prepared.last_bomb_action_id, Some(Counter::new(1).unwrap()));
+
+    let before_loss = runtime.prepare_resume(SeatId::One).unwrap();
+    assert_eq!(
+        before_loss.last_bomb_action_id,
+        Some(Counter::new(2).unwrap())
+    );
+    let before_loss: serde_json::Value = serde_json::from_str(
+        &before_loss
+            .encode(
+                Counter::new(8).unwrap(),
+                ResumeToken::new("b".repeat(64)).unwrap(),
+            )
+            .unwrap(),
+    )
+    .unwrap();
+    let initial_effect = remaining_effect(&before_loss["state"], "stopwatch");
+    let (initial_fuse, initially_paused) =
+        remaining_bomb(&before_loss["state"], u64::from(bomb.id().0));
+    assert!(initially_paused);
+
+    runtime
+        .settle_boundary([Some(DepartureReason::TransportLoss), None])
+        .unwrap();
+    for _ in 0..3 {
+        runtime.tick().unwrap();
+    }
+    let restore_tick = runtime.sim().unwrap().state.tick();
+    let restoration = runtime.prepare_resume(SeatId::One).unwrap();
+    assert_eq!(
+        restoration.last_bomb_action_id,
+        Some(Counter::new(2).unwrap())
+    );
+    let frame = restoration
+        .encode(
+            Counter::new(9).unwrap(),
+            ResumeToken::new("c".repeat(64)).unwrap(),
+        )
+        .unwrap();
+    let admitted: serde_json::Value = serde_json::from_str(&frame).unwrap();
+    assert_eq!(admitted["type"], "admitted");
+    assert_eq!(admitted["sequence"], 9);
+    assert_eq!(admitted["youSeat"], "one");
+    assert_eq!(admitted["lastActionId"], 2);
+    assert!(admitted.get("events").is_none());
+    assert_eq!(
+        remaining_effect(&admitted["state"], "stopwatch"),
+        initial_effect - 4
+    );
+    assert_eq!(
+        remaining_bomb(&admitted["state"], u64::from(bomb.id().0)),
+        (initial_fuse, true)
+    );
+    assert_eq!(runtime.commit_admission(restoration), ResumeKind::Restore);
+    assert_eq!(runtime.sim().unwrap().state.tick(), restore_tick);
     assert_eq!(
         replay(runtime.replay_journal()).unwrap(),
         runtime.replay_inspection()

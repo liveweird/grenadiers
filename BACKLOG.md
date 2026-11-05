@@ -38,8 +38,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 
 ## Playtesting and extensions
 
-- [todo] **BASELINE — broaden browser/network validation.** Complete human playtesting and decide
-  supported browser/network conditions. The 1.0 release records the current limits and
+- [todo] **BASELINE — human browser/network validation.** Complete human playtesting and decide
+  supported browser/network conditions; automated coverage and its limits are documented in
+  [testing](docs/testing.md#ordered-websocket-delay). The 1.0 release records the current limits and
   upgrade/rollback guidance; remaining archived M7/M8 validation criteria stay open. CPU difficulty
   and campaign content remain separate tracks.
 - [todo] **TURN — tune with human evidence.** Tolerance is already configurable. Evaluate early/

@@ -7,6 +7,8 @@
 )]
 mod recording;
 #[cfg(test)]
+mod evaluation_fixture;
+#[cfg(test)]
 mod tests;
 #[path = "../replay_v34/validation.rs"]
 #[expect(

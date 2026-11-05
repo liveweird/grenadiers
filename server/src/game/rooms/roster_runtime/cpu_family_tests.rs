@@ -35,6 +35,9 @@ fn runtime_with_family(family: CpuPolicyFamily) -> RosterRuntime {
             RosterRuntime::new_spike_v21_combination_with_navigation
         }
         CpuPolicyFamily::ProgressHardV69 => RosterRuntime::new_spike_v21_progress_with_navigation,
+        CpuPolicyFamily::OpportunityHardV70 => {
+            RosterRuntime::new_spike_v21_opportunity_with_navigation
+        }
     };
     constructor(
         tests::identity(tests::configuration_for(2, BoardSize::ThirteenByEleven)),
@@ -88,6 +91,7 @@ fn cpu_family_survives_settings_updates_and_simulation_resets() {
         CpuPolicyFamily::CombinationHardV67,
         CpuPolicyFamily::CertifiedEasyV68,
         CpuPolicyFamily::ProgressHardV69,
+        CpuPolicyFamily::OpportunityHardV70,
     ] {
         assert_family_survives_settings_and_resets(family);
     }
@@ -230,6 +234,26 @@ fn progress_family_changes_only_the_selected_hard_planner() {
     let mut new = runtime_with_family(CpuPolicyFamily::ProgressHardV69);
     assert_eq!(new.hard_cpu_profile(), Some(CpuProfile::HARD_V69));
     assert_eq!(old.hard_cpu_profile(), Some(CpuProfile::HARD_V67));
+    assert_eq!(
+        new.easy_cpu_profile(),
+        Some(CpuProfile::CERTIFIED_CADENCE_V68_EASY)
+    );
+    tests::start(&mut old, 2);
+    tests::start(&mut new, 2);
+    let before = old.replay_inspection();
+    let after = new.replay_inspection();
+    assert_eq!(before.simulation, after.simulation);
+    assert_eq!(before.lifecycle, after.lifecycle);
+    assert_eq!(before.construction_profile, after.construction_profile);
+    assert_ne!(before.cpu_family, after.cpu_family);
+}
+
+#[test]
+fn opportunity_family_changes_only_the_selected_hard_planner() {
+    let mut old = runtime_with_family(CpuPolicyFamily::ProgressHardV69);
+    let mut new = runtime_with_family(CpuPolicyFamily::OpportunityHardV70);
+    assert_eq!(new.hard_cpu_profile(), Some(CpuProfile::HARD_V70));
+    assert_eq!(old.hard_cpu_profile(), Some(CpuProfile::HARD_V69));
     assert_eq!(
         new.easy_cpu_profile(),
         Some(CpuProfile::CERTIFIED_CADENCE_V68_EASY)

@@ -68,3 +68,8 @@ Hard69 requires actual actor displacement before its existing progress test can 
 deadline. Moving opponents or recomputed approaches cannot provide progress for a stationary
 CPU. Real cell and subcell progress, commitment timing, failed-target cooldowns and known-hazard
 proofs retain their existing meaning. Older planner identities keep their archived semantics.
+
+Hard70 retains that progress boundary. Its fresh farming-opportunity stage can choose a nearby
+visible block before distant pressure, without replacing a valid commitment or recomputing goal
+order every frame. Normal commitment expiry, higher opportunities and stalled-target deferral
+still apply; known hazards retain priority over tactical goals.

@@ -30,11 +30,18 @@ pub(crate) enum ProgressMode {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum OpeningMode {
+    Legacy,
+    FarmOpportunity,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct GoalModes {
     pub(crate) pressure: PressureMode,
     pub(crate) farm_origin: FarmOriginMode,
     pub(crate) pickup: PickupMode,
     pub(crate) progress: ProgressMode,
+    pub(crate) opening: OpeningMode,
 }
 
 impl GoalModes {
@@ -44,6 +51,7 @@ impl GoalModes {
             farm_origin: FarmOriginMode::Nearest,
             pickup: PickupMode::Legacy,
             progress: ProgressMode::Legacy,
+            opening: OpeningMode::Legacy,
         }
     }
 
@@ -53,6 +61,7 @@ impl GoalModes {
             farm_origin: FarmOriginMode::VisibleYield,
             pickup: PickupMode::Legacy,
             progress: ProgressMode::Legacy,
+            opening: OpeningMode::Legacy,
         }
     }
 
@@ -67,6 +76,13 @@ impl GoalModes {
         Self {
             progress: ProgressMode::ActorMovement,
             ..Self::visible_yield_contention()
+        }
+    }
+
+    pub(crate) const fn visible_yield_farm_opportunity() -> Self {
+        Self {
+            opening: OpeningMode::FarmOpportunity,
+            ..Self::visible_yield_actor_progress()
         }
     }
 }

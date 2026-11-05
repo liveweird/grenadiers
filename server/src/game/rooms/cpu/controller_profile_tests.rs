@@ -6,12 +6,13 @@ use grenadiers_core::{
 };
 
 #[test]
-fn owned_combination_support_is_exactly_hard67_or_hard69() {
+fn owned_combination_support_is_exactly_hard67_hard69_or_hard70() {
     for (profile, expected) in [
         (CpuProfile::HARD_V65, false),
         (CpuProfile::HARD_V66, false),
         (CpuProfile::HARD_V67, true),
         (CpuProfile::HARD_V69, true),
+        (CpuProfile::HARD_V70, true),
         (
             CpuProfile {
                 policy: CpuPolicy::UtilityV67,
@@ -23,6 +24,20 @@ fn owned_combination_support_is_exactly_hard67_or_hard69() {
             CpuProfile {
                 policy: CpuPolicy::UtilityV69,
                 difficulty: CpuDifficulty::Standard,
+            },
+            false,
+        ),
+        (
+            CpuProfile {
+                policy: CpuPolicy::UtilityV70,
+                difficulty: CpuDifficulty::Standard,
+            },
+            false,
+        ),
+        (
+            CpuProfile {
+                policy: CpuPolicy::UtilityV70,
+                difficulty: CpuDifficulty::Easy,
             },
             false,
         ),
@@ -66,6 +81,15 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
             .profile_supports(10)
         );
     }
+    for difficulty in [CpuDifficulty::Easy, CpuDifficulty::Standard] {
+        assert!(
+            !controller(CpuProfile {
+                policy: CpuPolicy::UtilityV70,
+                difficulty,
+            })
+            .profile_supports(10)
+        );
+    }
     assert!(hard.profile_supports(10));
     assert!(controller(CpuProfile::HARD_V28).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V29).profile_supports(10));
@@ -92,6 +116,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V66).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V67).profile_supports(10));
     assert!(controller(CpuProfile::HARD_V69).profile_supports(10));
+    assert!(controller(CpuProfile::HARD_V70).profile_supports(10));
     assert!(controller(CpuProfile::CERTIFIED_CADENCE_V68_EASY).profile_supports(10));
     for rules in 5..10 {
         assert!(!hard.profile_supports(rules));
@@ -197,6 +222,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
     assert!(controller(CpuProfile::HARD_V66).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V67).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V69).supports_refuge_handoff());
+    assert!(controller(CpuProfile::HARD_V70).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V37).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V39).supports_refuge_handoff());
     assert!(controller(CpuProfile::HARD_V41).supports_refuge_handoff());
@@ -259,6 +285,7 @@ fn hard_requires_an_exact_supported_policy_and_rules10() {
         CpuProfile::HARD_V66,
         CpuProfile::HARD_V67,
         CpuProfile::HARD_V69,
+        CpuProfile::HARD_V70,
     ] {
         let current = controller(profile);
         assert!(current.supports_contact_topology());

@@ -30,7 +30,12 @@ balance still needs human playtesting.
 
 Hard counts strategic progress only when the CPU actually moves and meets its existing progress
 test. An opponent or approach moving closer cannot restart a stationary CPU's deadline.
-Expired progress still triggers normal target deferral; fresh target scoring is unchanged.
+Expired progress still triggers normal target deferral.
+
+When choosing a fresh goal, Hard may clear a much nearer visible block before pursuing a distant
+opponent. Immediate attacks, eligible item opportunities and existing commitments retain their
+normal treatment. This can produce an earlier useful opening bomb; it grants no new planting or
+escape capability and does not guarantee a win against a person.
 
 ## Settings, start and rematch
 
@@ -155,7 +160,7 @@ use its restricted tactic.
 
 Archived ManualV1 CPU profiles can check one stopped Equipment action against a single adjacent,
 unpaused Standard timed bomb. Their complete relocation/cooldown-failure escape proof and scene
-restrictions remain frozen for replay compatibility. Live CPU68/62/69 intentionally emit no manual
+restrictions remain frozen for replay compatibility. Live CPU68/62/70 intentionally emit no manual
 Equipment action and do not currently use an intentional contact-Punch tactic. ContactV2 can
 activate Punch through movement, so their route guard declines forward bomb contact that could
 cause an unmodelled relocation. Exact retained origin grace permits safe departure from an overlap;

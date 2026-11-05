@@ -20,6 +20,15 @@ fn queued_hard69_reuses_the_exact_physical_combination_proof() {
     assert_positive(&hard66, &hard69);
 }
 
+#[test]
+fn queued_hard70_reuses_the_exact_physical_combination_proof() {
+    let hard66 = run(CpuProfile::HARD_V66);
+    let hard70 = run(CpuProfile::HARD_V70);
+    eprintln!("HARD70_OWNED_COMBINATION hard66={hard66:#?} hard70={hard70:#?}");
+
+    assert_positive(&hard66, &hard70);
+}
+
 fn assert_positive(hard66: &Outcome, current: &Outcome) {
     assert_eq!(hard66.pickups, current.pickups);
     assert!(
@@ -49,7 +58,7 @@ fn assert_positive(hard66: &Outcome, current: &Outcome) {
     assert!(current.selected_rival_at_second);
     assert_eq!(
         current.route_profile_support_at_second,
-        Some([false, false, true, true])
+        Some([false, false, true, true, true])
     );
     assert!(current.survived_both_windows);
     assert!(current.settled_progress_after_windows);

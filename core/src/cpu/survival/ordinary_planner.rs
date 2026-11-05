@@ -1,6 +1,6 @@
 use crate::cpu::policy::{
-    ControlPlan, FarmOriginMode, GoalModes, PickupMode, PolicyError, PressureMode, ProgressMode,
-    UtilityMemory,
+    ControlPlan, FarmOriginMode, GoalModes, OpeningMode, PickupMode, PolicyError, PressureMode,
+    ProgressMode, UtilityMemory,
 };
 use crate::cpu::{CpuRng, Observation, WorkBudget};
 
@@ -19,7 +19,9 @@ pub(super) fn plan(
     avoid_pits: bool,
 ) -> Result<ControlPlan, PolicyError> {
     let pressure_mode = goal_modes.pressure;
-    if goal_modes.progress == ProgressMode::ActorMovement {
+    if goal_modes.opening == OpeningMode::FarmOpportunity {
+        crate::cpu::policy::plan_hard_opportunity_v70(observation, memory, rng, work)
+    } else if goal_modes.progress == ProgressMode::ActorMovement {
         crate::cpu::policy::plan_hard_progress_v69(observation, memory, rng, work)
     } else if goal_modes.pickup == PickupMode::VisibleContention {
         crate::cpu::policy::plan_hard_pickup_contention_v66(observation, memory, rng, work)

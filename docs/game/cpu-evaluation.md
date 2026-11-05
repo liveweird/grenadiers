@@ -12,8 +12,8 @@ scripts/measure-game.sh --cpu-live-rounds
 
 This separate release-profile matrix uses the actual four-seat roster owner with one human and
 three CPUs, all items enabled, live ×5 extra-bomb weighting, storm, lairs and spikes. It binds
-generator7, pit-layout2, gameplay21/ContactV2, Easy68, Standard62 and Hard69 through private
-Replay38. The 15×13 arena, environment and initial physical state match across difficulties.
+generator7, pit-layout2, gameplay21/ContactV2, Easy68, Standard62 and Hard70 through private
+Replay39. The 15×13 arena, environment and initial physical state match across difficulties.
 Arena, simulation-root and CPU seeds are explicit independent inputs.
 
 The 48 cases combine four arena seeds, two CPU seed sets, `fixed-idle` and `bomb-retreat` human
@@ -23,7 +23,7 @@ Natural timeout is a draw; reaching a measurement bound without a result is cens
 
 A test-only bounded trace captures committed operations from the real owner. A retained shadow
 uses the existing recorder; its complete inspection must match the owner, and accepted-input
-Replay38 must reconstruct that same inspection. Tracing stays disabled in production. Overflow,
+Replay39 must reconstruct that same inspection. Tracing stays disabled in production. Overflow,
 unsupported post-setup admissions, incomplete queue accounting and replay divergence fail the
 measurement. Short tests require actual queued work, accepted CPU inputs and physical progress.
 

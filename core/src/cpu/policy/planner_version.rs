@@ -20,6 +20,7 @@ pub(in crate::cpu::policy) enum PlannerVersion {
     HardPitsYieldV59,
     HardPickupV66,
     HardProgressV69,
+    HardOpportunityV70,
 }
 
 impl PlannerVersion {
@@ -47,6 +48,7 @@ impl PlannerVersion {
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         )
     }
 
@@ -69,6 +71,7 @@ impl PlannerVersion {
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         )
     }
 
@@ -90,6 +93,7 @@ impl PlannerVersion {
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         )
     }
 
@@ -102,6 +106,7 @@ impl PlannerVersion {
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         ) {
             super::super::PressureMode::ExitCoverage
         } else if matches!(
@@ -125,6 +130,7 @@ impl PlannerVersion {
                 | Self::HardFarmYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         )
     }
 
@@ -141,6 +147,7 @@ impl PlannerVersion {
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         )
     }
 
@@ -151,6 +158,7 @@ impl PlannerVersion {
                 | Self::HardPitsYieldV59
                 | Self::HardPickupV66
                 | Self::HardProgressV69
+                | Self::HardOpportunityV70
         ) {
             super::super::FarmOriginMode::VisibleYield
         } else {
@@ -159,7 +167,10 @@ impl PlannerVersion {
     }
 
     pub(super) const fn pickup_mode(self) -> super::super::PickupMode {
-        if matches!(self, Self::HardPickupV66 | Self::HardProgressV69) {
+        if matches!(
+            self,
+            Self::HardPickupV66 | Self::HardProgressV69 | Self::HardOpportunityV70
+        ) {
             super::super::PickupMode::VisibleContention
         } else {
             super::super::PickupMode::Legacy
@@ -167,10 +178,18 @@ impl PlannerVersion {
     }
 
     pub(super) const fn progress_mode(self) -> super::super::ProgressMode {
-        if matches!(self, Self::HardProgressV69) {
+        if matches!(self, Self::HardProgressV69 | Self::HardOpportunityV70) {
             super::super::ProgressMode::ActorMovement
         } else {
             super::super::ProgressMode::Legacy
+        }
+    }
+
+    pub(super) const fn opening_mode(self) -> super::super::OpeningMode {
+        if matches!(self, Self::HardOpportunityV70) {
+            super::super::OpeningMode::FarmOpportunity
+        } else {
+            super::super::OpeningMode::Legacy
         }
     }
 }
@@ -189,4 +208,21 @@ pub(in crate::cpu::policy) fn assert_hard69_inherits_hard66() {
     assert_eq!(new.farm_origin_mode(), old.farm_origin_mode());
     assert_eq!(new.pickup_mode(), old.pickup_mode());
     assert_ne!(new.progress_mode(), old.progress_mode());
+}
+
+#[cfg(test)]
+pub(in crate::cpu::policy) fn assert_hard70_inherits_hard69() {
+    let old = PlannerVersion::HardProgressV69;
+    let new = PlannerVersion::HardOpportunityV70;
+    assert_eq!(new.follow_committed(), old.follow_committed());
+    assert_eq!(new.persistent_goals(), old.persistent_goals());
+    assert_eq!(new.strategic_goals(), old.strategic_goals());
+    assert_eq!(new.failed_plant_recovery(), old.failed_plant_recovery());
+    assert_eq!(new.pressure_mode(), old.pressure_mode());
+    assert_eq!(new.farm_origin_recovery(), old.farm_origin_recovery());
+    assert_eq!(new.avoid_pits(), old.avoid_pits());
+    assert_eq!(new.farm_origin_mode(), old.farm_origin_mode());
+    assert_eq!(new.pickup_mode(), old.pickup_mode());
+    assert_eq!(new.progress_mode(), old.progress_mode());
+    assert_ne!(new.opening_mode(), old.opening_mode());
 }

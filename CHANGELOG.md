@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## 1.3.30 — 2026-11-05
+
+- Let Hard prefer a substantially nearer productive farming route over a distant fresh opponent pursuit, while preserving nearby pressure and item opportunities.
+- Preserve earlier planner identities and physical safety proofs; select Hard70 with Easy68/Standard62 through private replay39.
+
 ## 1.3.29 — 2026-11-05
 
 - Do not renew Hard CPU strategic progress solely because a rival or approach moves closer while the CPU remains stationary.

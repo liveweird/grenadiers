@@ -255,6 +255,10 @@ mod easy68_cadence_owner_tests;
 #[cfg(test)]
 mod hard_approach_diagnostic_tests;
 #[cfg(test)]
+mod hard_opening_owner_support;
+#[cfg(test)]
+mod hard_opening_owner_tests;
+#[cfg(test)]
 mod live_cpu_evaluation;
 #[cfg(test)]
 mod live_cpu_evaluation_metrics;

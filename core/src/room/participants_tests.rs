@@ -387,3 +387,10 @@ fn hard69_actor_progress_has_a_new_identity_without_relabeling_hard67() {
     assert_eq!(CpuProfile::HARD_V69.difficulty, CpuDifficulty::Hard);
     assert_eq!(CpuProfile::HARD_V67.policy.version(), 67);
 }
+
+#[test]
+fn hard70_opening_opportunity_has_a_new_identity_without_relabeling_hard69() {
+    assert_eq!(CpuProfile::HARD_V70.policy, CpuPolicy::UtilityV70);
+    assert_eq!(CpuProfile::HARD_V70.difficulty, CpuDifficulty::Hard);
+    assert_eq!(CpuProfile::HARD_V69.policy.version(), 69);
+}

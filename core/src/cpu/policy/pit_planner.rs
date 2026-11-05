@@ -189,6 +189,21 @@ pub(crate) fn plan_hard_progress_v69(
     )
 }
 
+pub(crate) fn plan_hard_opportunity_v70(
+    observation: &Observation,
+    memory: &UtilityMemory,
+    rng: &mut CpuRng,
+    work: &mut WorkBudget,
+) -> Result<ControlPlan, PolicyError> {
+    plan_rules10(
+        observation,
+        memory,
+        rng,
+        work,
+        PlannerVersion::HardOpportunityV70,
+    )
+}
+
 fn plan_rules10(
     observation: &Observation,
     memory: &UtilityMemory,

@@ -10,14 +10,19 @@ pub(super) fn plan(
     work: &mut WorkBudget,
 ) -> Option<Result<WorkerPlan, PolicyError>> {
     let handoff = job.refuge_handoff.as_ref()?;
-    if !matches!(job.policy, CpuPolicy::UtilityV67 | CpuPolicy::UtilityV69)
-        || job.escape_origin.is_some()
+    if !matches!(
+        job.policy,
+        CpuPolicy::UtilityV67 | CpuPolicy::UtilityV69 | CpuPolicy::UtilityV70
+    ) || job.escape_origin.is_some()
     {
         return Some(Ok(WorkerPlan::NoReplacement));
     }
     let planner = match job.policy {
         CpuPolicy::UtilityV67 => {
             grenadiers_core::cpu::survival::plan_hard_combination_v67_with_handoff
+        }
+        CpuPolicy::UtilityV70 => {
+            grenadiers_core::cpu::survival::plan_hard_combination_v70_with_handoff
         }
         CpuPolicy::UtilityV69 => {
             grenadiers_core::cpu::survival::plan_hard_combination_v69_with_handoff

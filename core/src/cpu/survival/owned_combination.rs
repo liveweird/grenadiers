@@ -132,3 +132,21 @@ pub fn plan_hard_combination_v69_with_handoff(
         work,
     )
 }
+
+pub fn plan_hard_combination_v70_with_handoff(
+    observation: &Observation,
+    prospective_memory: &UtilityMemory,
+    history: &ObservedHazardMemory,
+    settled_stop_tick: Tick,
+    handoff: &TerminalRefugeHandoff,
+    work: &mut WorkBudget,
+) -> Result<Option<LairSurvivalPlan>, PolicyError> {
+    plan_hard_combination_v69_with_handoff(
+        observation,
+        prospective_memory,
+        history,
+        settled_stop_tick,
+        handoff,
+        work,
+    )
+}

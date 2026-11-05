@@ -81,6 +81,8 @@ impl CpuProfile {
         Self::profile(CpuPolicy::UtilityV68, CpuDifficulty::Easy);
     /// Hard67 tactics with actor-motion-only strategic progress renewal.
     pub const HARD_V69: Self = Self::profile(CpuPolicy::UtilityV69, CpuDifficulty::Hard);
+    /// Hard69 tactics with a bounded fresh farming-opportunity comparison.
+    pub const HARD_V70: Self = Self::profile(CpuPolicy::UtilityV70, CpuDifficulty::Hard);
 
     pub const HARD_V57: Self = Self::profile(CpuPolicy::UtilityV57, CpuDifficulty::Hard);
 }

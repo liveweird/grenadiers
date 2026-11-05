@@ -97,6 +97,48 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.30 — 2026-11-05
+
+Hard70 can choose a substantially nearer visible Farm before a distant fresh opponent pursuit.
+The bounded stage preserves the original total order, vetoes promotion whenever an eligible
+Collect exists, keeps ties/immediate attacks and retains normal commitments and target deferral.
+It adds no planting authority, forecast or RNG draw; complete physical escape/contact proofs
+and the 65,536-work ceiling remain intact. Easy68/Standard62 stay current. Private Replay39
+closes the selected family; Replay38/37 remain unchanged.
+
+In the paired generated seed53 scene, Seat Four accepts its productive bomb at running update
+25 instead of 199: 174 updates (2.9 seconds) earlier. Its actual bomb uniquely contributes to a
+named block's destruction under simultaneous detonations, survives the full flame window and
+moves afterward. In the fixed 48-case comparison, Hard places 140 bombs versus 74 and records
+10 pickup events versus zero; Easy/Standard's 32 complete results remain identical. These are
+scoped workloads, not a general strength ranking. See the
+[decision and physical evidence](history/cpu-farming-opportunity-2026-11-05.md).
+
+### Verification
+
+- Clean source `3be8925587ace310d68a8be58d99d5eeec06e246` passes the actual 48-case release
+  runner in 10.55 seconds: all natural outcomes, exact owner/shadow/input replay, bounded complete
+  queue/work accounting. Independent review findings are resolved; fixture attribution includes
+  every detonation view and nonzero work, with valid deterministic zero-RNG receipts.
+- Full local debug/release/coverage passes: 2,048 core cases and two doctests, 876 ordinary server
+  cases and five serial native timing cases per profile. Each profile completes all 4,194,304
+  masks with 32 partitions, four workers and no retries. Official coverage is 85,016/91,220 lines
+  (93.20%) with 40 raw profiles, above the unchanged 90% floor. Wall time is 1,087.05 seconds.
+- Focused selector/pickup/pressure/commitment/pit/budget controls, actual owner progress,
+  canonical profiles, current/archived workers, lifecycle/replay and inherited combination
+  proofs pass. Strict Clippy, formatting and the actual repository/source-cap gate pass.
+- [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41964004986)
+  pass on the same source. Unchanged web/API/artwork/E2E/deployment and third-party dependency
+  inputs reuse their unaffected v1.3.29 acceptance.
+- Exact-image Compose/Hard and restricted local OrbStack Kubernetes/Easy pass with three moving,
+  bombing CPUs, moving mobs, configured spikes, protocol21, rendered canvas and no browser errors.
+  Nine served assets, security/cache/CSP headers, readiness and probes pass. Pinned Trivy reports
+  zero fixable high/critical findings. Temporary projects, namespace and forwarder are removed.
+
+The accepted image is `sha256:df6523aa3411587b489e2aa70e17feac087f5b2b1a93330bacf922afc78dd305`, labelled v1.3.30 and source
+`3be8925587ace310d68a8be58d99d5eeec06e246`. Later release-document changes preserve the verified
+code. Promote this exact image and retain v1.3.29 for rollback.
+
 ## v1.3.29 — 2026-11-05
 
 Hard69 requires actual actor displacement before the existing strategic-progress test may

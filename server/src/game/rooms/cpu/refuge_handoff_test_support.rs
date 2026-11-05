@@ -168,7 +168,10 @@ fn state(profile: CpuProfile) -> (State, RoomSettings) {
     terrain[4 * 15 + 6] = grenadiers_core::game::Terrain::Floor;
     let arena = Arena::new(
         terrain,
-        if matches!(profile, CpuProfile::HARD_V67 | CpuProfile::HARD_V69) {
+        if matches!(
+            profile,
+            CpuProfile::HARD_V67 | CpuProfile::HARD_V69 | CpuProfile::HARD_V70
+        ) {
             BTreeSet::from([CellId::new(7, 3)])
         } else {
             BTreeSet::new()
@@ -289,7 +292,7 @@ fn observe(state: &State, settings: RoomSettings, profile: CpuProfile) -> Observ
         rules: ObservedRules {
             punch_activation_policy: if matches!(
                 profile,
-                CpuProfile::HARD_V67 | CpuProfile::HARD_V69
+                CpuProfile::HARD_V67 | CpuProfile::HARD_V69 | CpuProfile::HARD_V70
             ) {
                 grenadiers_core::game::PunchActivationPolicy::ContactV2
             } else {

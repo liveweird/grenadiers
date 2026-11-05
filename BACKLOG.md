@@ -22,9 +22,6 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
-  - Tune distant opponent pursuit versus nearby useful demolition: the same-basis seed53
-    comparison delays Hard's first bomb by 174 ticks. Retain complete escape/contact proofs,
-    private observations and bounded work; verify real accepted bombing and later progress.
   - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,
     stalls, fairness, unexpected item/death behavior and the difference between levels. Turn
     reproducible weaknesses into bounded tuning or further combat/equipment tactics. Preserve

@@ -22,6 +22,9 @@ mod farm_yield;
 #[path = "goals_v66_pickup_contention.rs"]
 mod pickup_contention;
 
+#[path = "goals_v70_farm_opportunity.rs"]
+mod farm_opportunity;
+
 #[path = "goals_v24_reachable.rs"]
 mod reachability;
 pub(in crate::cpu::policy) use reachability::reachable;
@@ -177,6 +180,9 @@ fn select_inner(
 
     let previous = memory.strategic_intent();
     let mut reason = StrategicSwitchReason::Initial;
+    let mut promote = |candidate, excluded| {
+        farm_opportunity::promote_fresh(goal_modes.opening, candidate, &candidates, excluded, work)
+    };
     let chosen = if let Some(previous) = previous {
         let valid = validate_previous(observation, previous.target);
         let retained = candidates
@@ -234,6 +240,7 @@ fn select_inner(
                     .iter()
                     .copied()
                     .find(|candidate| candidate.target != previous.target)
+                    .map(|candidate| promote(candidate, Some(previous.target)))
                     .or(Some(retained))
             } else if let Some(better) = better {
                 reason = StrategicSwitchReason::BetterOpportunity;
@@ -278,10 +285,16 @@ fn select_inner(
             } else {
                 valid.err().unwrap_or(StrategicSwitchReason::TargetInvalid)
             };
-            candidates.first().copied()
+            candidates
+                .first()
+                .copied()
+                .map(|candidate| promote(candidate, None))
         }
     } else {
-        candidates.first().copied()
+        candidates
+            .first()
+            .copied()
+            .map(|candidate| promote(candidate, None))
     };
 
     if let Some(mut chosen) = chosen {

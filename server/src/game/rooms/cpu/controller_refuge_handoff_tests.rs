@@ -263,8 +263,12 @@ fn full_shared_queue_leaves_the_old_hold_and_live_state_untouched() {
 }
 
 #[test]
-fn optional_hard67_and_hard69_declines_preserve_installed_route_memory_and_rng() {
-    for profile in [CpuProfile::HARD_V67, CpuProfile::HARD_V69] {
+fn optional_hard67_hard69_and_hard70_declines_preserve_installed_route_memory_and_rng() {
+    for profile in [
+        CpuProfile::HARD_V67,
+        CpuProfile::HARD_V69,
+        CpuProfile::HARD_V70,
+    ] {
         let mut fixture = queued_refuge_for(profile);
         let memory = fixture.controller.memory;
         let rng_draws = fixture.controller.rng_draws();

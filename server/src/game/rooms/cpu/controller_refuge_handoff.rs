@@ -106,6 +106,7 @@ impl CpuController {
                 self.profile.policy,
                 grenadiers_core::room::CpuPolicy::UtilityV67
                     | grenadiers_core::room::CpuPolicy::UtilityV69
+                    | grenadiers_core::room::CpuPolicy::UtilityV70
             )
             .then_some(handoff.clone()),
             live: Arc::clone(&live),

@@ -1,29 +1,24 @@
 //! Curated public setup; no generated-world or restored-match provenance is implied.
 use std::{collections::BTreeSet, sync::Arc};
 
+#[path = "owned_combination_runtime_support.rs"]
+mod runtime_support;
+
 use grenadiers_core::{
     cpu::{ManualIntent, WorldId, policy::StrategicTarget},
     game::{
-        BlastKind, BombTrigger, CellId, Direction, EnabledItems, EntityId, InputAction,
-        MobNavigationPolicy, PickupKind, SeatId, SeatInput, SimulationSeed, StepEventKind,
-        StormCloudConfig, Tick,
+        BlastKind, BombTrigger, CellId, Direction, EntityId, InputAction, PickupKind, SeatId,
+        SeatInput, StepEventKind, Tick,
     },
-    protocol::{RoomCode, RoomId},
-    room::{
-        BoardSize, BombCapacityDropMultiplier, CpuDifficulty, CpuProfile, RespawnLairTuning,
-        RoomConfiguration, RoomSettings, SeatControl, SpikePitTuning,
-    },
+    room::CpuProfile,
 };
 use tokio::{sync::watch, time::Instant};
 
 use super::{RosterOwnerNotice, driver::Driver};
-use crate::{
-    game::rooms::{
-        RandomFill,
-        cpu::{AdmissionTrace, CpuController, CpuPlanner},
-        roster_runtime::{RosterAction, RosterIdentity, RosterRuntime, SpikeRuntimeEnvironment},
-    },
-    round_seed::RoundSeedSource,
+use crate::game::rooms::{
+    RandomFill,
+    cpu::{AdmissionTrace, CpuController, CpuPlanner},
+    roster_runtime::{RosterAction, RosterRuntime},
 };
 
 pub(super) const CPU: SeatId = SeatId::Two;
@@ -53,7 +48,7 @@ pub(super) struct Outcome {
     pub additional_destroyed_by: Option<EntityId>,
     pub detonations: Vec<(Tick, EntityId)>,
     pub selected_rival_at_second: bool,
-    pub route_profile_support_at_second: Option<[bool; 4]>,
+    pub route_profile_support_at_second: Option<[bool; 5]>,
     pub survived_both_windows: bool,
     pub settled_progress_after_windows: bool,
     pub manual_attempts_after_first: usize,
@@ -180,6 +175,9 @@ pub(super) fn run(profile: CpuProfile) -> Outcome {
                         owner.cpus[0]
                             .committed_route_support_for_profile_test(CpuProfile::HARD_V69)
                             .unwrap_or(false),
+                        owner.cpus[0]
+                            .committed_route_support_for_profile_test(CpuProfile::HARD_V70)
+                            .unwrap_or(false),
                     ]);
                     windows_complete_at = plants.iter().map(|plant| plant.clears_at).max();
                 }
@@ -286,59 +284,7 @@ fn running_scene(
     grenadiers_core::game::State,
     Vec<(Tick, PickupKind)>,
 ) {
-    let settings = RoomSettings::new(grenadiers_core::game::SpeedLevel::Four, 256, 3, 240)
-        .unwrap()
-        .with_enabled_items(EnabledItems::ALL)
-        .with_bomb_capacity_drop_multiplier(BombCapacityDropMultiplier::DEFAULT);
-    let configuration = RoomConfiguration::new(
-        &[SeatControl::Human, SeatControl::Cpu, SeatControl::Human],
-        Some(CpuDifficulty::Hard),
-        BoardSize::FifteenByThirteen,
-    )
-    .unwrap();
-    let identity = RosterIdentity {
-        id: RoomId::new("0123456789abcdef0123456789abc067").unwrap(),
-        code: RoomCode::new("ABCDEFGH").unwrap(),
-        registry_serial: INSTANCE,
-        configuration,
-    };
-    let environment = SpikeRuntimeEnvironment {
-        cloud: StormCloudConfig::Disabled,
-        lairs: RespawnLairTuning::DEFAULT,
-        spike_pits: SpikePitTuning::DEFAULT,
-        navigation: MobNavigationPolicy::TimedEscapeV3,
-    };
-    let seeds = RoundSeedSource::with_entropy(|bytes| {
-        bytes.fill(67);
-        Ok(())
-    });
-    let simulation_seed = Arc::new(|_| Ok(SimulationSeed::new([67; 32])));
-    let mut runtime = if profile == CpuProfile::HARD_V67 {
-        RosterRuntime::new_spike_v21_combination_with_navigation(
-            identity,
-            settings,
-            environment,
-            seeds,
-            simulation_seed,
-        )
-    } else if profile == CpuProfile::HARD_V69 {
-        RosterRuntime::new_spike_v21_progress_with_navigation(
-            identity,
-            settings,
-            environment,
-            seeds,
-            simulation_seed,
-        )
-    } else {
-        RosterRuntime::new_spike_v21_pickup_with_navigation(
-            identity,
-            settings,
-            environment,
-            seeds,
-            simulation_seed,
-        )
-    }
-    .unwrap();
+    let (mut runtime, settings) = runtime_support::runtime(profile, INSTANCE);
     for seat in [SeatId::One, RIVAL] {
         let admission = runtime.prepare_join(seat).unwrap();
         runtime.commit_admission(admission);

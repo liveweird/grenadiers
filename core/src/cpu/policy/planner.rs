@@ -257,6 +257,7 @@ pub(super) fn plan_inner(
             farm_origin: version.farm_origin_mode(),
             pickup: version.pickup_mode(),
             progress: version.progress_mode(),
+            opening: version.opening_mode(),
         },
         version.farm_origin_recovery(),
         avoid_pits,

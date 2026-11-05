@@ -20,15 +20,18 @@ pub use pit_planner::{
     plan_spike_pits_cautious_v52,
 };
 pub(crate) use pit_planner::{
-    plan_hard_farm_exit_pressure_v58, plan_hard_farm_yield_v59, plan_hard_pickup_contention_v66,
-    plan_hard_pits_exit_pressure_v58, plan_hard_pits_yield_v59, plan_hard_progress_v69,
+    plan_hard_farm_exit_pressure_v58, plan_hard_farm_yield_v59, plan_hard_opportunity_v70,
+    plan_hard_pickup_contention_v66, plan_hard_pits_exit_pressure_v58, plan_hard_pits_yield_v59,
+    plan_hard_progress_v69,
 };
 pub use planner::plan;
 pub(crate) use planner::{
     plan_farm_v38, plan_hard_farm_v39, plan_hard_v28, plan_lairs, plan_respawn, plan_respawn_v23,
     plan_respawn_v24, plan_respawn_v25, plan_spike_pits_v26,
 };
-pub(crate) use pressure_mode::{FarmOriginMode, GoalModes, PickupMode, PressureMode, ProgressMode};
+pub(crate) use pressure_mode::{
+    FarmOriginMode, GoalModes, OpeningMode, PickupMode, PressureMode, ProgressMode,
+};
 pub(crate) use teleporter_guidance::teleporter_guidance;
 pub(crate) use teleporter_guidance_v50::teleporter_guidance_v50;
 pub use types::{
@@ -50,6 +53,8 @@ mod goal_game_tests;
 mod goal_tests;
 #[cfg(test)]
 mod hard_approach_progress_diagnostic_tests;
+#[cfg(test)]
+mod hard_opening_opportunity_tests;
 #[cfg(test)]
 mod hard_v28_goal_tests;
 #[cfg(test)]

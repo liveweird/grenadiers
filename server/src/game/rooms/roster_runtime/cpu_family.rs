@@ -11,6 +11,7 @@ pub(in crate::game::rooms) enum CpuPolicyFamily {
     CombinationHardV67,
     CertifiedEasyV68,
     ProgressHardV69,
+    OpportunityHardV70,
 }
 
 impl RosterRuntime {
@@ -23,6 +24,7 @@ impl RosterRuntime {
                 | CpuPolicyFamily::CombinationHardV67
                 | CpuPolicyFamily::CertifiedEasyV68
                 | CpuPolicyFamily::ProgressHardV69
+                | CpuPolicyFamily::OpportunityHardV70
         )
     }
 
@@ -33,9 +35,9 @@ impl RosterRuntime {
             | CpuPolicyFamily::ReactiveHardV65
             | CpuPolicyFamily::PickupHardV66
             | CpuPolicyFamily::CombinationHardV67 => Some(CpuProfile::RECOVERY_V62_EASY),
-            CpuPolicyFamily::CertifiedEasyV68 | CpuPolicyFamily::ProgressHardV69 => {
-                Some(CpuProfile::CERTIFIED_CADENCE_V68_EASY)
-            }
+            CpuPolicyFamily::CertifiedEasyV68
+            | CpuPolicyFamily::ProgressHardV69
+            | CpuPolicyFamily::OpportunityHardV70 => Some(CpuProfile::CERTIFIED_CADENCE_V68_EASY),
         }
     }
 
@@ -49,6 +51,7 @@ impl RosterRuntime {
                 Some(CpuProfile::HARD_V67)
             }
             CpuPolicyFamily::ProgressHardV69 => Some(CpuProfile::HARD_V69),
+            CpuPolicyFamily::OpportunityHardV70 => Some(CpuProfile::HARD_V70),
         }
     }
 }

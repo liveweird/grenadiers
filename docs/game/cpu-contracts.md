@@ -95,6 +95,7 @@ deadline while the CPU remains stationary. Renewal requires actual actor displac
 existing progress predicate; valid cell and subcell movement still count. Stalls use the normal
 failed-target deferral and alternative-goal selection. Older profiles retain their exact rules.
 This corrects accounting; it does not alter fresh goal scores or shorten distant pursuits.
+The [acceptance record](../history/cpu-actor-progress-2026-11-05.md) separates these behaviors.
 
 ## Goal guidance
 

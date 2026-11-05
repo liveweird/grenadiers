@@ -97,6 +97,47 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.29 — 2026-11-05
+
+Hard69 requires actual actor displacement before the existing strategic-progress test may
+renew a deadline. A moving rival or recomputed approach alone cannot keep a stationary CPU's
+goal alive. Cell/subcell progress, failed-target deferral and older policy semantics are retained.
+Easy68/Standard62 stay current; private Replay38 closes the new Hard family while Replay37
+remains unchanged. The same canonical Hard67/69 controllers share the existing physical
+owned-bomb combination proof.
+
+The targeted selector regression establishes this fix. All 48 live reference cases remain
+identical to v1.3.28 after omitting the Hard profile label and replay exactly. A separate ordered
+seed53 comparison identifies distant opponent pursuit as the opening-bomb delay; this release
+does not claim to correct that tradeoff. See the
+[accounting and physical evidence](history/cpu-actor-progress-2026-11-05.md).
+
+### Verification
+
+- Clean source `81090d38e54de5f86601ae1f188f6a7400bbc997` passes the 48-case release measurement
+  runner in 10.83 seconds: all natural results, exact owner/shadow/input replay, bounded complete
+  queue/work accounting. Independent review findings and the source-size cleanup are resolved.
+- Full local debug/release/coverage passes: 2,035 core cases and two doctests, 866 ordinary server
+  cases and five serial native timing cases per profile. Every profile completes all 4,194,304
+  masks with 32 partitions, four workers and no retries. Official coverage is 84,289/90,477 lines
+  (93.16%) with 40 raw profiles, above the unchanged 90% floor. Wall time is 1,092.97 seconds.
+- The actual queued Hard69 combination witness collects capacity, overlaps a useful second bomb,
+  attributes extra destruction, survives both flame windows and resumes settled movement.
+  Profile/worker parity, handoff negatives, current/archived replay and lifecycle checks pass.
+  Strict formatting, Clippy and repository gates pass. The large ordered diagnostic stays opt-in.
+- [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41959652755)
+  pass on the same source. Web/API/artwork/E2E/deployment and third-party dependency inputs are
+  unchanged; their unaffected v1.3.28 checks are reused.
+- Fresh exact-image Compose/Hard and restricted local OrbStack Kubernetes/Easy checks pass with
+  three moving/bombing CPUs, moving mobs, spikes, protocol21, rendered canvas and no browser errors.
+  Nine assets, security/cache/CSP headers, probes and readiness pass. The accepted runtime retains
+  the Debian security refresh; pinned Trivy reports zero fixable high/critical findings. Temporary
+  projects, namespace and forwarder are removed.
+
+The accepted image is `sha256:c2cf1e226560d517dc4751fc3529d30b75b4c356fb73ba3f38f07f8ef89e5b4d`, labelled v1.3.29 and source
+`81090d38e54de5f86601ae1f188f6a7400bbc997`. Later release-document changes preserve the verified
+code. Promote this exact image and retain v1.3.28 for rollback.
+
 ## v1.3.28 — 2026-11-05
 
 Easy68 restores the intended bounded pause after completed certified ordinary navigation and

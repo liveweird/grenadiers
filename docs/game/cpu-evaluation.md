@@ -43,6 +43,25 @@ controller summary and may persist after elimination; they are not active-goal d
 The [dated comparison](../history/cpu-live-evaluation-2026-11-05.md) records the observed seed
 coverage and current Easy/Standard equivalence.
 
+## Broader seed soak
+
+```sh
+scripts/measure-game.sh --cpu-live-soak
+```
+
+This opt-in 192-case sweep complements the fixed comparison matrix. It uses eight different
+arena seeds, two independent simulation-root seeds (including a different item-randomness
+stream), two CPU seed sets, both reference scripts and all three difficulties. Each episode
+runs through its first natural result or the same 10,800-update bound. The real queued owner,
+complete shadow inspection, accepted-input replay and work/queue invariants remain mandatory.
+There are no retries or seed searches. The regular comparison matrix and its output stay unchanged.
+
+Reports under `target/cpu-live-soak-measurements/` retain source and binary identity, every seed,
+living movement, stationary spans, events and bounded planning work. Investigate long stationary
+spans in context: safe waiting, movement within a cell and frozen actors are not themselves
+proof of a stall. This sweep tests deterministic simulation episodes, not wall-clock network
+load, continuous multi-round operation or human difficulty.
+
 ## Archived Solo workloads
 
 The archived native Solo evaluation retains CPU15 and generated ExpandedV5 rounds. Its

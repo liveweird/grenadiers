@@ -17,17 +17,9 @@ repeated approval for routine implementation choices. Entries are not delivery-d
 - [new] **Full 3D character models.** Consider after the billboard trial; retain the actor-view
   boundary while commissioning any required models, rigs and animation.
 
-## Arena environment
-
-- [next] **MOB-TARGET — prevent reached-target wall deadlocks.** A monster already in its
-  target's cell can select an unreachable neighbor and become stuck off center. Add versioned
-  navigation while preserving timed escapes and archived replay behavior. Verify the original
-  generated scene and the long-round seed sweep with unchanged CPU policies before considering
-  broader AI routing changes.
-
 ## Single-player
 
-- [todo] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
+- [next] **SOLO-CPU — validate and tune the staged hybrid.** Compare the
   [private Solo opponent](docs/game/single-player.md) on Easy, Standard and Hard with all items enabled.
   Follow the [accepted design](docs/game/single-player-cpu.md).
   - **CPU4 — human difficulty and playability validation:** collect feedback on pressure,

@@ -66,12 +66,17 @@ publishes the chosen difficulty; archived v12 remains Standard-only.
 
 ## Difficulty cadence
 
-Standard does not add delays. Easy arms one bounded pause after accepted ordinary navigation,
-starting its 12-tick deadline once the stopped pose is confirmed. Repeated observations cannot
+Standard does not add delays. The archived Easy cadence arms one bounded pause after accepted
+ordinary navigation, starting its 12-tick deadline once the stopped pose is confirmed. Repeated observations cannot
 restart it. Deferral happens before a fresh request, preserving six-tick result admission and
 exact manual execution times. Active escapes/routes/pulses and unavailable or newly dangerous
 observations bypass the pause. Reconnect preserves cadence; world/command-epoch changes reset
 it. Goal scores, RNG, worker budgets and known-hazard mechanics are shared.
+
+Live Easy62 does not reach that archived cadence path with current certified navigation and
+spike support. The matched default-feature comparison therefore records the same Easy62 and
+Standard62 trajectories. The [backlog](../../BACKLOG.md#single-player) owns the cadence correction;
+this limitation does not change either archived policy identity.
 
 ## Goal guidance
 

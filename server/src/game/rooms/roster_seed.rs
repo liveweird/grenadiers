@@ -17,6 +17,11 @@ impl SimulationRoot {
         Ok(Self(bytes))
     }
 
+    #[cfg(test)]
+    pub(in crate::game::rooms) const fn from_seed_for_test(seed: [u8; 32]) -> Self {
+        Self(seed)
+    }
+
     pub(in crate::game::rooms) fn for_round(&self, epoch: u64) -> Result<SimulationSeed, ()> {
         let epoch = NonZeroU64::new(epoch).ok_or(())?;
         Ok(SimulationSeed::new(self.0).for_round(epoch))

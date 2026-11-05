@@ -1,11 +1,51 @@
 # Deterministic CPU evaluation
 
-The native Solo evaluation exercises the actual private CPU controller in generated ExpandedV5
-rounds. It is a regression and profiling workload, not a public game mode, ranking system or claim
-about human-level difficulty. Its fixed human scripts are deliberately constrained reference
-inputs.
+These deterministic workloads measure controller behavior and planning cost. They are regression
+and profiling tools, not rankings or evidence of human-level strength. Fixed human scripts are
+constrained reference inputs.
 
-## Workloads
+## Live roster difficulty comparison
+
+```sh
+scripts/measure-game.sh --cpu-live-rounds
+```
+
+This separate release-profile matrix uses the actual four-seat roster owner with one human and
+three CPUs, all items enabled, live ×5 extra-bomb weighting, storm, lairs and spikes. It binds
+generator7, pit-layout2, gameplay21/ContactV2, Easy62, Standard62 and Hard67 through private
+Replay36. The 15×13 arena, environment and initial physical state match across difficulties.
+Arena, simulation-root and CPU seeds are explicit independent inputs.
+
+The 48 cases combine four arena seeds, two CPU seed sets, `fixed-idle` and `bomb-retreat` human
+scripts, and three difficulty levels. Commands use normal movement refreshes and accepted
+manual IDs. Each episode stops at its first natural round result or 10,800 running updates.
+Natural timeout is a draw; reaching a measurement bound without a result is censored.
+
+A test-only bounded trace captures committed operations from the real owner. A retained shadow
+uses the existing recorder; its complete inspection must match the owner, and accepted-input
+Replay36 must reconstruct that same inspection. Tracing stays disabled in production. Overflow,
+unsupported post-setup admissions, incomplete queue accounting and replay divergence fail the
+measurement. Short tests require actual queued work, accepted CPU inputs and physical progress.
+
+Reports include real bomb/pickup/elimination events, living-cell movement and stationary spans,
+alive updates, unattributed block destruction, intent, admission denials, complete queue/work
+counts and RNG draws. Dead time does not inflate stationary metrics. Planner timing excludes
+shadow/replay work; wrapper wall time includes the whole workload. Run timing comparisons on a
+quiet host. Output under `target/cpu-live-round-measurements/` retains source, toolchain, binary
+identity and terminal/censored results. Interpret pressure and movement alongside survival;
+these scripts do not establish a monotonic difficulty or win-rate ordering.
+
+`stationaryUpdates` and its longest span mean no **cell transition**, including movement within
+one cell. They do not measure complete physical stillness. Intent counts sample the last-known
+controller summary and may persist after elimination; they are not active-goal durations.
+The [dated comparison](../history/cpu-live-evaluation-2026-11-05.md) records the observed seed
+coverage and current Easy/Standard equivalence.
+
+## Archived Solo workloads
+
+The archived native Solo evaluation retains CPU15 and generated ExpandedV5 rounds. Its
+`--cpu`, `--cpu-rounds`, `--cpu-easy` and `--cpu-easy-rounds` meanings and output paths remain
+unchanged; they do not measure the live roster profiles above.
 
 Routine tests use small fixed cases to check deterministic traces, bounded termination and the
 controller's queue/admission invariants. Arena-generation seeds and private CPU seeds are supplied

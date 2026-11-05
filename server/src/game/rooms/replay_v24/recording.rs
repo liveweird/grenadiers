@@ -10,8 +10,8 @@ use crate::{
 };
 
 pub(in crate::game::rooms) struct RecordingRosterRuntime {
-    body: replay_v8::RecordingRosterRuntime,
-    header: ReplayHeader,
+    pub(super) body: replay_v8::RecordingRosterRuntime,
+    pub(super) header: ReplayHeader,
 }
 
 impl RecordingRosterRuntime {

@@ -3,6 +3,8 @@ use grenadiers_core::{
     room::{DepartureReason, InterruptReason, MatchChange, RosterMatchLifecycle, SeatControl},
 };
 
+#[cfg(test)]
+use super::evaluation_trace::EvaluationOperation;
 use super::{
     error::{RosterRuntimeError, lifecycle},
     runtime::RosterRuntime,
@@ -66,6 +68,12 @@ impl RosterRuntime {
         let mut next = self.clone();
         let notice = next.apply_action(seat, expected_epoch, action)?;
         *self = next;
+        #[cfg(test)]
+        self.record_evaluation_operation(EvaluationOperation::CpuAction {
+            seat,
+            epoch: expected_epoch,
+            action,
+        });
         Ok(notice)
     }
 
@@ -79,6 +87,12 @@ impl RosterRuntime {
     }
 
     pub(in crate::game::rooms) fn stop_seat_inputs(&mut self, seat: SeatId) {
+        self.stop_seat_inputs_internal(seat);
+        #[cfg(test)]
+        self.record_evaluation_operation(EvaluationOperation::InputFence(seat));
+    }
+
+    pub(super) fn stop_seat_inputs_internal(&mut self, seat: SeatId) {
         self.inputs.stop(seat);
     }
 
@@ -127,6 +141,8 @@ impl RosterRuntime {
         let mut next = self.clone();
         let notice = next.publish_current()?;
         *self = next;
+        #[cfg(test)]
+        self.record_evaluation_operation(EvaluationOperation::PublicationFlush);
         Ok(notice)
     }
 

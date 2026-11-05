@@ -3,7 +3,7 @@ use super::{admission::PreparedRosterAdmission, runtime::RosterRuntime, types::R
 impl RosterRuntime {
     pub(in crate::game::rooms) fn commit_admission(&mut self, prepared: PreparedRosterAdmission) {
         if prepared.is_replacement {
-            self.stop_seat_inputs(prepared.seat);
+            self.stop_seat_inputs_internal(prepared.seat);
         }
         self.cpu_publication = prepared.notice.legacy_cpu_publication().cloned();
         self.environment_cpu_publication = match &prepared.notice.publication {
@@ -36,5 +36,7 @@ impl RosterRuntime {
         };
         self.lifecycle = prepared.lifecycle;
         self.revision = prepared.revision;
+        #[cfg(test)]
+        self.latch_unsupported_evaluation_operation();
     }
 }

@@ -10,6 +10,8 @@ mod environment_clearance;
 mod environment_notice;
 mod environment_spike;
 mod error;
+#[cfg(test)]
+mod evaluation_trace;
 mod owner_helpers;
 mod publication;
 mod publication_v15;
@@ -37,6 +39,8 @@ pub(in crate::game::rooms) use admission::PreparedRosterAdmission;
 pub(in crate::game::rooms) use environment_spike::SpikeRuntimeEnvironment;
 pub(in crate::game::rooms) use error::RosterRuntimeError;
 #[cfg(test)]
+pub(in crate::game::rooms) use evaluation_trace::{EvaluationOperation, EvaluationTraceError};
+#[cfg(test)]
 pub(in crate::game::rooms) use replay_inspection::RosterRuntimeInspection;
 pub(in crate::game::rooms) use runtime::RosterRuntime;
 pub(in crate::game::rooms) use types::RosterIdentity;
@@ -48,6 +52,8 @@ mod boundary_tests;
 mod environment_recovery_tests;
 #[cfg(test)]
 mod environment_settings_tests;
+#[cfg(test)]
+mod evaluation_trace_tests;
 #[cfg(test)]
 mod lair_settings_tests;
 #[cfg(test)]

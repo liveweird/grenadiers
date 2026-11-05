@@ -11,6 +11,8 @@ use grenadiers_core::{
 
 use crate::{game::rooms::input::InputMailbox, round_seed::RoundSeedSource};
 
+#[cfg(test)]
+use super::evaluation_trace::{EvaluationOperation, EvaluationTrace};
 use super::{
     error::{RosterRuntimeError, input, lifecycle},
     publication,
@@ -35,6 +37,8 @@ pub(in crate::game::rooms) struct RosterRuntime {
     pub(super) reports: Vec<StepReport>,
     #[cfg(test)]
     pub(super) last_step_trace: Option<(Vec<grenadiers_core::game::SeatInput>, StepReport)>,
+    #[cfg(test)]
+    pub(super) evaluation_trace: Option<EvaluationTrace>,
     pub(super) cpu_publication: Option<v14::BoundPublication>,
     pub(super) environment_cpu_publication: Option<Arc<v15::BoundPublication>>,
     pub(super) lair_cpu_publication: Option<Arc<v16::BoundPublication>>,
@@ -117,6 +121,8 @@ impl RosterRuntime {
             reports: Vec::new(),
             #[cfg(test)]
             last_step_trace: None,
+            #[cfg(test)]
+            evaluation_trace: None,
             cpu_publication: None,
             environment_cpu_publication: None,
             lair_cpu_publication: None,
@@ -148,6 +154,12 @@ impl RosterRuntime {
         let mut next = self.clone();
         let notice = next.apply_action(seat, expected_epoch, action)?;
         *self = next;
+        #[cfg(test)]
+        self.record_evaluation_operation(EvaluationOperation::HumanAction {
+            seat,
+            epoch: expected_epoch,
+            action,
+        });
         Ok(notice)
     }
 
@@ -213,9 +225,13 @@ impl RosterRuntime {
         &mut self,
         departures: [Option<DepartureReason>; 4],
     ) -> Result<Option<RosterNotice>, RosterRuntimeError> {
+        #[cfg(test)]
+        let tick = self.lifecycle.tick();
         let mut next = self.clone();
         let notice = next.settle(departures)?;
         *self = next;
+        #[cfg(test)]
+        self.record_evaluation_operation(EvaluationOperation::Settle { tick, departures });
         Ok(notice)
     }
 

@@ -249,6 +249,16 @@ mod farm_refuge_owner_tests;
 mod reliable_profile_tests;
 
 #[cfg(test)]
+mod live_cpu_evaluation;
+#[cfg(test)]
+mod live_cpu_evaluation_metrics;
+#[cfg(test)]
+mod live_cpu_evaluation_replay_tests;
+#[cfg(test)]
+mod live_cpu_evaluation_tests;
+#[cfg(test)]
+mod live_cpu_evaluation_types;
+#[cfg(test)]
 mod owned_combination_owner_support;
 #[cfg(test)]
 mod owned_combination_owner_tests;

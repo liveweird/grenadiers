@@ -101,7 +101,6 @@ fn initial_and_admission_notices_are_v14_room_states_with_real_cpu_ready() {
     let prepared = runtime.prepare_solo_creator(SeatId::One).unwrap();
     let frame = prepared
         .encode(
-            SeatId::One,
             grenadiers_core::protocol::Counter::new(1).unwrap(),
             grenadiers_core::protocol::v13::ResumeToken::new("a".repeat(64)).unwrap(),
         )
@@ -112,22 +111,19 @@ fn initial_and_admission_notices_are_v14_room_states_with_real_cpu_ready() {
 }
 
 #[test]
-fn failed_prepared_admission_does_not_commit_candidate_or_cpu_state() {
+fn dropped_prepared_admission_does_not_commit_candidate_or_cpu_state() {
     let mut runtime = live(RoomProfile::ExpandedV5);
     runtime.initial_notice().unwrap();
     let before = runtime.replay_inspection();
     let revision = runtime.publication_revision_for_test();
     let prepared = runtime.prepare_solo_creator(SeatId::One).unwrap();
 
-    assert!(
-        prepared
-            .encode(
-                SeatId::Two,
-                grenadiers_core::protocol::Counter::new(1).unwrap(),
-                grenadiers_core::protocol::v13::ResumeToken::new("b".repeat(64)).unwrap(),
-            )
-            .is_err()
-    );
+    prepared
+        .encode(
+            grenadiers_core::protocol::Counter::new(1).unwrap(),
+            grenadiers_core::protocol::v13::ResumeToken::new("b".repeat(64)).unwrap(),
+        )
+        .unwrap();
     drop(prepared);
     assert_eq!(runtime.replay_inspection(), before);
     assert_eq!(runtime.publication_revision_for_test(), revision);

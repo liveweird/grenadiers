@@ -258,7 +258,6 @@ impl MatchRuntime {
 impl PreparedRuntimeAdmission {
     pub(in crate::game::rooms) fn encode(
         &self,
-        seat: SeatId,
         sequence: Counter,
         token: grenadiers_core::protocol::v13::ResumeToken,
     ) -> Result<Arc<str>, MatchRuntimeError> {
@@ -268,7 +267,7 @@ impl PreparedRuntimeAdmission {
                 self.state_epoch,
                 self.live_capture.as_ref(),
                 self.generation,
-                seat,
+                self.seat,
                 self.last_bomb_action_id,
                 sequence,
                 token,
@@ -283,7 +282,7 @@ impl PreparedRuntimeAdmission {
                     generation: self.generation,
                 },
                 grenadiers_core::protocol::v13::PersonalAdmission {
-                    recipient: super::super::publication::wire_seat(seat)?,
+                    recipient: super::super::publication::wire_seat(self.seat)?,
                     last_action_id: self.last_bomb_action_id,
                     sequence,
                     resume_token: token,

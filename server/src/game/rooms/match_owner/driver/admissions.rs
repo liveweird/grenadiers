@@ -80,7 +80,7 @@ impl Driver {
         };
         let (departure_sender, departure) = oneshot::channel();
         let (replaced, replaced_receiver) = oneshot::channel();
-        let personal_frame = match admission_frame(&prepared, seat, sequence, credential.token()) {
+        let personal_frame = match admission_frame(&prepared, sequence, credential.token()) {
             Ok(frame) => frame,
             Err(error) => {
                 let _ = reply.send(Err(map_runtime_error(error)));
@@ -154,7 +154,7 @@ impl Driver {
             .as_ref()
             .and_then(|slot| slot.credential.as_ref())
             .expect("matched credential");
-        let personal_frame = match admission_frame(&prepared, seat, sequence, credential.token()) {
+        let personal_frame = match admission_frame(&prepared, sequence, credential.token()) {
             Ok(frame) => frame,
             Err(_error) => {
                 let _ = reply.send(Err(RoomError::ResumeRejected));
@@ -205,7 +205,6 @@ impl Driver {
 
 fn admission_frame(
     prepared: &crate::game::rooms::match_runtime::PreparedRuntimeAdmission,
-    seat: SeatId,
     sequence: Counter,
     token: ResumeToken,
 ) -> Result<std::sync::Arc<str>, MatchRuntimeError> {
@@ -213,7 +212,7 @@ fn admission_frame(
     if FAIL_NEXT_ADMISSION_ENCODING.with(|fail| fail.replace(false)) {
         return Err(MatchRuntimeError::Publication);
     }
-    prepared.encode(seat, sequence, token)
+    prepared.encode(sequence, token)
 }
 
 #[cfg(test)]

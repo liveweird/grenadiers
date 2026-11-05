@@ -97,6 +97,45 @@ retain the previous immutable image reference for rollback. The runtime stage in
 rolling Debian package updates, so a later build may resolve newer packages and is not expected to
 be byte-identical; treat it as a new candidate with new evidence rather than reusing acceptance.
 
+## v1.3.28 — 2026-11-05
+
+Easy68 restores the intended bounded pause after completed certified ordinary navigation and
+confirmed physical Stop. The fixed 12-tick deadline cannot be extended by publications, and
+fresh danger bypasses it. Distant pits and storm clouds no longer disable stationary pacing.
+Standard62/Hard67 planning, physics, generation and archived Easy62 remain unchanged. Private
+Replay37 closes the selected family; Replay36 retains its exact evaluation constructor.
+
+The matched live matrix completes all 48 episodes naturally with exact shadow/input replay.
+Easy records 340 completed pauses in 14 of 16 cases and 1,380 deferred planning publications.
+All 32 complete Standard/Hard results equal v1.3.27 after omitting the new zero cadence field.
+This establishes exercised pacing, not a strength ranking. See the
+[acceptance record](history/cpu-easy-cadence-2026-11-05.md).
+
+### Verification
+
+- Clean source `dd0130f22229395599d47bd45c738927aeaaca20` passes the actual release measurement
+  runner in 10.93 seconds. Independent review, strict Clippy, formatting and repository gates pass.
+- Full local debug/release/coverage passes: 2,028 core cases and two doctests, 857 ordinary server
+  cases and five isolated native timing cases per profile. Each profile completes all 4,194,304
+  item masks with 32 partitions, four workers and no retries. Official LCOV coverage is
+  83,875/90,024 lines (93.17%), above the unchanged 90% floor, with 40 raw profiles. Wall time is
+  1,114.93 seconds. The native Easy episode proves pause, settled-cell resume, bomb use and bypass.
+- [Linux debug/release checks](https://github.com/liveweird/grenadiers/actions/runs/41953856903)
+  pass on the same source. Unchanged web/API/artwork/E2E/deployment and third-party dependency
+  inputs reuse the preceding release's unaffected checks; local Cargo package versions alone change.
+- The first image passed Compose but its fresh pinned scan found fixable high-severity
+  CVE-2026-109518 in cached Debian apt/libapt-pkg6.0 2.6.1. A runtime-only cache refresh installs
+  2.6.2; its exact replacement image reports zero fixable high/critical findings. The rejected
+  image is not promoted. Source tests remain valid; runtime acceptance is repeated on the refresh.
+- Refreshed-image Compose and restricted local OrbStack Kubernetes pass authenticated protocol21,
+  three moving/bombing CPUs (Easy and Hard), two moving mobs, spikes and rendered canvas without
+  browser errors. All nine served assets, CSP/cache/security headers, readiness and probes pass.
+  Temporary projects, namespace and forwarding process are removed.
+
+The accepted image is `sha256:16a7c734bfac94aa39c8421436c05ed71fe2f64ce7b28c381d66aad1ef89cbbe`, labelled v1.3.28 and source
+`dd0130f22229395599d47bd45c738927aeaaca20`. Later release-document changes preserve the verified
+code. Promote this exact image and retain v1.3.27 for rollback.
+
 ## v1.3.27 — 2026-11-05
 
 A separate `--cpu-live-rounds` measurement now exercises the actual live four-seat owner with

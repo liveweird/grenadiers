@@ -83,7 +83,8 @@ pulses do not acquire a pause. Deferral precedes fresh work, preserving decision
 manual timing. Reconnect preserves state; world/command-epoch changes clear it. Goal scores,
 RNG and planner budgets remain Standard62's. Archived Easy62 retains its earlier semantics;
 its unreachable cadence in the previous live matrix is recorded in
-[history](../history/cpu-live-evaluation-2026-11-05.md).
+[history](../history/cpu-live-evaluation-2026-11-05.md). The restored behavior has a separate
+[acceptance record](../history/cpu-easy-cadence-2026-11-05.md).
 
 ## Goal guidance
 

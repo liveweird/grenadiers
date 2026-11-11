@@ -24,7 +24,7 @@ RUN --mount=type=cache,id=grenadiers-cargo-registry,target=/usr/local/cargo/regi
     && cargo build --release --locked -p grenadiers-server \
     && cp target/release/grenadiers-server /build/grenadiers-server
 
-FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587 AS runtime
+FROM debian:bookworm-slim@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8 AS runtime
 LABEL org.opencontainers.image.title="Grenadiers" \
       org.opencontainers.image.source="https://github.com/liveweird/grenadiers" \
       org.opencontainers.image.documentation="https://github.com/liveweird/grenadiers#readme"

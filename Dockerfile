@@ -8,7 +8,7 @@ COPY api/ /build/api/
 COPY assets/art/arena-source.png assets/art/arena-source.json /build/assets/art/
 RUN npm run build
 
-FROM rust:1.99.1-bookworm@sha256:e12566d5abc17a0da741628782cdb504b68b8961f5bfcf677936bf3e8b32de29 AS server
+FROM rust:1.100.0-bookworm@sha256:ade39a710ef85f3506cffcfec3e8a24ba090badef1dff2fb798f71d878833fea AS server
 ARG TARGETPLATFORM
 WORKDIR /build
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
